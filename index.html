@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Akhilesh Malani - Senior Accessibility Architect & Digital Inclusion Strategist with 16+ years of experience.">
+  <title>Akhilesh Malani | Senior Accessibility Architect</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Firebase SDK (v9 compat for simplicity) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <!-- Skip Navigation -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header / Navigation -->
+  <header role="banner">
+    <nav aria-label="Primary navigation" class="navbar">
+      <div class="container nav-container">
+        <a href="#hero" class="logo" aria-label="Akhilesh Malani - Home">
+          <span aria-hidden="true">AM</span>
+          <span class="sr-only">Akhilesh Malani</span>
+        </a>
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">
+          <span class="hamburger" aria-hidden="true"></span>
+        </button>
+        <ul id="nav-menu" class="nav-links" role="list">
+          <li><a href="#about">About</a></li>
+          <li><a href="#experience">Experience</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#recognition">Recognition</a></li>
+          <li><a href="#library">Library</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero Section -->
+    <section id="hero" class="hero" aria-labelledby="hero-heading">
+      <div class="container hero-content">
+        <p class="hero-greeting">Hello, I am</p>
+        <h1 id="hero-heading">Akhilesh Malani</h1>
+        <p class="hero-title">Senior Accessibility Architect &amp; Digital Inclusion Strategist</p>
+        <p class="hero-subtitle">16+ years championing inclusive digital experiences for global enterprises</p>
+        <div class="hero-cta">
+          <a href="#contact" class="btn btn-primary">Get in Touch</a>
+          <a href="#experience" class="btn btn-outline">View My Work</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section" aria-labelledby="about-heading">
+      <div class="container">
+        <h2 id="about-heading">About Me</h2>
+        <div class="about-content">
+          <div class="about-text">
+            <p>I am an Accessibility Architect and Digital Inclusion Strategist based in <strong>Chennai, Tamil Nadu, India</strong>. With over <strong>16 years of experience</strong>, I define and deliver enterprise-grade accessibility programmes across web, mobile, and document platforms.</p>
+            <p>As a <strong>blind professional</strong> who lost sight at age 12, I navigate the digital world daily using JAWS, NVDA, VoiceOver, and a Braille display. This gives me <strong>lived, first-hand insight</strong> that no sighted consultant can replicate &mdash; making me uniquely qualified to evaluate, architect, and champion truly inclusive digital experiences.</p>
+            <p>I have a proven record leading large-scale accessibility transformations for global clients including <strong>Google</strong>, <strong>Bank of Montreal</strong>, and <strong>Dun &amp; Bradstreet</strong>. I build institutional capability &mdash; not just audit reports.</p>
+          </div>
+          <aside class="about-highlights" aria-label="Key highlights">
+            <div class="highlight-card">
+              <span class="highlight-number" aria-hidden="true">16+</span>
+              <span class="highlight-label">Years of Experience</span>
+            </div>
+            <div class="highlight-card">
+              <span class="highlight-number" aria-hidden="true">250+</span>
+              <span class="highlight-label">Websites Audited</span>
+            </div>
+            <div class="highlight-card">
+              <span class="highlight-number" aria-hidden="true">15+</span>
+              <span class="highlight-label">Team Members Led</span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- What Sets Me Apart -->
+    <section id="unique" class="section section-alt" aria-labelledby="unique-heading">
+      <div class="container">
+        <h2 id="unique-heading">What Sets Me Apart</h2>
+        <div class="cards-grid">
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <h3>Lived Experience</h3>
+            <p>I test accessibility as an actual end user &mdash; not by simulating disability. This gives my audits, recommendations, and strategic guidance a depth and accuracy that is unmatched.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h3>Google as a Client</h3>
+            <p>Sustained delivery for Google India across two organisations spanning over a decade &mdash; covering Google Play, Google Search, and a wide range of products.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3>Capability Builder</h3>
+            <p>I establish Accessibility Champions networks, deliver training programmes, and mentor developers, designers, and QA engineers across organisations.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h3>India Regulatory Expert</h3>
+            <p>Deep knowledge of India's RPwD Act 2016, GIGW 3.0, and SEBI's digital accessibility mandate &mdash; bridging both the technical and regulatory dimensions.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section" aria-labelledby="experience-heading">
+      <div class="container">
+        <h2 id="experience-heading">Professional Experience</h2>
+        <div class="timeline" role="list">
+
+          <article class="timeline-item" role="listitem">
+            <div class="timeline-marker" aria-hidden="true"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3>Accessibility Test Architect</h3>
+                <p class="timeline-company">Virtusa Systems India Pvt. Ltd., Chennai</p>
+                <p class="timeline-date"><time datetime="2024-03">March 2024</time> &ndash; Present</p>
+              </div>
+              <div class="timeline-details">
+                <h4>Bank of Montreal (OLBB) &mdash; March 2025 &ndash; Present</h4>
+                <ul>
+                  <li>Lead Accessibility Architect for customer-facing web applications, native mobile apps, and digital documents across WCAG 2.2 Level AA.</li>
+                  <li>Architected automated + manual validation pipeline for large-scale digital statements and PDFs, achieving PDF/UA and WCAG 2.2 compliance.</li>
+                  <li>Standardised Accessibility Conformance Reports (ACR) using VPAT 2.5 for regulatory reporting.</li>
+                  <li>Led training programmes for engineering and QA teams, increasing in-sprint accessibility defect detection.</li>
+                </ul>
+                <h4>Dun &amp; Bradstreet &mdash; April 2024 &ndash; February 2025</h4>
+                <ul>
+                  <li>Led accessibility architecture for the Risk Analytics web application ensuring WCAG 2.2 Level AA compliance.</li>
+                  <li>Delivered WAI-ARIA strategies for complex data visualisation and interactive dashboard components.</li>
+                  <li>Established an Accessibility Champions programme, shifting compliance left into design and development.</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="timeline-item" role="listitem">
+            <div class="timeline-marker" aria-hidden="true"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3>Accessibility Test Lead &amp; SME</h3>
+                <p class="timeline-company">Tech Mahindra</p>
+                <p class="timeline-date"><time datetime="2019-11">November 2019</time> &ndash; <time datetime="2024-03">March 2024</time></p>
+              </div>
+              <div class="timeline-details">
+                <h4>Client: Google India</h4>
+                <ul>
+                  <li>Led a team of 15 accessibility testers &mdash; including persons with disabilities &mdash; across Google's product portfolio.</li>
+                  <li>Managed end-to-end project delivery: resource planning, technical escalation, and stakeholder coordination with Google's global teams.</li>
+                  <li>Recognised with the <strong>ACE Award 2023</strong> &mdash; Tech Mahindra's highest performance recognition.</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="timeline-item" role="listitem">
+            <div class="timeline-marker" aria-hidden="true"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3>Accessibility Technical Lead</h3>
+                <p class="timeline-company">HCL Technologies</p>
+                <p class="timeline-date"><time datetime="2014-07">July 2014</time> &ndash; <time datetime="2019-10">October 2019</time></p>
+              </div>
+              <div class="timeline-details">
+                <h4>Client: Google India (Google Play)</h4>
+                <ul>
+                  <li>Served as the dedicated end-user accessibility tester for the Google Play team &mdash; providing real-user feedback on screen reader compatibility and keyboard navigation.</li>
+                  <li>Authored accessibility audit reports and documentation standards adopted as the baseline for Google Play.</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="timeline-item" role="listitem">
+            <div class="timeline-marker" aria-hidden="true"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3>Accessibility Tester</h3>
+                <p class="timeline-company">Prakat Solutions, Bengaluru</p>
+                <p class="timeline-date"><time datetime="2011-02">February 2011</time> &ndash; <time datetime="2014-06">June 2014</time></p>
+              </div>
+              <div class="timeline-details">
+                <h4>Client: Oracle Financial Services</h4>
+                <ul>
+                  <li>Evaluated accessibility compliance across 250+ websites, internal tools, PDFs, and Flash-based solutions.</li>
+                  <li>Formulated accessibility statements and supported VPAT creation for Oracle's product compliance.</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="timeline-item" role="listitem">
+            <div class="timeline-marker" aria-hidden="true"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3>Technical Support Engineer (L2)</h3>
+                <p class="timeline-company">Mphasis (an HP Company)</p>
+                <p class="timeline-date"><time datetime="2009-04">April 2009</time> &ndash; <time datetime="2010-09">September 2010</time></p>
+              </div>
+              <div class="timeline-details">
+                <ul>
+                  <li>Managed complex customer queries for HP hardware, software, and operating systems.</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section section-alt" aria-labelledby="skills-heading">
+      <div class="container">
+        <h2 id="skills-heading">Skills &amp; Expertise</h2>
+        <div class="skills-grid">
+
+          <div class="skill-group">
+            <h3>Standards &amp; Compliance</h3>
+            <ul class="skill-tags" role="list">
+              <li>WCAG 2.0 / 2.1 / 2.2</li>
+              <li>WAI-ARIA 1.1 / 1.2</li>
+              <li>PDF/UA</li>
+              <li>VPAT 2.5 / ACR</li>
+              <li>Section 508</li>
+              <li>ADA</li>
+              <li>AODA</li>
+              <li>EN 301 549</li>
+            </ul>
+          </div>
+
+          <div class="skill-group">
+            <h3>India Regulations</h3>
+            <ul class="skill-tags" role="list">
+              <li>RPwD Act 2016</li>
+              <li>GIGW 3.0</li>
+              <li>SEBI Accessibility Mandate</li>
+            </ul>
+          </div>
+
+          <div class="skill-group">
+            <h3>Assistive Technology</h3>
+            <ul class="skill-tags" role="list">
+              <li>JAWS</li>
+              <li>NVDA</li>
+              <li>VoiceOver (iOS/macOS)</li>
+              <li>TalkBack (Android)</li>
+              <li>Orca (Linux)</li>
+              <li>Narrator</li>
+              <li>ChromeVox</li>
+              <li>Braille Display</li>
+            </ul>
+          </div>
+
+          <div class="skill-group">
+            <h3>Tools &amp; Platforms</h3>
+            <ul class="skill-tags" role="list">
+              <li>Axe DevTools / axe-core</li>
+              <li>WAVE</li>
+              <li>ANDI</li>
+              <li>Deque Auditing</li>
+              <li>Windows</li>
+              <li>macOS</li>
+              <li>Linux</li>
+              <li>iOS</li>
+              <li>Android</li>
+            </ul>
+          </div>
+
+          <div class="skill-group">
+            <h3>Leadership &amp; Strategy</h3>
+            <ul class="skill-tags" role="list">
+              <li>Accessibility Strategy</li>
+              <li>Shift-Left Practices</li>
+              <li>Champions Programmes</li>
+              <li>Team Leadership</li>
+              <li>Executive Stakeholder Mgmt</li>
+              <li>Inclusive UX Consulting</li>
+              <li>Design Reviews</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Recognition Section -->
+    <section id="recognition" class="section" aria-labelledby="recognition-heading">
+      <div class="container">
+        <h2 id="recognition-heading">Recognition &amp; Education</h2>
+        <div class="recognition-grid">
+          <div class="recognition-col">
+            <h3>Awards &amp; Speaking</h3>
+            <ul class="recognition-list">
+              <li>
+                <strong>ACE Award 2023</strong> &mdash; Highest performance recognition at Tech Mahindra, for exceptional delivery on the Google India accessibility programme.
+              </li>
+              <li>
+                <strong>Youngest Web Researcher at WWW2011 Conference</strong> &mdash; Recognised at the world's foremost web standards conference.
+              </li>
+              <li>
+                <strong>Speaker, NASSCOM BPO Summit 2010</strong> &mdash; Addressed industry leaders on accessibility and digital inclusion.
+              </li>
+            </ul>
+          </div>
+          <div class="recognition-col">
+            <h3>Education</h3>
+            <ul class="recognition-list">
+              <li><strong>B.A. English Literature</strong> &mdash; Loyola College, Madras University, Chennai (2008)</li>
+              <li><strong>Higher Secondary (Arts)</strong> &mdash; Netraheen Vikas Sansthan, Jodhpur (2005)</li>
+            </ul>
+            <h3>Languages</h3>
+            <ul class="recognition-list">
+              <li>English (Professional)</li>
+              <li>Hindi (Native)</li>
+              <li>Tamil (Professional)</li>
+              <li>Marwari (Native)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Library Section -->
+    <section id="library" class="section" aria-labelledby="library-heading">
+      <div class="container">
+        <h2 id="library-heading">Resource Library</h2>
+        <p class="section-intro">Exclusive accessibility resources &mdash; training materials, audit templates, ARIA patterns, research, and more. Available to approved members only.</p>
+
+        <!-- Logged-out view -->
+        <div id="library-guest" class="library-gate">
+          <div class="library-gate-content">
+            <svg aria-hidden="true" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <h3>Members-Only Access</h3>
+            <p>Sign in to access the full resource library. New here? Register and your access will be reviewed.</p>
+            <div class="library-gate-actions">
+              <button type="button" class="btn btn-primary" id="btn-login-open">Sign In</button>
+              <button type="button" class="btn btn-outline" id="btn-register-open">Request Access</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending approval view -->
+        <div id="library-pending" class="library-gate" hidden>
+          <div class="library-gate-content">
+            <svg aria-hidden="true" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <h3>Access Pending</h3>
+            <p>Your registration is under review. You will receive an email once approved. Thank you for your patience.</p>
+            <button type="button" class="btn btn-outline" id="btn-signout-pending">Sign Out</button>
+          </div>
+        </div>
+
+        <!-- Approved member view -->
+        <div id="library-content" hidden>
+          <div class="library-toolbar">
+            <div class="library-user-info">
+              <span id="library-user-name"></span>
+              <button type="button" class="btn-text" id="btn-signout">Sign Out</button>
+            </div>
+            <div class="library-filters" role="group" aria-label="Filter resources by category">
+              <button type="button" class="filter-btn active" data-filter="all">All</button>
+              <button type="button" class="filter-btn" data-filter="training">Training</button>
+              <button type="button" class="filter-btn" data-filter="templates">Templates</button>
+              <button type="button" class="filter-btn" data-filter="research">Research</button>
+              <button type="button" class="filter-btn" data-filter="tools">Tools</button>
+            </div>
+          </div>
+
+          <div class="library-grid" role="list" aria-label="Resource library">
+            <!-- Training Materials -->
+            <article class="library-card" data-category="training" role="listitem">
+              <div class="library-card-badge">Training</div>
+              <h3>WCAG 2.2 Complete Guide</h3>
+              <p>Comprehensive walkthrough of every WCAG 2.2 success criterion with practical examples and testing techniques.</p>
+              <div class="library-card-meta">
+                <span>PDF &middot; 45 pages</span>
+                <a href="#" class="btn-text" aria-label="Download WCAG 2.2 Complete Guide">Download</a>
+              </div>
+            </article>
+
+            <article class="library-card" data-category="training" role="listitem">
+              <div class="library-card-badge">Training</div>
+              <h3>Screen Reader Testing Masterclass</h3>
+              <p>Step-by-step guide to testing with JAWS, NVDA, VoiceOver, and TalkBack &mdash; from a daily screen reader user.</p>
+              <div class="library-card-meta">
+                <span>PDF &middot; 32 pages</span>
+                <a href="#" class="btn-text" aria-label="Download Screen Reader Testing Masterclass">Download</a>
+              </div>
+            </article>
+
+            <article class="library-card" data-category="training" role="listitem">
+              <div class="library-card-badge">Training</div>
+              <h3>Shift-Left Accessibility in SDLC</h3>
+              <p>How to embed accessibility into design, development, and QA phases to reduce late-stage remediation costs.</p>
+              <div class="library-card-meta">
+                <span>PDF &middot; 20 pages</span>
+                <a href="#" class="btn-text" aria-label="Download Shift-Left Accessibility in SDLC">Download</a>
+              </div>
+            </article>
+
+            <!-- Templates -->
+            <article class="library-card" data-category="templates" role="listitem">
+              <div class="library-card-badge">Template</div>
+              <h3>VPAT 2.5 / ACR Template</h3>
+              <p>Ready-to-use Accessibility Conformance Report template aligned with VPAT 2.5 Rev (WCAG + Section 508).</p>
+              <div class="library-card-meta">
+                <span>DOCX &middot; Template</span>
+                <a href="#" class="btn-text" aria-label="Download VPAT 2.5 ACR Template">Download</a>
+              </div>
+            </article>
+
+            <article class="library-card" data-category="templates" role="listitem">
+              <div class="library-card-badge">Template</div>
+              <h3>Accessibility Audit Checklist</h3>
+              <p>Comprehensive checklist covering WCAG 2.2 Level AA for web applications, mapped to testing procedures.</p>
+              <div class="library-card-meta">
+                <span>XLSX &middot; Template</span>
+                <a href="#" class="btn-text" aria-label="Download Accessibility Audit Checklist">Download</a>
+              </div>
+            </article>
+
+            <article class="library-card" data-category="templates" role="listitem">
+              <div class="library-card-badge">Template</div>
+              <h3>Remediation Playbook</h3>
+              <p>Cross-platform technical remediation guide for common WCAG violations with code examples.</p>
+              <div class="library-card-meta">
+                <span>PDF &middot; 38 pages</span>
+                <a href="#" class="btn-text" aria-label="Download Remediation Playbook">Download</a>
+              </div>
+            </article>
+
+            <!-- Research -->
+            <article class="library-card" data-category="research" role="listitem">
+              <div class="library-card-badge">Research</div>
+              <h3>India SEBI Accessibility Mandate &mdash; Analysis</h3>
+              <p>Deep-dive into the July 2025 SEBI circular mandating WCAG 2.1 compliance for all regulated financial entities in India.</p>
+              <div class="library-card-meta">
+                <span>PDF &middot; 15 pages</span>
+                <a href="#" class="btn-text" aria-label="Download SEBI Accessibility Mandate Analysis">Download</a>
+              </div>
+            </article>
+
+            <article class="library-card" data-category="research" role="listitem">
+              <div class="library-card-badge">Research</div>
+              <h3>RPwD Act 2016 &amp; Digital Inclusion</h3>
+              <p>How India's Rights of Persons with Disabilities Act impacts digital product development and organisational compliance.</p>
+              <div class="library-card-meta">
+                <span>PDF &middot; 12 pages</span>
+                <a href="#" class="btn-text" aria-label="Download RPwD Act 2016 and Digital Inclusion">Download</a>
+              </div>
+            </article>
+
+            <!-- Tools -->
+            <article class="library-card" data-category="tools" role="listitem">
+              <div class="library-card-badge">Tool</div>
+              <h3>WAI-ARIA Pattern Library</h3>
+              <p>Production-ready ARIA implementations for complex widgets: data tables, comboboxes, tree views, live regions, and more.</p>
+              <div class="library-card-meta">
+                <span>HTML/CSS/JS &middot; Code</span>
+                <a href="#" class="btn-text" aria-label="Download WAI-ARIA Pattern Library">Download</a>
+              </div>
+            </article>
+
+            <article class="library-card" data-category="tools" role="listitem">
+              <div class="library-card-badge">Tool</div>
+              <h3>PDF/UA Validation Toolkit</h3>
+              <p>Scripts and workflows for validating PDF accessibility against PDF/UA and WCAG standards at scale.</p>
+              <div class="library-card-meta">
+                <span>ZIP &middot; Toolkit</span>
+                <a href="#" class="btn-text" aria-label="Download PDF/UA Validation Toolkit">Download</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-overlay" hidden role="dialog" aria-labelledby="auth-modal-title" aria-modal="true">
+      <div class="modal">
+        <button type="button" class="modal-close" id="btn-modal-close" aria-label="Close dialog">&times;</button>
+
+        <!-- Login Form -->
+        <div id="auth-login">
+          <h2 id="auth-modal-title">Sign In</h2>
+          <p>Access the resource library with your account.</p>
+          <form id="login-form" novalidate aria-label="Sign in form">
+            <div class="form-group">
+              <label for="login-email">Email <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="email" id="login-email" required autocomplete="email" aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="password" id="login-password" required autocomplete="current-password" aria-required="true">
+            </div>
+            <div id="login-error" class="form-error" role="alert" hidden></div>
+            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          </form>
+          <p class="auth-switch">Don't have an account? <button type="button" class="btn-text" id="switch-to-register">Request Access</button></p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="auth-register" hidden>
+          <h2 id="auth-modal-title-register">Request Access</h2>
+          <p>Create an account. Your access will be reviewed and approved by Akhilesh.</p>
+          <form id="register-form" novalidate aria-label="Registration form">
+            <div class="form-group">
+              <label for="reg-name">Full Name <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="text" id="reg-name" required autocomplete="name" aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="reg-email">Email <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="email" id="reg-email" required autocomplete="email" aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="reg-password">Password <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="password" id="reg-password" required autocomplete="new-password" aria-required="true" minlength="8">
+            </div>
+            <div class="form-group">
+              <label for="reg-reason">Why do you want access? <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <textarea id="reg-reason" rows="3" required aria-required="true" placeholder="Briefly describe your interest in accessibility resources"></textarea>
+            </div>
+            <div id="register-error" class="form-error" role="alert" hidden></div>
+            <button type="submit" class="btn btn-primary btn-full">Submit Request</button>
+          </form>
+          <p class="auth-switch">Already have an account? <button type="button" class="btn-text" id="switch-to-login">Sign In</button></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section section-alt" aria-labelledby="contact-heading">
+      <div class="container">
+        <h2 id="contact-heading">Get in Touch</h2>
+        <p class="section-intro">Interested in working together on accessibility? I'd love to hear from you.</p>
+        <div class="contact-grid">
+          <div class="contact-info">
+            <address>
+              <div class="contact-item">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Chennai, Tamil Nadu, India</span>
+              </div>
+              <div class="contact-item">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <a href="mailto:akhilesh.malani@gmail.com">akhilesh.malani@gmail.com</a>
+              </div>
+              <div class="contact-item">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <a href="tel:+919000531333">+91-900-053-1333</a>
+              </div>
+              <div class="contact-item">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                <a href="https://linkedin.com/in/akhilesh-malani-67073bb" target="_blank" rel="noopener noreferrer">LinkedIn Profile <span class="sr-only">(opens in new tab)</span></a>
+              </div>
+            </address>
+          </div>
+          <form class="contact-form" action="#" method="post" novalidate aria-label="Contact form">
+            <div class="form-group">
+              <label for="name">Your Name <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="text" id="name" name="name" required autocomplete="name" aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="email">Your Email <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <input type="email" id="email" name="email" required autocomplete="email" aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject">
+            </div>
+            <div class="form-group">
+              <label for="message">Message <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+              <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer role="contentinfo" class="footer">
+    <div class="container">
+      <p>&copy; 2025 Akhilesh Malani. All rights reserved.</p>
+      <p class="footer-note">This website was built with accessibility as a core principle, following WCAG 2.2 Level AA guidelines.</p>
+    </div>
+  </footer>
+
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
