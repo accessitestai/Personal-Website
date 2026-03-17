@@ -3,8 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Akhilesh Malani - Senior Accessibility Architect & Digital Inclusion Strategist with 16+ years of experience.">
-  <title>Akhilesh Malani | Senior Accessibility Architect</title>
+  <meta name="description" content="Akhilesh Malani - Senior Accessibility Architect & Digital Inclusion Strategist with 16+ years of experience. CPACC certified blind professional specializing in WCAG, ADA, Section 508 compliance.">
+  <meta name="keywords" content="accessibility consultant, WCAG, digital inclusion, accessibility architect, blind professional, screen reader expert, ADA compliance, Section 508, India accessibility, CPACC">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="theme-color" content="#1a5276">
+  <link rel="canonical" href="https://akhileshmalani.com/">
+
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://akhileshmalani.com/">
+  <meta property="og:title" content="Akhilesh Malani | Senior Accessibility Architect">
+  <meta property="og:description" content="Blind accessibility architect with 16+ years of experience. Specializing in WCAG, ADA, and Section 508 compliance for global enterprises including Google and Bank of Montreal.">
+  <meta property="og:site_name" content="Akhilesh Malani">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Akhilesh Malani | Senior Accessibility Architect">
+  <meta name="twitter:description" content="Blind accessibility architect with 16+ years of experience. Specializing in WCAG, ADA, and Section 508 compliance for global enterprises.">
+
+  <title>Akhilesh Malani | Senior Accessibility Architect & Digital Inclusion Strategist</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>AM</text></svg>">
   <link rel="stylesheet" href="styles.css">
   <!-- Firebase SDK (v9 compat for simplicity) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -66,15 +84,15 @@
           <aside class="about-highlights" aria-label="Key highlights">
             <div class="highlight-card">
               <span class="highlight-number" aria-hidden="true">16+</span>
-              <span class="highlight-label">Years of Experience</span>
+              <span class="highlight-label"><span class="sr-only">16+ </span>Years of Experience</span>
             </div>
             <div class="highlight-card">
               <span class="highlight-number" aria-hidden="true">250+</span>
-              <span class="highlight-label">Websites Audited</span>
+              <span class="highlight-label"><span class="sr-only">250+ </span>Websites Audited</span>
             </div>
             <div class="highlight-card">
               <span class="highlight-number" aria-hidden="true">15+</span>
-              <span class="highlight-label">Team Members Led</span>
+              <span class="highlight-label"><span class="sr-only">15+ </span>Team Members Led</span>
             </div>
           </aside>
         </div>
@@ -570,7 +588,9 @@
               </div>
             </address>
           </div>
-          <form class="contact-form" action="#" method="post" novalidate aria-label="Contact form">
+          <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate aria-label="Contact form">
+            <input type="hidden" name="form-name" value="contact">
+            <p class="sr-only"><label>Don't fill this out if you're human: <input name="bot-field"></label></p>
             <div class="form-group">
               <label for="name">Your Name <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
               <input type="text" id="name" name="name" required autocomplete="name" aria-required="true">
@@ -597,11 +617,43 @@
   <!-- Footer -->
   <footer role="contentinfo" class="footer">
     <div class="container">
-      <p>&copy; 2025 Akhilesh Malani. All rights reserved.</p>
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
       <p class="footer-note">This website was built with accessibility as a core principle, following WCAG 2.2 Level AA guidelines.</p>
     </div>
   </footer>
 
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Akhilesh Malani",
+    "url": "https://akhileshmalani.com",
+    "jobTitle": "Senior Accessibility Architect & Digital Inclusion Strategist",
+    "description": "Blind accessibility architect with 16+ years of experience specializing in WCAG, ADA, Section 508 compliance for global enterprises.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Chennai",
+      "addressRegion": "Tamil Nadu",
+      "addressCountry": "India"
+    },
+    "email": "akhilesh.malani@gmail.com",
+    "telephone": "+919000531333",
+    "sameAs": [
+      "https://linkedin.com/in/akhilesh-malani-67073bb"
+    ],
+    "knowsAbout": ["Web Accessibility", "WCAG", "ADA Compliance", "Section 508", "Screen Reader Testing", "WAI-ARIA", "PDF/UA", "Digital Inclusion", "RPwD Act 2016", "GIGW 3.0"],
+    "hasCredential": {
+      "@type": "EducationalOccupationalCredential",
+      "credentialCategory": "Professional Certification",
+      "name": "Certified Professional in Accessibility Core Competencies (CPACC)"
+    },
+    "worksFor": {
+      "@type": "Organization",
+      "name": "Virtusa Systems India Pvt. Ltd."
+    }
+  }
+  </script>
   <script src="firebase-config.js"></script>
   <script src="script.js"></script>
 </body>

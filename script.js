@@ -60,22 +60,41 @@
       });
 
       if (valid) {
-        // Show success message
-        var successMsg = document.createElement('div');
-        successMsg.setAttribute('role', 'status');
-        successMsg.setAttribute('aria-live', 'polite');
-        successMsg.className = 'form-success';
-        successMsg.style.cssText = 'background:#d4edda;color:#155724;padding:1rem;border-radius:8px;margin-top:1rem;font-weight:500;';
-        successMsg.textContent = 'Thank you for your message! I will get back to you soon.';
-        form.appendChild(successMsg);
-        form.reset();
-
-        // Remove success message after 5 seconds
-        setTimeout(function () {
-          if (successMsg.parentNode) {
-            successMsg.parentNode.removeChild(successMsg);
+        // Submit form to Netlify
+        var formData = new FormData(form);
+        fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(formData).toString()
+        })
+        .then(function (response) {
+          if (response.ok) {
+            var successMsg = document.createElement('div');
+            successMsg.setAttribute('role', 'status');
+            successMsg.setAttribute('aria-live', 'polite');
+            successMsg.className = 'form-success';
+            successMsg.style.cssText = 'background:#d4edda;color:#155724;padding:1rem;border-radius:8px;margin-top:1rem;font-weight:500;';
+            successMsg.textContent = 'Thank you for your message! I will get back to you soon.';
+            form.appendChild(successMsg);
+            form.reset();
+            setTimeout(function () {
+              if (successMsg.parentNode) successMsg.parentNode.removeChild(successMsg);
+            }, 5000);
+          } else {
+            throw new Error('Form submission failed');
           }
-        }, 5000);
+        })
+        .catch(function () {
+          var errorMsg = document.createElement('div');
+          errorMsg.setAttribute('role', 'alert');
+          errorMsg.className = 'form-error';
+          errorMsg.style.cssText = 'background:#f8d7da;color:#721c24;padding:1rem;border-radius:8px;margin-top:1rem;font-weight:500;';
+          errorMsg.textContent = 'Something went wrong. Please email me directly at akhilesh.malani@gmail.com';
+          form.appendChild(errorMsg);
+          setTimeout(function () {
+            if (errorMsg.parentNode) errorMsg.parentNode.removeChild(errorMsg);
+          }, 7000);
+        });
       }
     });
   }
