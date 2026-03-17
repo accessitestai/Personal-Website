@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Accessibility Statement for akhileshmalani.com - our commitment to digital inclusion and WCAG 2.2 Level AA conformance.">
+  <meta name="theme-color" content="#1a5276">
+  <title>Accessibility Statement | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>AM</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header role="banner">
+    <nav aria-label="Primary navigation" class="navbar">
+      <div class="container nav-container">
+        <a href="index.html" class="logo" aria-label="Akhilesh Malani - Home">
+          <span aria-hidden="true">AM</span>
+          <span class="sr-only">Akhilesh Malani</span>
+        </a>
+        <ul class="nav-links" role="list" style="display:flex;">
+          <li><a href="index.html">Back to Home</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="section" aria-labelledby="a11y-heading">
+      <div class="container" style="max-width:800px;">
+        <h1 id="a11y-heading" style="font-size:clamp(1.75rem,3.5vw,2.25rem);color:var(--color-primary-dark);font-family:var(--font-heading);margin-bottom:var(--spacing-md);">Accessibility Statement</h1>
+
+        <h2>Our Commitment</h2>
+        <p>I am committed to ensuring that <strong>akhileshmalani.com</strong> is accessible to all people, including those with disabilities. As a blind professional who relies on assistive technology daily, I understand first-hand the importance of digital accessibility. This website has been built with accessibility as a core design principle.</p>
+
+        <h2>Conformance Status</h2>
+        <p>This website aims to conform to the <strong>Web Content Accessibility Guidelines (WCAG) 2.2 Level AA</strong>. These guidelines explain how to make web content more accessible to people with a wide range of disabilities.</p>
+
+        <h2>Accessibility Features</h2>
+        <ul>
+          <li><strong>Semantic HTML</strong> &mdash; Proper use of headings, landmarks, lists, and ARIA attributes for assistive technology compatibility.</li>
+          <li><strong>Keyboard Navigation</strong> &mdash; All interactive elements are fully operable via keyboard. A skip navigation link is provided.</li>
+          <li><strong>Focus Indicators</strong> &mdash; Visible focus outlines on all interactive elements for keyboard users.</li>
+          <li><strong>Colour Contrast</strong> &mdash; Text and interactive elements meet WCAG 2.2 Level AA contrast ratios.</li>
+          <li><strong>Responsive Design</strong> &mdash; The site adapts to different screen sizes and orientations.</li>
+          <li><strong>Reduced Motion</strong> &mdash; Animations are disabled when users have enabled reduced motion preferences.</li>
+          <li><strong>High Contrast Mode</strong> &mdash; The site supports Windows High Contrast Mode through forced-colors media queries.</li>
+          <li><strong>Screen Reader Optimised</strong> &mdash; Content is structured and labelled for optimal screen reader navigation.</li>
+        </ul>
+
+        <h2>Technologies Used</h2>
+        <ul>
+          <li>HTML5</li>
+          <li>CSS3 (with CSS Custom Properties)</li>
+          <li>JavaScript (ES5 compatible)</li>
+          <li>WAI-ARIA 1.2</li>
+          <li>Firebase Authentication (for the Resource Library)</li>
+        </ul>
+
+        <h2>Assistive Technologies Tested</h2>
+        <p>This website has been tested with the following assistive technologies:</p>
+        <ul>
+          <li>JAWS (latest version) with Chrome and Firefox on Windows</li>
+          <li>NVDA (latest version) with Chrome and Firefox on Windows</li>
+          <li>VoiceOver with Safari on macOS and iOS</li>
+          <li>TalkBack with Chrome on Android</li>
+          <li>Windows High Contrast Mode</li>
+          <li>Browser zoom up to 400%</li>
+        </ul>
+
+        <h2>Known Limitations</h2>
+        <ul>
+          <li><strong>Firebase Authentication Modal</strong> &mdash; The sign-in and registration forms rely on Firebase Authentication. While the modal itself is fully accessible with focus trapping and ARIA attributes, error messages from Firebase may not always be descriptively worded.</li>
+          <li><strong>Resource Library Downloads</strong> &mdash; Some downloadable resources in the Library section are placeholder links and do not yet point to actual files.</li>
+        </ul>
+
+        <h2>Feedback</h2>
+        <p>I welcome your feedback on the accessibility of this website. If you encounter any accessibility barriers or have suggestions for improvement, please contact me:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:akhilesh.malani@gmail.com">akhilesh.malani@gmail.com</a></li>
+          <li><strong>Phone:</strong> <a href="tel:+919000531333">+91-900-053-1333</a></li>
+        </ul>
+        <p>I aim to respond to accessibility feedback within 2 business days.</p>
+
+        <h2>Last Reviewed</h2>
+        <p>This accessibility statement was last reviewed on <time datetime="2026-03-17">March 17, 2026</time>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo" class="footer">
+    <div class="container">
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+      <p class="footer-note">This website was built with accessibility as a core principle, following WCAG 2.2 Level AA guidelines.</p>
+    </div>
+  </footer>
+</body>
+</html>
