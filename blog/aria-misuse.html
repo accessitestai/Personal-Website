@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ARIA is meant to improve accessibility, but developers often use it in ways that make things worse. Here's what I encounter as a daily screen reader user.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="WAI-ARIA, ARIA misuse, accessibility, screen reader, semantic HTML, web development, WCAG">
+  <link rel="canonical" href="https://akhileshmalani.com/blog/aria-misuse.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ARIA: The Tool Most Developers Use Wrong | Akhilesh Malani">
+  <meta property="og:description" content="ARIA is meant to improve accessibility, but developers often use it in ways that make things worse.">
+  <meta property="og:url" content="https://akhileshmalani.com/blog/aria-misuse.html">
+
+  <title>ARIA: The Tool Most Developers Use Wrong | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>AM</text></svg>">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .blog-post { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .blog-post-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); }
+    .blog-post-header h1 { font-size: 2rem; line-height: 1.3; color: var(--color-primary-dark); margin-bottom: 0.75rem; }
+    .blog-meta { color: var(--color-text-light); font-size: 0.95rem; }
+    .blog-meta time { font-weight: 600; }
+    .blog-post-content h2 { font-size: 1.4rem; color: var(--color-primary); margin-top: 2.5rem; margin-bottom: 1rem; }
+    .blog-post-content h3 { font-size: 1.15rem; margin-top: 2rem; margin-bottom: 0.75rem; }
+    .blog-post-content p { margin-bottom: 1.25rem; line-height: 1.8; }
+    .blog-post-content ul, .blog-post-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+    .blog-post-content li { margin-bottom: 0.5rem; line-height: 1.7; }
+    .blog-post-content blockquote { border-left: 4px solid var(--color-primary); padding: 1rem 1.5rem; margin: 1.5rem 0; background: var(--color-bg-alt); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; }
+    .blog-post-content code { background: var(--color-bg-alt); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .blog-post-content pre { background: #2c3e50; color: #ecf0f1; padding: 1.25rem; border-radius: var(--radius); overflow-x: auto; margin: 1.5rem 0; line-height: 1.6; }
+    .blog-post-content pre code { background: none; padding: 0; color: inherit; }
+    .blog-post-content .callout { background: #eaf2f8; border: 1px solid #aed6f1; padding: 1.25rem; border-radius: var(--radius); margin: 1.5rem 0; }
+    .blog-post-content .callout strong { color: var(--color-primary); }
+    .blog-post-content .bad-example { background: #fdf2f2; border: 1px solid #e6a0a0; padding: 1.25rem; border-radius: var(--radius); margin: 1.5rem 0; }
+    .blog-post-content .good-example { background: #f0faf0; border: 1px solid #a0d6a0; padding: 1.25rem; border-radius: var(--radius); margin: 1.5rem 0; }
+    .blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; margin-top: 2rem; border-top: 2px solid var(--color-border); }
+    .blog-nav a { color: var(--color-primary); font-weight: 600; text-decoration: none; }
+    .blog-nav a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { .blog-post-header h1 { font-size: 1.5rem; } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <nav class="navbar" aria-label="Primary navigation">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand" aria-label="Akhilesh Malani - Home">Akhilesh Malani</a>
+        <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <article class="blog-post" aria-label="Blog post">
+      <header class="blog-post-header">
+        <h1>ARIA: The Tool Most Developers Use Wrong</h1>
+        <p class="blog-meta">
+          By <strong>Akhilesh Malani</strong> &middot; <time datetime="2026-02-05">February 5, 2026</time> &middot; 9 min read
+        </p>
+      </header>
+
+      <div class="blog-post-content">
+        <p>WAI-ARIA (Web Accessibility Initiative &mdash; Accessible Rich Internet Applications) was created to bridge the gap between complex web interfaces and assistive technologies. It's a powerful specification. It has made many things possible that weren't before.</p>
+
+        <p>It has also, in my experience, broken more websites than it has fixed.</p>
+
+        <p>I don't say this lightly. I use a screen reader for every interaction I have with the web. And I can tell you: bad ARIA is worse than no ARIA at all.</p>
+
+        <h2>The Five Rules of ARIA (That Most Developers Never Read)</h2>
+
+        <p>The W3C's WAI-ARIA specification comes with five rules of usage. The very first one is the most important:</p>
+
+        <blockquote>
+          "If you can use a native HTML element or attribute with the semantics and behaviour you require already built in, instead of re-purposing an element and adding an ARIA role, state or property to make it accessible, then do so."
+        </blockquote>
+
+        <p>In other words: <strong>use a <code>&lt;button&gt;</code> instead of a <code>&lt;div role="button"&gt;</code></strong>. Use a <code>&lt;select&gt;</code> instead of building a custom dropdown from scratch. Use a <code>&lt;nav&gt;</code> instead of <code>&lt;div role="navigation"&gt;</code>.</p>
+
+        <p>Native HTML elements come with built-in keyboard support, focus management, and screen reader semantics. When you use ARIA instead, you're taking on the responsibility of recreating all of that yourself. Most developers don't.</p>
+
+        <h2>The Patterns I See Every Week</h2>
+
+        <h3>1. The DIV That Thinks It's a Button</h3>
+
+        <div class="bad-example">
+          <strong>What I encounter:</strong>
+          <pre><code>&lt;div class="btn" onclick="submitForm()" role="button"&gt;
+  Submit
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <p>This looks like a button. It has <code>role="button"</code>. But when I navigate to it with my screen reader, I can hear it announced as a button. So far, so good. Then I press Enter. Nothing happens. Because a <code>&lt;div&gt;</code> doesn't respond to Enter or Space by default. The developer added the click handler but forgot that keyboard users don't click.</p>
+
+        <p>They also forgot to add <code>tabindex="0"</code>, so in some cases I can't even reach it with Tab.</p>
+
+        <div class="good-example">
+          <strong>The fix is simple:</strong>
+          <pre><code>&lt;button type="button" onclick="submitForm()"&gt;
+  Submit
+&lt;/button&gt;</code></pre>
+        </div>
+
+        <p>One element. No ARIA needed. Keyboard support is built in. Focus is built in. Screen reader announcement is built in.</p>
+
+        <h3>2. aria-label vs. Visible Text</h3>
+
+        <p>I regularly find elements where the <code>aria-label</code> says something completely different from the visible text on screen:</p>
+
+        <div class="bad-example">
+          <strong>What I encounter:</strong>
+          <pre><code>&lt;a href="/account" aria-label="Navigate to your personal account dashboard page"&gt;
+  My Account
+&lt;/a&gt;</code></pre>
+        </div>
+
+        <p>A sighted user sees "My Account." I hear "Navigate to your personal account dashboard page." This creates a disconnect. If someone tells me to click "My Account," I can't find it &mdash; because my screen reader is announcing something else entirely.</p>
+
+        <p>WCAG 2.5.3 (Label in Name) exists specifically because of this problem. The accessible name should include the visible text, at minimum.</p>
+
+        <h3>3. aria-hidden Hiding Things That Shouldn't Be Hidden</h3>
+
+        <p>I've encountered pages where entire sections of content have <code>aria-hidden="true"</code> on them. The developer probably added it to hide a decorative element and accidentally applied it to a parent container. The result? I can't see any of that content. It simply doesn't exist for my screen reader.</p>
+
+        <p>The most extreme case I've seen: an entire form was inside a container with <code>aria-hidden="true"</code>. Sighted users could see it and fill it out. For me, the form didn't exist.</p>
+
+        <div class="callout">
+          <strong>Rule of thumb:</strong> If content is visible on screen, it should be visible to assistive technologies. If you find yourself hiding things from screen readers, ask why. If the answer isn't "because it's purely decorative and has no information value," you probably shouldn't be hiding it.
+        </div>
+
+        <h3>4. Redundant Roles on Native Elements</h3>
+
+        <p>The WebAIM Million report, which analyses the accessibility of the top one million websites annually, consistently finds that ARIA is one of the most misused technologies. One common pattern:</p>
+
+        <div class="bad-example">
+          <strong>Unnecessary ARIA:</strong>
+          <pre><code>&lt;nav role="navigation"&gt;
+&lt;main role="main"&gt;
+&lt;button role="button"&gt;
+&lt;a href="/home" role="link"&gt;</code></pre>
+        </div>
+
+        <p>Every one of these is redundant. The <code>&lt;nav&gt;</code> element already has an implicit role of "navigation." Adding <code>role="navigation"</code> doesn't help &mdash; but it signals that the developer doesn't understand how HTML semantics work, which often means there are bigger problems elsewhere.</p>
+
+        <h3>5. ARIA Live Region Overload</h3>
+
+        <p>Live regions are meant to announce dynamic content changes to screen reader users. When a form error appears, or a notification pops up, or a counter updates &mdash; a live region makes sure I know about it.</p>
+
+        <p>The problem is when developers make everything a live region. I've tested pages where every section of content had <code>aria-live="polite"</code>. Every time anything changed on the page, my screen reader would interrupt what I was doing to announce it. On one e-commerce site, scrolling through a product list triggered dozens of announcements per second. My screen reader became essentially unusable.</p>
+
+        <p>The other extreme is using <code>aria-live="assertive"</code> for non-urgent updates. Assertive live regions interrupt whatever the screen reader is currently announcing. They should be reserved for critical alerts &mdash; error messages, session timeouts, urgent notifications. Not "3 items in your cart."</p>
+
+        <h3>6. Custom Widgets Without Keyboard Support</h3>
+
+        <p>This is where the most damage is done. A developer builds a custom tab panel, adds <code>role="tablist"</code>, <code>role="tab"</code>, and <code>role="tabpanel"</code>. The screen reader announces it as a tab interface. I expect standard keyboard behaviour: Arrow keys to move between tabs, Enter or Space to activate.</p>
+
+        <p>But the developer only added the ARIA roles. They didn't implement the keyboard interactions. So I press Arrow Right and nothing happens. I press Tab and it moves to the next focusable element on the page, skipping all the other tabs.</p>
+
+        <p>The ARIA roles created an expectation. The missing keyboard support broke it. Now I'm worse off than if there had been no ARIA at all &mdash; at least then I wouldn't have expected tab-like behaviour.</p>
+
+        <h2>The Data Behind the Problem</h2>
+
+        <p>The WebAIM Million report has tracked this trend for years. Their findings consistently show:</p>
+
+        <ul>
+          <li>Pages with ARIA present had <strong>more detected accessibility errors</strong> on average than pages without ARIA</li>
+          <li>The correlation is clear: the more ARIA on a page, the more errors detected</li>
+          <li>This doesn't mean ARIA causes errors &mdash; it means that developers who use ARIA often don't use it correctly</li>
+        </ul>
+
+        <p>ARIA is a power tool. In skilled hands, it enables complex, accessible interfaces. In untrained hands, it creates a worse experience than plain HTML.</p>
+
+        <h2>When ARIA Is Actually Necessary</h2>
+
+        <p>There are legitimate cases where ARIA is the right choice:</p>
+
+        <ul>
+          <li><strong>Single-page applications</strong> that need to announce route changes</li>
+          <li><strong>Custom widgets</strong> with no native HTML equivalent (tree views, grids, comboboxes with autocomplete)</li>
+          <li><strong>Live regions</strong> for dynamic content updates (used sparingly and appropriately)</li>
+          <li><strong>Labelling relationships</strong> that can't be expressed with native HTML (e.g., <code>aria-describedby</code> linking an input to a hint paragraph)</li>
+          <li><strong>State management</strong> for custom controls (<code>aria-expanded</code>, <code>aria-selected</code>, <code>aria-pressed</code>)</li>
+        </ul>
+
+        <p>In these cases, ARIA is essential. But even then, it must be implemented correctly, with full keyboard support and tested with actual screen readers.</p>
+
+        <h2>What I Recommend</h2>
+
+        <ol>
+          <li><strong>Start with semantic HTML.</strong> Use the right elements for the right purpose. This alone solves the majority of accessibility issues.</li>
+          <li><strong>Add ARIA only when HTML falls short.</strong> If you're reaching for ARIA, ask: is there a native element that does this already?</li>
+          <li><strong>Follow the ARIA Authoring Practices Guide.</strong> The W3C publishes detailed patterns for every common widget. If you're building a custom component, follow these patterns exactly.</li>
+          <li><strong>Always implement keyboard support.</strong> If you add ARIA roles, you must add the expected keyboard interactions. Roles without keyboard support are worse than no roles at all.</li>
+          <li><strong>Test with a screen reader.</strong> Not just "does it announce something?" but "does it announce the right thing, at the right time, and can I complete the task?"</li>
+        </ol>
+
+        <h2>The Bottom Line</h2>
+
+        <p>ARIA is a tool, not a solution. Using it without understanding it is like using a power drill without knowing which way the bit turns &mdash; you'll make a hole, but probably not where you wanted it.</p>
+
+        <p>If your team is working with ARIA and wants to make sure they're using it correctly, <a href="../index.html#contact">I'm happy to help</a>. I've spent over 16 years navigating the web with these patterns &mdash; I know what works, what breaks, and why.</p>
+      </div>
+
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="sebi-accessibility-mandate.html">&larr; Previous: SEBI Mandate</a>
+        <a href="shift-left-accessibility.html">Next: Shift-Left Accessibility &rarr;</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
