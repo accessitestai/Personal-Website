@@ -4,7 +4,7 @@
 :root {
   --color-primary: #1a5276;
   --color-primary-dark: #0e3a55;
-  --color-primary-light: #2980b9;
+  --color-primary-light: #1a6da0;
   --color-accent: #2471a3;
   --color-text: #1a1a2e;
   --color-text-light: #4a4a5a;
@@ -650,22 +650,14 @@ a:hover {
   margin: 0;
 }
 
+.testimonial-card h3 {
+  margin-bottom: var(--spacing-xs);
+}
+
 .testimonial-card p {
-  font-style: italic;
   font-size: 1.05rem;
   color: var(--color-text);
   line-height: 1.7;
-}
-
-.testimonial-card footer {
-  margin-top: var(--spacing-sm);
-  font-size: 0.9rem;
-  color: var(--color-text-light);
-  font-style: normal;
-}
-
-.testimonial-card cite {
-  font-style: normal;
 }
 
 /* ===========================
@@ -998,7 +990,7 @@ a:hover {
 
 .footer-note {
   font-size: 0.8rem;
-  opacity: 0.75;
+  opacity: 0.85;
 }
 
 /* ===========================
