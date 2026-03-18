@@ -248,6 +248,9 @@
     });
   }
 
+  // Flag to prevent auth state listener from interfering during registration
+  var isRegistering = false;
+
   // Sign out
   function handleSignOut() {
     if (isFirebaseConfigured()) {
@@ -331,16 +334,21 @@
         return;
       }
 
+      isRegistering = true;
+      var createdUser = null;
+
       auth.createUserWithEmailAndPassword(email, password)
         .then(function (cred) {
-          return cred.user.updateProfile({ displayName: name }).then(function () {
-            return db.collection('members').doc(cred.user.uid).set({
-              name: name,
-              email: email,
-              reason: reason,
-              approved: false,
-              requestedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+          createdUser = cred.user;
+          return cred.user.updateProfile({ displayName: name });
+        })
+        .then(function () {
+          return db.collection('members').doc(createdUser.uid).set({
+            name: name,
+            email: email,
+            reason: reason,
+            approved: false,
+            requestedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         })
         .then(function () {
@@ -354,13 +362,18 @@
               // Silent fail - registration still succeeds
             });
           }
+          isRegistering = false;
           closeModal();
           showView('pending');
         })
         .catch(function (error) {
+          isRegistering = false;
           var msg = 'Registration failed. Please try again.';
           if (error.code === 'auth/email-already-in-use') msg = 'An account with this email already exists.';
           if (error.code === 'auth/weak-password') msg = 'Password is too weak. Use at least 8 characters.';
+          if (error.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+          if (error.code === 'auth/network-request-failed') msg = 'Network error. Please check your internet connection.';
+          if (error.code === 'permission-denied' || error.code === 'PERMISSION_DENIED') msg = 'Account created but profile save failed. Please sign in to retry.';
           registerError.textContent = msg;
           registerError.hidden = false;
         });
@@ -375,19 +388,31 @@
         return;
       }
 
-      // Check approval status in Firestore
-      db.collection('members').doc(user.uid).get()
-        .then(function (doc) {
-          if (doc.exists && doc.data().approved) {
-            userNameEl.textContent = 'Welcome, ' + (user.displayName || user.email);
-            showView('content');
-          } else {
+      // Skip if registration is in progress (let the registration handler manage the view)
+      if (isRegistering) return;
+
+      // Check approval status in Firestore (with retry for new registrations)
+      function checkApproval(retries) {
+        db.collection('members').doc(user.uid).get()
+          .then(function (doc) {
+            if (doc.exists && doc.data().approved) {
+              userNameEl.textContent = 'Welcome, ' + (user.displayName || user.email);
+              showView('content');
+            } else if (doc.exists && !doc.data().approved) {
+              showView('pending');
+            } else if (retries > 0) {
+              // Document might not exist yet if just registered — retry after a short delay
+              setTimeout(function () { checkApproval(retries - 1); }, 1500);
+            } else {
+              showView('pending');
+            }
+          })
+          .catch(function () {
             showView('pending');
-          }
-        })
-        .catch(function () {
-          showView('pending');
-        });
+          });
+      }
+
+      checkApproval(2);
     });
   }
 
