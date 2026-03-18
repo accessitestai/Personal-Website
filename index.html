@@ -28,6 +28,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<meta name="google-site-verification" content="QGON3ias_YR9u7-aNNYmhYNzXEqZ6LmK79ldSRe9UPc" />
 </head>
 <body>
   <!-- Skip Navigation -->
@@ -353,120 +354,17 @@
               <span id="library-user-name"></span>
               <button type="button" class="btn-text" id="btn-signout">Sign Out</button>
             </div>
-            <div class="library-filters" role="group" aria-label="Filter resources by category">
-              <button type="button" class="filter-btn active" data-filter="all">All</button>
-              <button type="button" class="filter-btn" data-filter="training">Training</button>
-              <button type="button" class="filter-btn" data-filter="templates">Templates</button>
-              <button type="button" class="filter-btn" data-filter="research">Research</button>
-              <button type="button" class="filter-btn" data-filter="tools">Tools</button>
-            </div>
           </div>
 
-          <div class="library-grid" role="list" aria-label="Resource library">
-            <!-- Training Materials -->
-            <article class="library-card" data-category="training" role="listitem">
-              <div class="library-card-badge">Training</div>
-              <h3>WCAG 2.2 Complete Guide</h3>
-              <p>Comprehensive walkthrough of every WCAG 2.2 success criterion with practical examples and testing techniques.</p>
-              <div class="library-card-meta">
-                <span>PDF &middot; 45 pages</span>
-                <a href="#" class="btn-text" aria-label="Download WCAG 2.2 Complete Guide">Download</a>
-              </div>
-            </article>
+          <p class="library-description">Browse and download accessibility resources including training materials, templates, research papers, and tools. Click on any file to view or download it.</p>
 
-            <article class="library-card" data-category="training" role="listitem">
-              <div class="library-card-badge">Training</div>
-              <h3>Screen Reader Testing Masterclass</h3>
-              <p>Step-by-step guide to testing with JAWS, NVDA, VoiceOver, and TalkBack &mdash; from a daily screen reader user.</p>
-              <div class="library-card-meta">
-                <span>PDF &middot; 32 pages</span>
-                <a href="#" class="btn-text" aria-label="Download Screen Reader Testing Masterclass">Download</a>
-              </div>
-            </article>
-
-            <article class="library-card" data-category="training" role="listitem">
-              <div class="library-card-badge">Training</div>
-              <h3>Shift-Left Accessibility in SDLC</h3>
-              <p>How to embed accessibility into design, development, and QA phases to reduce late-stage remediation costs.</p>
-              <div class="library-card-meta">
-                <span>PDF &middot; 20 pages</span>
-                <a href="#" class="btn-text" aria-label="Download Shift-Left Accessibility in SDLC">Download</a>
-              </div>
-            </article>
-
-            <!-- Templates -->
-            <article class="library-card" data-category="templates" role="listitem">
-              <div class="library-card-badge">Template</div>
-              <h3>VPAT 2.5 / ACR Template</h3>
-              <p>Ready-to-use Accessibility Conformance Report template aligned with VPAT 2.5 Rev (WCAG + Section 508).</p>
-              <div class="library-card-meta">
-                <span>DOCX &middot; Template</span>
-                <a href="#" class="btn-text" aria-label="Download VPAT 2.5 ACR Template">Download</a>
-              </div>
-            </article>
-
-            <article class="library-card" data-category="templates" role="listitem">
-              <div class="library-card-badge">Template</div>
-              <h3>Accessibility Audit Checklist</h3>
-              <p>Comprehensive checklist covering WCAG 2.2 Level AA for web applications, mapped to testing procedures.</p>
-              <div class="library-card-meta">
-                <span>XLSX &middot; Template</span>
-                <a href="#" class="btn-text" aria-label="Download Accessibility Audit Checklist">Download</a>
-              </div>
-            </article>
-
-            <article class="library-card" data-category="templates" role="listitem">
-              <div class="library-card-badge">Template</div>
-              <h3>Remediation Playbook</h3>
-              <p>Cross-platform technical remediation guide for common WCAG violations with code examples.</p>
-              <div class="library-card-meta">
-                <span>PDF &middot; 38 pages</span>
-                <a href="#" class="btn-text" aria-label="Download Remediation Playbook">Download</a>
-              </div>
-            </article>
-
-            <!-- Research -->
-            <article class="library-card" data-category="research" role="listitem">
-              <div class="library-card-badge">Research</div>
-              <h3>India SEBI Accessibility Mandate &mdash; Analysis</h3>
-              <p>Deep-dive into the July 2025 SEBI circular mandating WCAG 2.1 compliance for all regulated financial entities in India.</p>
-              <div class="library-card-meta">
-                <span>PDF &middot; 15 pages</span>
-                <a href="#" class="btn-text" aria-label="Download SEBI Accessibility Mandate Analysis">Download</a>
-              </div>
-            </article>
-
-            <article class="library-card" data-category="research" role="listitem">
-              <div class="library-card-badge">Research</div>
-              <h3>RPwD Act 2016 &amp; Digital Inclusion</h3>
-              <p>How India's Rights of Persons with Disabilities Act impacts digital product development and organisational compliance.</p>
-              <div class="library-card-meta">
-                <span>PDF &middot; 12 pages</span>
-                <a href="#" class="btn-text" aria-label="Download RPwD Act 2016 and Digital Inclusion">Download</a>
-              </div>
-            </article>
-
-            <!-- Tools -->
-            <article class="library-card" data-category="tools" role="listitem">
-              <div class="library-card-badge">Tool</div>
-              <h3>WAI-ARIA Pattern Library</h3>
-              <p>Production-ready ARIA implementations for complex widgets: data tables, comboboxes, tree views, live regions, and more.</p>
-              <div class="library-card-meta">
-                <span>HTML/CSS/JS &middot; Code</span>
-                <a href="#" class="btn-text" aria-label="Download WAI-ARIA Pattern Library">Download</a>
-              </div>
-            </article>
-
-            <article class="library-card" data-category="tools" role="listitem">
-              <div class="library-card-badge">Tool</div>
-              <h3>PDF/UA Validation Toolkit</h3>
-              <p>Scripts and workflows for validating PDF accessibility against PDF/UA and WCAG standards at scale.</p>
-              <div class="library-card-meta">
-                <span>ZIP &middot; Toolkit</span>
-                <a href="#" class="btn-text" aria-label="Download PDF/UA Validation Toolkit">Download</a>
-              </div>
-            </article>
+          <div class="library-embed">
+            <iframe src="https://drive.google.com/embeddedfolderview?id=1n_s2UjNyRgfsuzdycYccfVjHrjnGgf2K#list" title="Accessibility Resource Library - Google Drive folder" aria-label="Embedded Google Drive folder with accessibility resources" style="width:100%; height:600px; border:none; border-radius:8px;"></iframe>
           </div>
+
+          <p class="library-fallback">
+            Having trouble viewing the files above? <a href="https://drive.google.com/drive/folders/1n_s2UjNyRgfsuzdycYccfVjHrjnGgf2K?usp=sharing" target="_blank" rel="noopener noreferrer">Open the library directly in Google Drive <span class="sr-only">(opens in new tab)</span></a>
+          </p>
         </div>
       </div>
     </section>

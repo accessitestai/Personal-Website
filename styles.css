@@ -900,6 +900,30 @@ a:hover {
   color: var(--color-text-light);
 }
 
+.library-description {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-md);
+  font-size: 1rem;
+}
+
+.library-embed {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.library-embed iframe {
+  display: block;
+}
+
+.library-fallback {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
 /* ===========================
    Auth Modal
    =========================== */
