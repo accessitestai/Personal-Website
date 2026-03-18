@@ -3,11 +3,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Members collection - authenticated users can read/write their own document
+    // Members collection
     match /members/{userId} {
+      // Admin can read and manage all members
+      allow read, update, delete: if request.auth != null && request.auth.token.email == 'akhilesh.malani@gmail.com';
+
+      // Users can read and create their own document
       allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
     }
 
     // Library content - any authenticated member can read

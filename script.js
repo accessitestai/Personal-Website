@@ -344,6 +344,16 @@
           });
         })
         .then(function () {
+          // Send email notification to admin via EmailJS
+          if (typeof emailjs !== 'undefined') {
+            emailjs.send('service_dvp0x0o', 'template_j0ss7rf', {
+              from_name: name,
+              from_email: email,
+              reason: reason
+            }).catch(function () {
+              // Silent fail - registration still succeeds
+            });
+          }
           closeModal();
           showView('pending');
         })

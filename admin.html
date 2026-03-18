@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin - Library Access Management</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-primary: #1a5276;
+      --color-primary-dark: #0e3a56;
+      --color-success: #27ae60;
+      --color-danger: #c0392b;
+      --color-warning: #f39c12;
+      --color-bg: #f8f9fa;
+      --color-white: #ffffff;
+      --color-text: #2c3e50;
+      --color-text-light: #5d6d7e;
+      --color-border: #dee2e6;
+      --radius: 8px;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1.5rem;
+      --spacing-lg: 2.5rem;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    a:focus, button:focus, input:focus, select:focus {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: var(--spacing-md);
+      background: var(--color-primary);
+      color: var(--color-white);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: 0 0 var(--radius) var(--radius);
+      z-index: 9999;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Header */
+    .admin-header {
+      background: var(--color-primary);
+      color: var(--color-white);
+      padding: var(--spacing-md) var(--spacing-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+    }
+
+    .admin-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .admin-header a {
+      color: var(--color-white);
+      text-decoration: underline;
+      font-size: 0.95rem;
+    }
+
+    .admin-header a:hover {
+      opacity: 0.85;
+    }
+
+    /* Main content */
+    .admin-main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    /* Password gate */
+    .password-gate {
+      max-width: 400px;
+      margin: 4rem auto;
+      background: var(--color-white);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius);
+      border: 1px solid var(--color-border);
+      text-align: center;
+    }
+
+    .password-gate h1 {
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-primary);
+    }
+
+    .password-gate label {
+      display: block;
+      text-align: left;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .password-gate input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .password-gate input:focus {
+      border-color: var(--color-primary);
+    }
+
+    .password-gate .btn {
+      width: 100%;
+    }
+
+    .password-error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: var(--spacing-sm);
+      border-radius: var(--radius);
+      margin-bottom: var(--spacing-md);
+      font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, opacity 0.2s;
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .btn:hover { opacity: 0.9; }
+
+    .btn-approve {
+      background: var(--color-success);
+      color: var(--color-white);
+    }
+
+    .btn-deny {
+      background: var(--color-danger);
+      color: var(--color-white);
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+
+    .btn-signout {
+      background: transparent;
+      color: var(--color-white);
+      border: 2px solid var(--color-white);
+      padding: 0.4rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    /* Stats */
+    .admin-stats {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .stat-card .stat-number {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.9rem;
+      color: var(--color-text-light);
+    }
+
+    /* Sections */
+    .admin-section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .admin-section h2 {
+      font-size: 1.3rem;
+      color: var(--color-primary);
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    /* Member cards */
+    .member-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .member-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .member-info {
+      font-size: 0.95rem;
+      color: var(--color-text-light);
+      margin-bottom: 0.3rem;
+    }
+
+    .member-reason {
+      font-size: 0.95rem;
+      margin-bottom: var(--spacing-sm);
+      padding: var(--spacing-sm);
+      background: var(--color-bg);
+      border-radius: var(--radius);
+      border-left: 3px solid var(--color-primary);
+    }
+
+    .member-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: var(--spacing-lg);
+      color: var(--color-text-light);
+      font-style: italic;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #ffeaa7;
+      color: #856404;
+    }
+
+    .status-approved {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    /* Live region for announcements */
+    [role="status"] {
+      margin-top: var(--spacing-sm);
+    }
+
+    .action-result {
+      padding: var(--spacing-sm);
+      border-radius: var(--radius);
+      font-weight: 500;
+      margin-top: var(--spacing-sm);
+    }
+
+    .action-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .action-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: var(--spacing-lg);
+      color: var(--color-text-light);
+    }
+
+    @media (max-width: 600px) {
+      .admin-header {
+        padding: var(--spacing-sm);
+      }
+      .admin-main {
+        padding: var(--spacing-md) var(--spacing-sm);
+      }
+      .admin-stats {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Password Gate -->
+  <div id="password-gate" class="password-gate" role="main" aria-label="Admin authentication">
+    <h1>Admin Access</h1>
+    <div id="password-error" class="password-error" hidden role="alert"></div>
+    <form id="password-form" novalidate>
+      <label for="admin-password">Admin Password</label>
+      <input type="password" id="admin-password" autocomplete="current-password" required aria-required="true">
+      <button type="submit" class="btn btn-primary">Unlock</button>
+    </form>
+  </div>
+
+  <!-- Admin Panel (hidden until password verified) -->
+  <div id="admin-panel" hidden>
+    <header class="admin-header">
+      <h1>Library Access Manager</h1>
+      <nav aria-label="Admin navigation">
+        <a href="index.html">Back to Website</a>
+        <button type="button" class="btn btn-signout" id="btn-admin-signout" hidden>Sign Out</button>
+      </nav>
+    </header>
+
+    <main id="main-content" class="admin-main">
+      <!-- Firebase Sign-In (admin needs to authenticate to access Firestore) -->
+      <div id="admin-auth" class="password-gate" style="margin-top:2rem;">
+        <h2>Sign in with your Firebase account</h2>
+        <p style="color:var(--color-text-light); margin-bottom:var(--spacing-md); font-size:0.95rem;">
+          Sign in with your admin email to manage library members.
+        </p>
+        <div id="admin-auth-error" class="password-error" hidden role="alert"></div>
+        <form id="admin-auth-form" novalidate>
+          <label for="admin-email">Email</label>
+          <input type="email" id="admin-email" autocomplete="email" required aria-required="true">
+          <label for="admin-auth-password" style="margin-top:var(--spacing-sm);">Password</label>
+          <input type="password" id="admin-auth-password" autocomplete="current-password" required aria-required="true">
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+      </div>
+
+      <!-- Dashboard (shown after Firebase auth) -->
+      <div id="admin-dashboard" hidden>
+        <div id="live-announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- Stats -->
+        <div class="admin-stats" role="group" aria-label="Member statistics">
+          <div class="stat-card">
+            <span class="stat-number" id="stat-pending">0</span>
+            <span class="stat-label">Pending Requests</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-approved">0</span>
+            <span class="stat-label">Approved Members</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="stat-total">0</span>
+            <span class="stat-label">Total</span>
+          </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <section class="admin-section" aria-label="Pending access requests">
+          <h2>Pending Requests</h2>
+          <div id="pending-list">
+            <p class="loading">Loading...</p>
+          </div>
+        </section>
+
+        <!-- Approved Members -->
+        <section class="admin-section" aria-label="Approved members">
+          <h2>Approved Members</h2>
+          <div id="approved-list">
+            <p class="loading">Loading...</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var ADMIN_PASS = 'Akh!l123$';
+    var ADMIN_EMAIL = 'akhilesh.malani@gmail.com';
+
+    var passwordGate = document.getElementById('password-gate');
+    var adminPanel = document.getElementById('admin-panel');
+    var adminAuth = document.getElementById('admin-auth');
+    var adminDashboard = document.getElementById('admin-dashboard');
+    var announcements = document.getElementById('live-announcements');
+
+    // --- Password Gate ---
+    var passwordForm = document.getElementById('password-form');
+    var passwordError = document.getElementById('password-error');
+
+    passwordForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var entered = document.getElementById('admin-password').value;
+      if (entered === ADMIN_PASS) {
+        passwordGate.hidden = true;
+        adminPanel.hidden = false;
+        document.getElementById('admin-email').focus();
+      } else {
+        passwordError.textContent = 'Incorrect password. Please try again.';
+        passwordError.hidden = false;
+        document.getElementById('admin-password').value = '';
+        document.getElementById('admin-password').focus();
+      }
+    });
+
+    // --- Firebase Admin Auth ---
+    var adminAuthForm = document.getElementById('admin-auth-form');
+    var adminAuthError = document.getElementById('admin-auth-error');
+    var btnAdminSignout = document.getElementById('btn-admin-signout');
+
+    adminAuthForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      adminAuthError.hidden = true;
+
+      var email = document.getElementById('admin-email').value.trim();
+      var password = document.getElementById('admin-auth-password').value;
+
+      if (!email || !password) {
+        adminAuthError.textContent = 'Please fill in all fields.';
+        adminAuthError.hidden = false;
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(function () {
+          // Auth state listener will handle the rest
+        })
+        .catch(function (error) {
+          var msg = 'Sign in failed. Please check your credentials.';
+          if (error.code === 'auth/user-not-found') msg = 'No account found. Create one on the main website first.';
+          if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') msg = 'Incorrect credentials.';
+          adminAuthError.textContent = msg;
+          adminAuthError.hidden = false;
+        });
+    });
+
+    btnAdminSignout.addEventListener('click', function () {
+      auth.signOut();
+      adminDashboard.hidden = true;
+      adminAuth.hidden = false;
+      btnAdminSignout.hidden = true;
+      document.getElementById('admin-email').focus();
+    });
+
+    // --- Auth State ---
+    if (auth) {
+      auth.onAuthStateChanged(function (user) {
+        if (user && user.email === ADMIN_EMAIL) {
+          adminAuth.hidden = true;
+          adminDashboard.hidden = false;
+          btnAdminSignout.hidden = false;
+          loadMembers();
+        } else if (user && user.email !== ADMIN_EMAIL) {
+          adminAuthError.textContent = 'Access denied. Only the admin account can manage members.';
+          adminAuthError.hidden = false;
+          auth.signOut();
+        }
+      });
+    }
+
+    // --- Load Members ---
+    function loadMembers() {
+      var pendingList = document.getElementById('pending-list');
+      var approvedList = document.getElementById('approved-list');
+
+      pendingList.innerHTML = '<p class="loading">Loading pending requests...</p>';
+      approvedList.innerHTML = '<p class="loading">Loading approved members...</p>';
+
+      db.collection('members').orderBy('requestedAt', 'desc').get()
+        .then(function (snapshot) {
+          var pending = [];
+          var approved = [];
+
+          snapshot.forEach(function (doc) {
+            var data = doc.data();
+            data.id = doc.id;
+            if (data.approved) {
+              approved.push(data);
+            } else {
+              pending.push(data);
+            }
+          });
+
+          // Update stats
+          document.getElementById('stat-pending').textContent = pending.length;
+          document.getElementById('stat-approved').textContent = approved.length;
+          document.getElementById('stat-total').textContent = pending.length + approved.length;
+
+          // Render pending
+          if (pending.length === 0) {
+            pendingList.innerHTML = '<p class="empty-message">No pending requests.</p>';
+          } else {
+            pendingList.innerHTML = '';
+            pending.forEach(function (member) {
+              pendingList.appendChild(createMemberCard(member, false));
+            });
+          }
+
+          // Render approved
+          if (approved.length === 0) {
+            approvedList.innerHTML = '<p class="empty-message">No approved members yet.</p>';
+          } else {
+            approvedList.innerHTML = '';
+            approved.forEach(function (member) {
+              approvedList.appendChild(createMemberCard(member, true));
+            });
+          }
+
+          announce(pending.length + ' pending requests, ' + approved.length + ' approved members loaded.');
+        })
+        .catch(function (error) {
+          pendingList.innerHTML = '<p class="action-error">Error loading members: ' + error.message + '</p>';
+          approvedList.innerHTML = '';
+        });
+    }
+
+    // --- Create Member Card ---
+    function createMemberCard(member, isApproved) {
+      var card = document.createElement('article');
+      card.className = 'member-card';
+      card.setAttribute('aria-label', member.name + (isApproved ? ' - approved' : ' - pending'));
+
+      var date = member.requestedAt ? member.requestedAt.toDate().toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      }) : 'Unknown date';
+
+      var html = '<h3>' + escapeHtml(member.name) + ' ';
+      html += '<span class="status-badge ' + (isApproved ? 'status-approved' : 'status-pending') + '">';
+      html += isApproved ? 'Approved' : 'Pending';
+      html += '</span></h3>';
+      html += '<p class="member-info"><strong>Email:</strong> ' + escapeHtml(member.email) + '</p>';
+      html += '<p class="member-info"><strong>Requested:</strong> ' + date + '</p>';
+
+      if (member.reason) {
+        html += '<div class="member-reason"><strong>Reason:</strong> ' + escapeHtml(member.reason) + '</div>';
+      }
+
+      html += '<div class="member-actions">';
+      if (!isApproved) {
+        html += '<button type="button" class="btn btn-approve" data-action="approve" data-id="' + member.id + '" data-name="' + escapeHtml(member.name) + '" aria-label="Approve ' + escapeHtml(member.name) + '">Approve</button>';
+        html += '<button type="button" class="btn btn-deny" data-action="deny" data-id="' + member.id + '" data-name="' + escapeHtml(member.name) + '" aria-label="Deny and remove ' + escapeHtml(member.name) + '">Deny</button>';
+      } else {
+        html += '<button type="button" class="btn btn-deny" data-action="revoke" data-id="' + member.id + '" data-name="' + escapeHtml(member.name) + '" aria-label="Revoke access for ' + escapeHtml(member.name) + '">Revoke Access</button>';
+      }
+      html += '</div>';
+
+      card.innerHTML = html;
+
+      // Attach event listeners
+      card.querySelectorAll('button[data-action]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          handleAction(btn.getAttribute('data-action'), btn.getAttribute('data-id'), btn.getAttribute('data-name'));
+        });
+      });
+
+      return card;
+    }
+
+    // --- Handle Approve / Deny / Revoke ---
+    function handleAction(action, memberId, memberName) {
+      if (action === 'deny') {
+        if (!confirm('Are you sure you want to deny and remove ' + memberName + '? This will delete their account request.')) {
+          return;
+        }
+      }
+
+      if (action === 'revoke') {
+        if (!confirm('Are you sure you want to revoke access for ' + memberName + '?')) {
+          return;
+        }
+      }
+
+      var updateData;
+      var message;
+
+      if (action === 'approve') {
+        updateData = { approved: true, approvedAt: firebase.firestore.FieldValue.serverTimestamp() };
+        message = memberName + ' has been approved.';
+      } else if (action === 'revoke') {
+        updateData = { approved: false, approvedAt: firebase.firestore.FieldValue.deleteField() };
+        message = 'Access revoked for ' + memberName + '.';
+      } else if (action === 'deny') {
+        // Delete the document
+        db.collection('members').doc(memberId).delete()
+          .then(function () {
+            announce(memberName + ' has been denied and removed.');
+            loadMembers();
+          })
+          .catch(function (error) {
+            announce('Error: ' + error.message);
+          });
+        return;
+      }
+
+      db.collection('members').doc(memberId).update(updateData)
+        .then(function () {
+          announce(message);
+          loadMembers();
+        })
+        .catch(function (error) {
+          announce('Error: ' + error.message);
+        });
+    }
+
+    // --- Announce to screen readers ---
+    function announce(message) {
+      if (announcements) {
+        announcements.textContent = message;
+      }
+    }
+
+    // --- Escape HTML ---
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+  })();
+  </script>
+</body>
+</html>
