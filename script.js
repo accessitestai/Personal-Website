@@ -469,7 +469,8 @@
         announcement.setAttribute('role', 'status');
         announcement.setAttribute('aria-live', 'polite');
         announcement.className = 'sr-only';
-        document.body.appendChild(announcement);
+        var librarySection = document.getElementById('library');
+        (librarySection || document.body).appendChild(announcement);
       }
       announcement.textContent = count + ' resource' + (count !== 1 ? 's' : '') + ' shown.';
     });

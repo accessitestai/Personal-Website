@@ -343,7 +343,7 @@
         </div>
 
         <!-- Pending approval view -->
-        <div id="library-pending" class="library-gate" hidden>
+        <div id="library-pending" class="library-gate" hidden aria-label="Library access pending approval">
           <div class="library-gate-content">
             <svg aria-hidden="true" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <h3>Access Pending</h3>
@@ -364,7 +364,7 @@
           <p class="library-description">Browse and download accessibility resources including training materials, templates, research papers, and tools. Click on any file to view or download it.</p>
 
           <div class="library-embed">
-            <iframe src="https://drive.google.com/embeddedfolderview?id=1n_s2UjNyRgfsuzdycYccfVjHrjnGgf2K#list" title="Accessibility Resource Library - Google Drive folder" aria-label="Embedded Google Drive folder with accessibility resources" style="width:100%; height:600px; border:none; border-radius:8px;"></iframe>
+            <iframe src="https://drive.google.com/embeddedfolderview?id=1n_s2UjNyRgfsuzdycYccfVjHrjnGgf2K#list" title="Accessibility Resource Library - Google Drive folder" style="width:100%; height:600px; border:none; border-radius:8px;">Your browser does not support embedded content. Please use the direct link below to access the library.</iframe>
           </div>
 
           <p class="library-fallback">
@@ -449,9 +449,7 @@
               </div>
             </address>
           </div>
-          <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate aria-label="Contact form">
-            <input type="hidden" name="form-name" value="contact">
-            <p class="sr-only"><label>Don't fill this out if you're human: <input name="bot-field"></label></p>
+          <form class="contact-form" novalidate aria-label="Contact form">
             <div class="form-group">
               <label for="name">Your Name <span aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
               <input type="text" id="name" name="name" required autocomplete="name" aria-required="true">
