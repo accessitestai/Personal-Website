@@ -76,7 +76,7 @@
         };
 
         if (typeof emailjs !== 'undefined') {
-          emailjs.send('service_dvp0x0o', 'template_contact', templateParams)
+          emailjs.send('service_dvp0x0o', 'template_qh6mgwh', templateParams)
             .then(function () {
               var successMsg = document.createElement('div');
               successMsg.setAttribute('role', 'status');
@@ -94,12 +94,13 @@
                 if (successMsg.parentNode) successMsg.parentNode.removeChild(successMsg);
               }, 5000);
             })
-            .catch(function () {
+            .catch(function (err) {
               var errorMsg = document.createElement('div');
               errorMsg.setAttribute('role', 'alert');
               errorMsg.className = 'form-error';
               errorMsg.style.cssText = 'background:#f8d7da;color:#721c24;padding:1rem;border-radius:8px;margin-top:1rem;font-weight:500;';
-              errorMsg.textContent = 'Something went wrong. Please email me directly at akhilesh.malani@gmail.com';
+              var errText = (err && err.text) ? err.text : (err && err.message) ? err.message : String(err);
+              errorMsg.textContent = 'Error: ' + errText + '. Please email me directly at akhilesh.malani@gmail.com';
               form.appendChild(errorMsg);
               if (submitBtn) {
                 submitBtn.disabled = false;
@@ -107,7 +108,7 @@
               }
               setTimeout(function () {
                 if (errorMsg.parentNode) errorMsg.parentNode.removeChild(errorMsg);
-              }, 7000);
+              }, 15000);
             });
         } else {
           // EmailJS not loaded fallback
