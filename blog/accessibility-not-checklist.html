@@ -51,7 +51,7 @@
     .share-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
   </style>
   <script>
-    (function(){var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){document.documentElement.setAttribute('data-theme','dark')}})();
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true')})();
   </script>
 </head>
 <body>
@@ -62,11 +62,65 @@
       <div class="nav-container">
         <a href="../index.html" class="nav-brand" aria-label="Akhilesh Malani - Home">Akhilesh Malani</a>
         <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>
+        <div class="nav-actions">
+          <button class="a11y-toggle" id="a11y-toggle" aria-label="Accessibility settings" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v10"/><path d="M7 11l5-1.5 5 1.5"/><path d="M9 21l3-4 3 4"/></svg>
+          </button>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">
+            <svg id="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
       </div>
     </nav>
   </header>
 
+  <!-- Accessibility Preferences Panel -->
+  <div id="a11y-backdrop" class="a11y-backdrop"></div>
+  <div id="a11y-panel" class="a11y-panel" role="dialog" aria-labelledby="a11y-panel-title" aria-modal="true" hidden>
+    <div class="a11y-panel-header">
+      <h2 id="a11y-panel-title">Accessibility Settings</h2>
+      <button type="button" class="a11y-panel-close" id="a11y-panel-close" aria-label="Close accessibility settings">&times;</button>
+    </div>
+    <div class="a11y-panel-body">
+      <fieldset class="a11y-option">
+        <legend>Text Size</legend>
+        <div class="a11y-text-sizes" role="group" aria-label="Text size options">
+          <button type="button" class="a11y-size-btn" data-size="normal" aria-pressed="true"><span style="font-size:0.85em">A</span><span class="sr-only"> Normal</span></button>
+          <button type="button" class="a11y-size-btn" data-size="large" aria-pressed="false"><span style="font-size:1.1em">A</span><span class="sr-only"> Large</span></button>
+          <button type="button" class="a11y-size-btn" data-size="larger" aria-pressed="false"><span style="font-size:1.4em">A</span><span class="sr-only"> Larger</span></button>
+        </div>
+      </fieldset>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-contrast">High Contrast</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-contrast" id="a11y-contrast" class="a11y-switch"></button>
+        </div>
+      </div>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-dyslexia">Dyslexia-Friendly Font</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-dyslexia" id="a11y-dyslexia" class="a11y-switch"></button>
+        </div>
+      </div>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-motion">Reduce Motion</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-motion" id="a11y-motion" class="a11y-switch"></button>
+        </div>
+      </div>
+      <button type="button" class="a11y-reset" id="a11y-reset">Reset All Preferences</button>
+    </div>
+  </div>
+
   <main id="main-content">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ol>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#blog">Blog</a></li>
+        <li><span aria-current="page">Accessibility Is Not a Checklist — It's a Culture</span></li>
+      </ol>
+    </nav>
     <article class="blog-post" aria-label="Blog post">
       <header class="blog-post-header">
         <h1>Accessibility Is Not a Checklist &mdash; It's a Culture</h1>
@@ -258,5 +312,6 @@
     "timeRequired": "PT8M"
   }
   </script>
+  <script src="../script.js"></script>
 </body>
 </html>

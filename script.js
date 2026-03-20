@@ -591,3 +591,254 @@
     }
   });
 })();
+
+// ===========================
+// Accessibility Preferences Panel
+// ===========================
+(function () {
+  'use strict';
+
+  var html = document.documentElement;
+  var toggleBtn = document.getElementById('a11y-toggle');
+  var panel = document.getElementById('a11y-panel');
+  var backdrop = document.getElementById('a11y-backdrop');
+  var closeBtn = document.getElementById('a11y-panel-close');
+  var resetBtn = document.getElementById('a11y-reset');
+
+  if (!panel || !toggleBtn) return;
+
+  // Size buttons
+  var sizeBtns = panel.querySelectorAll('.a11y-size-btn');
+  var contrastSwitch = document.getElementById('a11y-contrast');
+  var dyslexiaSwitch = document.getElementById('a11y-dyslexia');
+  var motionSwitch = document.getElementById('a11y-motion');
+
+  // --- Panel open/close ---
+  function openPanel() {
+    panel.classList.add('open');
+    panel.removeAttribute('hidden');
+    if (backdrop) backdrop.classList.add('open');
+    closeBtn.focus();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+    toggleBtn.focus();
+    // Wait for transition, then hide
+    setTimeout(function () {
+      if (!panel.classList.contains('open')) {
+        panel.setAttribute('hidden', '');
+      }
+    }, 300);
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    if (panel.classList.contains('open')) {
+      closePanel();
+    } else {
+      openPanel();
+    }
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closePanel);
+  if (backdrop) backdrop.addEventListener('click', closePanel);
+
+  // Close on Escape
+  panel.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closePanel();
+    }
+    // Focus trap
+    if (e.key === 'Tab') {
+      var focusable = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  // --- Text Size ---
+  function applyTextSize(size) {
+    if (size && size !== 'normal') {
+      html.setAttribute('data-text-size', size);
+    } else {
+      html.removeAttribute('data-text-size');
+    }
+    sizeBtns.forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-size') === (size || 'normal') ? 'true' : 'false');
+    });
+  }
+
+  sizeBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var size = btn.getAttribute('data-size');
+      localStorage.setItem('a11y-text-size', size);
+      applyTextSize(size);
+    });
+  });
+
+  // --- Toggle Switches ---
+  function applyToggle(switchEl, attrName, key) {
+    if (!switchEl) return;
+    switchEl.addEventListener('click', function () {
+      var isOn = switchEl.getAttribute('aria-checked') === 'true';
+      var newState = !isOn;
+      switchEl.setAttribute('aria-checked', String(newState));
+      if (newState) {
+        html.setAttribute(attrName, 'true');
+      } else {
+        html.removeAttribute(attrName);
+      }
+      localStorage.setItem(key, String(newState));
+    });
+  }
+
+  applyToggle(contrastSwitch, 'data-high-contrast', 'a11y-high-contrast');
+  applyToggle(dyslexiaSwitch, 'data-dyslexia-font', 'a11y-dyslexia-font');
+  applyToggle(motionSwitch, 'data-reduce-motion', 'a11y-reduce-motion');
+
+  // --- Restore from localStorage ---
+  var savedSize = localStorage.getItem('a11y-text-size') || 'normal';
+  applyTextSize(savedSize);
+
+  if (localStorage.getItem('a11y-high-contrast') === 'true' && contrastSwitch) {
+    contrastSwitch.setAttribute('aria-checked', 'true');
+  }
+  if (localStorage.getItem('a11y-dyslexia-font') === 'true' && dyslexiaSwitch) {
+    dyslexiaSwitch.setAttribute('aria-checked', 'true');
+  }
+  if (localStorage.getItem('a11y-reduce-motion') === 'true' && motionSwitch) {
+    motionSwitch.setAttribute('aria-checked', 'true');
+  }
+
+  // --- Reset ---
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      localStorage.removeItem('a11y-text-size');
+      localStorage.removeItem('a11y-high-contrast');
+      localStorage.removeItem('a11y-dyslexia-font');
+      localStorage.removeItem('a11y-reduce-motion');
+      html.removeAttribute('data-text-size');
+      html.removeAttribute('data-high-contrast');
+      html.removeAttribute('data-dyslexia-font');
+      html.removeAttribute('data-reduce-motion');
+      applyTextSize('normal');
+      if (contrastSwitch) contrastSwitch.setAttribute('aria-checked', 'false');
+      if (dyslexiaSwitch) dyslexiaSwitch.setAttribute('aria-checked', 'false');
+      if (motionSwitch) motionSwitch.setAttribute('aria-checked', 'false');
+    });
+  }
+})();
+
+// ===========================
+// Keyboard Shortcuts
+// ===========================
+(function () {
+  'use strict';
+
+  // Create help dialog dynamically
+  var helpHTML = '<div class="kbd-help-overlay" id="kbd-help" role="dialog" aria-labelledby="kbd-help-title" aria-modal="true">' +
+    '<div class="kbd-help-dialog">' +
+    '<h2 id="kbd-help-title">Keyboard Shortcuts</h2>' +
+    '<ul class="kbd-help-list">' +
+    '<li><span>Go to Home</span> <kbd>Alt + 1</kbd></li>' +
+    '<li><span>Go to Blog</span> <kbd>Alt + 2</kbd></li>' +
+    '<li><span>Go to Contact</span> <kbd>Alt + 3</kbd></li>' +
+    '<li><span>Accessibility Settings</span> <kbd>Alt + 0</kbd></li>' +
+    '<li><span>Show this help</span> <kbd>?</kbd></li>' +
+    '</ul>' +
+    '<button type="button" class="kbd-help-close" id="kbd-help-close">Close <kbd>Esc</kbd></button>' +
+    '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', helpHTML);
+
+  var helpOverlay = document.getElementById('kbd-help');
+  var helpClose = document.getElementById('kbd-help-close');
+
+  function showHelp() {
+    if (helpOverlay) {
+      helpOverlay.classList.add('open');
+      helpClose.focus();
+    }
+  }
+
+  function hideHelp() {
+    if (helpOverlay) {
+      helpOverlay.classList.remove('open');
+    }
+  }
+
+  if (helpClose) helpClose.addEventListener('click', hideHelp);
+  if (helpOverlay) helpOverlay.addEventListener('click', function (e) {
+    if (e.target === helpOverlay) hideHelp();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    var tag = e.target.tagName;
+    var isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable;
+    var isBlog = window.location.pathname.indexOf('/blog/') !== -1;
+    var prefix = isBlog ? '../' : '';
+
+    // Alt+1: Home
+    if (e.altKey && e.key === '1') {
+      e.preventDefault();
+      window.location.href = prefix + 'index.html';
+    }
+
+    // Alt+2: Blog
+    if (e.altKey && e.key === '2') {
+      e.preventDefault();
+      window.location.href = prefix + 'index.html#blog';
+    }
+
+    // Alt+3: Contact
+    if (e.altKey && e.key === '3') {
+      e.preventDefault();
+      window.location.href = prefix + 'index.html#contact';
+    }
+
+    // Alt+0: Accessibility Settings
+    if (e.altKey && e.key === '0') {
+      e.preventDefault();
+      var a11yToggle = document.getElementById('a11y-toggle');
+      if (a11yToggle) a11yToggle.click();
+    }
+
+    // ?: Show help (not when typing)
+    if (e.key === '?' && !isInput && !e.altKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      showHelp();
+    }
+
+    // Escape: Close help
+    if (e.key === 'Escape' && helpOverlay && helpOverlay.classList.contains('open')) {
+      hideHelp();
+    }
+  });
+})();
+
+// ===========================
+// Reading Time Calculator (for blog pages)
+// ===========================
+(function () {
+  'use strict';
+  var content = document.querySelector('.blog-post-content');
+  var meta = document.querySelector('.blog-meta');
+  if (content && meta && !meta.querySelector('.reading-time')) {
+    var words = content.textContent.trim().split(/\s+/).length;
+    var minutes = Math.max(1, Math.ceil(words / 200));
+    var span = document.createElement('span');
+    span.className = 'reading-time';
+    span.textContent = ' \u00B7 ' + minutes + ' min read';
+    meta.appendChild(span);
+  }
+})();
