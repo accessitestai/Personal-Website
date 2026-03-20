@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /node_modules/
 Disallow: /firebase-config.js
+Disallow: /admin.html
+Disallow: /tts_app/
 
 Sitemap: https://akhileshmalani.com/sitemap.xml

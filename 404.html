@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Page not found - Akhilesh Malani's website">
+  <meta name="robots" content="noindex">
+  <title>Page Not Found | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%231a5276'/%3E%3Ctext x='50' y='38' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%23ffffff'%3EA%3C/text%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%235dade2'%3EM%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --color-primary: #1a5276;
+      --color-primary-dark: #0e3a55;
+      --color-primary-light: #5dade2;
+      --color-text: #1a1a2e;
+      --color-text-light: #4a4a5a;
+      --color-bg: #ffffff;
+      --font-primary: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-heading: Georgia, 'Times New Roman', serif;
+    }
+
+    [data-theme="dark"] {
+      --color-primary: #5dade2;
+      --color-primary-dark: #85c1e9;
+      --color-primary-light: #7fb3d8;
+      --color-text: #e8e8e8;
+      --color-text-light: #b0b0b0;
+      --color-bg: #121820;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-primary);
+      color: var(--color-text);
+      background: var(--color-bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .error-container {
+      max-width: 500px;
+    }
+
+    .error-code {
+      font-family: var(--font-heading);
+      font-size: clamp(5rem, 15vw, 8rem);
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      color: var(--color-primary-dark);
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: var(--color-text-light);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 2rem;
+      background: var(--color-primary);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid var(--color-primary-light);
+      outline-offset: 3px;
+    }
+
+    .links {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .links a {
+      color: var(--color-primary);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-size: 0.95rem;
+    }
+
+    .links a:hover {
+      color: var(--color-primary-dark);
+    }
+
+    .links a:focus-visible {
+      outline: 3px solid var(--color-primary-light);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition-duration: 0.01ms !important; }
+    }
+  </style>
+  <script>
+    (function(){var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+</head>
+<body>
+  <main class="error-container" role="main">
+    <div class="error-code" aria-hidden="true">404</div>
+    <h1>Page Not Found</h1>
+    <p>The page you are looking for might have been moved, renamed, or doesn't exist. Let me help you find your way.</p>
+    <a href="/" class="btn">Go to Homepage</a>
+    <nav class="links" aria-label="Quick navigation">
+      <a href="/#about">About Me</a>
+      <a href="/#blog">Blog</a>
+      <a href="/#contact">Contact</a>
+      <a href="/#library">Library</a>
+    </nav>
+  </main>
+</body>
+</html>
