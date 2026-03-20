@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="I'm blind. I use banking apps every day. Here's what actually happens when I try to check my balance, transfer money, or pay a bill — and what banks get wrong.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="banking accessibility, blind user experience, screen reader banking, accessible fintech, UPI accessibility, mobile banking accessibility, TalkBack, WCAG banking">
+  <link rel="canonical" href="https://akhileshmalani.com/blog/banking-app-blind-user.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="What Happens When a Blind User Tries Your Banking App | Akhilesh Malani">
+  <meta property="og:description" content="I'm blind. I use banking apps every day. Here's what actually happens when I try to check my balance, transfer money, or pay a bill — and what banks get wrong.">
+  <meta property="og:url" content="https://akhileshmalani.com/blog/banking-app-blind-user.html">
+
+  <title>What Happens When a Blind User Tries Your Banking App | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%231a5276'/%3E%3Ctext x='50' y='38' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%23ffffff'%3EA%3C/text%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%235dade2'%3EM%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .blog-post { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .blog-post-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); }
+    .blog-post-header h1 { font-size: 2rem; line-height: 1.3; color: var(--color-primary-dark); margin-bottom: 0.75rem; }
+    .blog-meta { color: var(--color-text-light); font-size: 0.95rem; }
+    .blog-meta time { font-weight: 600; }
+    .blog-post-content h2 { font-size: 1.4rem; color: var(--color-primary); margin-top: 2.5rem; margin-bottom: 1rem; }
+    .blog-post-content h3 { font-size: 1.15rem; margin-top: 2rem; margin-bottom: 0.75rem; }
+    .blog-post-content p { margin-bottom: 1.25rem; line-height: 1.8; }
+    .blog-post-content ul, .blog-post-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+    .blog-post-content li { margin-bottom: 0.5rem; line-height: 1.7; }
+    .blog-post-content blockquote { border-left: 4px solid var(--color-primary); padding: 1rem 1.5rem; margin: 1.5rem 0; background: var(--color-bg-alt); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; }
+    .blog-post-content code { background: var(--color-bg-alt); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .blog-post-content .callout { background: #eaf2f8; border: 1px solid #aed6f1; padding: 1.25rem; border-radius: var(--radius); margin: 1.5rem 0; }
+    .blog-post-content .callout strong { color: var(--color-primary); }
+    .blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; margin-top: 2rem; border-top: 2px solid var(--color-border); }
+    .blog-nav a { color: var(--color-primary); font-weight: 600; text-decoration: none; }
+    .blog-nav a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { .blog-post-header h1 { font-size: 1.5rem; } }
+    .share-section { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+    .share-section h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-text); }
+    .share-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease; }
+    .share-btn:hover { transform: translateY(-2px); }
+    .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
+    .share-btn--linkedin { background: #0077b5; color: #fff; }
+    .share-btn--linkedin:hover { background: #005e93; color: #fff; }
+    .share-btn--twitter { background: #1da1f2; color: #fff; }
+    .share-btn--twitter:hover { background: #0d8ecf; color: #fff; }
+    .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
+    .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
+    .share-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  </style>
+  <script>
+    (function(){var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <nav class="navbar" aria-label="Primary navigation">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand" aria-label="Akhilesh Malani - Home">Akhilesh Malani</a>
+        <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <article class="blog-post" aria-label="Blog post">
+      <header class="blog-post-header">
+        <h1>What Happens When a Blind User Tries Your Banking App</h1>
+        <p class="blog-meta">
+          By <strong>Akhilesh Malani</strong> &middot; <time datetime="2026-02-20">February 20, 2026</time> &middot; 10 min read
+        </p>
+      </header>
+
+      <div class="blog-post-content">
+
+        <h2>A Morning Like Any Other</h2>
+
+        <p>Let me walk you through my morning. I pick up my phone, turn on TalkBack, and try to check my bank balance. That's it. Nothing complicated. No international wire transfer, no stock trade, no mortgage application. Just: how much money do I have?</p>
+
+        <p>What follows is a fifteen-minute obstacle course that most sighted people would never believe. I've been blind since birth. I've worked in the banking and financial services space as an accessibility architect for over sixteen years. I use banking apps every single day &mdash; not as a test exercise, but because I have to. I have bills to pay. Rent is due. My credit card statement won't read itself.</p>
+
+        <p>So let me take you through what actually happens. Not theory. Not guidelines. The real thing.</p>
+
+        <h2>The Login Screen: Where It Falls Apart Before It Begins</h2>
+
+        <p>I open the app. TalkBack announces: "Image." Then: "Edit box." Then: "Button."</p>
+
+        <p>That's it. No label on the edit box telling me it's a username field. No label on the button telling me it's "Login" or "Submit." Just "Image. Edit box. Button." I'm expected to guess.</p>
+
+        <p>I type my username from memory &mdash; I've done this enough times to know the layout. Then I swipe to what I hope is the password field. TalkBack says "Edit box" again. No label. I type my password and tap what I believe is the login button.</p>
+
+        <p>Nothing happens for a few seconds. Then: "WebView." A CAPTCHA has appeared. A visual CAPTCHA. Squiggly letters on a noisy background that I'm supposed to type into a box. There is no audio alternative. There is no way to request a different challenge. My screen reader sees the image and announces: "Unlabelled image."</p>
+
+        <p>I am locked out of my own bank account.</p>
+
+        <p>Some banks have moved to OTP-based verification instead, which should be better. But here's what often happens: the OTP arrives by SMS, I switch to my messaging app to read it, copy the code, switch back to the banking app &mdash; and the app has reset. The OTP field is gone. The session has timed out. I start over.</p>
+
+        <p>And when the OTP field does work, it's often six separate input boxes &mdash; one for each digit. Each box is unlabelled. TalkBack doesn't tell me which digit I'm on. I type the first number. Did it go in? I can't tell. I swipe forward. "Edit box." Is this the second box or still the first? There's no way to know without sighted help.</p>
+
+        <blockquote>Biometric login &mdash; fingerprint or face recognition &mdash; is often the only usable path. But many apps bury the biometric option behind the inaccessible login screen. You have to log in once with a password to enable fingerprint authentication. It's a catch-22.</blockquote>
+
+        <h2>Navigation: The Invisible Maze</h2>
+
+        <p>Let's say I get past login. Now I need to navigate the app. The first thing TalkBack hits is usually a hamburger menu icon. Except it doesn't say "Menu." It says "Button" or, worse, nothing at all. I've encountered apps where the main navigation icon is an unlabelled image button. I tap it and hope for the best.</p>
+
+        <p>The menu opens &mdash; I think. There's no announcement that a menu has appeared. No change in focus. I swipe right and hear: "Image. Image. Image. Image." Four icons with no text labels. Are these Account, Transfers, Bills, Settings? Or Home, Offers, Rewards, Help? I have no idea. Each one is a mystery door.</p>
+
+        <p>Many banking apps rely heavily on swipe gestures for navigation. Swipe up for account summary. Swipe down to refresh. Swipe left to see the next card in a carousel. These gestures directly conflict with the gestures I use to operate TalkBack. When I swipe right, I'm trying to move to the next element on screen. But the app intercepts that gesture and interprets it as "dismiss this notification card." Suddenly I've closed something I haven't even read yet.</p>
+
+        <p>There are no alternative navigation paths. No visible "Next" and "Previous" buttons. No keyboard shortcuts. Just gestures that my screen reader has already claimed.</p>
+
+        <h2>Checking My Balance: The Simplest Task That Isn't</h2>
+
+        <p>I navigate to what I believe is the account summary. TalkBack begins reading: "Image. Text. Text. Text. Heading. Double tap to activate."</p>
+
+        <p>None of these "Text" elements have meaningful labels. I don't know which one is my account number, which is the account type, and which is the balance. They're all just "Text."</p>
+
+        <p>I've seen apps where the account balance is rendered as an image. A flat image of the number. My screen reader sees it and says: "Unlabelled image." My balance could be five hundred rupees or five lakh. I have no way to know.</p>
+
+        <p>Other apps use custom-drawn text &mdash; canvas elements or styled spans with no semantic meaning. The balance appears on screen but doesn't exist in the accessibility tree. It's a ghost. Visible to eyes, invisible to my software.</p>
+
+        <p>One major bank's app reads my balance correctly about half the time. The other half, it announces the balance from a cached version of the page &mdash; the balance from yesterday, or last week. There's no indication that the data is stale. I've made financial decisions based on incorrect information because the app couldn't be bothered to announce a refresh.</p>
+
+        <div class="callout">
+          <strong>Think about this:</strong> Checking your bank balance takes you two seconds. It takes me anywhere from two to ten minutes, and at the end of it, I still might not have the right number.
+        </div>
+
+        <h2>Making a Transfer: A Form Designed for Frustration</h2>
+
+        <p>Now I want to send money to someone. I find the transfer option after navigating through the unlabelled icons. A form appears.</p>
+
+        <p>The first field says "Edit box." Not "Beneficiary name" or "Account number" &mdash; just "Edit box." I swipe to the next field. "Edit box." And the next. "Edit box." There are five or six fields in a row, and none of them tell me what they expect. I have to rely on the visual order matching a standard pattern: beneficiary, account number, IFSC code, amount, remarks. But if the developer reordered the fields, or added an extra one, I'm filling in the wrong information in every box.</p>
+
+        <p>Then comes the dropdown for selecting the bank or the account to transfer from. I double-tap to open it. TalkBack goes silent. Nothing is announced. The dropdown has opened visually &mdash; I can hear my colleague confirm this when I ask &mdash; but it's a custom component that doesn't expose its options to the accessibility API. I swipe right. Nothing. Swipe down. Nothing. The dropdown has effectively trapped me in a void. I can't select a bank. I can't close the dropdown. I have to force-close the app and start over.</p>
+
+        <p>On a popular UPI app, the process is marginally better. I can enter a UPI ID. But the "Verify" button that confirms the recipient's name is unlabelled &mdash; it just says "Button." I tap it, wait, and hear nothing. Has the name been verified? Is this the right person? I'm about to send money and I can't confirm who will receive it.</p>
+
+        <p>The confirmation screen is the worst part. After I've painstakingly filled out every field, the app shows a summary: recipient name, amount, account details, and a "Confirm" button. This screen has a thirty-second timeout. If I don't tap "Confirm" within thirty seconds, the transaction is cancelled. But TalkBack reads the screen sequentially, one element at a time. By the time I've listened to the recipient details and reached the amount, the screen has already redirected. Transaction cancelled. Start over.</p>
+
+        <blockquote>I'm not slow. The app is impatient. It was designed for someone who can see the entire screen at once. I read it one word at a time, in a single stream. That takes more than thirty seconds, and the app punishes me for it.</blockquote>
+
+        <h2>Paying Bills: Calendar Roulette and Silent Failures</h2>
+
+        <p>Bill payments introduce their own unique brand of inaccessibility. I need to pay my electricity bill. I find the bill payment section, select my provider, and enter my consumer number. So far, so good &mdash; if the fields happen to be labelled, which is a coin toss.</p>
+
+        <p>Then the app asks me to select a payment date. A date picker appears. It's a visual calendar grid. Rows for weeks, columns for days. My screen reader reads it as a flat sequence of numbers: "1. 2. 3. 4. 5. 6. 7. 8. 9..." I have no way to know which number corresponds to which day of the week. I don't know where the current date is. I don't know which month I'm looking at. The "Previous month" and "Next month" buttons are unlabelled arrows.</p>
+
+        <p>I tap a number at random, hoping it's a reasonable date. Sometimes I accidentally select a date in the past and the app throws an error that TalkBack doesn't announce. I just know the form didn't submit. Was it the date? Was it something else? Silence.</p>
+
+        <p>The amount field is another quiet disaster. I type 2500. But the field doesn't announce what currency it expects. Is this rupees? Is there a paise field somewhere else? Some apps auto-format the number with commas as I type, and each keystroke triggers TalkBack to re-read the entire field from the beginning. I type "2" and hear "2." I type "5" and hear "25." I type "0" and hear "250." I type "0" and hear "2,500." That last comma insertion means TalkBack just announced "2 comma 500" instead of "two thousand five hundred." It's disorienting, every time.</p>
+
+        <p>The final insult is the success or failure message. I tap "Pay." The app processes the payment. A message appears on screen for three seconds: "Payment successful" or "Payment failed &mdash; insufficient funds." Then it auto-redirects to the home screen. TalkBack never gets a chance to read the message. I've just sent money &mdash; or haven't &mdash; and I have no idea which one it is. I have to go find my transaction history and check there, assuming the transaction history is accessible. Often, it isn't.</p>
+
+        <h2>The Security vs. Accessibility Myth</h2>
+
+        <p>I've sat in dozens of meetings with bank product teams where someone says it. The line I've come to dread: "We can't make it accessible because of security requirements."</p>
+
+        <p>This is almost always wrong. Let me be specific about why.</p>
+
+        <p>Visual CAPTCHAs are not more secure than audio CAPTCHAs or challenge-response alternatives. Bot operators use OCR to crack visual CAPTCHAs; they don't use screen readers. An audio CAPTCHA or a simple logic-based challenge ("What is three plus five?") provides equivalent security without locking out blind users.</p>
+
+        <p>Session timeouts that are too short don't prevent fraud &mdash; they prevent me from completing transactions. WCAG requires that users be warned before a timeout and given the option to extend their session. This doesn't weaken security. It means a legitimate user who needs more time gets more time, while a genuinely abandoned session still expires.</p>
+
+        <p>Masking the account balance or showing it as an image doesn't protect anyone from anything. If someone has already authenticated and is inside the app, they're the account holder. The balance should be in accessible text. Rendering it as an image just prevents screen readers from reading it &mdash; it doesn't prevent shoulder surfers or screenshots.</p>
+
+        <p>The screen reader itself is not a security risk. TalkBack and VoiceOver read what's in the accessibility tree &mdash; the same information that's displayed visually on screen. Making content accessible doesn't expose additional data. It exposes the same data through a different channel.</p>
+
+        <div class="callout">
+          <strong>Here's the truth:</strong> In sixteen years of working with financial institutions, I have never encountered a genuine security requirement that could not be met while also being accessible. Not once. "Security" is used as a shield because the team doesn't know how to build accessibly, and it's easier to blame the constraint than to learn the skill.
+        </div>
+
+        <h2>What Banks Should Do</h2>
+
+        <p>I'm not asking for a separate app for blind users. I'm not asking for a simplified version with fewer features. I'm asking for the same app, built correctly. Here's what that looks like:</p>
+
+        <ol>
+          <li><strong>Label everything.</strong> Every input field, every button, every icon needs an accessible name. If it does something, it needs to say what it does. This is the single most impactful change and often the easiest to implement. One attribute: <code>aria-label</code> or a proper <code>&lt;label&gt;</code> element. That's it.</li>
+          <li><strong>Announce dynamic changes.</strong> When content changes on screen &mdash; a balance updates, an OTP timer ticks down, a success message appears &mdash; use <code>aria-live</code> regions to announce it. Don't assume I can see it.</li>
+          <li><strong>Extend timeouts or make them adjustable.</strong> If your confirmation screen auto-redirects in thirty seconds, make it sixty. Or better, let the user choose. WCAG 2.2 Success Criterion 2.2.1 is clear on this: provide a way to turn off, adjust, or extend time limits.</li>
+          <li><strong>Use native components wherever possible.</strong> Native HTML select elements, native date inputs, native checkboxes &mdash; these work with screen readers out of the box. Every custom component you build from scratch is a component you need to make accessible from scratch. Most teams don't.</li>
+          <li><strong>Provide alternatives to gesture-based navigation.</strong> If a swipe gesture performs an action, provide a button that does the same thing. Gestures are invisible to users who can't see a visual cue telling them to swipe.</li>
+          <li><strong>Replace visual CAPTCHAs.</strong> Use audio CAPTCHAs, logic challenges, or server-side bot detection that doesn't require any user interaction at all. ReCAPTCHA v3 does this silently. There is no excuse for a visual-only CAPTCHA in 2026.</li>
+          <li><strong>Test with real assistive technology users.</strong> Not just automated tools. Not just one round of testing before launch. Include screen reader users in your regular QA cycle. Pay them for their time. They'll find what your tools can't.</li>
+          <li><strong>Don't treat accessibility as a feature &mdash; treat it as quality.</strong> Accessible code is well-structured code. Proper labels, semantic HTML, logical focus order &mdash; these make the app better for everyone, including sighted users who rely on voice control, older adults with motor impairments, and people using the app in bright sunlight who need high contrast.</li>
+        </ol>
+
+        <h2>This Isn't Hypothetical</h2>
+
+        <p>Everything I've described in this post has happened to me. Not once, not as an edge case, but repeatedly, across multiple banking apps from some of the largest financial institutions in the country. These are banks that spend crores on their mobile platforms. They have hundreds of developers. They conduct extensive testing &mdash; for features, performance, security.</p>
+
+        <p>They just don't test for people like me.</p>
+
+        <p>And it's not just me. There are millions of people with visual impairments in India who need to manage their finances independently. Every inaccessible app is a message to those millions: you don't matter enough for us to build this correctly.</p>
+
+        <p>I don't think that's the intention. But it is the impact.</p>
+
+        <p>I'm not asking for special treatment. I'm not asking for charity, or sympathy, or a separate "accessible version" tucked away in a corner. I'm asking to use my own money. The money I earned. In the account that has my name on it. Through the app that my bank requires me to use.</p>
+
+        <p>That shouldn't require fifteen minutes and a prayer. It should work.</p>
+
+        <p>If your team builds banking software and you're reading this, I'd welcome the conversation. <a href="../index.html#contact">Get in touch</a> &mdash; I'd rather help you fix this than write about it.</p>
+      </div>
+
+      <div class="share-section">
+        <h2>Share this article</h2>
+        <div class="share-buttons">
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://akhileshmalani.com/blog/banking-app-blind-user.html" target="_blank" rel="noopener noreferrer" class="share-btn share-btn--linkedin" aria-label="Share on LinkedIn (opens in new tab)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://twitter.com/intent/tweet?text=What%20Happens%20When%20a%20Blind%20User%20Tries%20Your%20Banking%20App&url=https://akhileshmalani.com/blog/banking-app-blind-user.html" target="_blank" rel="noopener noreferrer" class="share-btn share-btn--twitter" aria-label="Share on X/Twitter (opens in new tab)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X / Twitter
+          </a>
+          <a href="mailto:?subject=What%20Happens%20When%20a%20Blind%20User%20Tries%20Your%20Banking%20App&body=Check%20out%20this%20article%3A%20https://akhileshmalani.com/blog/banking-app-blind-user.html" class="share-btn share-btn--email" aria-label="Share via email">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email
+          </a>
+        </div>
+      </div>
+
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="accessibility-not-checklist.html">&larr; Previous: Accessibility Is Not a Checklist</a>
+        <a href="rpwd-act-digital-accessibility.html">Next: RPwD Act &amp; Digital Accessibility &rarr;</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "What Happens When a Blind User Tries Your Banking App",
+    "description": "I'm blind. I use banking apps every day. Here's what actually happens when I try to check my balance, transfer money, or pay a bill — and what banks get wrong.",
+    "datePublished": "2026-02-20",
+    "dateModified": "2026-02-20",
+    "author": {
+      "@type": "Person",
+      "name": "Akhilesh Malani",
+      "url": "https://akhileshmalani.com",
+      "jobTitle": "Senior Accessibility Architect"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Akhilesh Malani",
+      "url": "https://akhileshmalani.com"
+    },
+    "mainEntityOfPage": "https://akhileshmalani.com/blog/banking-app-blind-user.html",
+    "articleSection": "Accessibility",
+    "keywords": ["banking accessibility", "blind user experience", "screen reader", "TalkBack", "mobile banking", "UPI accessibility", "WCAG", "financial inclusion"],
+    "wordCount": 2800,
+    "timeRequired": "PT10M"
+  }
+  </script>
+</body>
+</html>
