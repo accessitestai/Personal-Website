@@ -593,6 +593,41 @@
 })();
 
 // ===========================
+// Screen Reader Live Announcer
+// ===========================
+(function () {
+  'use strict';
+
+  // Create a single live region for all announcements
+  var announcer = document.createElement('div');
+  announcer.id = 'sr-announcer';
+  announcer.setAttribute('role', 'status');
+  announcer.setAttribute('aria-live', 'polite');
+  announcer.setAttribute('aria-atomic', 'true');
+  announcer.className = 'sr-only';
+  document.body.appendChild(announcer);
+
+  // Also create an assertive announcer for important changes
+  var assertiveAnnouncer = document.createElement('div');
+  assertiveAnnouncer.id = 'sr-announcer-assertive';
+  assertiveAnnouncer.setAttribute('role', 'alert');
+  assertiveAnnouncer.setAttribute('aria-live', 'assertive');
+  assertiveAnnouncer.setAttribute('aria-atomic', 'true');
+  assertiveAnnouncer.className = 'sr-only';
+  document.body.appendChild(assertiveAnnouncer);
+
+  // Expose globally for other scripts to use
+  window.srAnnounce = function (message, isAssertive) {
+    var el = isAssertive ? assertiveAnnouncer : announcer;
+    // Clear first, then set after a brief delay so screen readers detect the change
+    el.textContent = '';
+    setTimeout(function () {
+      el.textContent = message;
+    }, 100);
+  };
+})();
+
+// ===========================
 // Accessibility Preferences Panel
 // ===========================
 (function () {
@@ -604,6 +639,7 @@
   var backdrop = document.getElementById('a11y-backdrop');
   var closeBtn = document.getElementById('a11y-panel-close');
   var resetBtn = document.getElementById('a11y-reset');
+  var panelTitle = document.getElementById('a11y-panel-title');
 
   if (!panel || !toggleBtn) return;
 
@@ -613,13 +649,20 @@
   var dyslexiaSwitch = document.getElementById('a11y-dyslexia');
   var motionSwitch = document.getElementById('a11y-motion');
 
+  // Size labels for announcements
+  var sizeLabels = { normal: 'Normal', large: 'Large', larger: 'Larger' };
+
   // --- Panel open/close ---
   function openPanel() {
     panel.classList.add('open');
     panel.removeAttribute('hidden');
     if (backdrop) backdrop.classList.add('open');
-    closeBtn.focus();
     document.body.style.overflow = 'hidden';
+    // Focus the panel title for JAWS to announce the dialog
+    if (panelTitle) {
+      panelTitle.setAttribute('tabindex', '-1');
+      panelTitle.focus();
+    }
   }
 
   function closePanel() {
@@ -627,6 +670,7 @@
     if (backdrop) backdrop.classList.remove('open');
     document.body.style.overflow = '';
     toggleBtn.focus();
+    if (window.srAnnounce) window.srAnnounce('Accessibility settings closed');
     // Wait for transition, then hide
     setTimeout(function () {
       if (!panel.classList.contains('open')) {
@@ -649,13 +693,15 @@
   // Close on Escape
   panel.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
+      e.stopPropagation();
       closePanel();
     }
     // Focus trap
     if (e.key === 'Tab') {
       var focusable = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-      var first = focusable[0];
-      var last = focusable[focusable.length - 1];
+      var focusableArray = Array.prototype.slice.call(focusable);
+      var first = focusableArray[0];
+      var last = focusableArray[focusableArray.length - 1];
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();
@@ -667,29 +713,41 @@
   });
 
   // --- Text Size ---
-  function applyTextSize(size) {
+  function applyTextSize(size, announce) {
     if (size && size !== 'normal') {
       html.setAttribute('data-text-size', size);
     } else {
       html.removeAttribute('data-text-size');
     }
     sizeBtns.forEach(function (btn) {
-      btn.setAttribute('aria-pressed', btn.getAttribute('data-size') === (size || 'normal') ? 'true' : 'false');
+      var isSelected = btn.getAttribute('data-size') === (size || 'normal');
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     });
+    if (announce && window.srAnnounce) {
+      window.srAnnounce('Text size changed to ' + sizeLabels[size || 'normal']);
+    }
   }
 
   sizeBtns.forEach(function (btn) {
     btn.addEventListener('click', function () {
       var size = btn.getAttribute('data-size');
       localStorage.setItem('a11y-text-size', size);
-      applyTextSize(size);
+      applyTextSize(size, true);
+    });
+    // Also support Space key for toggle buttons
+    btn.addEventListener('keydown', function (e) {
+      if (e.key === ' ') {
+        e.preventDefault();
+        btn.click();
+      }
     });
   });
 
   // --- Toggle Switches ---
-  function applyToggle(switchEl, attrName, key) {
+  function applyToggle(switchEl, attrName, key, label) {
     if (!switchEl) return;
-    switchEl.addEventListener('click', function () {
+
+    function doToggle() {
       var isOn = switchEl.getAttribute('aria-checked') === 'true';
       var newState = !isOn;
       switchEl.setAttribute('aria-checked', String(newState));
@@ -699,16 +757,30 @@
         html.removeAttribute(attrName);
       }
       localStorage.setItem(key, String(newState));
+      // Announce the change to screen readers
+      if (window.srAnnounce) {
+        window.srAnnounce(label + (newState ? ' enabled' : ' disabled'));
+      }
+    }
+
+    switchEl.addEventListener('click', doToggle);
+
+    // Support Space and Enter keys for role="switch"
+    switchEl.addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        doToggle();
+      }
     });
   }
 
-  applyToggle(contrastSwitch, 'data-high-contrast', 'a11y-high-contrast');
-  applyToggle(dyslexiaSwitch, 'data-dyslexia-font', 'a11y-dyslexia-font');
-  applyToggle(motionSwitch, 'data-reduce-motion', 'a11y-reduce-motion');
+  applyToggle(contrastSwitch, 'data-high-contrast', 'a11y-high-contrast', 'High contrast');
+  applyToggle(dyslexiaSwitch, 'data-dyslexia-font', 'a11y-dyslexia-font', 'Dyslexia-friendly font');
+  applyToggle(motionSwitch, 'data-reduce-motion', 'a11y-reduce-motion', 'Reduce motion');
 
   // --- Restore from localStorage ---
   var savedSize = localStorage.getItem('a11y-text-size') || 'normal';
-  applyTextSize(savedSize);
+  applyTextSize(savedSize, false);
 
   if (localStorage.getItem('a11y-high-contrast') === 'true' && contrastSwitch) {
     contrastSwitch.setAttribute('aria-checked', 'true');
@@ -731,10 +803,11 @@
       html.removeAttribute('data-high-contrast');
       html.removeAttribute('data-dyslexia-font');
       html.removeAttribute('data-reduce-motion');
-      applyTextSize('normal');
+      applyTextSize('normal', false);
       if (contrastSwitch) contrastSwitch.setAttribute('aria-checked', 'false');
       if (dyslexiaSwitch) dyslexiaSwitch.setAttribute('aria-checked', 'false');
       if (motionSwitch) motionSwitch.setAttribute('aria-checked', 'false');
+      if (window.srAnnounce) window.srAnnounce('All accessibility preferences have been reset to defaults');
     });
   }
 })();
@@ -745,42 +818,80 @@
 (function () {
   'use strict';
 
-  // Create help dialog dynamically
-  var helpHTML = '<div class="kbd-help-overlay" id="kbd-help" role="dialog" aria-labelledby="kbd-help-title" aria-modal="true">' +
-    '<div class="kbd-help-dialog">' +
-    '<h2 id="kbd-help-title">Keyboard Shortcuts</h2>' +
-    '<ul class="kbd-help-list">' +
-    '<li><span>Go to Home</span> <kbd>Alt + 1</kbd></li>' +
-    '<li><span>Go to Blog</span> <kbd>Alt + 2</kbd></li>' +
-    '<li><span>Go to Contact</span> <kbd>Alt + 3</kbd></li>' +
-    '<li><span>Accessibility Settings</span> <kbd>Alt + 0</kbd></li>' +
-    '<li><span>Show this help</span> <kbd>?</kbd></li>' +
+  // Track the element that had focus before the help dialog opened
+  var previousFocus = null;
+
+  // Create help dialog dynamically — role="dialog" on the inner dialog, not the overlay
+  var helpHTML = '<div class="kbd-help-overlay" id="kbd-help">' +
+    '<div class="kbd-help-dialog" role="dialog" aria-labelledby="kbd-help-title" aria-modal="true">' +
+    '<h2 id="kbd-help-title" tabindex="-1">Keyboard Shortcuts</h2>' +
+    '<ul class="kbd-help-list" role="list">' +
+    '<li>Go to Home: <kbd>Alt + 1</kbd></li>' +
+    '<li>Go to Blog: <kbd>Alt + 2</kbd></li>' +
+    '<li>Go to Contact: <kbd>Alt + 3</kbd></li>' +
+    '<li>Accessibility Settings: <kbd>Alt + 0</kbd></li>' +
+    '<li>Show this help: <kbd>?</kbd></li>' +
     '</ul>' +
-    '<button type="button" class="kbd-help-close" id="kbd-help-close">Close <kbd>Esc</kbd></button>' +
+    '<button type="button" class="kbd-help-close" id="kbd-help-close">Close</button>' +
     '</div></div>';
 
   document.body.insertAdjacentHTML('beforeend', helpHTML);
 
   var helpOverlay = document.getElementById('kbd-help');
+  var helpDialog = helpOverlay ? helpOverlay.querySelector('.kbd-help-dialog') : null;
+  var helpTitle = document.getElementById('kbd-help-title');
   var helpClose = document.getElementById('kbd-help-close');
 
   function showHelp() {
-    if (helpOverlay) {
-      helpOverlay.classList.add('open');
-      helpClose.focus();
+    if (!helpOverlay) return;
+    previousFocus = document.activeElement;
+    helpOverlay.classList.add('open');
+    // Focus the dialog title so JAWS announces "Keyboard Shortcuts dialog"
+    if (helpTitle) {
+      helpTitle.focus();
     }
   }
 
   function hideHelp() {
-    if (helpOverlay) {
-      helpOverlay.classList.remove('open');
+    if (!helpOverlay) return;
+    helpOverlay.classList.remove('open');
+    // Restore focus to the element that triggered the dialog
+    if (previousFocus && previousFocus.focus) {
+      previousFocus.focus();
     }
+    previousFocus = null;
   }
 
   if (helpClose) helpClose.addEventListener('click', hideHelp);
-  if (helpOverlay) helpOverlay.addEventListener('click', function (e) {
-    if (e.target === helpOverlay) hideHelp();
-  });
+  if (helpOverlay) {
+    helpOverlay.addEventListener('click', function (e) {
+      if (e.target === helpOverlay) hideHelp();
+    });
+  }
+
+  // Focus trap inside help dialog
+  if (helpDialog) {
+    helpDialog.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        hideHelp();
+        return;
+      }
+      if (e.key === 'Tab') {
+        var focusable = helpDialog.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+        var focusableArray = Array.prototype.slice.call(focusable);
+        var first = focusableArray[0];
+        var last = focusableArray[focusableArray.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+  }
 
   document.addEventListener('keydown', function (e) {
     var tag = e.target.tagName;
@@ -813,13 +924,17 @@
       if (a11yToggle) a11yToggle.click();
     }
 
-    // ?: Show help (not when typing)
+    // ?: Show help (not when typing in an input)
     if (e.key === '?' && !isInput && !e.altKey && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      showHelp();
+      if (helpOverlay && helpOverlay.classList.contains('open')) {
+        hideHelp();
+      } else {
+        showHelp();
+      }
     }
 
-    // Escape: Close help
+    // Escape: Close help dialog
     if (e.key === 'Escape' && helpOverlay && helpOverlay.classList.contains('open')) {
       hideHelp();
     }
