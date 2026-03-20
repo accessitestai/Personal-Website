@@ -476,3 +476,118 @@
     });
   });
 })();
+
+// ===========================
+// Dark Mode Toggle
+// ===========================
+(function () {
+  'use strict';
+
+  var toggle = document.getElementById('theme-toggle');
+  var sunIcon = document.getElementById('theme-icon-sun');
+  var moonIcon = document.getElementById('theme-icon-moon');
+  var html = document.documentElement;
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (theme === 'dark') {
+      sunIcon.style.display = 'none';
+      moonIcon.style.display = 'block';
+      toggle.setAttribute('aria-label', 'Switch to light mode');
+    } else {
+      sunIcon.style.display = 'block';
+      moonIcon.style.display = 'none';
+      toggle.setAttribute('aria-label', 'Switch to dark mode');
+    }
+  }
+
+  // Check saved preference, then system preference
+  var saved = localStorage.getItem('theme');
+  if (saved) {
+    setTheme(saved);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    setTheme('dark');
+  }
+
+  // Listen for system preference changes
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+      if (!localStorage.getItem('theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  }
+
+  if (toggle) {
+    toggle.addEventListener('click', function () {
+      var current = html.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+})();
+
+// ===========================
+// Scroll Animations (Intersection Observer)
+// ===========================
+(function () {
+  'use strict';
+
+  // Respect reduced motion preference
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .stagger-children').forEach(function (el) {
+      el.classList.add('visible');
+    });
+    return;
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .stagger-children').forEach(function (el) {
+      el.classList.add('visible');
+    });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .stagger-children').forEach(function (el) {
+    observer.observe(el);
+  });
+})();
+
+// ===========================
+// Back to Top Button
+// ===========================
+(function () {
+  'use strict';
+
+  var btn = document.getElementById('back-to-top');
+  if (!btn) return;
+
+  window.addEventListener('scroll', function () {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  });
+
+  btn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Move focus to skip link or top of page for accessibility
+    var skipLink = document.querySelector('.skip-link');
+    if (skipLink) {
+      skipLink.focus();
+    }
+  });
+})();

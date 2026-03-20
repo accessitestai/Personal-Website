@@ -22,8 +22,12 @@
   <meta name="twitter:description" content="Blind accessibility architect with 16+ years of lived experience. Trusted by the world's leading technology and financial enterprises.">
 
   <title>Akhilesh Malani | Senior Accessibility Architect & Digital Inclusion Strategist</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>AM</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%231a5276'/%3E%3Ctext x='50' y='38' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%23ffffff'%3EA%3C/text%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%235dade2'%3EM%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <!-- Prevent flash of wrong theme -->
+  <script>
+    (function(){var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){document.documentElement.setAttribute('data-theme','dark')}})();
+  </script>
   <!-- Firebase SDK (v9 compat for simplicity) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -59,6 +63,10 @@
           <li><a href="#library">Library</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">
+          <svg id="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
       </div>
     </nav>
   </header>
@@ -78,7 +86,7 @@
     </section>
 
     <!-- About Me Section — the detail page -->
-    <section id="about" class="section" aria-labelledby="about-heading">
+    <section id="about" class="section fade-in" aria-labelledby="about-heading">
       <div class="container">
         <h2 id="about-heading">About Me</h2>
         <div class="about-content">
@@ -103,7 +111,7 @@
     </section>
 
     <!-- What I Do Section -->
-    <section id="unique" class="section section-alt" aria-labelledby="unique-heading">
+    <section id="unique" class="section section-alt fade-in" aria-labelledby="unique-heading">
       <div class="container">
         <h2 id="unique-heading">What I Do</h2>
         <div class="cards-grid">
@@ -140,7 +148,7 @@
     </section>
 
     <!-- Journey Section -->
-    <section id="journey" class="section" aria-labelledby="journey-heading">
+    <section id="journey" class="section fade-in" aria-labelledby="journey-heading">
       <div class="container">
         <h2 id="journey-heading">The Journey</h2>
         <p class="section-intro">A brief overview of my professional path.</p>
@@ -190,7 +198,7 @@
     </section>
 
     <!-- Skills Section -->
-    <section id="skills" class="section section-alt" aria-labelledby="skills-heading">
+    <section id="skills" class="section section-alt fade-in" aria-labelledby="skills-heading">
       <div class="container">
         <h2 id="skills-heading">Areas of Expertise</h2>
         <div class="skills-grid">
@@ -242,7 +250,7 @@
     </section>
 
     <!-- Recognition Section -->
-    <section id="recognition" class="section" aria-labelledby="recognition-heading">
+    <section id="recognition" class="section fade-in" aria-labelledby="recognition-heading">
       <div class="container">
         <h2 id="recognition-heading">Recognition</h2>
         <ul class="recognition-list">
@@ -260,7 +268,7 @@
     </section>
 
     <!-- Blog Section -->
-    <section id="blog" class="section section-alt" aria-labelledby="blog-heading">
+    <section id="blog" class="section section-alt fade-in" aria-labelledby="blog-heading">
       <div class="container">
         <h2 id="blog-heading">Thinking Out Loud</h2>
         <p class="section-intro">Perspectives you won't find in textbooks &mdash; because they come from living it.</p>
@@ -299,7 +307,7 @@
     </section>
 
     <!-- How I Work Section -->
-    <section id="testimonials" class="section" aria-labelledby="how-i-work-heading">
+    <section id="testimonials" class="section fade-in" aria-labelledby="how-i-work-heading">
       <div class="container">
         <h2 id="how-i-work-heading">How I Work</h2>
         <div class="testimonials-grid">
@@ -324,7 +332,7 @@
     </section>
 
     <!-- Library Section -->
-    <section id="library" class="section" aria-labelledby="library-heading">
+    <section id="library" class="section fade-in" aria-labelledby="library-heading">
       <div class="container">
         <h2 id="library-heading">Resource Library</h2>
         <p class="section-intro">Exclusive accessibility resources &mdash; training materials, audit templates, ARIA patterns, research, and more. Available to approved members only.</p>
@@ -428,7 +436,7 @@
     </div>
 
     <!-- Contact Section -->
-    <section id="contact" class="section section-alt" aria-labelledby="contact-heading">
+    <section id="contact" class="section section-alt fade-in" aria-labelledby="contact-heading">
       <div class="container">
         <h2 id="contact-heading">Get in Touch</h2>
         <p class="section-intro">Interested in working together or want to learn more? Let's connect.</p>
@@ -472,6 +480,11 @@
       </div>
     </section>
   </main>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top" type="button">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   <!-- Footer -->
   <footer role="contentinfo" class="footer">
