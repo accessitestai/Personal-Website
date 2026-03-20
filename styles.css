@@ -1010,6 +1010,112 @@ a:hover {
 }
 
 /* ===========================
+   Speaking Section
+   =========================== */
+.speaking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.speaking-card {
+  background: var(--color-card-bg);
+  padding: var(--spacing-md);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.speaking-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.speaking-icon {
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.speaking-card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.speaking-card p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.speaking-cta {
+  text-align: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.speaking-cta p {
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ===========================
+   Newsletter Section
+   =========================== */
+.newsletter-container {
+  max-width: 600px;
+  text-align: center;
+}
+
+.newsletter-form {
+  margin-top: var(--spacing-md);
+}
+
+.newsletter-input-group {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.newsletter-input-group input {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: var(--font-primary);
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color var(--transition);
+}
+
+.newsletter-input-group input:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.newsletter-input-group input::placeholder {
+  color: var(--color-text-light);
+}
+
+.newsletter-note {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .newsletter-input-group {
+    flex-direction: column;
+  }
+
+  .newsletter-input-group .btn {
+    width: 100%;
+  }
+}
+
+/* ===========================
    Footer
    =========================== */
 .footer {
