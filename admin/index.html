@@ -19,5 +19,18 @@
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <!-- Decap CMS will render here -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    // Auto-redirect to Blog Posts collection if landing on default media library view
+    (function() {
+      var checkInterval = setInterval(function() {
+        if (window.location.hash === '' || window.location.hash === '#/') {
+          window.location.hash = '#/collections/blog';
+          clearInterval(checkInterval);
+        } else {
+          clearInterval(checkInterval);
+        }
+      }, 1500);
+    })();
+  </script>
 </body>
 </html>
