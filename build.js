@@ -459,6 +459,24 @@ function build() {
   fs.writeFileSync(path.join(__dirname, 'sitemap.xml'), sitemap, 'utf8');
   console.log('[SITEMAP] Generated sitemap.xml with ' + (allPosts.length + 4) + ' URLs');
 
+  // 5. Generate _latest-post.json for auto-posting to social media
+  if (allPosts.length > 0) {
+    var latestPost = allPosts[0]; // Already sorted newest first
+    var latestPostData = {
+      slug: latestPost.slug,
+      title: latestPost.title,
+      date: latestPost.date,
+      description: latestPost.description,
+      url: 'https://akhileshmalani.com/blog/' + latestPost.slug + '.html'
+    };
+    fs.writeFileSync(
+      path.join(__dirname, '_latest-post.json'),
+      JSON.stringify(latestPostData, null, 2),
+      'utf8'
+    );
+    console.log('[SOCIAL] Generated _latest-post.json — latest: "' + latestPost.title + '"');
+  }
+
   console.log('\nBuild complete! Total blog posts: ' + allPosts.length);
 }
 

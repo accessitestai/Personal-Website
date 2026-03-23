@@ -1,6 +1,9 @@
 [build]
-  command = "node build.js"
+  command = "npm install && node build.js"
   publish = "."
+
+[functions]
+  directory = "netlify/functions"
 
 # Redirect old admin.html to renamed library-admin page
 [[redirects]]
