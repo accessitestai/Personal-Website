@@ -6,20 +6,15 @@
     <description>Insights on digital accessibility from Akhilesh Malani — a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>
     <language>en</language>
     <managingEditor>akhilesh.malani@gmail.com (Akhilesh Malani)</managingEditor>
-    <lastBuildDate>Sat, 15 Mar 2026 00:00:00 +0530</lastBuildDate>
+    <lastBuildDate>Mon, 23 Mar 2026 10:02:07 GMT</lastBuildDate>
     <atom:link href="https://akhileshmalani.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <image>
-      <url>https://akhileshmalani.com/favicon.ico</url>
-      <title>Akhilesh Malani - Accessibility Blog</title>
-      <link>https://akhileshmalani.com</link>
-    </image>
 
     <item>
       <title>How to Test Your Website with a Screen Reader — A Beginner's Guide</title>
       <link>https://akhileshmalani.com/blog/screen-reader-testing-guide.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/screen-reader-testing-guide.html</guid>
-      <pubDate>Sun, 15 Mar 2026 00:00:00 +0530</pubDate>
-      <description>A practical, step-by-step guide to testing your website with screen readers like JAWS, NVDA, VoiceOver, and TalkBack — written by someone who uses them every day.</description>
+      <pubDate>Sat, 14 Mar 2026 18:30:00 +0530</pubDate>
+      <description>A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS — written by someone who uses them every day.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -27,8 +22,8 @@
       <title>Your Automated Tools Miss 70% of What I Find</title>
       <link>https://akhileshmalani.com/blog/automated-tools-miss.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/automated-tools-miss.html</guid>
-      <pubDate>Tue, 10 Mar 2026 00:00:00 +0530</pubDate>
-      <description>Automated accessibility tools catch only 30-40% of real issues. Here's what they miss and why manual testing by real users matters.</description>
+      <pubDate>Mon, 09 Mar 2026 18:30:00 +0530</pubDate>
+      <description>Automated accessibility tools catch only 30-40% of real issues. Here's what they miss — from someone who tests with a screen reader every day.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -36,8 +31,8 @@
       <title>WCAG 2.2: What Changed and Why It Matters</title>
       <link>https://akhileshmalani.com/blog/wcag-22-changes.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/wcag-22-changes.html</guid>
-      <pubDate>Thu, 05 Mar 2026 00:00:00 +0530</pubDate>
-      <description>WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your projects, and how to prepare.</description>
+      <pubDate>Wed, 04 Mar 2026 18:30:00 +0530</pubDate>
+      <description>WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most — from someone who tests against them daily.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -45,8 +40,8 @@
       <title>Accessibility Is Not a Checklist — It's a Culture</title>
       <link>https://akhileshmalani.com/blog/accessibility-not-checklist.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/accessibility-not-checklist.html</guid>
-      <pubDate>Sat, 28 Feb 2026 00:00:00 +0530</pubDate>
-      <description>Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails and what actually works.</description>
+      <pubDate>Fri, 27 Feb 2026 18:30:00 +0530</pubDate>
+      <description>Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails — and what building a real accessibility culture looks like.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -54,8 +49,8 @@
       <title>India's SEBI Mandate: Are You Ready?</title>
       <link>https://akhileshmalani.com/blog/sebi-accessibility-mandate.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/sebi-accessibility-mandate.html</guid>
-      <pubDate>Sun, 22 Feb 2026 00:00:00 +0530</pubDate>
-      <description>SEBI has mandated WCAG compliance for all regulated financial entities in India. Here's what you need to know and do.</description>
+      <pubDate>Sat, 21 Feb 2026 18:30:00 +0530</pubDate>
+      <description>SEBI has mandated WCAG compliance for all regulated financial entities in India. Here's what the circular requires, who it applies to, and how to prepare.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -63,8 +58,8 @@
       <title>What Happens When a Blind User Tries Your Banking App</title>
       <link>https://akhileshmalani.com/blog/banking-app-blind-user.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/banking-app-blind-user.html</guid>
-      <pubDate>Thu, 20 Feb 2026 00:00:00 +0530</pubDate>
-      <description>I'm blind. I use banking apps every day. Here's what actually happens when I try to manage my money through your app.</description>
+      <pubDate>Thu, 19 Feb 2026 18:30:00 +0530</pubDate>
+      <description>I'm blind. I use banking apps every day. Here's what actually happens when I try to check my balance, transfer money, or pay a bill — and what banks get wrong.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -72,8 +67,8 @@
       <title>RPwD Act 2016: What Every Indian Business Must Know About Digital Accessibility</title>
       <link>https://akhileshmalani.com/blog/rpwd-act-digital-accessibility.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/rpwd-act-digital-accessibility.html</guid>
-      <pubDate>Thu, 12 Feb 2026 00:00:00 +0530</pubDate>
-      <description>India's Rights of Persons with Disabilities Act 2016 has real implications for digital accessibility. Here's what businesses need to know.</description>
+      <pubDate>Wed, 11 Feb 2026 18:30:00 +0530</pubDate>
+      <description>India's Rights of Persons with Disabilities Act 2016 has real implications for digital products. Here's what the law says, who it applies to, and what you need to do.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -81,8 +76,8 @@
       <title>ARIA: The Tool Most Developers Use Wrong</title>
       <link>https://akhileshmalani.com/blog/aria-misuse.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/aria-misuse.html</guid>
-      <pubDate>Thu, 05 Feb 2026 00:00:00 +0530</pubDate>
-      <description>ARIA is meant to improve accessibility, but developers often use it in ways that make things worse. Here's what you're getting wrong.</description>
+      <pubDate>Wed, 04 Feb 2026 18:30:00 +0530</pubDate>
+      <description>ARIA is meant to improve accessibility, but developers often use it in ways that make things worse. Here's what I encounter as a daily screen reader user.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -90,8 +85,8 @@
       <title>Why Indian Government Websites Fail Their Own Accessibility Guidelines</title>
       <link>https://akhileshmalani.com/blog/indian-govt-websites-accessibility.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/indian-govt-websites-accessibility.html</guid>
-      <pubDate>Sun, 01 Feb 2026 00:00:00 +0530</pubDate>
-      <description>India has its own accessibility guidelines (GIGW 3.0), yet most government websites fail to meet them. Here's what I found.</description>
+      <pubDate>Sat, 31 Jan 2026 18:30:00 +0530</pubDate>
+      <description>India has its own accessibility guidelines (GIGW 3.0), yet most government websites fail them. Here's what I find when I try to use them as a blind citizen.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -99,8 +94,8 @@
       <title>You're Spending 30x More Than You Need To</title>
       <link>https://akhileshmalani.com/blog/shift-left-accessibility.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/shift-left-accessibility.html</guid>
-      <pubDate>Sun, 18 Jan 2026 00:00:00 +0530</pubDate>
-      <description>Fixing accessibility in production costs 30x more than catching it in design. Here's how to shift left and save time, money, and frustration.</description>
+      <pubDate>Sat, 17 Jan 2026 18:30:00 +0530</pubDate>
+      <description>Fixing accessibility in production costs 30x more than catching it in design. Here's why shift-left accessibility saves money, time, and lawsuits.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 

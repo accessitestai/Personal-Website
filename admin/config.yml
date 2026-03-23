@@ -1,0 +1,20 @@
+backend:
+  name: github
+  repo: accessitestai/Personal-Website
+  branch: main
+
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "blog"
+    label: "Blog Posts"
+    folder: "content/blog"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime", format: "YYYY-MM-DD" }
+      - { label: "Description", name: "description", widget: "text", hint: "A brief summary for SEO and social sharing (1-2 sentences)" }
+      - { label: "Keywords", name: "keywords", widget: "string", hint: "Comma-separated keywords for SEO" }
+      - { label: "Body", name: "body", widget: "markdown" }
