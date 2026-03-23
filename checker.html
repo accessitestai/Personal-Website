@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free web accessibility checker by Akhilesh Malani. Paste your HTML code and get instant WCAG 2.2 compliance results with actionable recommendations.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="accessibility checker, WCAG checker, web accessibility testing, free accessibility tool, axe-core, WCAG 2.2, accessibility audit">
+  <link rel="canonical" href="https://akhileshmalani.com/checker.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free Web Accessibility Checker | Akhilesh Malani">
+  <meta property="og:description" content="Paste your HTML code and get instant WCAG 2.2 compliance results with actionable recommendations from a blind accessibility architect.">
+  <meta property="og:url" content="https://akhileshmalani.com/checker.html">
+
+  <title>Web Accessibility Checker | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%231a5276'/%3E%3Ctext x='50' y='38' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%23ffffff'%3EA%3C/text%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%235dade2'%3EM%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .checker-page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .checker-page h1 { font-size: 2rem; color: var(--color-primary-dark); margin-bottom: 0.5rem; }
+    .checker-intro { color: var(--color-text-light); margin-bottom: 2rem; line-height: 1.7; }
+    .checker-form { margin-bottom: 2rem; }
+    .checker-form label { display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-text); font-size: 1.05rem; }
+    .checker-form .label-hint { font-weight: 400; font-size: 0.9rem; color: var(--color-text-light); display: block; margin-bottom: 0.5rem; }
+    .checker-textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 1rem;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-bg);
+      color: var(--color-text);
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .checker-textarea:focus {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+      border-color: var(--color-primary);
+    }
+    .checker-actions { display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
+    .checker-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .checker-btn:hover, .checker-btn:focus { background: var(--color-primary-dark); }
+    .checker-btn:focus { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+    .checker-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .checker-btn--secondary { background: var(--color-bg-alt); color: var(--color-text); border: 2px solid var(--color-border); }
+    .checker-btn--secondary:hover, .checker-btn--secondary:focus { background: var(--color-border); }
+    .checker-status { font-size: 0.95rem; color: var(--color-text-light); }
+
+    /* Results */
+    .checker-results { display: none; }
+    .checker-results.visible { display: block; }
+    .results-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .summary-card {
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      text-align: center;
+      border: 2px solid var(--color-border);
+    }
+    .summary-card--critical { border-color: #c0392b; background: #fdedec; }
+    .summary-card--serious { border-color: #e67e22; background: #fdf2e9; }
+    .summary-card--moderate { border-color: #f39c12; background: #fef9e7; }
+    .summary-card--minor { border-color: #27ae60; background: #eafaf1; }
+    .summary-card--passes { border-color: #2980b9; background: #ebf5fb; }
+    [data-theme="dark"] .summary-card--critical { background: rgba(192, 57, 43, 0.15); }
+    [data-theme="dark"] .summary-card--serious { background: rgba(230, 126, 34, 0.15); }
+    [data-theme="dark"] .summary-card--moderate { background: rgba(243, 156, 18, 0.15); }
+    [data-theme="dark"] .summary-card--minor { background: rgba(39, 174, 96, 0.15); }
+    [data-theme="dark"] .summary-card--passes { background: rgba(41, 128, 185, 0.15); }
+    .summary-count { font-size: 2rem; font-weight: 700; display: block; }
+    .summary-label { font-size: 0.85rem; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 0.05em; }
+    .summary-card--critical .summary-count { color: #c0392b; }
+    .summary-card--serious .summary-count { color: #e67e22; }
+    .summary-card--moderate .summary-count { color: #f39c12; }
+    .summary-card--minor .summary-count { color: #27ae60; }
+    .summary-card--passes .summary-count { color: #2980b9; }
+
+    .issue-list { list-style: none; padding: 0; }
+    .issue-item {
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .issue-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-bg-alt);
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .issue-header:hover { background: var(--color-border); }
+    .issue-header:focus { outline: 3px solid var(--color-primary); outline-offset: -3px; }
+    .issue-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .issue-badge--critical { background: #c0392b; }
+    .issue-badge--serious { background: #e67e22; }
+    .issue-badge--moderate { background: #f39c12; color: #000; }
+    .issue-badge--minor { background: #27ae60; }
+    .issue-expand { margin-left: auto; flex-shrink: 0; font-size: 0.85rem; color: var(--color-text-light); }
+    .issue-details {
+      display: none;
+      padding: 1.25rem;
+      border-top: 1px solid var(--color-border);
+    }
+    .issue-details.open { display: block; }
+    .issue-details dt { font-weight: 700; color: var(--color-primary); margin-top: 0.75rem; font-size: 0.9rem; }
+    .issue-details dt:first-child { margin-top: 0; }
+    .issue-details dd { margin: 0.25rem 0 0 0; line-height: 1.6; }
+    .issue-details code { background: var(--color-bg-alt); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.88em; word-break: break-all; }
+    .issue-details pre { background: var(--color-bg-alt); padding: 1rem; border-radius: var(--radius); overflow-x: auto; margin: 0.5rem 0; border: 1px solid var(--color-border); }
+    .issue-details pre code { background: none; padding: 0; word-break: normal; }
+
+    .results-cta {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--color-bg-alt);
+      border-radius: var(--radius);
+      border: 2px solid var(--color-primary);
+      text-align: center;
+    }
+    .results-cta p { margin-bottom: 0.75rem; font-size: 1.05rem; }
+    .results-cta a { color: var(--color-primary); font-weight: 700; }
+
+    .no-issues { padding: 2rem; text-align: center; color: #27ae60; font-size: 1.1rem; font-weight: 600; }
+    .checker-nav { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .checker-nav a { color: var(--color-primary); font-weight: 600; text-decoration: none; padding: 0.5rem 1rem; border: 2px solid var(--color-primary); border-radius: var(--radius); }
+    .checker-nav a:hover, .checker-nav a:focus { background: var(--color-primary); color: #fff; }
+    .checker-nav a[aria-current="page"] { background: var(--color-primary); color: #fff; }
+
+    @media (max-width: 600px) {
+      .checker-page h1 { font-size: 1.5rem; }
+      .results-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+  <!-- Prevent flash of wrong theme/preferences -->
+  <script>
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
+  </script>
+</head>
+<body>
+  <!-- Skip Navigation -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header / Navigation -->
+  <header role="banner">
+    <nav aria-label="Primary navigation" class="navbar">
+      <div class="container nav-container">
+        <a href="index.html" class="logo" aria-label="Akhilesh Malani - Home">
+          <span aria-hidden="true">AM</span>
+          <span class="sr-only">Akhilesh Malani</span>
+        </a>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">
+            <svg id="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ol>
+        <li><a href="index.html">Home</a></li>
+        <li><span aria-current="page">Web Accessibility Checker</span></li>
+      </ol>
+    </nav>
+
+    <div class="checker-page">
+      <h1>Web Accessibility Checker</h1>
+      <p class="checker-intro">Paste your HTML code below and I will analyse it for WCAG 2.2 Level AA compliance using the axe-core engine — the same engine used by Deque, Google Lighthouse, and Microsoft Accessibility Insights. This tool runs entirely in your browser. No data is sent to any server.</p>
+
+      <nav aria-label="Checker tools" class="checker-nav">
+        <a href="checker.html" aria-current="page">Web Checker</a>
+        <a href="doc-checker.html">Document Checker</a>
+      </nav>
+
+      <form class="checker-form" id="checker-form" onsubmit="return false;">
+        <label for="html-input">
+          Paste your HTML code
+          <span class="label-hint">Paste a complete HTML page or a code snippet. The tool will wrap snippets in a basic HTML structure automatically.</span>
+        </label>
+        <textarea id="html-input" class="checker-textarea" placeholder="<!DOCTYPE html>&#10;<html lang=&quot;en&quot;>&#10;<head>&#10;  <title>My Page</title>&#10;</head>&#10;<body>&#10;  <h1>Hello World</h1>&#10;  <img src=&quot;photo.jpg&quot;>&#10;</body>&#10;</html>" spellcheck="false" aria-required="true"></textarea>
+        <div class="checker-actions">
+          <button type="button" class="checker-btn" id="run-check" aria-describedby="checker-status">
+            Run Accessibility Check
+          </button>
+          <button type="button" class="checker-btn checker-btn--secondary" id="clear-check">
+            Clear
+          </button>
+          <span class="checker-status" id="checker-status" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+
+      <!-- Results Section -->
+      <section class="checker-results" id="checker-results" aria-labelledby="results-heading">
+        <h2 id="results-heading" tabindex="-1">Results</h2>
+        <div class="results-summary" id="results-summary" role="group" aria-label="Issue summary"></div>
+        <div id="results-list"></div>
+
+        <div class="results-cta">
+          <p>Need help fixing these issues? I have been doing this for 16+ years.</p>
+          <a href="index.html#contact">Get in touch with me</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a> and 16+ years of lived accessibility experience.</p>
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Hidden iframe for axe-core testing -->
+  <iframe id="test-frame" style="position:absolute;left:-9999px;width:1024px;height:768px;border:none;" title="Accessibility test sandbox" sandbox="allow-same-origin"></iframe>
+
+  <!-- axe-core library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js"></script>
+
+  <script src="script.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var htmlInput = document.getElementById('html-input');
+    var runBtn = document.getElementById('run-check');
+    var clearBtn = document.getElementById('clear-check');
+    var statusEl = document.getElementById('checker-status');
+    var resultsSection = document.getElementById('checker-results');
+    var resultsSummary = document.getElementById('results-summary');
+    var resultsList = document.getElementById('results-list');
+    var resultsHeading = document.getElementById('results-heading');
+    var testFrame = document.getElementById('test-frame');
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function wrapSnippet(html) {
+      var trimmed = html.trim();
+      if (trimmed.toLowerCase().indexOf('<!doctype') !== -1 || trimmed.toLowerCase().indexOf('<html') !== -1) {
+        return trimmed;
+      }
+      return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Test Page</title></head><body>' + trimmed + '</body></html>';
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    function getImpactOrder(impact) {
+      var order = { critical: 0, serious: 1, moderate: 2, minor: 3 };
+      return order[impact] !== undefined ? order[impact] : 4;
+    }
+
+    function renderResults(results) {
+      var violations = results.violations || [];
+      var passes = results.passes || [];
+
+      // Sort violations by impact severity
+      violations.sort(function (a, b) {
+        return getImpactOrder(a.impact) - getImpactOrder(b.impact);
+      });
+
+      // Count by impact
+      var counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+      violations.forEach(function (v) {
+        if (counts[v.impact] !== undefined) counts[v.impact]++;
+      });
+
+      var totalIssues = violations.length;
+
+      // Summary cards
+      resultsSummary.innerHTML =
+        '<div class="summary-card summary-card--critical" role="group" aria-label="Critical issues">' +
+        '  <span class="summary-count">' + counts.critical + '</span>' +
+        '  <span class="summary-label">Critical</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--serious" role="group" aria-label="Serious issues">' +
+        '  <span class="summary-count">' + counts.serious + '</span>' +
+        '  <span class="summary-label">Serious</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--moderate" role="group" aria-label="Moderate issues">' +
+        '  <span class="summary-count">' + counts.moderate + '</span>' +
+        '  <span class="summary-label">Moderate</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--minor" role="group" aria-label="Minor issues">' +
+        '  <span class="summary-count">' + counts.minor + '</span>' +
+        '  <span class="summary-label">Minor</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--passes" role="group" aria-label="Checks passed">' +
+        '  <span class="summary-count">' + passes.length + '</span>' +
+        '  <span class="summary-label">Passed</span>' +
+        '</div>';
+
+      // Issue list
+      if (totalIssues === 0) {
+        resultsList.innerHTML = '<div class="no-issues" role="status"><p>No accessibility violations found. Well done!</p><p>Note: Automated testing catches about 30-40% of accessibility issues. I always recommend manual testing with a screen reader for comprehensive coverage.</p></div>';
+      } else {
+        var html = '<h3 id="issues-list-heading">' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ' found</h3>';
+        html += '<ul class="issue-list" aria-label="Accessibility issues found">';
+
+        violations.forEach(function (violation, index) {
+          var nodeCount = violation.nodes ? violation.nodes.length : 0;
+          var firstNode = violation.nodes && violation.nodes[0] ? violation.nodes[0] : {};
+          var htmlSnippet = firstNode.html || '';
+          var failureSummary = firstNode.failureSummary || '';
+          var wcagTags = (violation.tags || []).filter(function (t) {
+            return t.indexOf('wcag') === 0 || t.indexOf('best-practice') === 0;
+          }).join(', ');
+
+          html += '<li class="issue-item">';
+          html += '<button class="issue-header" aria-expanded="false" aria-controls="issue-detail-' + index + '" id="issue-btn-' + index + '">';
+          html += '<span class="issue-badge issue-badge--' + violation.impact + '">' + violation.impact + '</span>';
+          html += '<span class="issue-title">' + escapeHtml(violation.help) + '</span>';
+          html += '<span class="issue-expand" aria-hidden="true">' + nodeCount + ' element' + (nodeCount !== 1 ? 's' : '') + '</span>';
+          html += '</button>';
+          html += '<div class="issue-details" id="issue-detail-' + index + '" role="region" aria-labelledby="issue-btn-' + index + '">';
+          html += '<dl>';
+          html += '<dt>Rule</dt><dd>' + escapeHtml(violation.id) + '</dd>';
+          html += '<dt>Impact</dt><dd>' + violation.impact + '</dd>';
+          html += '<dt>WCAG Criteria</dt><dd>' + (wcagTags || 'Best practice') + '</dd>';
+          html += '<dt>Description</dt><dd>' + escapeHtml(violation.description) + '</dd>';
+          if (htmlSnippet) {
+            html += '<dt>Affected Element</dt><dd><pre><code>' + escapeHtml(htmlSnippet) + '</code></pre></dd>';
+          }
+          if (failureSummary) {
+            html += '<dt>How to Fix</dt><dd>' + escapeHtml(failureSummary) + '</dd>';
+          }
+          if (violation.helpUrl) {
+            html += '<dt>Learn More</dt><dd><a href="' + escapeHtml(violation.helpUrl) + '" target="_blank" rel="noopener">Detailed documentation on ' + escapeHtml(violation.id) + ' rule</a></dd>';
+          }
+          if (nodeCount > 1) {
+            html += '<dt>Total Affected Elements</dt><dd>' + nodeCount + ' elements on the page have this issue</dd>';
+          }
+          html += '</dl>';
+          html += '</div>';
+          html += '</li>';
+        });
+
+        html += '</ul>';
+        resultsList.innerHTML = html;
+
+        // Add toggle behaviour to issue headers
+        var headers = resultsList.querySelectorAll('.issue-header');
+        headers.forEach(function (header) {
+          header.addEventListener('click', function () {
+            var expanded = header.getAttribute('aria-expanded') === 'true';
+            var detailId = header.getAttribute('aria-controls');
+            var detail = document.getElementById(detailId);
+            if (expanded) {
+              header.setAttribute('aria-expanded', 'false');
+              detail.classList.remove('open');
+            } else {
+              header.setAttribute('aria-expanded', 'true');
+              detail.classList.add('open');
+            }
+          });
+          header.addEventListener('keydown', function (e) {
+            if (e.key === ' ') {
+              e.preventDefault();
+              header.click();
+            }
+          });
+        });
+      }
+
+      // Show results and move focus
+      resultsSection.classList.add('visible');
+      resultsHeading.textContent = 'Results: ' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ' found, ' + passes.length + ' checks passed';
+      resultsHeading.focus();
+    }
+
+    // Run check
+    runBtn.addEventListener('click', function () {
+      var code = htmlInput.value.trim();
+      if (!code) {
+        setStatus('Please paste some HTML code first.');
+        htmlInput.focus();
+        return;
+      }
+
+      setStatus('Running accessibility analysis, please wait...');
+      runBtn.disabled = true;
+      resultsSection.classList.remove('visible');
+
+      var fullHtml = wrapSnippet(code);
+
+      // Write HTML to hidden iframe
+      var frameDoc = testFrame.contentDocument || testFrame.contentWindow.document;
+      frameDoc.open();
+      frameDoc.write(fullHtml);
+      frameDoc.close();
+
+      // Give iframe time to render, then run axe
+      setTimeout(function () {
+        try {
+          if (typeof testFrame.contentWindow.axe === 'undefined') {
+            // Inject axe-core into the iframe
+            var script = frameDoc.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
+            script.onload = function () {
+              testFrame.contentWindow.axe.run(frameDoc, {
+                runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
+              }).then(function (results) {
+                setStatus('Analysis complete.');
+                runBtn.disabled = false;
+                renderResults(results);
+              }).catch(function (err) {
+                setStatus('Error during analysis: ' + err.message);
+                runBtn.disabled = false;
+              });
+            };
+            script.onerror = function () {
+              // Fallback: run axe from parent window against iframe
+              window.axe.run(frameDoc, {
+                runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
+              }).then(function (results) {
+                setStatus('Analysis complete.');
+                runBtn.disabled = false;
+                renderResults(results);
+              }).catch(function (err) {
+                setStatus('Error: ' + err.message);
+                runBtn.disabled = false;
+              });
+            };
+            frameDoc.head.appendChild(script);
+          } else {
+            testFrame.contentWindow.axe.run(frameDoc, {
+              runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
+            }).then(function (results) {
+              setStatus('Analysis complete.');
+              runBtn.disabled = false;
+              renderResults(results);
+            }).catch(function (err) {
+              setStatus('Error: ' + err.message);
+              runBtn.disabled = false;
+            });
+          }
+        } catch (err) {
+          // Cross-origin fallback: run axe from parent context
+          window.axe.run(frameDoc, {
+            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
+          }).then(function (results) {
+            setStatus('Analysis complete.');
+            runBtn.disabled = false;
+            renderResults(results);
+          }).catch(function (err2) {
+            setStatus('Error: ' + err2.message);
+            runBtn.disabled = false;
+          });
+        }
+      }, 500);
+    });
+
+    // Clear
+    clearBtn.addEventListener('click', function () {
+      htmlInput.value = '';
+      resultsSection.classList.remove('visible');
+      resultsSummary.innerHTML = '';
+      resultsList.innerHTML = '';
+      setStatus('Cleared.');
+      htmlInput.focus();
+    });
+
+    // Enter key in textarea should not submit — let it add newline naturally
+    // Ctrl+Enter to run check
+    htmlInput.addEventListener('keydown', function (e) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        runBtn.click();
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free document accessibility checker by Akhilesh Malani. Upload PDF, Word, or PowerPoint files and get instant accessibility analysis with actionable recommendations.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="document accessibility checker, PDF accessibility, Word accessibility, PowerPoint accessibility, accessible documents, WCAG, free tool">
+  <link rel="canonical" href="https://akhileshmalani.com/doc-checker.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Free Document Accessibility Checker | Akhilesh Malani">
+  <meta property="og:description" content="Upload PDF, Word, or PowerPoint files and get instant accessibility analysis with actionable recommendations from a blind accessibility architect.">
+  <meta property="og:url" content="https://akhileshmalani.com/doc-checker.html">
+
+  <title>Document Accessibility Checker | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%231a5276'/%3E%3Ctext x='50' y='38' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%23ffffff'%3EA%3C/text%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='Georgia,serif' font-size='36' font-weight='bold' fill='%235dade2'%3EM%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .checker-page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .checker-page h1 { font-size: 2rem; color: var(--color-primary-dark); margin-bottom: 0.5rem; }
+    .checker-intro { color: var(--color-text-light); margin-bottom: 2rem; line-height: 1.7; }
+    .checker-nav { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .checker-nav a { color: var(--color-primary); font-weight: 600; text-decoration: none; padding: 0.5rem 1rem; border: 2px solid var(--color-primary); border-radius: var(--radius); }
+    .checker-nav a:hover, .checker-nav a:focus { background: var(--color-primary); color: #fff; }
+    .checker-nav a[aria-current="page"] { background: var(--color-primary); color: #fff; }
+
+    /* Upload area */
+    .upload-area {
+      border: 3px dashed var(--color-border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      background: var(--color-bg-alt);
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .upload-area.drag-over {
+      border-color: var(--color-primary);
+      background: rgba(26, 82, 118, 0.05);
+    }
+    .upload-area p { margin-bottom: 1rem; color: var(--color-text-light); font-size: 1.05rem; }
+    .upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .upload-label:hover, .upload-label:focus-within { background: var(--color-primary-dark); }
+    .upload-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .upload-input:focus + .upload-label {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 3px;
+    }
+    .file-info {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-bg-alt);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+    }
+    .file-info.visible { display: flex; }
+    .file-info-name { font-weight: 600; flex: 1; }
+    .file-info-size { color: var(--color-text-light); font-size: 0.9rem; }
+    .file-info-remove {
+      background: none;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      color: var(--color-text);
+      font-size: 0.85rem;
+    }
+    .file-info-remove:hover, .file-info-remove:focus { border-color: #c0392b; color: #c0392b; }
+
+    .checker-actions { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
+    .checker-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .checker-btn:hover, .checker-btn:focus { background: var(--color-primary-dark); }
+    .checker-btn:focus { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+    .checker-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .checker-status { font-size: 0.95rem; color: var(--color-text-light); }
+
+    /* Results */
+    .checker-results { display: none; }
+    .checker-results.visible { display: block; }
+    .results-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .summary-card {
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      text-align: center;
+      border: 2px solid var(--color-border);
+    }
+    .summary-card--fail { border-color: #c0392b; background: #fdedec; }
+    .summary-card--warn { border-color: #e67e22; background: #fdf2e9; }
+    .summary-card--pass { border-color: #27ae60; background: #eafaf1; }
+    .summary-card--info { border-color: #2980b9; background: #ebf5fb; }
+    [data-theme="dark"] .summary-card--fail { background: rgba(192, 57, 43, 0.15); }
+    [data-theme="dark"] .summary-card--warn { background: rgba(230, 126, 34, 0.15); }
+    [data-theme="dark"] .summary-card--pass { background: rgba(39, 174, 96, 0.15); }
+    [data-theme="dark"] .summary-card--info { background: rgba(41, 128, 185, 0.15); }
+    .summary-count { font-size: 2rem; font-weight: 700; display: block; }
+    .summary-label { font-size: 0.85rem; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 0.05em; }
+    .summary-card--fail .summary-count { color: #c0392b; }
+    .summary-card--warn .summary-count { color: #e67e22; }
+    .summary-card--pass .summary-count { color: #27ae60; }
+    .summary-card--info .summary-count { color: #2980b9; }
+
+    .check-category {
+      margin-bottom: 1.5rem;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .category-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-bg-alt);
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .category-header:hover { background: var(--color-border); }
+    .category-header:focus { outline: 3px solid var(--color-primary); outline-offset: -3px; }
+    .category-expand { margin-left: auto; font-size: 0.85rem; color: var(--color-text-light); }
+    .category-body { display: none; padding: 0; border-top: 1px solid var(--color-border); }
+    .category-body.open { display: block; }
+
+    .check-item {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--color-border);
+      align-items: flex-start;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .check-icon--pass { background: #27ae60; }
+    .check-icon--fail { background: #c0392b; }
+    .check-icon--warn { background: #e67e22; }
+    .check-icon--info { background: #2980b9; }
+    .check-text { flex: 1; }
+    .check-text strong { display: block; margin-bottom: 0.25rem; }
+    .check-text p { margin: 0; font-size: 0.9rem; color: var(--color-text-light); line-height: 1.5; }
+
+    .results-cta {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--color-bg-alt);
+      border-radius: var(--radius);
+      border: 2px solid var(--color-primary);
+      text-align: center;
+    }
+    .results-cta p { margin-bottom: 0.75rem; font-size: 1.05rem; }
+    .results-cta a { color: var(--color-primary); font-weight: 700; }
+
+    .supported-formats {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--color-text-light);
+    }
+    .supported-formats strong { color: var(--color-text); }
+
+    @media (max-width: 600px) {
+      .checker-page h1 { font-size: 1.5rem; }
+      .results-summary { grid-template-columns: repeat(2, 1fr); }
+      .upload-area { padding: 1.5rem 1rem; }
+    }
+  </style>
+  <!-- Prevent flash of wrong theme/preferences -->
+  <script>
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
+  </script>
+  <!-- PDF.js for parsing PDFs client-side -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- JSZip for parsing DOCX/PPTX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <!-- Skip Navigation -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header / Navigation -->
+  <header role="banner">
+    <nav aria-label="Primary navigation" class="navbar">
+      <div class="container nav-container">
+        <a href="index.html" class="logo" aria-label="Akhilesh Malani - Home">
+          <span aria-hidden="true">AM</span>
+          <span class="sr-only">Akhilesh Malani</span>
+        </a>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">
+            <svg id="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ol>
+        <li><a href="index.html">Home</a></li>
+        <li><span aria-current="page">Document Accessibility Checker</span></li>
+      </ol>
+    </nav>
+
+    <div class="checker-page">
+      <h1>Document Accessibility Checker</h1>
+      <p class="checker-intro">Upload a PDF, Word (.docx), or PowerPoint (.pptx) file and I will analyse it for common accessibility issues. This tool runs entirely in your browser — your documents are never uploaded to any server. Your files stay private.</p>
+
+      <nav aria-label="Checker tools" class="checker-nav">
+        <a href="checker.html">Web Checker</a>
+        <a href="doc-checker.html" aria-current="page">Document Checker</a>
+      </nav>
+
+      <!-- Upload Section -->
+      <div class="upload-area" id="upload-area" role="region" aria-label="File upload">
+        <p>Drag and drop a file here, or use the button below</p>
+        <input type="file" id="file-input" class="upload-input" accept=".pdf,.docx,.pptx" aria-label="Choose a PDF, Word, or PowerPoint file to check">
+        <label for="file-input" class="upload-label">Choose File</label>
+        <p class="supported-formats"><strong>Supported formats:</strong> PDF (.pdf), Word (.docx), PowerPoint (.pptx)</p>
+      </div>
+
+      <!-- File info -->
+      <div class="file-info" id="file-info" role="status">
+        <span class="file-info-name" id="file-name"></span>
+        <span class="file-info-size" id="file-size"></span>
+        <button type="button" class="file-info-remove" id="file-remove" aria-label="Remove selected file">Remove</button>
+      </div>
+
+      <div class="checker-actions">
+        <button type="button" class="checker-btn" id="run-doc-check" disabled aria-describedby="doc-status">
+          Run Document Check
+        </button>
+        <span class="checker-status" id="doc-status" role="status" aria-live="polite"></span>
+      </div>
+
+      <!-- Results Section -->
+      <section class="checker-results" id="doc-results" aria-labelledby="doc-results-heading">
+        <h2 id="doc-results-heading" tabindex="-1">Results</h2>
+        <div class="results-summary" id="doc-summary" role="group" aria-label="Check summary"></div>
+        <div id="doc-checks"></div>
+
+        <div class="results-cta">
+          <p>Need help making your documents accessible? I have 16+ years of hands-on experience.</p>
+          <a href="index.html#contact">Get in touch with me</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Built with 16+ years of lived accessibility experience. Your documents never leave your browser.</p>
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var fileInput = document.getElementById('file-input');
+    var uploadArea = document.getElementById('upload-area');
+    var fileInfo = document.getElementById('file-info');
+    var fileName = document.getElementById('file-name');
+    var fileSize = document.getElementById('file-size');
+    var fileRemove = document.getElementById('file-remove');
+    var runBtn = document.getElementById('run-doc-check');
+    var statusEl = document.getElementById('doc-status');
+    var resultsSection = document.getElementById('doc-results');
+    var docSummary = document.getElementById('doc-summary');
+    var docChecks = document.getElementById('doc-checks');
+    var resultsHeading = document.getElementById('doc-results-heading');
+
+    var selectedFile = null;
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showFile(file) {
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = formatSize(file.size);
+      fileInfo.classList.add('visible');
+      uploadArea.style.display = 'none';
+      runBtn.disabled = false;
+      setStatus('File selected: ' + file.name + '. Press Run Document Check to begin.');
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      fileInfo.classList.remove('visible');
+      uploadArea.style.display = '';
+      runBtn.disabled = true;
+      resultsSection.classList.remove('visible');
+      setStatus('File removed.');
+      fileInput.focus();
+    }
+
+    fileInput.addEventListener('change', function () {
+      if (fileInput.files && fileInput.files[0]) {
+        showFile(fileInput.files[0]);
+      }
+    });
+
+    fileRemove.addEventListener('click', clearFile);
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      uploadArea.classList.add('drag-over');
+    });
+    uploadArea.addEventListener('dragleave', function () {
+      uploadArea.classList.remove('drag-over');
+    });
+    uploadArea.addEventListener('drop', function (e) {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        var file = e.dataTransfer.files[0];
+        var ext = file.name.toLowerCase().split('.').pop();
+        if (['pdf', 'docx', 'pptx'].indexOf(ext) === -1) {
+          setStatus('Unsupported file type. Please upload a PDF, Word, or PowerPoint file.');
+          return;
+        }
+        showFile(file);
+      }
+    });
+
+    // ============================
+    // PDF Analysis
+    // ============================
+    function analysePDF(file) {
+      return new Promise(function (resolve) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var typedarray = new Uint8Array(reader.result);
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+          pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+            var checks = [];
+            var totalPages = pdf.numPages;
+            var textPages = [];
+            var hasImages = false;
+            var totalChars = 0;
+
+            var pagePromises = [];
+            for (var i = 1; i <= totalPages; i++) {
+              pagePromises.push(pdf.getPage(i).then(function (page) {
+                return page.getTextContent().then(function (textContent) {
+                  var pageText = textContent.items.map(function (item) { return item.str; }).join(' ');
+                  totalChars += pageText.trim().length;
+                  textPages.push(pageText);
+                  return page.getOperatorList();
+                }).then(function (ops) {
+                  ops.fnArray.forEach(function (fn) {
+                    if (fn === pdfjsLib.OPS.paintImageXObject || fn === pdfjsLib.OPS.paintJpegXObject) {
+                      hasImages = true;
+                    }
+                  });
+                });
+              }));
+            }
+
+            Promise.all(pagePromises).then(function () {
+              var fullText = textPages.join(' ');
+
+              // Check 1: Document has extractable text (not a scanned image)
+              if (totalChars < 50) {
+                checks.push({ status: 'fail', category: 'Structure', title: 'No extractable text found', description: 'This PDF appears to be a scanned image without OCR. Screen readers cannot read it. Run OCR (Optical Character Recognition) using Adobe Acrobat Pro or a free tool like OCRmyPDF to add a text layer.' });
+              } else {
+                checks.push({ status: 'pass', category: 'Structure', title: 'Text is extractable', description: 'The document contains real text that screen readers can read. Total characters: ' + totalChars });
+              }
+
+              // Check 2: Document title in metadata
+              pdf.getMetadata().then(function (meta) {
+                var info = meta.info || {};
+                if (info.Title && info.Title.trim().length > 0) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Document title is set', description: 'Title: "' + info.Title + '". Screen readers announce this when opening the file.' });
+                } else {
+                  checks.push({ status: 'fail', category: 'Metadata', title: 'Document title is missing', description: 'Without a title, screen readers announce the filename instead (e.g., "doc_final_v3.pdf"). Set the title in File > Properties in your PDF editor.' });
+                }
+
+                // Check 3: Language
+                if (info.Language || (meta.metadata && meta.metadata.get('dc:language'))) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Document language is set', description: 'The language is specified, helping screen readers use the correct pronunciation.' });
+                } else {
+                  checks.push({ status: 'warn', category: 'Metadata', title: 'Document language may not be set', description: 'If the language is not specified, screen readers may mispronounce words. Set it in File > Properties > Advanced tab in Adobe Acrobat.' });
+                }
+
+                // Check 4: Author
+                if (info.Author && info.Author.trim().length > 0) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Author is specified', description: 'Author: "' + info.Author + '"' });
+                } else {
+                  checks.push({ status: 'info', category: 'Metadata', title: 'Author is not specified', description: 'Adding an author helps identify the document source. Set it in File > Properties.' });
+                }
+
+                // Check 5: Page count
+                checks.push({ status: 'info', category: 'Structure', title: 'Document has ' + totalPages + ' page' + (totalPages !== 1 ? 's' : ''), description: 'Documents longer than 5 pages should have bookmarks or a table of contents for navigation.' });
+                if (totalPages > 5) {
+                  checks.push({ status: 'warn', category: 'Navigation', title: 'Long document — consider adding bookmarks', description: 'With ' + totalPages + ' pages, screen reader users need bookmarks (PDF) or a table of contents to navigate efficiently. Without them, they must read every page sequentially.' });
+                }
+
+                // Check 6: Images detected
+                if (hasImages) {
+                  checks.push({ status: 'warn', category: 'Images', title: 'Images detected — verify alt text', description: 'This document contains images. Each informative image needs alternative text. Decorative images should be marked as artifacts. This tool cannot verify alt text in PDFs — use Adobe Acrobat Pro\'s Accessibility Checker for a thorough check.' });
+                } else {
+                  checks.push({ status: 'pass', category: 'Images', title: 'No images detected', description: 'No images found, so no alternative text is needed.' });
+                }
+
+                // Check 7: Heading structure (heuristic)
+                var headingPatterns = fullText.match(/^[A-Z][A-Za-z\s]{3,60}$/gm);
+                checks.push({ status: 'info', category: 'Structure', title: 'Heading structure requires manual verification', description: 'Proper heading structure (H1, H2, H3) is critical for screen reader navigation. This tool cannot detect PDF tags — use Adobe Acrobat Pro\'s Accessibility Checker or PAC (PDF Accessibility Checker) to verify tags and heading structure.' });
+
+                // Check 8: Tables (heuristic)
+                if (fullText.indexOf('\t') !== -1 || /\d+\s{2,}\d+/.test(fullText)) {
+                  checks.push({ status: 'warn', category: 'Tables', title: 'Possible table content detected', description: 'This document may contain tabular data. Ensure tables are properly tagged with header cells marked as TH elements. Without proper table markup, screen readers cannot announce row and column headers.' });
+                }
+
+                // Check 9: Links (heuristic)
+                var urlPattern = /https?:\/\/[^\s]+/g;
+                var urls = fullText.match(urlPattern);
+                if (urls && urls.length > 0) {
+                  checks.push({ status: 'info', category: 'Links', title: urls.length + ' URL' + (urls.length !== 1 ? 's' : '') + ' found in text', description: 'Ensure these are actual hyperlinks (not just plain text URLs) so screen reader users can activate them. Also ensure link text is descriptive — avoid raw URLs as link text.' });
+                }
+
+                // Check 10: Reading order
+                checks.push({ status: 'warn', category: 'Structure', title: 'Reading order requires manual verification', description: 'PDF reading order may not match the visual layout. Multi-column documents are especially problematic. Use Adobe Acrobat Pro\'s Reading Order tool or PAC to verify.' });
+
+                // Check 11: Colour contrast
+                checks.push({ status: 'info', category: 'Visual', title: 'Colour contrast requires manual verification', description: 'Ensure all text meets WCAG contrast requirements: 4.5:1 for normal text, 3:1 for large text. Use the Colour Contrast Analyser tool to check.' });
+
+                // Check 12: Form fields
+                if (fullText.indexOf('Date:') !== -1 || fullText.indexOf('Name:') !== -1 || fullText.indexOf('Signature') !== -1 || fullText.indexOf('Email:') !== -1) {
+                  checks.push({ status: 'warn', category: 'Forms', title: 'Possible form fields detected', description: 'If this document contains fillable fields, ensure each field has a programmatic label and a logical tab order. Screen reader users need labels to know what each field expects.' });
+                }
+
+                resolve(checks);
+              });
+            });
+          }).catch(function (err) {
+            resolve([{ status: 'fail', category: 'Error', title: 'Could not parse PDF', description: 'Error: ' + err.message + '. The file may be corrupted or password-protected.' }]);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // ============================
+    // DOCX Analysis
+    // ============================
+    function analyseDOCX(file) {
+      return new Promise(function (resolve) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          JSZip.loadAsync(reader.result).then(function (zip) {
+            var checks = [];
+            var promises = [];
+
+            // Parse core.xml for metadata
+            var coreFile = zip.file('docProps/core.xml');
+            if (coreFile) {
+              promises.push(coreFile.async('text').then(function (xml) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(xml, 'text/xml');
+
+                var title = doc.querySelector('title');
+                if (title && title.textContent.trim()) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Document title is set', description: 'Title: "' + title.textContent.trim() + '"' });
+                } else {
+                  checks.push({ status: 'fail', category: 'Metadata', title: 'Document title is missing', description: 'Go to File > Properties > Summary and add a descriptive title. Screen readers announce this when opening the file.' });
+                }
+
+                var creator = doc.querySelector('creator');
+                if (creator && creator.textContent.trim()) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Author is specified', description: 'Author: "' + creator.textContent.trim() + '"' });
+                } else {
+                  checks.push({ status: 'info', category: 'Metadata', title: 'Author is not specified', description: 'Adding an author helps identify the document source.' });
+                }
+
+                var language = doc.querySelector('language');
+                if (language && language.textContent.trim()) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Document language is set', description: 'Language: ' + language.textContent.trim() });
+                } else {
+                  checks.push({ status: 'warn', category: 'Metadata', title: 'Document language may not be set', description: 'Set the language in File > Options > Language. Screen readers need this for correct pronunciation.' });
+                }
+              }));
+            } else {
+              checks.push({ status: 'fail', category: 'Metadata', title: 'No metadata found', description: 'The document is missing core properties. Add title, author, and language in File > Properties.' });
+            }
+
+            // Parse document.xml for content structure
+            var docFile = zip.file('word/document.xml');
+            if (docFile) {
+              promises.push(docFile.async('text').then(function (xml) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(xml, 'text/xml');
+                var ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+
+                // Check headings
+                var styles = doc.querySelectorAll('pStyle');
+                var headings = [];
+                styles.forEach(function (s) {
+                  var val = s.getAttribute('w:val') || s.getAttribute('val') || '';
+                  if (/^Heading/i.test(val) || /^heading/i.test(val)) {
+                    headings.push(val);
+                  }
+                });
+                if (headings.length > 0) {
+                  checks.push({ status: 'pass', category: 'Structure', title: headings.length + ' heading' + (headings.length !== 1 ? 's' : '') + ' found', description: 'Headings found: ' + headings.join(', ') + '. Verify they follow a logical hierarchy (Heading 1 > Heading 2 > Heading 3).' });
+                } else {
+                  checks.push({ status: 'fail', category: 'Structure', title: 'No headings found', description: 'Use built-in Heading styles (Heading 1, 2, 3) instead of just making text bold. Screen readers use headings to navigate — without them, users must read every word to find what they need.' });
+                }
+
+                // Check lists
+                var lists = doc.querySelectorAll('numId');
+                if (lists.length > 0) {
+                  checks.push({ status: 'pass', category: 'Structure', title: 'Lists are using built-in formatting', description: 'Found ' + lists.length + ' list reference(s). Using Word\'s built-in list tools means screen readers can announce "list of X items".' });
+                }
+
+                // Check tables
+                var tables = doc.querySelectorAll('tbl');
+                if (tables.length > 0) {
+                  checks.push({ status: 'warn', category: 'Tables', title: tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' found — verify header rows', description: 'Ensure each table has a designated header row (Table Properties > Row > Repeat as header row). Never use merged cells — they break screen reader navigation entirely.' });
+                }
+
+                // Check images
+                var drawings = doc.querySelectorAll('drawing');
+                var images = doc.querySelectorAll('imagedata');
+                var imgCount = drawings.length + images.length;
+                if (imgCount > 0) {
+                  checks.push({ status: 'warn', category: 'Images', title: imgCount + ' image' + (imgCount !== 1 ? 's' : '') + ' found — verify alt text', description: 'Right-click each image > Edit Alt Text. Provide a meaningful description for informative images. Mark decorative images as decorative.' });
+                } else {
+                  checks.push({ status: 'pass', category: 'Images', title: 'No images detected', description: 'No images found, so no alternative text is needed.' });
+                }
+
+                // Check for text content
+                var paragraphs = doc.querySelectorAll('p');
+                checks.push({ status: 'info', category: 'Structure', title: paragraphs.length + ' paragraph' + (paragraphs.length !== 1 ? 's' : '') + ' found', description: 'Document has content spread across ' + paragraphs.length + ' paragraphs.' });
+
+                // Hyperlinks
+                var hyperlinks = doc.querySelectorAll('hyperlink');
+                if (hyperlinks.length > 0) {
+                  checks.push({ status: 'info', category: 'Links', title: hyperlinks.length + ' hyperlink' + (hyperlinks.length !== 1 ? 's' : '') + ' found', description: 'Ensure all links have descriptive text. Avoid "click here" or raw URLs as link text. Screen reader users often navigate by listing all links — descriptive text is essential.' });
+                }
+              }));
+            }
+
+            // Check for alt text in relationships
+            var relsFile = zip.file('word/_rels/document.xml.rels');
+            if (relsFile) {
+              promises.push(relsFile.async('text').then(function (xml) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(xml, 'text/xml');
+                var images = [];
+                doc.querySelectorAll('Relationship').forEach(function (rel) {
+                  var type = rel.getAttribute('Type') || '';
+                  if (type.indexOf('image') !== -1) images.push(rel.getAttribute('Target'));
+                });
+                if (images.length > 0) {
+                  checks.push({ status: 'info', category: 'Images', title: images.length + ' image file' + (images.length !== 1 ? 's' : '') + ' embedded', description: 'Image files: ' + images.join(', ') });
+                }
+              }));
+            }
+
+            // General recommendations
+            checks.push({ status: 'info', category: 'General', title: 'Run Word\'s built-in Accessibility Checker', description: 'Go to Review > Check Accessibility in Microsoft Word for a comprehensive check. It catches issues this tool cannot detect, such as missing alt text on specific images and reading order problems.' });
+
+            Promise.all(promises).then(function () {
+              resolve(checks);
+            });
+          }).catch(function (err) {
+            resolve([{ status: 'fail', category: 'Error', title: 'Could not parse Word document', description: 'Error: ' + err.message + '. Ensure this is a valid .docx file (not .doc).' }]);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // ============================
+    // PPTX Analysis
+    // ============================
+    function analysePPTX(file) {
+      return new Promise(function (resolve) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          JSZip.loadAsync(reader.result).then(function (zip) {
+            var checks = [];
+            var promises = [];
+
+            // Metadata
+            var coreFile = zip.file('docProps/core.xml');
+            if (coreFile) {
+              promises.push(coreFile.async('text').then(function (xml) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(xml, 'text/xml');
+
+                var title = doc.querySelector('title');
+                if (title && title.textContent.trim()) {
+                  checks.push({ status: 'pass', category: 'Metadata', title: 'Presentation title is set', description: 'Title: "' + title.textContent.trim() + '"' });
+                } else {
+                  checks.push({ status: 'fail', category: 'Metadata', title: 'Presentation title is missing', description: 'Go to File > Properties and add a descriptive title.' });
+                }
+              }));
+            }
+
+            // Count slides
+            var slideFiles = Object.keys(zip.files).filter(function (name) {
+              return /^ppt\/slides\/slide\d+\.xml$/.test(name);
+            });
+            var slideCount = slideFiles.length;
+            checks.push({ status: 'info', category: 'Structure', title: slideCount + ' slide' + (slideCount !== 1 ? 's' : '') + ' found', description: 'Each slide should have a unique, descriptive title for screen reader navigation.' });
+
+            // Analyse each slide
+            var slidesWithoutTitles = [];
+            var totalImages = 0;
+            var slidePromises = slideFiles.map(function (slidePath, idx) {
+              return zip.file(slidePath).async('text').then(function (xml) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(xml, 'text/xml');
+
+                // Check for slide title
+                var hasTitle = false;
+                var spElements = doc.querySelectorAll('sp');
+                spElements.forEach(function (sp) {
+                  var nvSpPr = sp.querySelector('nvSpPr');
+                  if (nvSpPr) {
+                    var nvPr = nvSpPr.querySelector('nvPr');
+                    var ph = nvPr ? nvPr.querySelector('ph') : null;
+                    if (ph) {
+                      var phType = ph.getAttribute('type') || '';
+                      if (phType === 'title' || phType === 'ctrTitle') {
+                        var textBody = sp.querySelector('txBody');
+                        if (textBody && textBody.textContent.trim()) {
+                          hasTitle = true;
+                        }
+                      }
+                    }
+                  }
+                });
+                if (!hasTitle) {
+                  slidesWithoutTitles.push(idx + 1);
+                }
+
+                // Check for images
+                var pics = doc.querySelectorAll('pic');
+                totalImages += pics.length;
+              });
+            });
+
+            promises.push(Promise.all(slidePromises).then(function () {
+              if (slidesWithoutTitles.length === 0) {
+                checks.push({ status: 'pass', category: 'Slide Titles', title: 'All slides have titles', description: 'Every slide has a title, which screen readers use for slide navigation.' });
+              } else if (slidesWithoutTitles.length <= 3) {
+                checks.push({ status: 'fail', category: 'Slide Titles', title: slidesWithoutTitles.length + ' slide' + (slidesWithoutTitles.length !== 1 ? 's' : '') + ' missing titles', description: 'Slides without titles: ' + slidesWithoutTitles.join(', ') + '. Screen readers list slide titles for navigation. Without a title, users hear "Slide ' + slidesWithoutTitles[0] + '" with no context.' });
+              } else {
+                checks.push({ status: 'fail', category: 'Slide Titles', title: slidesWithoutTitles.length + ' of ' + slideCount + ' slides are missing titles', description: 'That is ' + Math.round(slidesWithoutTitles.length / slideCount * 100) + '% of your slides without titles. This severely impacts screen reader navigation. Add unique, descriptive titles to every slide using the Title placeholder.' });
+              }
+
+              if (totalImages > 0) {
+                checks.push({ status: 'warn', category: 'Images', title: totalImages + ' image' + (totalImages !== 1 ? 's' : '') + ' found — verify alt text', description: 'Right-click each image > Edit Alt Text. Provide meaningful descriptions. Mark decorative images (logos, background graphics) as decorative.' });
+              } else {
+                checks.push({ status: 'pass', category: 'Images', title: 'No images detected', description: 'No images found in the slides.' });
+              }
+            }));
+
+            // Check reading order
+            checks.push({ status: 'warn', category: 'Reading Order', title: 'Verify reading order on each slide', description: 'In PowerPoint, go to Home > Arrange > Selection Pane. Items are read bottom-to-top. The first item a screen reader reads should be at the bottom of the Selection Pane list.' });
+
+            // General recommendations
+            checks.push({ status: 'info', category: 'General', title: 'Run PowerPoint\'s built-in Accessibility Checker', description: 'Go to Review > Check Accessibility for a comprehensive check including alt text verification and reading order suggestions.' });
+
+            checks.push({ status: 'info', category: 'General', title: 'Use built-in slide layouts', description: 'Always use built-in slide layouts rather than placing text boxes randomly. Built-in layouts have a defined, predictable reading order.' });
+
+            Promise.all(promises).then(function () {
+              resolve(checks);
+            });
+          }).catch(function (err) {
+            resolve([{ status: 'fail', category: 'Error', title: 'Could not parse PowerPoint file', description: 'Error: ' + err.message + '. Ensure this is a valid .pptx file (not .ppt).' }]);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // ============================
+    // Render Results
+    // ============================
+    function renderDocResults(checks) {
+      var counts = { pass: 0, fail: 0, warn: 0, info: 0 };
+      checks.forEach(function (c) { counts[c.status]++; });
+
+      docSummary.innerHTML =
+        '<div class="summary-card summary-card--fail" role="group" aria-label="Issues found">' +
+        '  <span class="summary-count">' + counts.fail + '</span>' +
+        '  <span class="summary-label">Issues</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--warn" role="group" aria-label="Warnings">' +
+        '  <span class="summary-count">' + counts.warn + '</span>' +
+        '  <span class="summary-label">Warnings</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--pass" role="group" aria-label="Checks passed">' +
+        '  <span class="summary-count">' + counts.pass + '</span>' +
+        '  <span class="summary-label">Passed</span>' +
+        '</div>' +
+        '<div class="summary-card summary-card--info" role="group" aria-label="Information">' +
+        '  <span class="summary-count">' + counts.info + '</span>' +
+        '  <span class="summary-label">Info</span>' +
+        '</div>';
+
+      // Group checks by category
+      var categories = {};
+      checks.forEach(function (c) {
+        if (!categories[c.category]) categories[c.category] = [];
+        categories[c.category].push(c);
+      });
+
+      var html = '';
+      var catIndex = 0;
+      Object.keys(categories).forEach(function (cat) {
+        var items = categories[cat];
+        var failCount = items.filter(function (i) { return i.status === 'fail'; }).length;
+        var warnCount = items.filter(function (i) { return i.status === 'warn'; }).length;
+
+        html += '<div class="check-category">';
+        html += '<button class="category-header" aria-expanded="false" aria-controls="cat-body-' + catIndex + '" id="cat-btn-' + catIndex + '">';
+        html += '<span>' + cat + '</span>';
+        if (failCount > 0) html += '<span class="issue-badge issue-badge--critical">' + failCount + ' issue' + (failCount !== 1 ? 's' : '') + '</span>';
+        if (warnCount > 0) html += '<span class="issue-badge issue-badge--moderate">' + warnCount + ' warning' + (warnCount !== 1 ? 's' : '') + '</span>';
+        html += '<span class="category-expand" aria-hidden="true">' + items.length + ' check' + (items.length !== 1 ? 's' : '') + '</span>';
+        html += '</button>';
+        html += '<div class="category-body" id="cat-body-' + catIndex + '" role="region" aria-labelledby="cat-btn-' + catIndex + '">';
+
+        items.forEach(function (item) {
+          var iconLabel = item.status === 'pass' ? 'Passed' : item.status === 'fail' ? 'Failed' : item.status === 'warn' ? 'Warning' : 'Info';
+          var iconSymbol = item.status === 'pass' ? '✓' : item.status === 'fail' ? '✗' : item.status === 'warn' ? '!' : 'i';
+          html += '<div class="check-item">';
+          html += '<span class="check-icon check-icon--' + item.status + '" aria-label="' + iconLabel + '">' + iconSymbol + '</span>';
+          html += '<div class="check-text">';
+          html += '<strong>' + item.title + '</strong>';
+          html += '<p>' + item.description + '</p>';
+          html += '</div></div>';
+        });
+
+        html += '</div></div>';
+        catIndex++;
+      });
+
+      docChecks.innerHTML = html;
+
+      // Add toggle behaviour
+      docChecks.querySelectorAll('.category-header').forEach(function (header) {
+        header.addEventListener('click', function () {
+          var expanded = header.getAttribute('aria-expanded') === 'true';
+          var bodyId = header.getAttribute('aria-controls');
+          var body = document.getElementById(bodyId);
+          if (expanded) {
+            header.setAttribute('aria-expanded', 'false');
+            body.classList.remove('open');
+          } else {
+            header.setAttribute('aria-expanded', 'true');
+            body.classList.add('open');
+          }
+        });
+        header.addEventListener('keydown', function (e) {
+          if (e.key === ' ') {
+            e.preventDefault();
+            header.click();
+          }
+        });
+      });
+
+      // Expand categories with failures by default
+      docChecks.querySelectorAll('.category-header').forEach(function (header) {
+        var badge = header.querySelector('.issue-badge--critical');
+        if (badge) {
+          header.setAttribute('aria-expanded', 'true');
+          var bodyId = header.getAttribute('aria-controls');
+          document.getElementById(bodyId).classList.add('open');
+        }
+      });
+
+      resultsSection.classList.add('visible');
+      resultsHeading.textContent = 'Results: ' + counts.fail + ' issue' + (counts.fail !== 1 ? 's' : '') + ', ' + counts.warn + ' warning' + (counts.warn !== 1 ? 's' : '') + ', ' + counts.pass + ' passed';
+      resultsHeading.focus();
+    }
+
+    // ============================
+    // Run Check
+    // ============================
+    runBtn.addEventListener('click', function () {
+      if (!selectedFile) return;
+
+      var ext = selectedFile.name.toLowerCase().split('.').pop();
+      setStatus('Analysing your document, please wait...');
+      runBtn.disabled = true;
+      resultsSection.classList.remove('visible');
+
+      var analyser;
+      if (ext === 'pdf') {
+        analyser = analysePDF(selectedFile);
+      } else if (ext === 'docx') {
+        analyser = analyseDOCX(selectedFile);
+      } else if (ext === 'pptx') {
+        analyser = analysePPTX(selectedFile);
+      } else {
+        setStatus('Unsupported file type: .' + ext);
+        runBtn.disabled = false;
+        return;
+      }
+
+      analyser.then(function (checks) {
+        setStatus('Analysis complete.');
+        runBtn.disabled = false;
+        renderDocResults(checks);
+      }).catch(function (err) {
+        setStatus('Error analysing document: ' + err.message);
+        runBtn.disabled = false;
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
