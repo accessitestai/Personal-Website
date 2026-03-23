@@ -2,4 +2,8 @@
   command = "node build.js"
   publish = "."
 
-# No special redirects needed — admin/index.html is served directly
+# Redirect old admin.html to renamed library-admin page
+[[redirects]]
+  from = "/admin.html"
+  to = "/library-admin.html"
+  status = 301
