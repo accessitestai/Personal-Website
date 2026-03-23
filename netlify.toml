@@ -2,9 +2,4 @@
   command = "node build.js"
   publish = "."
 
-# Redirect for Decap CMS OAuth
-[[redirects]]
-  from = "/admin/*"
-  to = "/admin/index.html"
-  status = 200
-  conditions = {Role = ["admin"]}
+# No special redirects needed — admin/index.html is served directly
