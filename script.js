@@ -1038,77 +1038,98 @@
   menu.setAttribute('role', 'menu');
   menu.setAttribute('aria-label', 'Select a language');
 
-  // Build menu items
   var menuItems = []; // Track all focusable menu items
 
-  // "Restore English" item (only if translation is active)
-  if (activeLang) {
-    var restoreItem = document.createElement('button');
-    restoreItem.type = 'button';
-    restoreItem.className = 'translate-menu-item translate-menu-item--restore';
-    restoreItem.setAttribute('role', 'menuitem');
-    restoreItem.setAttribute('data-lang', '');
-    restoreItem.textContent = 'English (Restore original)';
-    menu.appendChild(restoreItem);
-    menuItems.push(restoreItem);
+  // Build (or rebuild) all menu items
+  function buildMenuItems() {
+    menu.innerHTML = '';
+    menuItems = [];
 
+    // English is ALWAYS the first item
+    var englishItem = document.createElement('button');
+    englishItem.type = 'button';
+    englishItem.className = 'translate-menu-item';
+    englishItem.setAttribute('role', 'menuitem');
+    englishItem.setAttribute('data-lang', '');
+    if (!activeLang) {
+      englishItem.textContent = 'English (Current)';
+      englishItem.classList.add('translate-menu-item--active');
+      englishItem.setAttribute('aria-current', 'true');
+    } else {
+      englishItem.textContent = 'English (Restore original)';
+      englishItem.classList.add('translate-menu-item--restore');
+    }
+    menu.appendChild(englishItem);
+    menuItems.push(englishItem);
+
+    // Separator after English
     var sep0 = document.createElement('div');
     sep0.className = 'translate-menu-separator';
     sep0.setAttribute('role', 'separator');
     menu.appendChild(sep0);
+
+    // Indian Languages group
+    var groupLabel1 = document.createElement('div');
+    groupLabel1.className = 'translate-menu-group';
+    groupLabel1.setAttribute('role', 'presentation');
+    groupLabel1.id = 'translate-group-indian';
+    groupLabel1.textContent = 'Indian Languages';
+    menu.appendChild(groupLabel1);
+
+    indianLanguages.forEach(function (lang) {
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'translate-menu-item';
+      item.setAttribute('role', 'menuitem');
+      item.setAttribute('data-lang', lang.code);
+      item.textContent = lang.label;
+      if (lang.code === activeLang) {
+        item.classList.add('translate-menu-item--active');
+        item.setAttribute('aria-current', 'true');
+      }
+      menu.appendChild(item);
+      menuItems.push(item);
+    });
+
+    // Separator
+    var sep1 = document.createElement('div');
+    sep1.className = 'translate-menu-separator';
+    sep1.setAttribute('role', 'separator');
+    menu.appendChild(sep1);
+
+    // International Languages group
+    var groupLabel2 = document.createElement('div');
+    groupLabel2.className = 'translate-menu-group';
+    groupLabel2.setAttribute('role', 'presentation');
+    groupLabel2.id = 'translate-group-intl';
+    groupLabel2.textContent = 'International Languages';
+    menu.appendChild(groupLabel2);
+
+    internationalLanguages.forEach(function (lang) {
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'translate-menu-item';
+      item.setAttribute('role', 'menuitem');
+      item.setAttribute('data-lang', lang.code);
+      item.textContent = lang.label;
+      if (lang.code === activeLang) {
+        item.classList.add('translate-menu-item--active');
+        item.setAttribute('aria-current', 'true');
+      }
+      menu.appendChild(item);
+      menuItems.push(item);
+    });
+
+    // Attach click handlers to all items
+    menuItems.forEach(function (item) {
+      item.addEventListener('click', function () {
+        selectLanguage(item.getAttribute('data-lang'));
+      });
+    });
   }
 
-  // Indian Languages group
-  var groupLabel1 = document.createElement('div');
-  groupLabel1.className = 'translate-menu-group';
-  groupLabel1.setAttribute('role', 'presentation');
-  groupLabel1.id = 'translate-group-indian';
-  groupLabel1.textContent = 'Indian Languages';
-  menu.appendChild(groupLabel1);
-
-  indianLanguages.forEach(function (lang) {
-    var item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'translate-menu-item';
-    item.setAttribute('role', 'menuitem');
-    item.setAttribute('data-lang', lang.code);
-    item.textContent = lang.label;
-    if (lang.code === activeLang) {
-      item.classList.add('translate-menu-item--active');
-      item.setAttribute('aria-current', 'true');
-    }
-    menu.appendChild(item);
-    menuItems.push(item);
-  });
-
-  // Separator
-  var sep1 = document.createElement('div');
-  sep1.className = 'translate-menu-separator';
-  sep1.setAttribute('role', 'separator');
-  menu.appendChild(sep1);
-
-  // International Languages group
-  var groupLabel2 = document.createElement('div');
-  groupLabel2.className = 'translate-menu-group';
-  groupLabel2.setAttribute('role', 'presentation');
-  groupLabel2.id = 'translate-group-intl';
-  groupLabel2.textContent = 'International Languages';
-  menu.appendChild(groupLabel2);
-
-  internationalLanguages.forEach(function (lang) {
-    var item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'translate-menu-item';
-    item.setAttribute('role', 'menuitem');
-    item.setAttribute('data-lang', lang.code);
-    item.textContent = lang.label;
-    if (lang.code === activeLang) {
-      item.classList.add('translate-menu-item--active');
-      item.setAttribute('aria-current', 'true');
-    }
-    menu.appendChild(item);
-    menuItems.push(item);
-  });
+  // Build initial menu
+  buildMenuItems();
 
   wrapper.appendChild(btn);
   wrapper.appendChild(menu);
@@ -1225,15 +1246,6 @@
     }
   });
 
-  // =============================================
-  // Menu item click events
-  // =============================================
-  menuItems.forEach(function (item) {
-    item.addEventListener('click', function () {
-      selectLanguage(item.getAttribute('data-lang'));
-    });
-  });
-
   // Close menu on outside click
   document.addEventListener('click', function (e) {
     if (isOpen && !wrapper.contains(e.target)) {
@@ -1277,6 +1289,24 @@
   };
   document.head.appendChild(gtScript);
 
+  // Update button text and rebuild menu to reflect new active language
+  function updateAfterTranslation(langCode) {
+    activeLang = langCode || null;
+
+    // Update the button
+    if (activeLang) {
+      var shortName = getLangLabel(activeLang).split('(')[0].trim();
+      btn.querySelector('.translate-btn-text').textContent = shortName;
+      btn.setAttribute('aria-label', 'Translate page. Currently: ' + getLangLabel(activeLang) + '. Press to change language.');
+    } else {
+      btn.querySelector('.translate-btn-text').textContent = 'Translate';
+      btn.setAttribute('aria-label', 'Translate this page to another language');
+    }
+
+    // Rebuild menu so English shows correctly and checkmark moves
+    buildMenuItems();
+  }
+
   function selectLanguage(langCode) {
     closeMenu();
 
@@ -1305,6 +1335,9 @@
         }
       }, 8000);
     }
+
+    // Update the menu and button immediately (don't wait for translation to finish)
+    updateAfterTranslation(langCode);
   }
 
   function doTranslate(langCode) {
