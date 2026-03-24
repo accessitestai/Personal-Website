@@ -254,9 +254,6 @@
     </div>
   </footer>
 
-  <!-- Hidden iframe for axe-core testing -->
-  <iframe id="test-frame" style="position:absolute;left:-9999px;width:1024px;height:768px;border:none;" title="Accessibility test sandbox" sandbox="allow-same-origin"></iframe>
-
   <!-- axe-core library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js"></script>
 
@@ -273,7 +270,6 @@
     var resultsSummary = document.getElementById('results-summary');
     var resultsList = document.getElementById('results-list');
     var resultsHeading = document.getElementById('results-heading');
-    var testFrame = document.getElementById('test-frame');
 
     function setStatus(msg) {
       statusEl.textContent = msg;
@@ -298,6 +294,119 @@
       return order[impact] !== undefined ? order[impact] : 4;
     }
 
+    // =============================================
+    // Manual document-level checks
+    // (axe cannot check these when running on a div)
+    // =============================================
+    function runDocumentLevelChecks(fullHtml) {
+      var manualViolations = [];
+      var manualPasses = [];
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(fullHtml, 'text/html');
+      var htmlEl = doc.documentElement;
+      var titleEl = doc.querySelector('title');
+      var headEl = doc.querySelector('head');
+
+      // Check 1: <html lang>
+      var langAttr = htmlEl.getAttribute('lang');
+      if (!langAttr || langAttr.trim() === '') {
+        manualViolations.push({
+          id: 'html-has-lang',
+          impact: 'serious',
+          help: '<html> element must have a lang attribute',
+          description: 'Ensures every HTML document has a lang attribute on the <html> element. Screen readers use this to determine the correct pronunciation.',
+          tags: ['wcag2a', 'wcag311'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/html-has-lang',
+          nodes: [{ html: '<html' + (htmlEl.attributes.length ? ' ' + Array.from(htmlEl.attributes).map(function(a) { return a.name + '="' + a.value + '"'; }).join(' ') : '') + '>', failureSummary: 'Fix: Add a lang attribute to the <html> element.\nExample: <html lang="en">' }]
+        });
+      } else {
+        // Check 1b: Valid lang value
+        var validLangs = /^[a-z]{2,3}(-[a-z]{2,4})?(-[a-z]{2})?$/i;
+        if (!validLangs.test(langAttr.trim())) {
+          manualViolations.push({
+            id: 'html-lang-valid',
+            impact: 'serious',
+            help: '<html> element must have a valid value for the lang attribute',
+            description: 'Ensures the lang attribute of the <html> element has a valid value (e.g., "en", "hi", "ta", "fr").',
+            tags: ['wcag2a', 'wcag311'],
+            helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/html-lang-valid',
+            nodes: [{ html: '<html lang="' + escapeHtml(langAttr) + '">', failureSummary: 'Fix: Use a valid BCP 47 language tag.\nExamples: "en", "en-US", "hi", "ta", "fr"' }]
+          });
+        } else {
+          manualPasses.push({ id: 'html-has-lang', description: '<html> element has a valid lang attribute' });
+        }
+      }
+
+      // Check 2: <title>
+      if (!titleEl || !titleEl.textContent.trim()) {
+        manualViolations.push({
+          id: 'document-title',
+          impact: 'serious',
+          help: 'Documents must have a <title> element',
+          description: 'Ensures each HTML document contains a non-empty <title> element. The title is announced by screen readers when a page loads.',
+          tags: ['wcag2a', 'wcag242'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/document-title',
+          nodes: [{ html: headEl ? '<head>...</head>' : '<html> (no <head> found)', failureSummary: 'Fix: Add a descriptive <title> element inside <head>.\nExample: <title>My Accessible Page</title>' }]
+        });
+      } else {
+        manualPasses.push({ id: 'document-title', description: 'Document has a non-empty <title> element' });
+      }
+
+      // Check 3: Viewport meta (zoom disabled)
+      var viewportMeta = doc.querySelector('meta[name="viewport"]');
+      if (viewportMeta) {
+        var content = (viewportMeta.getAttribute('content') || '').toLowerCase();
+        var hasMaxScale = content.match(/maximum-scale\s*=\s*([\d.]+)/);
+        var hasUserScalable = content.match(/user-scalable\s*=\s*(no|0)/);
+        if (hasUserScalable || (hasMaxScale && parseFloat(hasMaxScale[1]) < 2)) {
+          manualViolations.push({
+            id: 'meta-viewport',
+            impact: 'critical',
+            help: 'Zooming and scaling must not be disabled',
+            description: 'Ensures that the viewport meta tag does not disable text scaling or zooming. Users with low vision need to zoom in to read content.',
+            tags: ['wcag2aa', 'wcag144'],
+            helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/meta-viewport',
+            nodes: [{ html: '<meta name="viewport" content="' + escapeHtml(viewportMeta.getAttribute('content')) + '">', failureSummary: 'Fix: Remove user-scalable=no and ensure maximum-scale is at least 2.\nExample: <meta name="viewport" content="width=device-width, initial-scale=1.0">' }]
+          });
+        } else {
+          manualPasses.push({ id: 'meta-viewport', description: 'Viewport meta tag allows zooming' });
+        }
+      }
+
+      // Check 4: Heading order in the full document
+      var headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      var hasH1 = false;
+      var headingOrderIssues = [];
+      var prevLevel = 0;
+      for (var i = 0; i < headings.length; i++) {
+        var level = parseInt(headings[i].tagName.charAt(1));
+        if (level === 1) hasH1 = true;
+        if (prevLevel > 0 && level > prevLevel + 1) {
+          headingOrderIssues.push({
+            skipped: 'h' + prevLevel + ' to h' + level,
+            html: headings[i].outerHTML.substring(0, 100)
+          });
+        }
+        prevLevel = level;
+      }
+      if (!hasH1 && headings.length > 0) {
+        manualViolations.push({
+          id: 'page-has-heading-one',
+          impact: 'moderate',
+          help: 'Page should contain a level-one heading',
+          description: 'Ensures the page has at least one h1 element. An h1 heading gives screen reader users an overview of the page content.',
+          tags: ['best-practice'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/page-has-heading-one',
+          nodes: [{ html: '(no <h1> found)', failureSummary: 'Fix: Add an <h1> element that describes the main content of the page.' }]
+        });
+      }
+
+      return { violations: manualViolations, passes: manualPasses };
+    }
+
+    // =============================================
+    // Render results
+    // =============================================
     function renderResults(results) {
       var violations = results.violations || [];
       var passes = results.passes || [];
@@ -416,7 +525,9 @@
       resultsHeading.focus();
     }
 
-    // Run check
+    // =============================================
+    // Run accessibility check
+    // =============================================
     runBtn.addEventListener('click', function () {
       var code = htmlInput.value.trim();
       if (!code) {
@@ -431,33 +542,67 @@
 
       var fullHtml = wrapSnippet(code);
 
-      // Write HTML to hidden iframe
-      var frameDoc = testFrame.contentDocument || testFrame.contentWindow.document;
-      frameDoc.open();
-      frameDoc.write(fullHtml);
-      frameDoc.close();
+      // Parse user HTML with DOMParser (safe — no scripts execute)
+      var parser = new DOMParser();
+      var parsedDoc = parser.parseFromString(fullHtml, 'text/html');
 
-      // Give iframe time to render, then run axe from parent window
+      // Create a hidden test container in the main document
+      // axe-core needs elements to be in the live DOM of the current page
+      var testContainer = document.createElement('div');
+      testContainer.id = 'axe-test-container';
+      testContainer.setAttribute('aria-hidden', 'true');
+      testContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1024px;height:768px;overflow:hidden;visibility:hidden;pointer-events:none;';
+
+      // Copy parsed body content into the test container
+      // Use importNode to bring nodes from the parsed document into the main document
+      var bodyNodes = parsedDoc.body.childNodes;
+      for (var i = 0; i < bodyNodes.length; i++) {
+        testContainer.appendChild(document.importNode(bodyNodes[i], true));
+      }
+
+      document.body.appendChild(testContainer);
+
+      // Run manual document-level checks (lang, title, viewport, heading order)
+      // These can't be detected by axe when running on a div
+      var manualResults = runDocumentLevelChecks(fullHtml);
+
+      // Run axe-core on the test container (element-level checks)
       setTimeout(function () {
         try {
-          // Run axe-core from the parent window against the iframe document.
-          // The iframe is sandboxed (no scripts) for security, so we use
-          // the parent window's axe instance to analyse the iframe's DOM.
-          axe.run(frameDoc, {
+          axe.run(testContainer, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
-          }).then(function (results) {
-            setStatus('Analysis complete.');
+          }).then(function (axeResults) {
+            // Merge manual document-level violations with axe violations
+            var allViolations = manualResults.violations.concat(axeResults.violations || []);
+            var allPasses = manualResults.passes.concat(axeResults.passes || []);
+
+            // Clean up test container
+            if (testContainer.parentNode) {
+              document.body.removeChild(testContainer);
+            }
+
+            setStatus('Analysis complete. Found ' + allViolations.length + ' issue' + (allViolations.length !== 1 ? 's' : '') + '.');
             runBtn.disabled = false;
-            renderResults(results);
+            renderResults({ violations: allViolations, passes: allPasses });
+
           }).catch(function (err) {
+            // Clean up on error
+            if (testContainer.parentNode) {
+              document.body.removeChild(testContainer);
+            }
             setStatus('Error during analysis: ' + err.message);
             runBtn.disabled = false;
+            console.error('[Checker] axe.run error:', err);
           });
         } catch (err) {
+          if (testContainer.parentNode) {
+            document.body.removeChild(testContainer);
+          }
           setStatus('Error: ' + err.message);
           runBtn.disabled = false;
+          console.error('[Checker] Error:', err);
         }
-      }, 500);
+      }, 300);
     });
 
     // Clear
@@ -470,7 +615,6 @@
       htmlInput.focus();
     });
 
-    // Enter key in textarea should not submit — let it add newline naturally
     // Ctrl+Enter to run check
     htmlInput.addEventListener('keydown', function (e) {
       if (e.ctrlKey && e.key === 'Enter') {
