@@ -437,63 +437,25 @@
       frameDoc.write(fullHtml);
       frameDoc.close();
 
-      // Give iframe time to render, then run axe
+      // Give iframe time to render, then run axe from parent window
       setTimeout(function () {
         try {
-          if (typeof testFrame.contentWindow.axe === 'undefined') {
-            // Inject axe-core into the iframe
-            var script = frameDoc.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
-            script.onload = function () {
-              testFrame.contentWindow.axe.run(frameDoc, {
-                runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
-              }).then(function (results) {
-                setStatus('Analysis complete.');
-                runBtn.disabled = false;
-                renderResults(results);
-              }).catch(function (err) {
-                setStatus('Error during analysis: ' + err.message);
-                runBtn.disabled = false;
-              });
-            };
-            script.onerror = function () {
-              // Fallback: run axe from parent window against iframe
-              window.axe.run(frameDoc, {
-                runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
-              }).then(function (results) {
-                setStatus('Analysis complete.');
-                runBtn.disabled = false;
-                renderResults(results);
-              }).catch(function (err) {
-                setStatus('Error: ' + err.message);
-                runBtn.disabled = false;
-              });
-            };
-            frameDoc.head.appendChild(script);
-          } else {
-            testFrame.contentWindow.axe.run(frameDoc, {
-              runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
-            }).then(function (results) {
-              setStatus('Analysis complete.');
-              runBtn.disabled = false;
-              renderResults(results);
-            }).catch(function (err) {
-              setStatus('Error: ' + err.message);
-              runBtn.disabled = false;
-            });
-          }
-        } catch (err) {
-          // Cross-origin fallback: run axe from parent context
-          window.axe.run(frameDoc, {
+          // Run axe-core from the parent window against the iframe document.
+          // The iframe is sandboxed (no scripts) for security, so we use
+          // the parent window's axe instance to analyse the iframe's DOM.
+          axe.run(frameDoc, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
           }).then(function (results) {
             setStatus('Analysis complete.');
             runBtn.disabled = false;
             renderResults(results);
-          }).catch(function (err2) {
-            setStatus('Error: ' + err2.message);
+          }).catch(function (err) {
+            setStatus('Error during analysis: ' + err.message);
             runBtn.disabled = false;
           });
+        } catch (err) {
+          setStatus('Error: ' + err.message);
+          runBtn.disabled = false;
         }
       }, 500);
     });
