@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Akhilesh Malani logo - white version">
+  <title>Akhilesh Malani Logo - White Background Version</title>
+  <desc>White background version of the AM logo for use on light surfaces, documents, and print materials.</desc>
+
+  <!-- White background with subtle border -->
+  <circle cx="200" cy="200" r="194" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+
+  <!-- Outer circle ring -->
+  <circle cx="200" cy="200" r="188" fill="none" stroke="#1a5276" stroke-width="6"/>
+
+  <!-- Inner accent ring -->
+  <circle cx="200" cy="200" r="172" fill="none" stroke="#5dade2" stroke-width="1.5" opacity="0.35"/>
+
+  <!-- === LETTER A as Accessibility Human Figure === -->
+
+  <!-- Human head -->
+  <circle cx="135" cy="95" r="18" fill="#5dade2"/>
+
+  <!-- Body/spine -->
+  <line x1="135" y1="113" x2="135" y2="155" stroke="#5dade2" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Left leg of A -->
+  <line x1="75" y1="310" x2="135" y2="155" stroke="#1a5276" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Right leg of A -->
+  <line x1="195" y1="310" x2="135" y2="155" stroke="#1a5276" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Arms (A crossbar) -->
+  <line x1="65" y1="200" x2="205" y2="200" stroke="#5dade2" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Bridge arc -->
+  <path d="M135 95 Q220 45 275 100" stroke="#5dade2" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- === LETTER M === -->
+  <path d="M215 310 L215 120 L265 230 L315 120 L315 310" stroke="#1a5276" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Base line -->
+  <line x1="70" y1="318" x2="320" y2="318" stroke="#5dade2" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+</svg>

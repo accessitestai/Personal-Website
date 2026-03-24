@@ -196,16 +196,67 @@ a:hover {
 }
 
 .logo {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-primary);
   text-decoration: none;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.logo:hover {
-  color: var(--color-primary-dark);
+.logo-img {
+  height: 44px;
+  width: auto;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover .logo-img {
+  opacity: 0.85;
+}
+
+.logo:focus-visible {
+  outline: 3px solid var(--color-focus, #2471a3);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Nav-brand for blog/sub pages using the logo */
+.nav-brand {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav-brand .logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.nav-brand:hover .logo-img {
+  opacity: 0.85;
+}
+
+.nav-brand:focus-visible {
+  outline: 3px solid var(--color-focus, #2471a3);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Dark mode logo adjustments */
+[data-theme="dark"] .logo-img,
+[data-theme="dark"] .nav-brand .logo-img {
+  filter: brightness(1.8) saturate(0.9);
+}
+
+@media (max-width: 768px) {
+  .logo-img {
+    height: 36px;
+  }
+  .nav-brand .logo-img {
+    height: 32px;
+  }
 }
 
 .nav-links {

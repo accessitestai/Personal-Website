@@ -155,7 +155,7 @@ function generateBlogPage(meta, bodyHtml, slug) {
 '  <meta property="og:url" content="' + url + '">\n' +
 '\n' +
 '  <title>' + escapeHtml(title) + ' | Akhilesh Malani</title>\n' +
-'  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' rx=\'16\' fill=\'%231a5276\'/%3E%3Ctext x=\'50\' y=\'38\' text-anchor=\'middle\' font-family=\'Georgia,serif\' font-size=\'36\' font-weight=\'bold\' fill=\'%23ffffff\'%3EA%3C/text%3E%3Ctext x=\'50\' y=\'72\' text-anchor=\'middle\' font-family=\'Georgia,serif\' font-size=\'36\' font-weight=\'bold\' fill=\'%235dade2\'%3EM%3C/text%3E%3C/svg%3E">\n' +
+'  <link rel="icon" type="image/svg+xml" href="../images/logo-icon.svg">\n' +
 '  <link rel="stylesheet" href="../styles.css">\n' +
 '  <style>\n' +
 '    .blog-post { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }\n' +
@@ -202,7 +202,7 @@ function generateBlogPage(meta, bodyHtml, slug) {
 '  <header class="site-header" role="banner">\n' +
 '    <nav class="navbar" aria-label="Primary navigation">\n' +
 '      <div class="nav-container">\n' +
-'        <a href="../index.html" class="nav-brand" aria-label="Akhilesh Malani - Home">Akhilesh Malani</a>\n' +
+'        <a href="../index.html" class="nav-brand" aria-label="Akhilesh Malani - Accessibility Architect, Home"><img src="../images/logo-horizontal.svg" alt="Akhilesh Malani - Accessibility Architect" class="logo-img" width="280" height="62"></a>\n' +
 '        <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>\n' +
 '        <div class="nav-actions">\n' +
 '          <button class="a11y-toggle" id="a11y-toggle" aria-label="Accessibility settings" type="button">\n' +
