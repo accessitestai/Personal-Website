@@ -202,7 +202,7 @@ function generateBlogPage(meta, bodyHtml, slug) {
 '  <header class="site-header" role="banner">\n' +
 '    <nav class="navbar" aria-label="Primary navigation">\n' +
 '      <div class="nav-container">\n' +
-'        <a href="../index.html" class="nav-brand" aria-label="Akhilesh Malani - Accessibility Architect, Home"><img src="../images/logo-horizontal.svg" alt="Akhilesh Malani - Accessibility Architect" class="logo-img" width="280" height="62"></a>\n' +
+'        <a href="../index.html" class="nav-brand"><img src="../images/logo-horizontal.svg" alt="" role="presentation" class="logo-img" width="280" height="62"><span class="sr-only">Akhilesh Malani - Accessibility Architect, Home</span></a>\n' +
 '        <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>\n' +
 '        <div class="nav-actions">\n' +
 '          <button class="a11y-toggle" id="a11y-toggle" aria-label="Accessibility settings" type="button">\n' +
