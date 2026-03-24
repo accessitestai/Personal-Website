@@ -943,6 +943,7 @@
 
 // ===========================
 // Translation Feature — supports 25+ Indian and international languages
+// Uses cookie-based approach for maximum reliability
 // ===========================
 (function () {
   'use strict';
@@ -984,6 +985,8 @@
     { code: 'sv', label: 'Svenska (Swedish)' }
   ];
 
+  var supportedCodes = 'hi,ta,te,kn,ml,bn,mr,gu,pa,ur,or,as,es,fr,de,pt,ar,zh-CN,ja,ko,ru,it,nl,tr,th,vi,id,ms,pl,sv';
+
   // Find the nav-actions container (exists on all pages)
   var navActions = document.querySelector('.nav-actions');
   if (!navActions) return;
@@ -1014,100 +1017,134 @@
   // Insert translate select before the a11y toggle (first in nav-actions)
   navActions.insertBefore(wrapper, navActions.firstChild);
 
-  // Hidden container for Google Translate widget
+  // Google Translate container — MUST be in the visible DOM area (not left:-9999px)
+  // Google's script checks if the container is visible before initializing.
+  // We use opacity:0.01 + pointer-events:none to hide it visually but keep it "visible" to Google.
   var gtContainer = document.createElement('div');
   gtContainer.id = 'google_translate_element';
-  gtContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+  gtContainer.style.cssText = 'position:fixed;bottom:0;right:0;opacity:0.01;pointer-events:none;z-index:-1;height:0;overflow:hidden;';
   document.body.appendChild(gtContainer);
 
-  // Load Google Translate script
-  var gtLoaded = false;
+  // Track state
   var gtReady = false;
+  var pendingLang = null;
 
+  // Google Translate init callback — called when the script loads
   window.googleTranslateElementInit = function () {
     new google.translate.TranslateElement({
       pageLanguage: 'en',
+      includedLanguages: supportedCodes,
       autoDisplay: false,
       layout: google.translate.TranslateElement.InlineLayout.SIMPLE
     }, 'google_translate_element');
     gtReady = true;
+
+    // If user already selected a language before script finished loading
+    if (pendingLang) {
+      waitForComboAndTranslate(pendingLang);
+      pendingLang = null;
+    }
   };
 
-  function loadGoogleTranslate() {
-    if (gtLoaded) return;
-    gtLoaded = true;
-    var s = document.createElement('script');
-    s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    s.async = true;
-    document.head.appendChild(s);
-  }
+  // Load Google Translate script IMMEDIATELY (not lazy) for reliability
+  var gtScript = document.createElement('script');
+  gtScript.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  gtScript.async = true;
+  gtScript.onerror = function () {
+    console.warn('[Translate] Google Translate script failed to load.');
+  };
+  document.head.appendChild(gtScript);
 
-  // Trigger translation by setting Google's hidden select
-  function triggerTranslation(langCode) {
-    if (!langCode) {
-      // Reset to English — remove Google Translate frame
-      var frame = document.querySelector('.goog-te-banner-frame');
-      if (frame) {
-        // Click "Show original" button inside the banner
-        try {
-          var innerDoc = frame.contentDocument || frame.contentWindow.document;
-          var restoreBtn = innerDoc.querySelector('.goog-close-link');
-          if (restoreBtn) restoreBtn.click();
-        } catch (e) {
-          // Cross-origin — fallback: remove the cookie and reload
-          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
-          location.reload();
-        }
-      } else {
-        // No translation active, clear cookie just in case
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
-      }
-      if (window.srAnnounce) window.srAnnounce('Page restored to English');
-      return;
-    }
-
-    // Wait for Google Translate to be ready
+  // Find Google's hidden combo box and trigger translation
+  function waitForComboAndTranslate(langCode) {
     var attempts = 0;
-    function tryTranslate() {
-      var gtSelect = document.querySelector('.goog-te-combo');
-      if (gtSelect) {
-        gtSelect.value = langCode;
-        gtSelect.dispatchEvent(new Event('change'));
+    var maxAttempts = 50; // 10 seconds max
+
+    function tryNow() {
+      var combo = document.querySelector('.goog-te-combo');
+      if (combo) {
+        combo.value = langCode;
+        combo.dispatchEvent(new Event('change'));
         // Announce to screen readers
-        var selectedOption = select.options[select.selectedIndex];
-        var langName = selectedOption ? selectedOption.textContent : langCode;
+        var langName = langCode;
+        for (var i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === langCode) {
+            langName = select.options[i].textContent;
+            break;
+          }
+        }
         if (window.srAnnounce) {
           window.srAnnounce('Translating page to ' + langName + '. Please wait.');
         }
-      } else if (attempts < 30) {
+      } else if (attempts < maxAttempts) {
         attempts++;
-        setTimeout(tryTranslate, 200);
+        setTimeout(tryNow, 200);
+      } else {
+        // Fallback: use cookie-based approach — set cookie and reload
+        console.log('[Translate] Combo not found, using cookie fallback for: ' + langCode);
+        setCookieAndReload(langCode);
       }
     }
-    tryTranslate();
+    tryNow();
+  }
+
+  // Cookie-based fallback — works even if Google widget doesn't fully initialize
+  function setCookieAndReload(langCode) {
+    var domain = location.hostname;
+    document.cookie = 'googtrans=/en/' + langCode + '; path=/;';
+    document.cookie = 'googtrans=/en/' + langCode + '; path=/; domain=.' + domain;
+    location.reload();
+  }
+
+  function clearTranslationCookies() {
+    var domain = location.hostname;
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + domain;
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain;
   }
 
   // Handle language selection
   select.addEventListener('change', function () {
     var code = select.value;
-    // Load Google Translate if not loaded yet
-    if (!gtLoaded) {
-      loadGoogleTranslate();
+
+    if (!code) {
+      // Reset to English
+      var frame = document.querySelector('.goog-te-banner-frame');
+      if (frame) {
+        try {
+          var innerDoc = frame.contentDocument || frame.contentWindow.document;
+          var restoreBtn = innerDoc.querySelector('.goog-close-link');
+          if (restoreBtn) {
+            restoreBtn.click();
+            if (window.srAnnounce) window.srAnnounce('Page restored to English');
+            return;
+          }
+        } catch (e) { /* cross-origin — fall through to cookie clear */ }
+      }
+      // Clear cookies and reload to restore English
+      clearTranslationCookies();
+      if (window.srAnnounce) window.srAnnounce('Page restored to English. Reloading.');
+      location.reload();
+      return;
     }
-    // Small delay to allow script to load on first use
-    if (!gtReady && code) {
-      var checkReady = setInterval(function () {
-        if (gtReady) {
-          clearInterval(checkReady);
-          triggerTranslation(code);
-        }
-      }, 200);
-      // Timeout after 10 seconds
-      setTimeout(function () { clearInterval(checkReady); }, 10000);
+
+    // Translate to selected language
+    if (gtReady) {
+      // Google Translate is loaded — try the combo box
+      waitForComboAndTranslate(code);
     } else {
-      triggerTranslation(code);
+      // Script still loading — queue the request
+      pendingLang = code;
+      if (window.srAnnounce) {
+        window.srAnnounce('Loading translator. Please wait.');
+      }
+      // Safety timeout: if script never loads, use cookie fallback
+      setTimeout(function () {
+        if (pendingLang === code && !gtReady) {
+          console.log('[Translate] Timeout — using cookie fallback');
+          setCookieAndReload(code);
+        }
+      }, 8000);
     }
   });
 
