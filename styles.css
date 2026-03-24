@@ -1572,6 +1572,36 @@ body > .skiptranslate:not(#google_translate_element) {
   pointer-events: none !important;
 }
 
+/* Translation loading indicator */
+.translate-loading {
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 3px;
+}
+
+.translate-loading--active {
+  opacity: 1;
+}
+
+.translate-loading-bar {
+  height: 100%;
+  width: 35%;
+  background: var(--color-accent, #5dade2);
+  border-radius: 3px;
+  animation: translate-slide 0.8s ease-in-out infinite;
+}
+
+@keyframes translate-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(380%); }
+}
+
 /* Responsive: translate menu on mobile */
 @media (max-width: 768px) {
   .translate-btn {
