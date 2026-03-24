@@ -942,6 +942,189 @@
 })();
 
 // ===========================
+// Translation Feature — supports 25+ Indian and international languages
+// ===========================
+(function () {
+  'use strict';
+
+  // Languages: Indian first, then international
+  var languages = [
+    { code: '', label: 'Translate' },
+    { code: '', label: '\u2500\u2500 Indian Languages \u2500\u2500', disabled: true },
+    { code: 'hi', label: '\u0939\u093F\u0928\u094D\u0926\u0940 (Hindi)' },
+    { code: 'ta', label: '\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD (Tamil)' },
+    { code: 'te', label: '\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41 (Telugu)' },
+    { code: 'kn', label: '\u0C95\u0CA8\u0CCD\u0CA8\u0CA1 (Kannada)' },
+    { code: 'ml', label: '\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02 (Malayalam)' },
+    { code: 'bn', label: '\u09AC\u09BE\u0982\u09B2\u09BE (Bengali)' },
+    { code: 'mr', label: '\u092E\u0930\u093E\u0920\u0940 (Marathi)' },
+    { code: 'gu', label: '\u0A97\u0AC1\u0A9C\u0AB0\u0ABE\u0AA4\u0AC0 (Gujarati)' },
+    { code: 'pa', label: '\u0A2A\u0A70\u0A1C\u0A3E\u0A2C\u0A40 (Punjabi)' },
+    { code: 'ur', label: '\u0627\u0631\u062F\u0648 (Urdu)' },
+    { code: 'or', label: '\u0B13\u0B21\u0B3F\u0B06 (Odia)' },
+    { code: 'as', label: '\u0985\u09B8\u09AE\u09C0\u09AF\u09BC\u09BE (Assamese)' },
+    { code: '', label: '\u2500\u2500 International Languages \u2500\u2500', disabled: true },
+    { code: 'es', label: 'Espa\u00F1ol (Spanish)' },
+    { code: 'fr', label: 'Fran\u00E7ais (French)' },
+    { code: 'de', label: 'Deutsch (German)' },
+    { code: 'pt', label: 'Portugu\u00EAs (Portuguese)' },
+    { code: 'ar', label: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629 (Arabic)' },
+    { code: 'zh-CN', label: '\u4E2D\u6587 (Chinese)' },
+    { code: 'ja', label: '\u65E5\u672C\u8A9E (Japanese)' },
+    { code: 'ko', label: '\uD55C\uAD6D\uC5B4 (Korean)' },
+    { code: 'ru', label: '\u0420\u0443\u0441\u0441\u043A\u0438\u0439 (Russian)' },
+    { code: 'it', label: 'Italiano (Italian)' },
+    { code: 'nl', label: 'Nederlands (Dutch)' },
+    { code: 'tr', label: 'T\u00FCrk\u00E7e (Turkish)' },
+    { code: 'th', label: '\u0E44\u0E17\u0E22 (Thai)' },
+    { code: 'vi', label: 'Ti\u1EBFng Vi\u1EC7t (Vietnamese)' },
+    { code: 'id', label: 'Bahasa Indonesia' },
+    { code: 'ms', label: 'Bahasa Melayu (Malay)' },
+    { code: 'pl', label: 'Polski (Polish)' },
+    { code: 'sv', label: 'Svenska (Swedish)' }
+  ];
+
+  // Find the nav-actions container (exists on all pages)
+  var navActions = document.querySelector('.nav-actions');
+  if (!navActions) return;
+
+  // Create translate wrapper
+  var wrapper = document.createElement('div');
+  wrapper.className = 'translate-wrapper';
+
+  // Create the accessible select element
+  var select = document.createElement('select');
+  select.id = 'translate-select';
+  select.className = 'translate-select';
+  select.setAttribute('aria-label', 'Translate this page to another language');
+
+  languages.forEach(function (lang) {
+    var opt = document.createElement('option');
+    opt.value = lang.code;
+    opt.textContent = lang.label;
+    if (lang.disabled) {
+      opt.disabled = true;
+      opt.setAttribute('aria-hidden', 'true');
+    }
+    select.appendChild(opt);
+  });
+
+  wrapper.appendChild(select);
+
+  // Insert translate select before the a11y toggle (first in nav-actions)
+  navActions.insertBefore(wrapper, navActions.firstChild);
+
+  // Hidden container for Google Translate widget
+  var gtContainer = document.createElement('div');
+  gtContainer.id = 'google_translate_element';
+  gtContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;';
+  document.body.appendChild(gtContainer);
+
+  // Load Google Translate script
+  var gtLoaded = false;
+  var gtReady = false;
+
+  window.googleTranslateElementInit = function () {
+    new google.translate.TranslateElement({
+      pageLanguage: 'en',
+      autoDisplay: false,
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+    gtReady = true;
+  };
+
+  function loadGoogleTranslate() {
+    if (gtLoaded) return;
+    gtLoaded = true;
+    var s = document.createElement('script');
+    s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  // Trigger translation by setting Google's hidden select
+  function triggerTranslation(langCode) {
+    if (!langCode) {
+      // Reset to English — remove Google Translate frame
+      var frame = document.querySelector('.goog-te-banner-frame');
+      if (frame) {
+        // Click "Show original" button inside the banner
+        try {
+          var innerDoc = frame.contentDocument || frame.contentWindow.document;
+          var restoreBtn = innerDoc.querySelector('.goog-close-link');
+          if (restoreBtn) restoreBtn.click();
+        } catch (e) {
+          // Cross-origin — fallback: remove the cookie and reload
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+          location.reload();
+        }
+      } else {
+        // No translation active, clear cookie just in case
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+      }
+      if (window.srAnnounce) window.srAnnounce('Page restored to English');
+      return;
+    }
+
+    // Wait for Google Translate to be ready
+    var attempts = 0;
+    function tryTranslate() {
+      var gtSelect = document.querySelector('.goog-te-combo');
+      if (gtSelect) {
+        gtSelect.value = langCode;
+        gtSelect.dispatchEvent(new Event('change'));
+        // Announce to screen readers
+        var selectedOption = select.options[select.selectedIndex];
+        var langName = selectedOption ? selectedOption.textContent : langCode;
+        if (window.srAnnounce) {
+          window.srAnnounce('Translating page to ' + langName + '. Please wait.');
+        }
+      } else if (attempts < 30) {
+        attempts++;
+        setTimeout(tryTranslate, 200);
+      }
+    }
+    tryTranslate();
+  }
+
+  // Handle language selection
+  select.addEventListener('change', function () {
+    var code = select.value;
+    // Load Google Translate if not loaded yet
+    if (!gtLoaded) {
+      loadGoogleTranslate();
+    }
+    // Small delay to allow script to load on first use
+    if (!gtReady && code) {
+      var checkReady = setInterval(function () {
+        if (gtReady) {
+          clearInterval(checkReady);
+          triggerTranslation(code);
+        }
+      }, 200);
+      // Timeout after 10 seconds
+      setTimeout(function () { clearInterval(checkReady); }, 10000);
+    } else {
+      triggerTranslation(code);
+    }
+  });
+
+  // Restore previous language selection from cookie
+  var cookieMatch = document.cookie.match(/googtrans=\/en\/([^;]+)/);
+  if (cookieMatch && cookieMatch[1]) {
+    var savedLang = cookieMatch[1];
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === savedLang) {
+        select.selectedIndex = i;
+        break;
+      }
+    }
+  }
+})();
+
+// ===========================
 // Reading Time Calculator (for blog pages)
 // ===========================
 (function () {

@@ -1323,6 +1323,86 @@ a:hover {
   color: var(--color-primary);
 }
 
+/* Translation language selector */
+.translate-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.translate-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 2rem 0.45rem 0.65rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  max-width: 140px;
+  text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a4a5a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.translate-select:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.translate-select:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-color: var(--color-focus);
+}
+
+.translate-select option {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  padding: 0.5rem;
+}
+
+.translate-select option:disabled {
+  color: var(--color-text-light);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+/* Dark mode translate select */
+[data-theme="dark"] .translate-select {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0a0b0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* Hide Google Translate's default bar */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-te-gadget {
+  font-size: 0 !important;
+}
+
+/* Responsive: smaller on mobile */
+@media (max-width: 768px) {
+  .translate-select {
+    max-width: 110px;
+    font-size: 0.8rem;
+    padding: 0.35rem 1.6rem 0.35rem 0.5rem;
+  }
+}
+
 .theme-toggle svg {
   width: 20px;
   height: 20px;
