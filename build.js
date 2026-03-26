@@ -374,8 +374,6 @@ function generateSitemap(posts) {
 
   var staticPages = [
     { url: 'https://akhileshmalani.com/', priority: '1.0', freq: 'weekly' },
-    { url: 'https://akhileshmalani.com/ama11y/', priority: '0.9', freq: 'weekly' },
-    { url: 'https://akhileshmalani.com/ama11y/install.html', priority: '0.8', freq: 'monthly' },
     { url: 'https://akhileshmalani.com/checker.html', priority: '0.9', freq: 'monthly' },
     { url: 'https://akhileshmalani.com/doc-checker.html', priority: '0.9', freq: 'monthly' },
     { url: 'https://akhileshmalani.com/accessibility.html', priority: '0.6', freq: 'monthly' }
