@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AMA11Y — Accessibility Management and Audit Layer. A blind-first accessibility audit tool that runs entirely in your browser. Built by Akhilesh Malani.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="AMA11Y, accessibility audit, WCAG checker, blind accessibility, screen reader, bookmarklet, JAWS, NVDA, VoiceOver">
+  <link rel="canonical" href="https://ama11y.akhileshmalani.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AMA11Y — Blind-First Accessibility Audit Tool">
+  <meta property="og:description" content="A blind-first accessibility audit tool that runs entirely in your browser. Zero network calls. JAWS, NVDA, VoiceOver compatible.">
+  <meta property="og:url" content="https://ama11y.akhileshmalani.com/">
+
+  <title>AMA11Y — Accessibility Audit Tool | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="../images/logo-icon.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* AMA11Y dark theme overrides */
+    :root {
+      --ama-navy:    #0a1628;
+      --ama-blue:    #003366;
+      --ama-mid:     #1a4a80;
+      --ama-accent:  #7ec8e3;
+      --ama-light:   #b8d4e8;
+      --ama-text:    #e8f0f8;
+      --ama-muted:   #8899aa;
+      --ama-surface: #0e1f2f;
+      --ama-border:  #1e3a5a;
+      --ama-success: #2ecc71;
+      --ama-warn:    #f39c12;
+      --ama-error:   #e74c3c;
+    }
+
+    body.ama11y-page {
+      background: var(--ama-navy);
+      color: var(--ama-text);
+    }
+
+    .ama11y-page .navbar {
+      background: var(--ama-blue);
+      border-bottom: 3px solid var(--ama-accent);
+    }
+
+    .ama11y-page .breadcrumb { max-width: 900px; margin: 0 auto; padding: 1rem 1.5rem 0; }
+    .ama11y-page .breadcrumb a { color: var(--ama-accent); }
+    .ama11y-page .breadcrumb span { color: var(--ama-light); }
+
+    .ama11y-page .checker-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 2rem;
+    }
+    .ama11y-page .checker-nav a {
+      padding: 0.6rem 1.2rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--ama-muted);
+      border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .ama11y-page .checker-nav a:hover { color: var(--ama-text); }
+    .ama11y-page .checker-nav a[aria-current="page"] {
+      color: var(--ama-accent);
+      border-bottom-color: var(--ama-accent);
+    }
+    .ama11y-page .checker-nav a:focus {
+      outline: 3px solid var(--ama-accent);
+      outline-offset: 2px;
+    }
+
+    .ama-content { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+    /* Hero */
+    .ama-hero {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--ama-border);
+      margin-bottom: 2.5rem;
+    }
+    .ama-hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--ama-accent);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+    }
+    .ama-hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--ama-light);
+      margin-bottom: 0.75rem;
+    }
+    .ama-hero-desc {
+      font-size: 1rem;
+      color: var(--ama-muted);
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.7;
+    }
+    .ama-hero-cta {
+      display: inline-block;
+      background: var(--ama-blue);
+      color: #fff;
+      border: 2px solid var(--ama-accent);
+      padding: 0.75rem 2rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: background 0.2s;
+    }
+    .ama-hero-cta:hover { background: var(--ama-mid); }
+    .ama-hero-cta:focus { outline: 3px solid #fff; outline-offset: 3px; }
+
+    /* Section headings */
+    .ama-content h2 {
+      font-size: 1.3rem;
+      color: var(--ama-accent);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--ama-border);
+    }
+    .ama-content h3 {
+      font-size: 1rem;
+      color: var(--ama-light);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .ama-content p {
+      font-size: 0.92rem;
+      color: #c8d8e8;
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+    .ama-content ul, .ama-content ol {
+      padding-left: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    .ama-content li {
+      font-size: 0.92rem;
+      color: #c8d8e8;
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    .ama-content strong { color: var(--ama-text); }
+    .ama-content code {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      background: #071624;
+      padding: 2px 7px;
+      border-radius: 3px;
+      color: var(--ama-accent);
+    }
+
+    /* Engine cards */
+    .ama-engines {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .ama-engine-card {
+      background: var(--ama-surface);
+      border: 1px solid var(--ama-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .ama-engine-card h3 {
+      font-size: 0.95rem;
+      color: var(--ama-accent);
+      margin: 0 0 0.4rem;
+    }
+    .ama-engine-card p {
+      font-size: 0.82rem;
+      color: var(--ama-muted);
+      margin: 0;
+    }
+
+    /* Steps */
+    .ama-steps {
+      counter-reset: step-counter;
+      list-style: none;
+      padding: 0;
+    }
+    .ama-steps > li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-start;
+    }
+    .ama-steps > li::before {
+      content: counter(step-counter);
+      background: var(--ama-accent);
+      color: var(--ama-navy);
+      font-weight: 800;
+      font-size: 0.85rem;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Keyboard ref table */
+    .ama-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 1rem 0;
+    }
+    .ama-table th {
+      background: var(--ama-surface);
+      color: var(--ama-accent);
+      padding: 0.6rem 1rem;
+      text-align: left;
+      border-bottom: 2px solid var(--ama-border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .ama-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--ama-border);
+      color: #c8d8e8;
+    }
+    .ama-table kbd {
+      display: inline-block;
+      background: #071624;
+      border: 1px solid var(--ama-border);
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      color: var(--ama-accent);
+    }
+
+    /* Notice box */
+    .ama-notice {
+      background: #071624;
+      border-left: 4px solid var(--ama-accent);
+      border-radius: 0 6px 6px 0;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .ama-notice p { margin: 0; font-size: 0.88rem; }
+
+    /* Roadmap */
+    .ama-roadmap-item {
+      background: var(--ama-surface);
+      border: 1px solid var(--ama-border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .ama-roadmap-item h3 { margin: 0 0 0.3rem; }
+    .ama-phase-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .ama-phase-active { background: rgba(46, 204, 113, 0.2); color: var(--ama-success); border: 1px solid var(--ama-success); }
+    .ama-phase-upcoming { background: rgba(126, 200, 227, 0.15); color: var(--ama-accent); border: 1px solid var(--ama-border); }
+
+    /* Footer */
+    .ama-footer {
+      border-top: 1px solid var(--ama-border);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--ama-muted);
+    }
+    .ama-footer a { color: var(--ama-accent); }
+    .ama-footer a:focus { outline: 3px solid var(--ama-accent); outline-offset: 2px; }
+
+    @media (max-width: 600px) {
+      .ama-hero-title { font-size: 2rem; }
+      .ama-engines { grid-template-columns: 1fr; }
+    }
+  </style>
+  <!-- Prevent flash of wrong theme -->
+  <script>
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
+  </script>
+</head>
+<body class="ama11y-page">
+  <!-- Skip Navigation -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header -->
+  <header role="banner">
+    <nav aria-label="Primary navigation" class="navbar">
+      <div class="container nav-container">
+        <a href="../index.html" class="logo">
+          <img src="../images/logo-horizontal.svg" alt="" role="presentation" class="logo-img" width="280" height="62">
+          <span class="sr-only">Akhilesh Malani - Accessibility Architect, Home</span>
+        </a>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">
+            <svg id="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ol>
+        <li><a href="../index.html">Home</a></li>
+        <li><span aria-current="page">AMA11Y</span></li>
+      </ol>
+    </nav>
+
+    <div class="ama-content">
+      <!-- Sub-navigation -->
+      <nav aria-label="AMA11Y tools" class="checker-nav">
+        <a href="./" aria-current="page">Overview</a>
+        <a href="install.html">Install Bookmarklet</a>
+      </nav>
+
+      <!-- Hero -->
+      <section class="ama-hero" aria-labelledby="ama-title">
+        <h1 id="ama-title" class="ama-hero-title">AMA11Y</h1>
+        <p class="ama-hero-subtitle">Accessibility Management and Audit Layer</p>
+        <p class="ama-hero-desc">A blind-first accessibility audit tool that runs entirely in your browser. Built for screen reader users. Zero network calls. Works behind firewalls and on locked-down corporate desktops.</p>
+        <a href="install.html" class="ama-hero-cta">Install the Bookmarklet</a>
+      </section>
+
+      <!-- What It Does -->
+      <h2 id="engines">What It Audits</h2>
+      <p>AMA11Y runs 8 accessibility audit engines against any web page, covering WCAG 2.2 Level AA and AAA criteria. Every finding includes the element reference, criterion, computed value, required value, verdict, severity, and remediation guidance — all announced by screen readers.</p>
+
+      <div class="ama-engines" role="list" aria-label="Audit engines">
+        <div class="ama-engine-card" role="listitem">
+          <h3>Focus Order</h3>
+          <p>SC 2.4.3, SC 2.1.2 — Tab sequence, positive tabindex detection, focus trap analysis</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Focus Visibility</h3>
+          <p>SC 2.4.7, SC 2.4.11, SC 2.4.12 — Indicator suppression, outline contrast ratio</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Colour Contrast</h3>
+          <p>SC 1.4.3, SC 1.4.6, SC 1.4.11 — Text AA/AAA ratios, non-text UI component contrast</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Heading Structure</h3>
+          <p>SC 1.3.1, SC 2.4.6 — Single H1 validation, skipped levels, empty headings</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Landmark Regions</h3>
+          <p>SC 1.3.1, SC 2.4.1 — Required landmarks, duplicate detection, unique naming</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Image Alt Text</h3>
+          <p>SC 1.1.1 — Missing alt, generic alt detection, SVG accessible names, decorative image review</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Form Labels</h3>
+          <p>SC 1.3.1, SC 3.3.2 — Programmatic label associations, required field indicators</p>
+        </div>
+        <div class="ama-engine-card" role="listitem">
+          <h3>Links and Buttons</h3>
+          <p>SC 2.4.4, SC 4.1.2 — Generic link text detection, missing accessible names</p>
+        </div>
+      </div>
+
+      <!-- How It Works -->
+      <h2 id="how-it-works">How It Works</h2>
+      <ol class="ama-steps">
+        <li>
+          <div>
+            <strong>Install the bookmarklet</strong>
+            <p>Copy the bookmarklet code and add it to your browser favourites bar. One-time setup, works in Chrome, Edge, and Firefox.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Activate on any page</strong>
+            <p>Navigate to the page you want to audit, move to your favourites bar with keyboard, and press Enter on the AMA11Y bookmark. The audit runs instantly.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Review findings in the accessible panel</strong>
+            <p>Results appear in a fully accessible panel. Navigate by headings, filter by verdict or engine, expand finding details, and export reports in JSON, HTML, CSV, or plain text.</p>
+          </div>
+        </li>
+      </ol>
+
+      <a href="install.html" class="ama-hero-cta" style="margin-top: 0.5rem;">Get Started — Install Now</a>
+
+      <!-- Keyboard Reference -->
+      <h2 id="keyboard-ref">Keyboard Reference</h2>
+      <p>After the audit panel opens, use these keys to navigate the results:</p>
+      <table class="ama-table" aria-label="Keyboard shortcuts for the AMA11Y audit panel">
+        <thead>
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><kbd>Escape</kbd></td><td>Close the audit panel and return to the page</td></tr>
+          <tr><td><kbd>H</kbd></td><td>Navigate by heading to jump between sections (JAWS/NVDA browse mode)</td></tr>
+          <tr><td><kbd>T</kbd></td><td>Jump directly to the findings table (JAWS/NVDA browse mode)</td></tr>
+          <tr><td><kbd>Arrow keys</kbd></td><td>Navigate between table rows and cells</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Expand or collapse finding detail</td></tr>
+          <tr><td><kbd>Tab</kbd></td><td>Move between interactive controls (filters, export buttons, close)</td></tr>
+          <tr><td><kbd>Insert + F5</kbd></td><td>Refresh JAWS virtual buffer if content not announced</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Technical Details -->
+      <h2 id="technical">Technical Details</h2>
+      <div class="ama-notice">
+        <p><strong>Zero network calls.</strong> The bookmarklet runs entirely within the browser tab. No data is transmitted anywhere. Works behind firewalls, on VPNs, and on locked-down corporate desktops.</p>
+      </div>
+      <ul>
+        <li><strong>Browser support:</strong> Chrome, Edge, Firefox (any version supporting ES6)</li>
+        <li><strong>Screen reader support:</strong> JAWS 2024+, NVDA 2023+, VoiceOver (macOS Sonoma+)</li>
+        <li><strong>Braille display support:</strong> Compatible with Freedom Scientific Focus 40 Blue</li>
+        <li><strong>No installation required:</strong> Single bookmark — no extensions, no IT approval, no admin rights</li>
+        <li><strong>Export formats:</strong> JSON, HTML report, CSV (for Excel), plain text</li>
+        <li><strong>Standards coverage:</strong> WCAG 2.2 Level AA and AAA criteria</li>
+      </ul>
+
+      <!-- Phase Roadmap -->
+      <h2 id="roadmap">Development Roadmap</h2>
+      <div class="ama-roadmap-item">
+        <h3><span class="ama-phase-badge ama-phase-active">Active</span> Phase 1 — Bookmarklet Core Engine</h3>
+        <p>8 audit engines, accessible results panel, 4 export formats. Currently in testing with JAWS screen reader.</p>
+      </div>
+      <div class="ama-roadmap-item">
+        <h3><span class="ama-phase-badge ama-phase-upcoming">Upcoming</span> Phase 2 — Browser Extension</h3>
+        <p>High contrast mode simulation, dark mode simulation, text spacing audit, DOM order audit, full ARIA validation. Chrome, Edge, and Firefox.</p>
+      </div>
+      <div class="ama-roadmap-item">
+        <h3><span class="ama-phase-badge ama-phase-upcoming">Upcoming</span> Phase 3 — Hosted Web Application</h3>
+        <p>Authentication, dashboard, findings import, report generation in 5 formats (HTML, Word, PDF, Excel, plain text), standards cross-mapping, document audit.</p>
+      </div>
+
+      <div class="ama-notice" style="border-color: var(--ama-warn); margin-top: 2rem;">
+        <p><strong>Private tool.</strong> AMA11Y is a personal professional instrument built exclusively for Akhilesh Malani. It is not available for public distribution.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ama-footer" role="contentinfo">
+    <p>AMA11Y v1.0.0 — <a href="https://akhileshmalani.com">akhileshmalani.com</a> — Private and Confidential</p>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

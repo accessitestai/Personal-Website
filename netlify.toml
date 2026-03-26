@@ -10,3 +10,16 @@
   from = "/admin.html"
   to = "/library-admin.html"
   status = 301
+
+# AMA11Y subdomain rewrite — serve /ama11y/ content at ama11y.akhileshmalani.com
+[[redirects]]
+  from = "https://ama11y.akhileshmalani.com/*"
+  to = "/ama11y/:splat"
+  status = 200
+  force = true
+
+# Redirect old orphaned bookmarklet installer to new location
+[[redirects]]
+  from = "/AMA11Y_Bookmarklet_Installer.html"
+  to = "/ama11y/install.html"
+  status = 301
