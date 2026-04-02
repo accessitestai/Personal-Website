@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>AMA11Y — Accessibility Audit Platform</title>
+  <title>AMA11Y — Accessibility Audit Platform v4.0.0</title>
   <meta name="description" content="Private accessibility audit platform for Akhilesh Malani.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1057,6 +1057,24 @@
         </button>
       </li>
       <li role="presentation">
+        <button class="nav-tab" role="tab" id="tab-champions"
+          aria-controls="panel-champions" aria-selected="false" type="button">
+          Champions
+        </button>
+      </li>
+      <li role="presentation">
+        <button class="nav-tab" role="tab" id="tab-vpat"
+          aria-controls="panel-vpat" aria-selected="false" type="button">
+          VPAT / ACR
+        </button>
+      </li>
+      <li role="presentation">
+        <button class="nav-tab" role="tab" id="tab-mobile"
+          aria-controls="panel-mobile" aria-selected="false" type="button">
+          Mobile Audit
+        </button>
+      </li>
+      <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-settings"
           aria-controls="panel-settings" aria-selected="false" type="button">
           Settings
@@ -1382,31 +1400,49 @@
       aria-labelledby="tab-document" tabindex="-1">
       <h1 class="panel-title">Document Accessibility Audit</h1>
       <p class="panel-desc">
-        Upload a PDF or Office document to audit its accessibility structure.
-        The tool checks tag structure, heading hierarchy, alt text, language declaration,
-        reading order, and table header associations.
+        Upload a PDF or Word document to audit its accessibility structure.
+        PDF audit checks tag structure, language, alt text, headings, tables, and bookmarks.
+        DOCX audit checks heading styles, alt text, table headers, language, lists,
+        reading order, bookmarks, and colour contrast of text.
       </p>
 
       <h2 class="section-heading">Upload Document</h2>
-      <div class="upload-zone" role="region" aria-label="Document upload area">
-        <div class="upload-icon" aria-hidden="true">PDF</div>
-        <p class="upload-label">Upload PDF for Accessibility Audit</p>
-        <p class="upload-hint">PDF files only in this release. DOCX support in Phase 4.</p>
-        <div class="file-input-wrapper">
-          <input type="file" id="doc-file-input" accept=".pdf"
-            aria-label="Select PDF document to audit"
-            aria-describedby="doc-file-hint">
-          <label class="file-input-label" for="doc-file-input">Select PDF File</label>
-        </div>
-        <p id="doc-file-hint" style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:10px;">
-          Maximum file size 20 MB
-        </p>
+
+      <div class="method-tabs" role="tablist" aria-label="Document type" style="margin-bottom:0;">
+        <button class="method-tab" role="tab" id="dtab-pdf" aria-selected="true"
+          aria-controls="dpanel-pdf" type="button">PDF Document</button>
+        <button class="method-tab" role="tab" id="dtab-docx" aria-selected="false"
+          aria-controls="dpanel-docx" type="button">Word Document (DOCX)</button>
       </div>
 
-      <div class="notice warn" style="margin-top:16px;">
-        <strong>Note:</strong> PDF document audit uses structural analysis of the PDF tag tree.
-        It cannot audit scanned PDFs that contain no machine-readable text.
-        For scanned PDFs, the tool will report that no tag structure was detected.
+      <div id="dpanel-pdf" style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;padding:20px;margin-bottom:16px;">
+        <div class="upload-zone" role="region" aria-label="PDF upload area">
+          <div class="upload-icon" aria-hidden="true">PDF</div>
+          <p class="upload-label">Upload PDF for Accessibility Audit</p>
+          <p class="upload-hint">Checks: Tagged status, language, title, headings, alt text, table headers, bookmarks, structure tree</p>
+          <div class="file-input-wrapper">
+            <input type="file" id="doc-file-input" accept=".pdf"
+              aria-label="Select PDF document to audit">
+            <label class="file-input-label" for="doc-file-input">Select PDF File</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="dpanel-docx" hidden style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;padding:20px;margin-bottom:16px;">
+        <div class="upload-zone" role="region" aria-label="DOCX upload area">
+          <div class="upload-icon" aria-hidden="true">DOC</div>
+          <p class="upload-label">Upload Word Document for Accessibility Audit</p>
+          <p class="upload-hint">Checks: Heading styles, alt text, table headers, language, lists, text boxes, bookmarks, colour contrast</p>
+          <div class="file-input-wrapper">
+            <input type="file" id="docx-file-input" accept=".docx"
+              aria-label="Select Word document to audit">
+            <label class="file-input-label" for="docx-file-input">Select DOCX File</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice warn" style="margin-top:4px;">
+        <strong>Note:</strong> Both audits use structural and content analysis. Scanned PDFs with no machine-readable text will report no tag structure. Password-protected documents cannot be audited.
       </div>
 
       <div id="doc-results" style="display:none;">
@@ -1421,6 +1457,211 @@
           </button>
         </div>
       </div>
+    </div>
+
+
+    <!-- ── CHAMPIONS TRACKER ── -->
+    <div class="tab-panel" id="panel-champions" role="tabpanel"
+      aria-labelledby="tab-champions" tabindex="-1">
+      <h1 class="panel-title">Accessibility Champions Tracker</h1>
+      <p class="panel-desc">
+        Track engagement metrics for your Accessibility Champions programme.
+        Record audits completed, issues reported, issues resolved, and training status
+        for each champion across your client engagements.
+      </p>
+
+      <h2 class="section-heading">Add Champion</h2>
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+          <div>
+            <label class="field-label" for="ch-name">Full Name</label>
+            <input class="field-input" type="text" id="ch-name" placeholder="Champion name" style="margin-bottom:0;">
+          </div>
+          <div>
+            <label class="field-label" for="ch-role">Role</label>
+            <input class="field-input" type="text" id="ch-role" placeholder="Developer, Designer..." style="margin-bottom:0;">
+          </div>
+          <div>
+            <label class="field-label" for="ch-team">Team or Product</label>
+            <input class="field-input" type="text" id="ch-team" placeholder="Team name" style="margin-bottom:0;">
+          </div>
+          <div>
+            <label class="field-label" for="ch-client">Client</label>
+            <input class="field-input" type="text" id="ch-client" placeholder="e.g. BMO" style="margin-bottom:0;">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="ch-add-btn" type="button">Add Champion</button>
+        <span id="ch-add-status" role="status" aria-live="polite"
+          style="font-family:var(--mono);font-size:11px;color:var(--green);margin-left:12px;"></span>
+      </div>
+
+      <h2 class="section-heading">Champion Roster</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <label class="field-label" for="ch-filter-client" style="margin:0;">Filter by client:</label>
+        <select class="field-select" id="ch-filter-client" style="margin:0;min-width:140px;" aria-label="Filter champions by client">
+          <option value="All">All clients</option>
+        </select>
+        <button class="btn btn-sm" id="ch-export-btn" type="button">Export Champion Data as CSV</button>
+      </div>
+
+      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);"
+        role="region" aria-label="Champions table" tabindex="0">
+        <table class="findings-table" id="ch-table" aria-label="Accessibility champions and engagement metrics">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Role</th>
+              <th scope="col">Team</th>
+              <th scope="col">Client</th>
+              <th scope="col">Audits</th>
+              <th scope="col">Issues Reported</th>
+              <th scope="col">Issues Resolved</th>
+              <th scope="col">Training</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ch-tbody">
+            <tr><td colspan="9" style="color:var(--text-muted);font-family:var(--mono);font-size:12px;padding:20px;">
+              No champions added yet. Use the form above to add your first champion.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── VPAT / ACR ── -->
+    <div class="tab-panel" id="panel-vpat" role="tabpanel"
+      aria-labelledby="tab-vpat" tabindex="-1">
+      <h1 class="panel-title">VPAT 2.5 and ACR Generator</h1>
+      <p class="panel-desc">
+        Generate a VPAT 2.5 Accessibility Conformance Report in Word format.
+        Complete the product information and conformance levels for each criterion.
+        The generated Word document follows the ITI VPAT 2.5 template structure
+        and is compatible with BMO and other enterprise client requirements.
+      </p>
+
+      <h2 class="section-heading">Product Information</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:20px;">
+        <div>
+          <label class="field-label" for="vpat-product">Product Name</label>
+          <input class="field-input" type="text" id="vpat-product" placeholder="e.g. BMO Online Banking Portal">
+        </div>
+        <div>
+          <label class="field-label" for="vpat-version">Product Version</label>
+          <input class="field-input" type="text" id="vpat-version" placeholder="e.g. 2.4.1">
+        </div>
+        <div>
+          <label class="field-label" for="vpat-vendor">Vendor or Developer</label>
+          <input class="field-input" type="text" id="vpat-vendor" placeholder="Organisation name">
+        </div>
+        <div>
+          <label class="field-label" for="vpat-contact">Contact Name</label>
+          <input class="field-input" type="text" id="vpat-contact" placeholder="Akhilesh Malani">
+        </div>
+        <div>
+          <label class="field-label" for="vpat-email">Contact Email</label>
+          <input class="field-input" type="email" id="vpat-email" placeholder="email@example.com">
+        </div>
+        <div>
+          <label class="field-label" for="vpat-date">Report Date</label>
+          <input class="field-input" type="date" id="vpat-date">
+        </div>
+        <div>
+          <label class="field-label" for="vpat-standard">Applicable Standard</label>
+          <select class="field-select" id="vpat-standard" aria-label="Select applicable standard">
+            <option value="wcag22">WCAG 2.2</option>
+            <option value="wcag21">WCAG 2.1</option>
+            <option value="section508">Section 508</option>
+            <option value="en301549">EN 301 549</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="vpat-eval-method">Evaluation Method</label>
+          <input class="field-input" type="text" id="vpat-eval-method"
+            value="Manual testing with JAWS, NVDA, VoiceOver. Automated testing with AMA11Y.">
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label class="field-label" for="vpat-notes">Executive Summary and Evaluation Notes</label>
+        <textarea class="field-input" id="vpat-notes" rows="4"
+          style="resize:vertical;height:100px;"
+          placeholder="Describe the scope of evaluation, pages tested, and any known limitations..."></textarea>
+      </div>
+
+      <h2 class="section-heading">WCAG 2.2 Conformance Levels</h2>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">
+        Set the conformance level for each success criterion. Use the quick-set buttons
+        to apply a level to all criteria at once, then adjust exceptions individually.
+      </p>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" role="group" aria-label="Quick set conformance for all criteria">
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Supports')">Set All: Supports</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Partially Supports')">Set All: Partially Supports</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Does Not Support')">Set All: Does Not Support</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Not Applicable')">Set All: Not Applicable</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Not Evaluated')">Set All: Not Evaluated</button>
+      </div>
+
+      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:24px;"
+        role="region" aria-label="WCAG criteria conformance table" tabindex="0">
+        <table class="findings-table" id="vpat-criteria-table" aria-label="WCAG 2.2 success criteria conformance levels">
+          <thead>
+            <tr>
+              <th scope="col">Criterion</th>
+              <th scope="col">Level</th>
+              <th scope="col">Conformance</th>
+              <th scope="col">Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="vpat-tbody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-primary" id="vpat-generate-btn" type="button">Generate VPAT 2.5 Word Document</button>
+        <span id="vpat-status" role="status" aria-live="polite"
+          style="font-family:var(--mono);font-size:12px;color:var(--text-dim);"></span>
+      </div>
+    </div>
+
+    <!-- ── MOBILE AUDIT CHECKLIST ── -->
+    <div class="tab-panel" id="panel-mobile" role="tabpanel"
+      aria-labelledby="tab-mobile" tabindex="-1">
+      <h1 class="panel-title">Mobile Accessibility Checklist</h1>
+      <p class="panel-desc">
+        A structured checklist for auditing mobile applications across iOS, iPadOS, Android,
+        and WearOS. Each item includes the WCAG criterion, the platform-specific test method,
+        and the assistive technology to use. Check items as you test, add notes, and export
+        the completed checklist as a report.
+      </p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;">
+        <div>
+          <label class="field-label" for="mob-app">App Name</label>
+          <input class="field-input" type="text" id="mob-app" placeholder="e.g. BMO Mobile Banking" style="margin-bottom:0;">
+        </div>
+        <div>
+          <label class="field-label" for="mob-platform">Platform</label>
+          <select class="field-select" id="mob-platform" style="margin-bottom:0;" aria-label="Select mobile platform" onchange="mob_renderChecklist()">
+            <option value="ios">iOS and iPadOS with VoiceOver</option>
+            <option value="android">Android with TalkBack</option>
+            <option value="wearos">WearOS</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="mob-version">App Version</label>
+          <input class="field-input" type="text" id="mob-version" placeholder="e.g. 4.2.1" style="margin-bottom:0;">
+        </div>
+        <button class="btn btn-sm" type="button" onclick="mob_resetChecklist()" style="align-self:flex-end;">Reset Checklist</button>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-primary btn-sm" id="mob-export-html" type="button">Export as HTML Report</button>
+        <button class="btn btn-sm" id="mob-export-txt" type="button">Export as Plain Text</button>
+      </div>
+
+      <div id="mob-checklist-region" role="region" aria-label="Mobile accessibility checklist" aria-live="polite"></div>
     </div>
 
     <!-- ── SETTINGS ── -->
@@ -1584,7 +1825,7 @@ function showView(id) {
 }
 
 /* ── Tab switching ── */
-const TABS = ['dashboard','import','webaudit','document','settings'];
+const TABS = ['dashboard','import','webaudit','document','champions','vpat','mobile','settings'];
 
 function switchTab(name) {
   TABS.forEach(t => {
@@ -1650,7 +1891,7 @@ function addDigit(d) {
   pinBuffer += d;
   updateDots();
   if (pinBuffer.length >= 4) {
-    // Auto-submit if PIN matches stored length (we don't know length, so submit on Enter)
+    // Auto-submit if PIN matches stored length (we don\'t know length, so submit on Enter)
   }
 }
 
@@ -1706,6 +1947,9 @@ document.addEventListener('keydown', e => {
 function enterApp() {
   showView('view-app');
   renderDashboard();
+  vpat_renderCriteria();
+  mob_renderChecklist();
+  renderChampions();
   setTimeout(() => {
     $('tab-dashboard').focus();
     announce('AMA11Y platform loaded. Dashboard tab focused. Use arrow keys to navigate between tabs.');
@@ -2605,6 +2849,768 @@ function waRenderTable(findings) {
     announce('Filter applied. ' + filtered.length + ' findings shown.');
   });
 });
+
+
+/* ══════════════════════════════════════════════════════════════
+   PHASE 4 JAVASCRIPT
+   4.2 DOCX Document Audit
+   4.3 Champions Tracker
+   4.4 VPAT 2.5 Generator
+   4.5 Mobile Accessibility Checklist
+   4.6 NVDA Keyboard Guidance (integrated into panel descriptions)
+══════════════════════════════════════════════════════════════ */
+
+/* ── Document type tab switching ── */
+const dtabs   = document.querySelectorAll('[id^="dtab-"]');
+const dpanels = document.querySelectorAll('[id^="dpanel-"]');
+dtabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    dtabs.forEach(t => t.setAttribute('aria-selected','false'));
+    dpanels.forEach(p => { p.hidden = true; });
+    tab.setAttribute('aria-selected','true');
+    const panel = document.getElementById(tab.getAttribute('aria-controls'));
+    if (panel) panel.hidden = false;
+    announce('Switched to ' + tab.textContent.trim() + ' audit.');
+  });
+  tab.addEventListener('keydown', e => {
+    const all = Array.from(dtabs);
+    const idx = all.indexOf(tab);
+    let next = null;
+    if (e.key === 'ArrowRight') next = all[(idx+1) % all.length];
+    if (e.key === 'ArrowLeft')  next = all[(idx-1+all.length) % all.length];
+    if (next) { e.preventDefault(); next.click(); next.focus(); }
+  });
+});
+
+/* ══════════════════════════════════════════════
+   4.2 DOCX DOCUMENT AUDIT
+══════════════════════════════════════════════ */
+
+$('docx-file-input') && $('docx-file-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) { announce('File is too large. Maximum 20 megabytes.'); return; }
+  announce('Reading Word document. Please wait.');
+  $('loading-overlay').classList.add('active');
+  try {
+    const buf   = await file.arrayBuffer();
+    const results = await auditDOCX(buf, file.name);
+    renderDocResults(results, file.name);
+    announce('DOCX audit complete. ' + results.length + ' findings. Navigate to results below.');
+  } catch(err) {
+    announce('Error reading document: ' + err.message);
+  } finally {
+    $('loading-overlay').classList.remove('active');
+  }
+});
+
+async function auditDOCX(buffer, filename) {
+  const findings = [];
+
+  // DOCX is a ZIP. We read the word/document.xml and word/styles.xml contents.
+  // We use a simple ZIP parser to extract the relevant XML files.
+  const zip    = await readZip(buffer);
+  const docXML = zip['word/document.xml'] || '';
+  const styXML = zip['word/styles.xml']   || '';
+  const setXML = zip['word/settings.xml'] || '';
+  const relXML = zip['word/_rels/document.xml.rels'] || '';
+
+  if (!docXML) {
+    findings.push({ status:'FAIL', title:'Could not read document XML',
+      detail:'The file does not appear to be a valid DOCX file or it may be password protected.' });
+    return findings;
+  }
+
+  // 1. HEADING STYLES — check for styled headings vs manually bolded paragraphs
+  const styledHeadings = (docXML.match(/w:styleId="Heading[1-6]"|w:val="Heading [1-6]"/g)||[]).length;
+  const boldParas      = (docXML.match(/<w:b\/>/g)||[]).length;
+  if (styledHeadings === 0) {
+    findings.push({ status:'FAIL', title:'No Word heading styles detected',
+      detail:'No paragraphs using built-in Heading 1 through Heading 6 styles were found. Screen readers navigate documents by heading styles, not by visual bold formatting. All section headings must use proper Word heading styles. WCAG SC 1.3.1 / PDF/UA.' });
+  } else {
+    findings.push({ status:'PASS', title: styledHeadings + ' heading style paragraphs found',
+      detail:'Built-in heading styles detected. Verify the heading hierarchy is logical and levels are not skipped.' });
+  }
+
+  // 2. ALT TEXT on images and objects
+  const drawingCount = (docXML.match(/<w:drawing>/g)||[]).length;
+  const altTextCount = (docXML.match(/a:hlinkClick|wp:docPr[^>]+descr=|wp:docPr[^>]+title=/g)||[]).length;
+  const altAttrCount = (docXML.match(/descr="[^"]+"/g)||[]).filter(m => m !== 'descr=""').length;
+  const emptyAlt     = (docXML.match(/descr=""/g)||[]).length;
+
+  if (drawingCount > 0) {
+    if (altAttrCount === 0 && emptyAlt === 0) {
+      findings.push({ status:'FAIL', title: drawingCount + ' images found with no alt text attribute',
+        detail: drawingCount + ' drawing objects found but no description attributes detected. All images and diagrams must have alternative text. WCAG SC 1.1.1.' });
+    } else if (emptyAlt > 0 && altAttrCount === 0) {
+      findings.push({ status:'WARN', title: emptyAlt + ' of ' + drawingCount + ' images have empty alt text',
+        detail:'Images found with empty description attributes (descr=""). Verify these are intentionally decorative. If they convey information, add descriptive alt text.' });
+    } else if (emptyAlt > 0) {
+      findings.push({ status:'WARN', title: emptyAlt + ' images have empty alt text, ' + altAttrCount + ' have descriptions',
+        detail:'Some images are marked decorative (empty alt) and some have descriptions. Verify that images marked decorative truly convey no information.' });
+    } else {
+      findings.push({ status:'PASS', title: altAttrCount + ' of ' + drawingCount + ' images have alt text',
+        detail:'All detected images have description attributes. Review each to confirm the descriptions are meaningful and accurate.' });
+    }
+  } else {
+    findings.push({ status:'INFO', title:'No image objects detected',
+      detail:'No drawing elements found in the document. If images appear when you open the file, they may be embedded in a way this analysis cannot detect.' });
+  }
+
+  // 3. TABLE HEADER ROWS
+  const tableCount     = (docXML.match(/<w:tbl>/g)||[]).length;
+  const tblHeaderCount = (docXML.match(/w:tblHeader/g)||[]).length;
+  if (tableCount > 0 && tblHeaderCount === 0) {
+    findings.push({ status:'FAIL', title: tableCount + ' tables found with no header rows marked',
+      detail: tableCount + ' table structures found but no rows are marked as header rows using the Repeat Header Row property. Screen readers use this to identify column headers. WCAG SC 1.3.1.' });
+  } else if (tableCount > 0) {
+    findings.push({ status:'PASS', title: tableCount + ' tables, ' + tblHeaderCount + ' header rows marked',
+      detail:'Table header rows detected. Verify that all data tables have their first row marked as a header row using Table Properties in Word.' });
+  } else {
+    findings.push({ status:'INFO', title:'No tables found', detail:'No table structures detected in the document.' });
+  }
+
+  // 4. DOCUMENT LANGUAGE
+  const hasLang = setXML.includes('w:themeFontLang') || docXML.includes('w:lang') || setXML.includes('<w:defaultTabStop');
+  const langMatch = docXML.match(/w:lang w:val="([^"]+)"/);
+  if (langMatch) {
+    findings.push({ status:'PASS', title:'Document language declared: ' + langMatch[1],
+      detail:'Language attribute found in document content. Verify this matches the primary language of the document.' });
+  } else if (setXML.match(/w:lang w:val="([^"]+)"/)) {
+    const sl = setXML.match(/w:lang w:val="([^"]+)"/)[1];
+    findings.push({ status:'PASS', title:'Document language in settings: ' + sl,
+      detail:'Language set in document settings. Screen readers use this to select the correct voice and pronunciation.' });
+  } else {
+    findings.push({ status:'FAIL', title:'Document language not declared',
+      detail:'No language attribute detected. The document language must be set so screen readers use the correct voice. In Word: File > Info > Properties or Review > Language > Set Proofing Language. WCAG SC 3.1.1.' });
+  }
+
+  // 5. LISTS — proper list styles vs manual bullets
+  const listCount   = (docXML.match(/w:numId/g)||[]).length;
+  const manualBullets = (docXML.match(/[•·‐‑–—]/g)||[]).length;
+  if (manualBullets > 3) {
+    findings.push({ status:'WARN', title: manualBullets + ' possible manual bullet characters found',
+      detail: manualBullets + ' bullet or dash characters found that may be manually typed rather than proper list styles. Screen readers announce list items and counts only for properly styled lists. WCAG SC 1.3.1.' });
+  }
+  if (listCount > 0) {
+    findings.push({ status:'PASS', title: listCount + ' list style references found',
+      detail:'Numbered list style references detected. Proper list styles allow screen readers to announce the number of items and navigate between them.' });
+  } else {
+    findings.push({ status:'INFO', title:'No list style references detected',
+      detail:'No Word list numbering definitions found. If the document contains lists, verify they use proper list styles rather than manual numbering or bullet characters.' });
+  }
+
+  // 6. TEXT BOXES AND READING ORDER
+  const textBoxCount = (docXML.match(/w:txbxContent/g)||[]).length;
+  if (textBoxCount > 0) {
+    findings.push({ status:'FAIL', title: textBoxCount + ' text boxes found',
+      detail: textBoxCount + ' text box elements found. Text boxes are read by screen readers in an unpredictable order that does not match the visual reading sequence. Content in text boxes is often skipped entirely by some screen readers. Replace text boxes with inline content. WCAG SC 1.3.2.' });
+  } else {
+    findings.push({ status:'PASS', title:'No text boxes found',
+      detail:'No text box elements detected. Content appears to be in the main document flow with predictable reading order.' });
+  }
+
+  // 7. BOOKMARKS AND NAVIGATION
+  const bookmarkCount = (docXML.match(/<w:bookmarkStart/g)||[]).length;
+  const headingCount2 = styledHeadings;
+  if (headingCount2 > 3 && bookmarkCount < 3) {
+    findings.push({ status:'WARN', title:'Document has headings but few bookmarks',
+      detail:'Long documents with headings should have a navigation pane. In Word, ensure the Navigation Pane is enabled (View > Navigation Pane) so screen reader users can jump between sections. Generate a table of contents for documents over 5 pages.' });
+  } else if (bookmarkCount > 0) {
+    findings.push({ status:'PASS', title: bookmarkCount + ' bookmarks found',
+      detail:'Bookmark elements present. These support navigation landmarks for screen reader users.' });
+  } else {
+    findings.push({ status:'INFO', title:'No bookmarks detected',
+      detail:'No bookmark elements found. Consider adding a table of contents for long documents to support screen reader navigation.' });
+  }
+
+  // 8. COLOUR CONTRAST (structural check — actual values require rendering)
+  const highlightCount = (docXML.match(/w:highlight/g)||[]).length;
+  const colorCount     = (docXML.match(/w:color w:val="(?!auto|000000)[^"]+"/g)||[]).length;
+  if (colorCount > 0) {
+    findings.push({ status:'WARN', title: colorCount + ' custom text colour instances found',
+      detail: colorCount + ' paragraphs or runs with custom text colours detected. Custom colours may fail contrast requirements when printed, when Windows High Contrast mode is active, or when the document is converted to PDF. Verify each custom colour meets 4.5:1 contrast ratio. WCAG SC 1.4.3.' });
+  } else {
+    findings.push({ status:'PASS', title:'No custom text colours detected',
+      detail:'Text appears to use default document colours. Default black on white meets contrast requirements.' });
+  }
+
+  if (highlightCount > 0) {
+    findings.push({ status:'WARN', title: highlightCount + ' highlighted text instances found',
+      detail: highlightCount + ' text highlight instances found. Highlighted text may convey meaning through colour alone. Ensure any information conveyed by highlighting is also available in text. WCAG SC 1.4.1.' });
+  }
+
+  return findings;
+}
+
+/* Simple ZIP reader for DOCX — extracts XML file contents from the ZIP archive */
+async function readZip(buffer) {
+  const result = {};
+  const view   = new DataView(buffer);
+  const bytes  = new Uint8Array(buffer);
+  let offset   = 0;
+
+  while (offset < bytes.length - 4) {
+    // Local file header signature
+    if (view.getUint32(offset, true) !== 0x04034b50) { offset++; continue; }
+
+    const fnLen    = view.getUint16(offset + 26, true);
+    const extraLen = view.getUint16(offset + 28, true);
+    const compSize = view.getUint32(offset + 18, true);
+    const compMethod = view.getUint16(offset + 8, true);
+
+    const fnBytes  = bytes.slice(offset + 30, offset + 30 + fnLen);
+    const filename = new TextDecoder().decode(fnBytes);
+
+    const dataOffset = offset + 30 + fnLen + extraLen;
+
+    if (['word/document.xml','word/styles.xml','word/settings.xml','word/_rels/document.xml.rels'].includes(filename)) {
+      try {
+        const compressed = bytes.slice(dataOffset, dataOffset + compSize);
+        if (compMethod === 0) {
+          // Stored — no compression
+          result[filename] = new TextDecoder().decode(compressed);
+        } else if (compMethod === 8) {
+          // Deflate
+          const ds = new DecompressionStream('deflate-raw');
+          const writer = ds.writable.getWriter();
+          const reader = ds.readable.getReader();
+          writer.write(compressed);
+          writer.close();
+          const chunks = [];
+          let done = false;
+          while (!done) {
+            const { value, done: d } = await reader.read();
+            if (value) chunks.push(value);
+            done = d;
+          }
+          const total = chunks.reduce((acc, c) => acc + c.length, 0);
+          const out   = new Uint8Array(total);
+          let pos = 0;
+          chunks.forEach(c => { out.set(c, pos); pos += c.length; });
+          result[filename] = new TextDecoder().decode(out);
+        }
+      } catch(e) { /* skip unreadable entries */ }
+    }
+
+    offset = dataOffset + compSize;
+  }
+  return result;
+}
+
+/* ══════════════════════════════════════════════
+   4.3 CHAMPIONS TRACKER
+══════════════════════════════════════════════ */
+
+const KEY_CHAMPIONS = 'ama11y_champions';
+
+function getChampions() {
+  try { return JSON.parse(localStorage.getItem(KEY_CHAMPIONS) || '[]'); } catch { return []; }
+}
+function saveChampions(data) { localStorage.setItem(KEY_CHAMPIONS, JSON.stringify(data)); }
+
+function renderChampions() {
+  const data   = getChampions();
+  const filter = $('ch-filter-client') ? $('ch-filter-client').value : 'All';
+  const tbody  = $('ch-tbody');
+  if (!tbody) return;
+
+  // Update client filter options
+  const clients = ['All', ...new Set(data.map(c => c.client).filter(Boolean))];
+  const cfSel   = $('ch-filter-client');
+  if (cfSel) {
+    const prev = cfSel.value;
+    cfSel.innerHTML = '';
+    clients.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; cfSel.appendChild(o); });
+    cfSel.value = clients.includes(prev) ? prev : 'All';
+  }
+
+  const filtered = filter === 'All' ? data : data.filter(c => c.client === filter);
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--text-muted);font-family:var(--mono);font-size:12px;padding:20px;">No champions found. Add one using the form above.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  filtered.forEach((ch, idx) => {
+    const realIdx = data.indexOf(ch);
+    const tr = document.createElement('tr');
+    const trainingOptions = ['Not Started','In Progress','Completed'];
+    tr.innerHTML =
+      '<td style="font-size:12px;">' + escHtml(ch.name) + '</td>' +
+      '<td style="font-size:11px;color:var(--text-dim);">' + escHtml(ch.role) + '</td>' +
+      '<td style="font-size:11px;color:var(--text-dim);">' + escHtml(ch.team) + '</td>' +
+      '<td style="font-size:11px;font-family:var(--mono);color:var(--accent);">' + escHtml(ch.client) + '</td>' +
+      '<td><input type="number" min="0" value="' + (ch.audits||0) + '" style="width:60px;background:var(--navy-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;font-family:var(--mono);font-size:12px;" aria-label="Audits completed by ' + escHtml(ch.name) + '" onchange="chUpdate(' + realIdx + ',\'audits\',this.value)"></td>' +
+      '<td><input type="number" min="0" value="' + (ch.reported||0) + '" style="width:60px;background:var(--navy-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;font-family:var(--mono);font-size:12px;" aria-label="Issues reported by ' + escHtml(ch.name) + '" onchange="chUpdate(' + realIdx + ',\'reported\',this.value)"></td>' +
+      '<td><input type="number" min="0" value="' + (ch.resolved||0) + '" style="width:60px;background:var(--navy-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;font-family:var(--mono);font-size:12px;" aria-label="Issues resolved by ' + escHtml(ch.name) + '" onchange="chUpdate(' + realIdx + ',\'resolved\',this.value)"></td>' +
+      '<td><select style="background:var(--navy-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px;font-size:11px;" aria-label="Training status for ' + escHtml(ch.name) + '" onchange="chUpdate(' + realIdx + ',\'training\',this.value)">' +
+        trainingOptions.map(o => '<option value="' + o + '"' + (ch.training===o?' selected':'') + '>' + o + '</option>').join('') +
+      '</select></td>' +
+      '<td><button class="expand-btn" type="button" onclick="chRemove(' + realIdx + ')" aria-label="Remove ' + escHtml(ch.name) + ' from champions list">Remove</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function chUpdate(idx, field, value) {
+  const data = getChampions();
+  if (!data[idx]) return;
+  data[idx][field] = isNaN(value) ? value : parseInt(value) || 0;
+  saveChampions(data);
+  announce(data[idx].name + ' ' + field + ' updated.');
+}
+
+function chRemove(idx) {
+  const data = getChampions();
+  const name = data[idx] ? data[idx].name : 'Champion';
+  data.splice(idx, 1);
+  saveChampions(data);
+  renderChampions();
+  announce(name + ' removed from champions list.');
+}
+
+if ($('ch-add-btn')) {
+  $('ch-add-btn').addEventListener('click', () => {
+    const name = $('ch-name').value.trim();
+    if (!name) { announce('Please enter a name for the champion.'); $('ch-name').focus(); return; }
+    const data = getChampions();
+    data.push({
+      name, role: $('ch-role').value.trim(),
+      team: $('ch-team').value.trim(), client: $('ch-client').value.trim(),
+      audits: 0, reported: 0, resolved: 0, training: 'Not Started'
+    });
+    saveChampions(data);
+    ['ch-name','ch-role','ch-team','ch-client'].forEach(id => { if ($(id)) $(id).value = ''; });
+    renderChampions();
+    const status = $('ch-add-status');
+    if (status) { status.textContent = name + ' added.'; setTimeout(() => { status.textContent=''; }, 3000); }
+    announce(name + ' added to champions list.');
+  });
+}
+
+if ($('ch-filter-client')) {
+  $('ch-filter-client').addEventListener('change', renderChampions);
+}
+
+if ($('ch-export-btn')) {
+  $('ch-export-btn').addEventListener('click', () => {
+    const data = getChampions();
+    if (!data.length) { announce('No champions to export.'); return; }
+    const hdr  = ['Name','Role','Team','Client','Audits Completed','Issues Reported','Issues Resolved','Training Status'];
+    const rows  = data.map(c => [c.name,c.role,c.team,c.client,c.audits||0,c.reported||0,c.resolved||0,c.training||'Not Started'].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(','));
+    const csv   = [hdr.join(','),...rows].join('\r\n');
+    downloadFile(csv,'text/csv','ama11y-champions-' + new Date().toISOString().slice(0,10) + '.csv');
+    announce('Champions data exported as CSV.');
+  });
+}
+
+/* ══════════════════════════════════════════════
+   4.4 VPAT 2.5 GENERATOR
+══════════════════════════════════════════════ */
+
+const VPAT_CRITERIA = [
+  { id:'1.1.1',  name:'Non-text Content',            level:'A'   },
+  { id:'1.2.1',  name:'Audio-only and Video-only',   level:'A'   },
+  { id:'1.2.2',  name:'Captions (Prerecorded)',       level:'A'   },
+  { id:'1.2.3',  name:'Audio Description or Media Alternative', level:'A' },
+  { id:'1.2.4',  name:'Captions (Live)',              level:'AA'  },
+  { id:'1.2.5',  name:'Audio Description (Prerecorded)', level:'AA' },
+  { id:'1.3.1',  name:'Info and Relationships',       level:'A'   },
+  { id:'1.3.2',  name:'Meaningful Sequence',          level:'A'   },
+  { id:'1.3.3',  name:'Sensory Characteristics',      level:'A'   },
+  { id:'1.3.4',  name:'Orientation',                  level:'AA'  },
+  { id:'1.3.5',  name:'Identify Input Purpose',       level:'AA'  },
+  { id:'1.4.1',  name:'Use of Color',                 level:'A'   },
+  { id:'1.4.2',  name:'Audio Control',                level:'A'   },
+  { id:'1.4.3',  name:'Contrast (Minimum)',           level:'AA'  },
+  { id:'1.4.4',  name:'Resize text',                  level:'AA'  },
+  { id:'1.4.5',  name:'Images of Text',               level:'AA'  },
+  { id:'1.4.10', name:'Reflow',                       level:'AA'  },
+  { id:'1.4.11', name:'Non-text Contrast',            level:'AA'  },
+  { id:'1.4.12', name:'Text Spacing',                 level:'AA'  },
+  { id:'1.4.13', name:'Content on Hover or Focus',    level:'AA'  },
+  { id:'2.1.1',  name:'Keyboard',                     level:'A'   },
+  { id:'2.1.2',  name:'No Keyboard Trap',             level:'A'   },
+  { id:'2.1.4',  name:'Character Key Shortcuts',      level:'A'   },
+  { id:'2.2.1',  name:'Timing Adjustable',            level:'A'   },
+  { id:'2.2.2',  name:'Pause, Stop, Hide',            level:'A'   },
+  { id:'2.3.1',  name:'Three Flashes or Below',       level:'A'   },
+  { id:'2.4.1',  name:'Bypass Blocks',                level:'A'   },
+  { id:'2.4.2',  name:'Page Titled',                  level:'A'   },
+  { id:'2.4.3',  name:'Focus Order',                  level:'A'   },
+  { id:'2.4.4',  name:'Link Purpose (In Context)',    level:'A'   },
+  { id:'2.4.5',  name:'Multiple Ways',                level:'AA'  },
+  { id:'2.4.6',  name:'Headings and Labels',          level:'AA'  },
+  { id:'2.4.7',  name:'Focus Visible',                level:'AA'  },
+  { id:'2.4.11', name:'Focus Appearance',             level:'AA'  },
+  { id:'2.5.1',  name:'Pointer Gestures',             level:'A'   },
+  { id:'2.5.2',  name:'Pointer Cancellation',         level:'A'   },
+  { id:'2.5.3',  name:'Label in Name',                level:'A'   },
+  { id:'2.5.4',  name:'Motion Actuation',             level:'A'   },
+  { id:'2.5.7',  name:'Dragging Movements',           level:'AA'  },
+  { id:'2.5.8',  name:'Target Size (Minimum)',        level:'AA'  },
+  { id:'3.1.1',  name:'Language of Page',             level:'A'   },
+  { id:'3.1.2',  name:'Language of Parts',            level:'AA'  },
+  { id:'3.2.1',  name:'On Focus',                     level:'A'   },
+  { id:'3.2.2',  name:'On Input',                     level:'A'   },
+  { id:'3.2.3',  name:'Consistent Navigation',        level:'AA'  },
+  { id:'3.2.4',  name:'Consistent Identification',    level:'AA'  },
+  { id:'3.2.6',  name:'Consistent Help',              level:'A'   },
+  { id:'3.3.1',  name:'Error Identification',         level:'A'   },
+  { id:'3.3.2',  name:'Labels or Instructions',       level:'A'   },
+  { id:'3.3.3',  name:'Error Suggestion',             level:'AA'  },
+  { id:'3.3.4',  name:'Error Prevention (Legal, Financial, Data)', level:'AA' },
+  { id:'3.3.7',  name:'Redundant Entry',              level:'A'   },
+  { id:'3.3.8',  name:'Accessible Authentication (Minimum)', level:'AA' },
+  { id:'4.1.1',  name:'Parsing',                      level:'A'   },
+  { id:'4.1.2',  name:'Name, Role, Value',            level:'A'   },
+  { id:'4.1.3',  name:'Status Messages',              level:'AA'  },
+];
+
+const CONFORMANCE_OPTIONS = ['Supports','Partially Supports','Does Not Support','Not Applicable','Not Evaluated'];
+
+function vpat_renderCriteria() {
+  const tbody = $('vpat-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  VPAT_CRITERIA.forEach(c => {
+    const tr = document.createElement('tr');
+    const selId = 'vpat-' + c.id.replace('.','_');
+    const rmkId = 'vpat-rmk-' + c.id.replace('.','_');
+    tr.innerHTML =
+      '<td style="font-family:var(--mono);font-size:12px;"><strong>' + escHtml(c.id) + '</strong> ' + escHtml(c.name) + '</td>' +
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--accent);">' + escHtml(c.level) + '</td>' +
+      '<td><select id="' + selId + '" class="field-select" style="margin:0;font-size:11px;" aria-label="Conformance for ' + escHtml(c.id) + ' ' + escHtml(c.name) + '">' +
+        CONFORMANCE_OPTIONS.map(o => '<option value="' + o + '">' + o + '</option>').join('') +
+      '</select></td>' +
+      '<td><input type="text" id="' + rmkId + '" class="field-input" style="margin:0;font-size:11px;" placeholder="Remarks and explanations..." aria-label="Remarks for ' + escHtml(c.id) + '"></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function vpat_setAll(value) {
+  VPAT_CRITERIA.forEach(c => {
+    const sel = document.getElementById('vpat-' + c.id.replace('.','_'));
+    if (sel) sel.value = value;
+  });
+  announce('All criteria set to ' + value + '.');
+}
+
+if ($('vpat-generate-btn')) {
+  // Set default date
+  const vd = $('vpat-date');
+  if (vd) vd.value = new Date().toISOString().slice(0,10);
+
+  $('vpat-generate-btn').addEventListener('click', () => {
+    const product = $('vpat-product').value.trim() || 'Product Name';
+    const version = $('vpat-version').value.trim() || '';
+    const vendor  = $('vpat-vendor').value.trim()  || '';
+    const contact = $('vpat-contact').value.trim() || 'Akhilesh Malani';
+    const email   = $('vpat-email').value.trim()   || '';
+    const date    = $('vpat-date').value            || new Date().toISOString().slice(0,10);
+    const notes   = $('vpat-notes').value.trim()   || '';
+    const std     = $('vpat-standard').value;
+    const stdLabels = {wcag22:'WCAG 2.2',wcag21:'WCAG 2.1',section508:'Section 508',en301549:'EN 301 549'};
+    const stdLabel  = stdLabels[std] || 'WCAG 2.2';
+
+    const criteria = VPAT_CRITERIA.map(c => {
+      const selId = 'vpat-' + c.id.replace('.','_');
+      const rmkId = 'vpat-rmk-' + c.id.replace('.','_');
+      const sel   = document.getElementById(selId);
+      const rmk   = document.getElementById(rmkId);
+      return { ...c, conformance: sel ? sel.value : 'Not Evaluated', remarks: rmk ? rmk.value : '' };
+    });
+
+    const docContent = buildVPATWord(product, version, vendor, contact, email, date, notes, stdLabel, criteria);
+    downloadFile(docContent, 'application/msword', 'VPAT-2.5-' + product.replace(/[^a-zA-Z0-9]/g,'-').slice(0,40) + '-' + date + '.doc');
+    const status = $('vpat-status');
+    if (status) status.textContent = 'VPAT document generated and downloaded.';
+    announce('VPAT 2.5 Word document generated and downloaded.');
+  });
+}
+
+function buildVPATWord(product, version, vendor, contact, email, date, notes, stdLabel, criteria) {
+  const rows = criteria.map(c => {
+    const cColor = { 'Supports':'#1e8449', 'Partially Supports':'#d68910',
+      'Does Not Support':'#c0392b', 'Not Applicable':'#666', 'Not Evaluated':'#666' }[c.conformance] || '#000';
+    return '<tr><td style="padding:6pt;border:1pt solid #ccc;font-size:10pt;"><b>' + escHtml(c.id) + '</b> ' + escHtml(c.name) + '</td>' +
+      '<td style="padding:6pt;border:1pt solid #ccc;font-size:9pt;text-align:center;">' + escHtml(c.level) + '</td>' +
+      '<td style="padding:6pt;border:1pt solid #ccc;font-size:10pt;color:' + cColor + ';font-weight:bold;">' + escHtml(c.conformance) + '</td>' +
+      '<td style="padding:6pt;border:1pt solid #ccc;font-size:10pt;">' + escHtml(c.remarks) + '</td></tr>';
+  }).join('');
+
+  const supCount  = criteria.filter(c=>c.conformance==='Supports').length;
+  const partCount = criteria.filter(c=>c.conformance==='Partially Supports').length;
+  const failCount = criteria.filter(c=>c.conformance==='Does Not Support').length;
+
+  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">' +
+    '<head><meta charset="UTF-8"><title>VPAT 2.5 — ' + escHtml(product) + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm;}' +
+    'h1{font-size:18pt;color:#003366;}h2{font-size:13pt;color:#003366;border-bottom:1pt solid #003366;padding-bottom:4pt;}' +
+    'h3{font-size:11pt;color:#003366;}p{margin-bottom:8pt;}' +
+    'table{border-collapse:collapse;width:100%;margin-bottom:16pt;}' +
+    'th{background:#003366;color:#fff;padding:6pt;text-align:left;font-size:10pt;}' +
+    'td{padding:6pt;border:1pt solid #ccc;font-size:10pt;vertical-align:top;}' +
+    '.summary-box{background:#f0f5fa;border:1pt solid #cde;padding:10pt;margin-bottom:16pt;}' +
+    '</style></head><body>' +
+    '<h1>Accessibility Conformance Report</h1>' +
+    '<p><strong>VPAT Version:</strong> 2.5 &nbsp; <strong>Standard:</strong> ' + escHtml(stdLabel) + '</p>' +
+    '<h2>Product Information</h2>' +
+    '<table style="width:100%;margin-bottom:16pt;"><tbody>' +
+    '<tr><td style="border:none;width:180pt;"><strong>Product Name:</strong></td><td style="border:none;">' + escHtml(product) + '</td></tr>' +
+    '<tr><td style="border:none;"><strong>Product Version:</strong></td><td style="border:none;">' + escHtml(version) + '</td></tr>' +
+    '<tr><td style="border:none;"><strong>Vendor:</strong></td><td style="border:none;">' + escHtml(vendor) + '</td></tr>' +
+    '<tr><td style="border:none;"><strong>Report Date:</strong></td><td style="border:none;">' + escHtml(date) + '</td></tr>' +
+    '<tr><td style="border:none;"><strong>Contact:</strong></td><td style="border:none;">' + escHtml(contact) + (email ? ' &lt;' + escHtml(email) + '&gt;' : '') + '</td></tr>' +
+    '<tr><td style="border:none;"><strong>Evaluated By:</strong></td><td style="border:none;">Akhilesh Malani, Senior Accessibility Architect and Digital Inclusion Strategist. Manual testing using JAWS, NVDA, VoiceOver, and TalkBack. Automated testing using AMA11Y v4.0.0.</td></tr>' +
+    '</tbody></table>' +
+    '<h2>Conformance Summary</h2>' +
+    '<div class="summary-box">' +
+    '<p><strong>Supports:</strong> ' + supCount + ' criteria &nbsp; <strong>Partially Supports:</strong> ' + partCount + ' criteria &nbsp; <strong>Does Not Support:</strong> ' + failCount + ' criteria</p>' +
+    '</div>' +
+    (notes ? '<h2>Evaluation Notes</h2><p>' + escHtml(notes) + '</p>' : '') +
+    '<h2>' + escHtml(stdLabel) + ' Success Criteria</h2>' +
+    '<table><thead><tr>' +
+    '<th style="width:40%;">Criterion</th><th style="width:8%;">Level</th>' +
+    '<th style="width:20%;">Conformance Level</th><th>Remarks and Explanations</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<p style="margin-top:24pt;font-size:9pt;color:#666;">Generated by AMA11Y v4.0.0 — ama11y.akhileshmalani.com — Akhilesh Malani — Private and Confidential</p>' +
+    '<p style="font-size:9pt;color:#666;">This report was prepared using the ITI VPAT 2.5 template structure.</p>' +
+    '</body></html>';
+}
+
+/* ══════════════════════════════════════════════
+   4.5 MOBILE ACCESSIBILITY CHECKLIST
+══════════════════════════════════════════════ */
+
+const MOBILE_CHECKS = {
+  ios: [
+    { id:'m1',  cat:'Touch Targets',     criterion:'WCAG 2.5.5 / Apple HIG', item:'All interactive elements have a touch target of at least 44 x 44 points', at:'VoiceOver', method:'Double-tap each button and link. Verify you can activate them without accidentally triggering adjacent elements.' },
+    { id:'m2',  cat:'Touch Targets',     criterion:'WCAG 2.5.8',             item:'Minimum touch target of 24 x 24 CSS pixels for all controls', at:'VoiceOver', method:'Use Accessibility Inspector on device to measure touch target sizes.' },
+    { id:'m3',  cat:'VoiceOver Labels',  criterion:'WCAG 1.1.1, 4.1.2',     item:'All images have meaningful accessibility labels', at:'VoiceOver', method:'Navigate to each image with VoiceOver swipe right. Verify the label is descriptive, not a file name.' },
+    { id:'m4',  cat:'VoiceOver Labels',  criterion:'WCAG 4.1.2',             item:'All buttons and controls have descriptive labels', at:'VoiceOver', method:'Navigate all interactive elements. Each should announce its purpose, not just "Button".' },
+    { id:'m5',  cat:'VoiceOver Labels',  criterion:'WCAG 4.1.2',             item:'Form fields have visible and programmatic labels', at:'VoiceOver', method:'Navigate to each form field. VoiceOver should announce the label, field type, and any current value.' },
+    { id:'m6',  cat:'Focus Management',  criterion:'WCAG 2.4.3',             item:'Focus order follows logical reading sequence', at:'VoiceOver', method:'Swipe through the entire screen. Verify focus moves top to bottom and left to right, matching visual layout.' },
+    { id:'m7',  cat:'Focus Management',  criterion:'WCAG 2.1.2',             item:'Modal dialogs trap focus correctly and can be dismissed', at:'VoiceOver', method:'Open any modal or alert. Verify VoiceOver cannot leave the modal. Verify Escape or a close button dismisses it.' },
+    { id:'m8',  cat:'Colour Contrast',   criterion:'WCAG 1.4.3',             item:'Text meets 4.5:1 contrast ratio against background', at:'Visual', method:'Use the AMA11Y web audit on the app\'s web equivalent, or use Accessibility Inspector colour contrast checker.' },
+    { id:'m9',  cat:'Colour Contrast',   criterion:'WCAG 1.4.11',            item:'Interactive component boundaries meet 3:1 contrast', at:'Visual', method:'Check button borders, form field outlines, and toggle states against their backgrounds.' },
+    { id:'m10', cat:'Text and Zoom',     criterion:'WCAG 1.4.4',             item:'Text resizes to 200% without loss of content using Display and Text Size settings', at:'VoiceOver', method:'Settings > Accessibility > Display and Text Size > Larger Text. Set to maximum. Verify no content is cut off.' },
+    { id:'m11', cat:'Text and Zoom',     criterion:'WCAG 1.4.12',            item:'Increased character spacing does not cause content overlap or truncation', at:'Visual', method:'Enable Bold Text in Accessibility settings. Verify content layout remains intact.' },
+    { id:'m12', cat:'Motion and Timing', criterion:'WCAG 2.3.3',             item:'Animations respect Reduce Motion setting', at:'VoiceOver', method:'Settings > Accessibility > Motion > Reduce Motion. Verify animations are replaced with crossfades or eliminated.' },
+    { id:'m13', cat:'Gestures',          criterion:'WCAG 2.5.1',             item:'All gesture-based actions have single-tap alternatives', at:'VoiceOver', method:'Verify swipe actions, pinch-to-zoom features, and multi-finger gestures all have button equivalents.' },
+    { id:'m14', cat:'Audio and Video',   criterion:'WCAG 1.2.2',             item:'Videos have closed captions', at:'VoiceOver', method:'Play any video in the app. Verify captions are available and can be enabled.' },
+    { id:'m15', cat:'Audio and Video',   criterion:'WCAG 1.1.1',             item:'Audio-only content has a text transcript', at:'VoiceOver', method:'Verify any podcast or audio-only content has an accompanying transcript accessible from the same screen.' },
+    { id:'m16', cat:'Dynamic Content',   criterion:'WCAG 4.1.3',             item:'Status messages are announced by VoiceOver without requiring focus', at:'VoiceOver', method:'Submit a form or trigger a loading state. Verify VoiceOver announces the result without requiring the user to navigate to the message.' },
+    { id:'m17', cat:'Dynamic Content',   criterion:'WCAG 2.2.2',             item:'Auto-updating content can be paused or stopped', at:'VoiceOver', method:'Find any content that updates automatically such as a news feed or carousel. Verify a pause or stop control exists.' },
+    { id:'m18', cat:'Language',          criterion:'WCAG 3.1.1',             item:'App language is set correctly in accessibility properties', at:'VoiceOver', method:'Verify VoiceOver reads content in the correct language with correct pronunciation.' },
+  ],
+  android: [
+    { id:'a1',  cat:'Touch Targets',     criterion:'WCAG 2.5.5 / Material Design', item:'All interactive elements are at least 48 x 48 dp', at:'TalkBack', method:'Use the Accessibility Scanner app to check touch target sizes across all screens.' },
+    { id:'a2',  cat:'TalkBack Labels',   criterion:'WCAG 1.1.1, 4.1.2',     item:'All images have content descriptions', at:'TalkBack', method:'Navigate with TalkBack swipe right. Images should announce a meaningful description, not "Unlabelled".' },
+    { id:'a3',  cat:'TalkBack Labels',   criterion:'WCAG 4.1.2',             item:'All buttons and controls have descriptive labels', at:'TalkBack', method:'Tap each control. TalkBack should announce the element name, role, and state.' },
+    { id:'a4',  cat:'TalkBack Labels',   criterion:'WCAG 4.1.2',             item:'Icon buttons have content descriptions', at:'TalkBack', method:'Navigate to any icon-only button. TalkBack should announce a meaningful label, not "Button".' },
+    { id:'a5',  cat:'Focus Management',  criterion:'WCAG 2.4.3',             item:'Linear focus order matches visual reading order', at:'TalkBack', method:'Swipe through screen. Verify order is logical and top-to-bottom, left-to-right.' },
+    { id:'a6',  cat:'Focus Management',  criterion:'WCAG 2.1.2',             item:'Modal dialogs contain focus and can be dismissed', at:'TalkBack', method:'Open a dialog. Verify TalkBack cannot swipe outside the dialog. Verify Back button closes it.' },
+    { id:'a7',  cat:'Colour Contrast',   criterion:'WCAG 1.4.3',             item:'Text meets 4.5:1 contrast ratio', at:'Visual', method:'Use Accessibility Scanner or the AMA11Y web audit on the mobile web version of the app.' },
+    { id:'a8',  cat:'Text and Zoom',     criterion:'WCAG 1.4.4',             item:'Text resizes to 200% using Font Size in Accessibility settings', at:'TalkBack', method:'Settings > Accessibility > Font Size. Set to largest. Verify no content is hidden or overlapping.' },
+    { id:'a9',  cat:'Motion',            criterion:'WCAG 2.3.3',             item:'Animations respect Remove Animations setting', at:'TalkBack', method:'Settings > Accessibility > Remove Animations. Verify all transitions and animations are removed.' },
+    { id:'a10', cat:'Gestures',          criterion:'WCAG 2.5.1',             item:'All gesture-based actions have accessible alternatives', at:'TalkBack', method:'Verify swipe-to-delete, pull-to-refresh, and multi-finger gestures have button alternatives.' },
+    { id:'a11', cat:'Dynamic Content',   criterion:'WCAG 4.1.3',             item:'Status and error messages are announced by TalkBack', at:'TalkBack', method:'Submit a form with an error. Verify TalkBack announces the error message without needing to navigate to it.' },
+    { id:'a12', cat:'Audio and Video',   criterion:'WCAG 1.2.2',             item:'Videos have closed captions', at:'TalkBack', method:'Play a video. Verify captions are present and can be enabled.' },
+    { id:'a13', cat:'Keyboard',          criterion:'WCAG 2.1.1',             item:'All functions operable with a physical keyboard connected via Bluetooth', at:'TalkBack', method:'Connect a Bluetooth keyboard. Verify all controls are reachable by Tab and activated by Enter or Space.' },
+    { id:'a14', cat:'Switch Access',     criterion:'WCAG 2.1.1',             item:'All functions operable with Switch Access enabled', at:'Switch Access', method:'Enable Switch Access in Settings > Accessibility. Verify all content is reachable.' },
+  ],
+  wearos: [
+    { id:'w1',  cat:'Touch Targets',     criterion:'WCAG 2.5.5',             item:'Interactive elements are large enough for a small circular display', at:'TalkBack', method:'Verify all buttons occupy at least one third of the watch face width.' },
+    { id:'w2',  cat:'TalkBack Labels',   criterion:'WCAG 4.1.2',             item:'All controls have TalkBack-compatible content descriptions', at:'TalkBack', method:'Enable TalkBack on WearOS device. Navigate all screens. Every control should have a label.' },
+    { id:'w3',  cat:'Navigation',        criterion:'WCAG 2.4.3',             item:'Rotary input (crown or bezel) provides navigation through interactive elements', at:'TalkBack', method:'Use the physical crown or bezel to navigate. Verify all elements are reachable.' },
+    { id:'w4',  cat:'Navigation',        criterion:'WCAG 2.1.1',             item:'All functions accessible without touch gestures using rotary and button navigation', at:'TalkBack', method:'Navigate the entire app using only the crown and side button. No touch should be required.' },
+    { id:'w5',  cat:'Content',           criterion:'WCAG 1.4.4',             item:'Text uses dynamic font scaling and adapts to watch display size', at:'TalkBack', method:'Verify text does not overflow or get clipped on the circular display at any font size setting.' },
+    { id:'w6',  cat:'Colour Contrast',   criterion:'WCAG 1.4.3',             item:'Text meets 4.5:1 contrast ratio on AMOLED display', at:'Visual', method:'AMOLED displays have true black. Verify text contrast is measured against the actual rendered background colour.' },
+    { id:'w7',  cat:'Dynamic Content',   criterion:'WCAG 4.1.3',             item:'Haptic and audio feedback supplements visual notifications', at:'TalkBack', method:'Verify alerts and notifications include haptic feedback that TalkBack users can detect.' },
+    { id:'w8',  cat:'Complications',     criterion:'WCAG 1.1.1',             item:'Watch face complications have accessible labels', at:'TalkBack', method:'Tap each complication on the watch face. TalkBack should announce the complication type and current value.' },
+  ]
+};
+
+let mobCheckState = {};
+
+function mob_renderChecklist() {
+  const platform = $('mob-platform') ? $('mob-platform').value : 'ios';
+  const checks   = MOBILE_CHECKS[platform] || [];
+  const region   = $('mob-checklist-region');
+  if (!region) return;
+
+  if (!mobCheckState[platform]) {
+    mobCheckState[platform] = {};
+    checks.forEach(c => { mobCheckState[platform][c.id] = { checked: false, notes: '' }; });
+  }
+
+  const categories = [...new Set(checks.map(c => c.cat))];
+  region.innerHTML = '';
+
+  categories.forEach(cat => {
+    const catChecks = checks.filter(c => c.cat === cat);
+    const catDiv    = document.createElement('div');
+    catDiv.style.cssText = 'margin-bottom:20px;';
+
+    const catH = document.createElement('h3');
+    catH.className   = 'section-heading';
+    catH.textContent = cat;
+    catDiv.appendChild(catH);
+
+    catChecks.forEach(c => {
+      const state = mobCheckState[platform][c.id] || { checked: false, notes: '' };
+      const item  = document.createElement('div');
+      item.className = 'card';
+      item.style.cssText = 'margin-bottom:10px;padding:14px 16px;';
+
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;gap:12px;align-items:flex-start;margin-bottom:8px;';
+
+      const cb = document.createElement('input');
+      cb.type    = 'checkbox';
+      cb.id      = 'mob-' + c.id;
+      cb.checked = state.checked;
+      cb.style.cssText = 'margin-top:3px;flex-shrink:0;width:18px;height:18px;accent-color:var(--accent);';
+      cb.setAttribute('aria-label', 'Mark as tested: ' + c.item);
+      cb.addEventListener('change', () => {
+        if (!mobCheckState[platform]) mobCheckState[platform] = {};
+        if (!mobCheckState[platform][c.id]) mobCheckState[platform][c.id] = {};
+        mobCheckState[platform][c.id].checked = cb.checked;
+        announce(c.item + (cb.checked ? ' marked as tested.' : ' unmarked.'));
+      });
+
+      const labelDiv = document.createElement('div');
+      labelDiv.style.cssText = 'flex:1;';
+
+      const itemLabel = document.createElement('label');
+      itemLabel.setAttribute('for', 'mob-' + c.id);
+      itemLabel.style.cssText = 'font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:block;margin-bottom:4px;';
+      itemLabel.textContent = c.item;
+
+      const meta = document.createElement('p');
+      meta.style.cssText = 'font-size:11px;font-family:var(--mono);color:var(--text-muted);margin-bottom:4px;';
+      meta.textContent = c.criterion + '  |  AT: ' + c.at;
+
+      const method = document.createElement('p');
+      method.style.cssText = 'font-size:12px;color:var(--text-dim);margin-bottom:6px;';
+      method.textContent = 'Test method: ' + c.method;
+
+      const notesInput = document.createElement('input');
+      notesInput.type        = 'text';
+      notesInput.className   = 'field-input';
+      notesInput.style.cssText = 'margin:0;font-size:11px;';
+      notesInput.placeholder = 'Add notes or findings...';
+      notesInput.value       = state.notes || '';
+      notesInput.setAttribute('aria-label', 'Notes for: ' + c.item);
+      notesInput.addEventListener('change', () => {
+        if (!mobCheckState[platform]) mobCheckState[platform] = {};
+        if (!mobCheckState[platform][c.id]) mobCheckState[platform][c.id] = {};
+        mobCheckState[platform][c.id].notes = notesInput.value;
+      });
+
+      labelDiv.appendChild(itemLabel);
+      labelDiv.appendChild(meta);
+      labelDiv.appendChild(method);
+      labelDiv.appendChild(notesInput);
+      header.appendChild(cb);
+      header.appendChild(labelDiv);
+      item.appendChild(header);
+      catDiv.appendChild(item);
+    });
+
+    region.appendChild(catDiv);
+  });
+
+  const checked = Object.values(mobCheckState[platform]||{}).filter(s=>s.checked).length;
+  announce('Mobile checklist loaded for ' + $('mob-platform').options[$('mob-platform').selectedIndex].text + '. ' + checks.length + ' items. ' + checked + ' checked.');
+}
+
+function mob_resetChecklist() {
+  const platform = $('mob-platform') ? $('mob-platform').value : 'ios';
+  mobCheckState[platform] = {};
+  mob_renderChecklist();
+  announce('Checklist reset.');
+}
+
+if ($('mob-export-html')) {
+  $('mob-export-html').addEventListener('click', () => {
+    const platform  = $('mob-platform').value;
+    const platLabel = $('mob-platform').options[$('mob-platform').selectedIndex].text;
+    const appName   = $('mob-app').value.trim()     || 'Mobile App';
+    const appVer    = $('mob-version').value.trim() || '';
+    const checks    = MOBILE_CHECKS[platform] || [];
+    const state     = mobCheckState[platform] || {};
+    const dateStr   = new Date().toISOString().replace('T',' ').slice(0,19);
+    const tested    = Object.values(state).filter(s=>s.checked).length;
+
+    const rows = checks.map(c => {
+      const s = state[c.id] || {};
+      const status = s.checked ? 'Tested' : 'Not Tested';
+      const color  = s.checked ? '#1e8449' : '#c0392b';
+      return '<tr><td style="padding:6pt;border:1pt solid #e0e8f5;">' + escHtml(c.cat) + '</td>' +
+        '<td style="padding:6pt;border:1pt solid #e0e8f5;">' + escHtml(c.item) + '</td>' +
+        '<td style="padding:6pt;border:1pt solid #e0e8f5;font-size:9pt;color:#666;">' + escHtml(c.criterion) + '</td>' +
+        '<td style="padding:6pt;border:1pt solid #e0e8f5;font-size:9pt;">' + escHtml(c.at) + '</td>' +
+        '<td style="padding:6pt;border:1pt solid #e0e8f5;color:' + color + ';font-weight:bold;">' + escHtml(status) + '</td>' +
+        '<td style="padding:6pt;border:1pt solid #e0e8f5;font-size:9pt;">' + escHtml(s.notes||'') + '</td></tr>';
+    }).join('');
+
+    const html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+      '<title>Mobile Audit — ' + escHtml(appName) + '</title>' +
+      '<style>body{font-family:Arial,sans-serif;padding:24px;}h1{color:#003366;}h2{color:#003366;}table{width:100%;border-collapse:collapse;font-size:10pt;}th{background:#003366;color:#fff;padding:6pt;text-align:left;}a.skip{position:absolute;top:-999px;left:-999px;}a.skip:focus{top:0;left:0;background:#003366;color:#fff;padding:8px;}</style>' +
+      '</head><body><a class="skip" href="#main">Skip to main content</a>' +
+      '<main id="main"><h1>Mobile Accessibility Audit Checklist</h1>' +
+      '<p><strong>App:</strong> ' + escHtml(appName) + (appVer?' v'+escHtml(appVer):'') + ' &nbsp; <strong>Platform:</strong> ' + escHtml(platLabel) + ' &nbsp; <strong>Date:</strong> ' + escHtml(dateStr) + '</p>' +
+      '<p><strong>Items tested:</strong> ' + tested + ' of ' + checks.length + '</p>' +
+      '<table aria-label="Mobile accessibility checklist"><thead><tr><th scope="col">Category</th><th scope="col">Check</th><th scope="col">Criterion</th><th scope="col">Assistive Technology</th><th scope="col">Status</th><th scope="col">Notes</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p style="margin-top:20pt;font-size:9pt;color:#666;">AMA11Y v4.0.0 — ama11y.akhileshmalani.com — Akhilesh Malani</p>' +
+      '</main></body></html>';
+
+    downloadFile(html, 'text/html', 'mobile-audit-' + platform + '-' + new Date().toISOString().slice(0,10) + '.html');
+    announce('Mobile checklist exported as HTML report.');
+  });
+}
+
+if ($('mob-export-txt')) {
+  $('mob-export-txt').addEventListener('click', () => {
+    const platform  = $('mob-platform').value;
+    const platLabel = $('mob-platform').options[$('mob-platform').selectedIndex].text;
+    const appName   = $('mob-app').value.trim()     || 'Mobile App';
+    const appVer    = $('mob-version').value.trim() || '';
+    const checks    = MOBILE_CHECKS[platform] || [];
+    const state     = mobCheckState[platform] || {};
+    const dateStr   = new Date().toISOString().replace('T',' ').slice(0,19);
+    const tested    = Object.values(state).filter(s=>s.checked).length;
+
+    const lines = [
+      'AMA11Y Mobile Accessibility Audit Checklist',
+      'App: ' + appName + (appVer ? ' v' + appVer : ''),
+      'Platform: ' + platLabel,
+      'Date: ' + dateStr,
+      'Items tested: ' + tested + ' of ' + checks.length,
+      '', '='.repeat(60), ''
+    ];
+    checks.forEach(c => {
+      const s = state[c.id] || {};
+      lines.push('[' + (s.checked ? 'X' : ' ') + '] ' + c.item);
+      lines.push('    Category:  ' + c.cat);
+      lines.push('    Criterion: ' + c.criterion);
+      lines.push('    AT:        ' + c.at);
+      lines.push('    Method:    ' + c.method);
+      if (s.notes) lines.push('    Notes:     ' + s.notes);
+      lines.push('');
+    });
+    lines.push('AMA11Y v4.0.0 — ama11y.akhileshmalani.com — Akhilesh Malani');
+
+    downloadFile(lines.join('\n'), 'text/plain', 'mobile-audit-' + platform + '-' + new Date().toISOString().slice(0,10) + '.txt');
+    announce('Mobile checklist exported as plain text.');
+  });
+}
+
+/* ── Initialise Phase 4 components on app load ── */
+
 
 init();
 </script>
