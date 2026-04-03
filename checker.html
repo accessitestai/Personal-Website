@@ -97,6 +97,39 @@
     .summary-card--minor .summary-count { color: #27ae60; }
     .summary-card--passes .summary-count { color: #2980b9; }
 
+    .summary-card--score { border-color: #2c3e50; background: #f8f9fa; grid-column: 1 / -1; display: flex; align-items: center; gap: 1.5rem; text-align: left; }
+    .score-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .score-info { flex: 1; }
+    .score-grade { font-size: 1.1rem; font-weight: 700; }
+    .score-desc { font-size: 0.82rem; color: var(--color-text-light); margin-top: 2px; }
+    .score--excellent .score-circle { background: #27ae60; } .score--excellent .score-grade { color: #27ae60; }
+    .score--good .score-circle { background: #2980b9; } .score--good .score-grade { color: #2980b9; }
+    .score--needs-work .score-circle { background: #e67e22; } .score--needs-work .score-grade { color: #e67e22; }
+    .score--poor .score-circle { background: #c0392b; } .score--poor .score-grade { color: #c0392b; }
+    [data-theme="dark"] .summary-card--score { background: rgba(44, 62, 80, 0.3); }
+
+    /* Filter controls */
+    .results-filters { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; border: 2px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg-alt); }
+    .results-filters fieldset { border: none; padding: 0; margin: 0; }
+    .results-filters legend { font-weight: 700; font-size: 0.85rem; color: var(--color-text); margin-bottom: 0.4rem; }
+    .filter-options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .filter-option { display: flex; align-items: center; gap: 0.3rem; font-size: 0.88rem; cursor: pointer; }
+    .filter-option input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--color-primary); }
+    .filter-select { padding: 0.4rem 0.6rem; border: 2px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); color: var(--color-text); font-size: 0.88rem; }
+    .filter-select:focus { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+    .filter-status { font-size: 0.88rem; color: var(--color-text-light); align-self: center; }
+
+    /* Scan history */
+    .scan-history { margin-top: 2rem; }
+    .scan-history summary { font-weight: 700; font-size: 1rem; color: var(--color-primary); cursor: pointer; padding: 0.5rem 0; }
+    .scan-history summary:focus { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+    .history-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.75rem; }
+    .history-table th { background: var(--color-bg-alt); color: var(--color-primary); padding: 0.5rem 0.75rem; text-align: left; border-bottom: 2px solid var(--color-border); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .history-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--color-border); }
+    .history-clear { margin-top: 0.5rem; padding: 0.4rem 1rem; background: var(--color-bg-alt); color: var(--color-text); border: 2px solid var(--color-border); border-radius: var(--radius); font-size: 0.85rem; cursor: pointer; }
+    .history-clear:hover { background: var(--color-border); }
+    .history-clear:focus { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+
     .issue-list { list-style: none; padding: 0; }
     .issue-item {
       border: 2px solid var(--color-border);
@@ -165,6 +198,53 @@
     .checker-nav a:hover, .checker-nav a:focus { background: var(--color-primary); color: #fff; }
     .checker-nav a[aria-current="page"] { background: var(--color-primary); color: #fff; }
 
+    .engine-selection {
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+      background: var(--color-bg-alt);
+    }
+    .engine-selection legend {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--color-text);
+      padding: 0 0.5rem;
+    }
+    .engine-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+    .engine-option input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--color-primary);
+    }
+    .engine-option span { font-size: 0.92rem; }
+    .engine-option strong { color: var(--color-primary-dark); }
+
+    .engine-tag {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .engine-tag--axe { background: #eaf2f8; color: #1a5276; border: 1px solid #aed6f1; }
+    .engine-tag--htmlcs { background: #f5eef8; color: #6c3483; border: 1px solid #d2b4de; }
+    [data-theme="dark"] .engine-tag--axe { background: rgba(26, 82, 118, 0.3); color: #aed6f1; }
+    [data-theme="dark"] .engine-tag--htmlcs { background: rgba(108, 52, 131, 0.3); color: #d2b4de; }
+
     @media (max-width: 600px) {
       .checker-page h1 { font-size: 1.5rem; }
       .results-summary { grid-template-columns: repeat(2, 1fr); }
@@ -208,7 +288,7 @@
 
     <div class="checker-page">
       <h1>Web Accessibility Checker</h1>
-      <p class="checker-intro">Paste your HTML code below and I will analyse it for WCAG 2.2 Level AA compliance using the axe-core engine — the same engine used by Deque, Google Lighthouse, and Microsoft Accessibility Insights. This tool runs entirely in your browser. No data is sent to any server.</p>
+      <p class="checker-intro">Paste your HTML code below and I will analyse it for WCAG 2.2 Level AA compliance using industry-standard engines. This tool runs entirely in your browser. No data is sent to any server.</p>
 
       <nav aria-label="Checker tools" class="checker-nav">
         <a href="checker.html" aria-current="page">Web Checker</a>
@@ -221,6 +301,17 @@
           <span class="label-hint">Paste a complete HTML page or a code snippet. The tool will wrap snippets in a basic HTML structure automatically.</span>
         </label>
         <textarea id="html-input" class="checker-textarea" placeholder="<!DOCTYPE html>&#10;<html lang=&quot;en&quot;>&#10;<head>&#10;  <title>My Page</title>&#10;</head>&#10;<body>&#10;  <h1>Hello World</h1>&#10;  <img src=&quot;photo.jpg&quot;>&#10;</body>&#10;</html>" spellcheck="false" aria-required="true"></textarea>
+        <fieldset class="engine-selection">
+          <legend>Select testing engine(s)</legend>
+          <label class="engine-option">
+            <input type="checkbox" id="engine-axe" checked>
+            <span><strong>axe-core</strong> — Industry standard, zero false positives, WCAG 2.2</span>
+          </label>
+          <label class="engine-option">
+            <input type="checkbox" id="engine-htmlcs" checked>
+            <span><strong>HTML_CodeSniffer</strong> — Catches additional issues, includes warnings and advisories</span>
+          </label>
+        </fieldset>
         <div class="checker-actions">
           <button type="button" class="checker-btn" id="run-check" aria-describedby="checker-status">
             Run Accessibility Check
@@ -228,6 +319,14 @@
           <button type="button" class="checker-btn checker-btn--secondary" id="clear-check">
             Clear
           </button>
+          <div id="export-group" role="group" aria-label="Export options" style="display:none;">
+            <button type="button" class="checker-btn checker-btn--secondary" id="download-html">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              HTML Report
+            </button>
+            <button type="button" class="checker-btn checker-btn--secondary" id="download-json">JSON</button>
+            <button type="button" class="checker-btn checker-btn--secondary" id="download-csv">CSV</button>
+          </div>
           <span class="checker-status" id="checker-status" role="status" aria-live="polite"></span>
         </div>
       </form>
@@ -236,12 +335,50 @@
       <section class="checker-results" id="checker-results" aria-labelledby="results-heading">
         <h2 id="results-heading" tabindex="-1">Results</h2>
         <div class="results-summary" id="results-summary" role="group" aria-label="Issue summary"></div>
+
+        <!-- Filters -->
+        <div class="results-filters" id="results-filters" style="display:none;">
+          <fieldset>
+            <legend>Filter by severity</legend>
+            <div class="filter-options">
+              <label class="filter-option"><input type="checkbox" class="filter-severity" value="critical" checked> Critical</label>
+              <label class="filter-option"><input type="checkbox" class="filter-severity" value="serious" checked> Serious</label>
+              <label class="filter-option"><input type="checkbox" class="filter-severity" value="moderate" checked> Moderate</label>
+              <label class="filter-option"><input type="checkbox" class="filter-severity" value="minor" checked> Minor</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Filter by engine</legend>
+            <div class="filter-options">
+              <label class="filter-option"><input type="checkbox" class="filter-engine" value="axe" checked> axe-core</label>
+              <label class="filter-option"><input type="checkbox" class="filter-engine" value="htmlcs" checked> HTML_CodeSniffer</label>
+              <label class="filter-option"><input type="checkbox" class="filter-engine" value="manual" checked> Manual checks</label>
+            </div>
+          </fieldset>
+          <div>
+            <label for="sort-select" style="font-weight:700;font-size:0.85rem;display:block;margin-bottom:0.4rem;">Sort by</label>
+            <select id="sort-select" class="filter-select">
+              <option value="severity-desc">Severity (most to least)</option>
+              <option value="severity-asc">Severity (least to most)</option>
+              <option value="engine">Engine</option>
+            </select>
+          </div>
+          <span class="filter-status" id="filter-status" role="status" aria-live="polite"></span>
+        </div>
+
         <div id="results-list"></div>
 
         <div class="results-cta">
           <p>Need help fixing these issues? I have been doing this for 16+ years.</p>
           <a href="index.html#contact">Get in touch with me</a>
         </div>
+
+        <!-- Scan History -->
+        <details class="scan-history" id="scan-history">
+          <summary>Scan History</summary>
+          <div id="history-content"></div>
+          <button type="button" class="history-clear" id="history-clear">Clear History</button>
+        </details>
       </section>
     </div>
   </main>
@@ -249,13 +386,14 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a> and 16+ years of lived accessibility experience.</p>
+      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a> + <a href="https://squizlabs.github.io/HTML_CodeSniffer/" target="_blank" rel="noopener">HTML_CodeSniffer</a> and 16+ years of lived accessibility experience.</p>
       <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
     </div>
   </footer>
 
-  <!-- axe-core library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js"></script>
+  <!-- Accessibility testing engines -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.3/axe.min.js"></script>
+  <script src="https://squizlabs.github.io/HTML_CodeSniffer/build/HTMLCS.js"></script>
 
   <script src="script.js"></script>
   <script>
@@ -270,16 +408,18 @@
     var resultsSummary = document.getElementById('results-summary');
     var resultsList = document.getElementById('results-list');
     var resultsHeading = document.getElementById('results-heading');
+    var engineAxeCheckbox = document.getElementById('engine-axe');
+    var engineHtmlcsCheckbox = document.getElementById('engine-htmlcs');
 
-    function setStatus(msg) {
-      statusEl.textContent = msg;
-    }
+    // Store latest results for report download
+    var lastResults = null;
+    var lastEngines = [];
+
+    function setStatus(msg) { statusEl.textContent = msg; }
 
     function wrapSnippet(html) {
       var trimmed = html.trim();
-      if (trimmed.toLowerCase().indexOf('<!doctype') !== -1 || trimmed.toLowerCase().indexOf('<html') !== -1) {
-        return trimmed;
-      }
+      if (trimmed.toLowerCase().indexOf('<!doctype') !== -1 || trimmed.toLowerCase().indexOf('<html') !== -1) return trimmed;
       return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Test Page</title></head><body>' + trimmed + '</body></html>';
     }
 
@@ -294,9 +434,22 @@
       return order[impact] !== undefined ? order[impact] : 4;
     }
 
+    function calculateScore(violations, passes) {
+      var weights = { critical: 10, serious: 5, moderate: 2, minor: 1 };
+      var deduction = 0;
+      violations.forEach(function (v) { deduction += (weights[v.impact] || 1); });
+      var bonus = passes.length > 0 ? Math.min(10, Math.floor(passes.length / 5)) : 0;
+      var score = Math.max(0, Math.min(100, 100 - deduction + bonus));
+      var grade, gradeClass;
+      if (score >= 90) { grade = 'A'; gradeClass = 'score--excellent'; }
+      else if (score >= 70) { grade = 'B'; gradeClass = 'score--good'; }
+      else if (score >= 50) { grade = 'C'; gradeClass = 'score--needs-work'; }
+      else { grade = 'D'; gradeClass = 'score--poor'; }
+      return { score: score, grade: grade, gradeClass: gradeClass };
+    }
+
     // =============================================
     // Manual document-level checks
-    // (axe cannot check these when running on a div)
     // =============================================
     function runDocumentLevelChecks(fullHtml) {
       var manualViolations = [];
@@ -307,52 +460,45 @@
       var titleEl = doc.querySelector('title');
       var headEl = doc.querySelector('head');
 
-      // Check 1: <html lang>
       var langAttr = htmlEl.getAttribute('lang');
       if (!langAttr || langAttr.trim() === '') {
         manualViolations.push({
-          id: 'html-has-lang',
-          impact: 'serious',
+          id: 'html-has-lang', engine: 'manual', impact: 'serious',
           help: '<html> element must have a lang attribute',
-          description: 'Ensures every HTML document has a lang attribute on the <html> element. Screen readers use this to determine the correct pronunciation.',
+          description: 'Ensures every HTML document has a lang attribute. Screen readers use this to determine pronunciation.',
           tags: ['wcag2a', 'wcag311'],
           helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/html-has-lang',
-          nodes: [{ html: '<html' + (htmlEl.attributes.length ? ' ' + Array.from(htmlEl.attributes).map(function(a) { return a.name + '="' + a.value + '"'; }).join(' ') : '') + '>', failureSummary: 'Fix: Add a lang attribute to the <html> element.\nExample: <html lang="en">' }]
+          nodes: [{ html: '<html>', failureSummary: 'Fix: Add a lang attribute.\nExample: <html lang="en">' }]
         });
       } else {
-        // Check 1b: Valid lang value
         var validLangs = /^[a-z]{2,3}(-[a-z]{2,4})?(-[a-z]{2})?$/i;
         if (!validLangs.test(langAttr.trim())) {
           manualViolations.push({
-            id: 'html-lang-valid',
-            impact: 'serious',
-            help: '<html> element must have a valid value for the lang attribute',
-            description: 'Ensures the lang attribute of the <html> element has a valid value (e.g., "en", "hi", "ta", "fr").',
+            id: 'html-lang-valid', engine: 'manual', impact: 'serious',
+            help: '<html> element must have a valid lang attribute value',
+            description: 'Ensures the lang attribute has a valid BCP 47 value.',
             tags: ['wcag2a', 'wcag311'],
             helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/html-lang-valid',
-            nodes: [{ html: '<html lang="' + escapeHtml(langAttr) + '">', failureSummary: 'Fix: Use a valid BCP 47 language tag.\nExamples: "en", "en-US", "hi", "ta", "fr"' }]
+            nodes: [{ html: '<html lang="' + escapeHtml(langAttr) + '">', failureSummary: 'Fix: Use a valid language tag like "en", "hi", "ta", "fr".' }]
           });
         } else {
-          manualPasses.push({ id: 'html-has-lang', description: '<html> element has a valid lang attribute' });
+          manualPasses.push({ id: 'html-has-lang', description: '<html> has a valid lang attribute' });
         }
       }
 
-      // Check 2: <title>
       if (!titleEl || !titleEl.textContent.trim()) {
         manualViolations.push({
-          id: 'document-title',
-          impact: 'serious',
+          id: 'document-title', engine: 'manual', impact: 'serious',
           help: 'Documents must have a <title> element',
-          description: 'Ensures each HTML document contains a non-empty <title> element. The title is announced by screen readers when a page loads.',
+          description: 'Ensures each HTML document contains a non-empty <title> element.',
           tags: ['wcag2a', 'wcag242'],
           helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/document-title',
-          nodes: [{ html: headEl ? '<head>...</head>' : '<html> (no <head> found)', failureSummary: 'Fix: Add a descriptive <title> element inside <head>.\nExample: <title>My Accessible Page</title>' }]
+          nodes: [{ html: headEl ? '<head>...</head>' : '(no <head>)', failureSummary: 'Fix: Add a descriptive <title> element.' }]
         });
       } else {
-        manualPasses.push({ id: 'document-title', description: 'Document has a non-empty <title> element' });
+        manualPasses.push({ id: 'document-title', description: 'Document has a non-empty <title>' });
       }
 
-      // Check 3: Viewport meta (zoom disabled)
       var viewportMeta = doc.querySelector('meta[name="viewport"]');
       if (viewportMeta) {
         var content = (viewportMeta.getAttribute('content') || '').toLowerCase();
@@ -360,250 +506,756 @@
         var hasUserScalable = content.match(/user-scalable\s*=\s*(no|0)/);
         if (hasUserScalable || (hasMaxScale && parseFloat(hasMaxScale[1]) < 2)) {
           manualViolations.push({
-            id: 'meta-viewport',
-            impact: 'critical',
+            id: 'meta-viewport', engine: 'manual', impact: 'critical',
             help: 'Zooming and scaling must not be disabled',
-            description: 'Ensures that the viewport meta tag does not disable text scaling or zooming. Users with low vision need to zoom in to read content.',
+            description: 'Ensures viewport meta tag does not disable zooming.',
             tags: ['wcag2aa', 'wcag144'],
             helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/meta-viewport',
-            nodes: [{ html: '<meta name="viewport" content="' + escapeHtml(viewportMeta.getAttribute('content')) + '">', failureSummary: 'Fix: Remove user-scalable=no and ensure maximum-scale is at least 2.\nExample: <meta name="viewport" content="width=device-width, initial-scale=1.0">' }]
+            nodes: [{ html: '<meta name="viewport" content="' + escapeHtml(viewportMeta.getAttribute('content')) + '">', failureSummary: 'Fix: Remove user-scalable=no and set maximum-scale to at least 2.' }]
           });
         } else {
-          manualPasses.push({ id: 'meta-viewport', description: 'Viewport meta tag allows zooming' });
+          manualPasses.push({ id: 'meta-viewport', description: 'Viewport allows zooming' });
         }
       }
 
-      // Check 4: Heading order in the full document
       var headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
       var hasH1 = false;
-      var headingOrderIssues = [];
-      var prevLevel = 0;
-      for (var i = 0; i < headings.length; i++) {
-        var level = parseInt(headings[i].tagName.charAt(1));
-        if (level === 1) hasH1 = true;
-        if (prevLevel > 0 && level > prevLevel + 1) {
-          headingOrderIssues.push({
-            skipped: 'h' + prevLevel + ' to h' + level,
-            html: headings[i].outerHTML.substring(0, 100)
-          });
-        }
-        prevLevel = level;
-      }
+      for (var i = 0; i < headings.length; i++) { if (headings[i].tagName === 'H1') hasH1 = true; }
       if (!hasH1 && headings.length > 0) {
         manualViolations.push({
-          id: 'page-has-heading-one',
-          impact: 'moderate',
+          id: 'page-has-heading-one', engine: 'manual', impact: 'moderate',
           help: 'Page should contain a level-one heading',
-          description: 'Ensures the page has at least one h1 element. An h1 heading gives screen reader users an overview of the page content.',
+          description: 'An h1 heading gives screen reader users an overview of the page.',
           tags: ['best-practice'],
           helpUrl: 'https://dequeuniversity.com/rules/axe/4.9/page-has-heading-one',
-          nodes: [{ html: '(no <h1> found)', failureSummary: 'Fix: Add an <h1> element that describes the main content of the page.' }]
+          nodes: [{ html: '(no <h1> found)', failureSummary: 'Fix: Add an <h1> element.' }]
         });
+      }
+
+      // ── Skip link detection (SC 2.4.1) ──
+      var bodyLinks = doc.querySelectorAll('body a[href^="#"]');
+      var hasSkipLink = false;
+      for (var si = 0; si < Math.min(bodyLinks.length, 5); si++) {
+        var linkText = (bodyLinks[si].textContent || '').trim().toLowerCase();
+        if (linkText.indexOf('skip') !== -1 || linkText.indexOf('jump') !== -1 || linkText.indexOf('main content') !== -1) { hasSkipLink = true; break; }
+      }
+      if (!hasSkipLink) {
+        manualViolations.push({
+          id: 'skip-link', engine: 'manual', impact: 'moderate',
+          help: 'Page should have a skip navigation link',
+          description: 'A skip link allows keyboard and screen reader users to bypass repeated navigation and jump to the main content.',
+          tags: ['wcag2a', 'wcag241'],
+          helpUrl: 'https://www.w3.org/WAI/WCAG22/Techniques/general/G1',
+          nodes: [{ html: '(no skip link found)', failureSummary: 'Fix: Add a skip link as the first focusable element. Example: <a href="#main-content" class="skip-link">Skip to main content</a>' }]
+        });
+      } else {
+        manualPasses.push({ id: 'skip-link', description: 'Page has a skip navigation link' });
+      }
+
+      // ── Landmark validation (SC 1.3.1) ──
+      var landmarks = {
+        main: doc.querySelector('main, [role="main"]'),
+        nav: doc.querySelector('nav, [role="navigation"]'),
+        banner: doc.querySelector('header, [role="banner"]'),
+        contentinfo: doc.querySelector('footer, [role="contentinfo"]')
+      };
+      var missingLandmarks = [];
+      if (!landmarks.main) missingLandmarks.push('<main>');
+      if (!landmarks.nav) missingLandmarks.push('<nav>');
+      if (!landmarks.banner) missingLandmarks.push('<header>');
+      if (!landmarks.contentinfo) missingLandmarks.push('<footer>');
+      if (missingLandmarks.length > 0) {
+        manualViolations.push({
+          id: 'landmark-regions', engine: 'manual', impact: 'moderate',
+          help: 'Page should use landmark regions for structure',
+          description: 'Landmark regions allow screen reader users to navigate quickly between major sections of the page.',
+          tags: ['wcag2a', 'wcag131'],
+          helpUrl: 'https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA11',
+          nodes: [{ html: '(missing landmarks)', failureSummary: 'Fix: Add these landmark elements: ' + missingLandmarks.join(', ') + '.' }]
+        });
+      } else {
+        manualPasses.push({ id: 'landmark-regions', description: 'Page has all required landmark regions' });
+      }
+
+      // ── Heading hierarchy — no skipped levels (SC 1.3.1) ──
+      if (headings.length > 0) {
+        var prevLevel = 0;
+        var skippedHeadings = [];
+        for (var hi = 0; hi < headings.length; hi++) {
+          var level = parseInt(headings[hi].tagName.charAt(1), 10);
+          if (prevLevel > 0 && level > prevLevel + 1) {
+            skippedHeadings.push(headings[hi].tagName + ' after ' + 'H' + prevLevel + ': "' + (headings[hi].textContent || '').trim().substring(0, 60) + '"');
+          }
+          prevLevel = level;
+        }
+        if (skippedHeadings.length > 0) {
+          manualViolations.push({
+            id: 'heading-order', engine: 'manual', impact: 'moderate',
+            help: 'Heading levels should not be skipped',
+            description: 'Skipping heading levels (e.g. H1 to H3) breaks the document outline and makes navigation harder for screen reader users.',
+            tags: ['wcag2a', 'wcag131'],
+            helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/heading-order',
+            nodes: [{ html: skippedHeadings[0], failureSummary: 'Fix: Use heading levels in sequential order without skipping. Found ' + skippedHeadings.length + ' skip(s): ' + skippedHeadings.join('; ') }]
+          });
+        } else {
+          manualPasses.push({ id: 'heading-order', description: 'Heading levels are in correct sequential order' });
+        }
+      }
+
+      // ── Form label associations (SC 4.1.2, SC 3.3.2) ──
+      var formFields = doc.querySelectorAll('input, select, textarea');
+      var unlabelledFields = [];
+      for (var fi = 0; fi < formFields.length; fi++) {
+        var field = formFields[fi];
+        var fType = (field.getAttribute('type') || '').toLowerCase();
+        if (fType === 'hidden' || fType === 'submit' || fType === 'button' || fType === 'reset' || fType === 'image') continue;
+        var hasLabel = false;
+        if (field.getAttribute('aria-label') || field.getAttribute('aria-labelledby')) hasLabel = true;
+        if (!hasLabel && field.id) {
+          var labelFor = doc.querySelector('label[for="' + field.id + '"]');
+          if (labelFor) hasLabel = true;
+        }
+        if (!hasLabel) {
+          var parent = field.parentElement;
+          while (parent && parent.tagName !== 'LABEL' && parent.tagName !== 'BODY') parent = parent.parentElement;
+          if (parent && parent.tagName === 'LABEL') hasLabel = true;
+        }
+        if (!hasLabel && field.getAttribute('title')) hasLabel = true;
+        if (!hasLabel) unlabelledFields.push(field.outerHTML.substring(0, 150));
+      }
+      if (unlabelledFields.length > 0) {
+        manualViolations.push({
+          id: 'label-association', engine: 'manual', impact: 'serious',
+          help: 'Form elements must have associated labels',
+          description: 'Every form field needs a programmatic label so screen readers can announce what the field is for.',
+          tags: ['wcag2a', 'wcag412', 'wcag332'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/label',
+          nodes: unlabelledFields.map(function (h) { return { html: h, failureSummary: 'Fix: Add a <label for="id"> element, or use aria-label or aria-labelledby.' }; })
+        });
+      } else if (formFields.length > 0) {
+        manualPasses.push({ id: 'label-association', description: 'All form fields have associated labels' });
+      }
+
+      // ── Link purpose validation (SC 2.4.4) ──
+      var allLinks = doc.querySelectorAll('a');
+      var genericLinkTexts = ['click here', 'here', 'read more', 'more', 'learn more', 'link', 'this', 'go', 'details'];
+      var genericLinks = [];
+      for (var li = 0; li < allLinks.length; li++) {
+        var linkName = (allLinks[li].getAttribute('aria-label') || allLinks[li].textContent || '').trim().toLowerCase();
+        if (genericLinkTexts.indexOf(linkName) !== -1) {
+          genericLinks.push(allLinks[li].outerHTML.substring(0, 150));
+        }
+      }
+      if (genericLinks.length > 0) {
+        manualViolations.push({
+          id: 'link-name', engine: 'manual', impact: 'moderate',
+          help: 'Links must have descriptive text that indicates their purpose',
+          description: 'Generic link text like "click here" or "read more" does not convey purpose to screen reader users who may navigate a list of links.',
+          tags: ['wcag2a', 'wcag244'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/link-name',
+          nodes: genericLinks.map(function (h) { return { html: h, failureSummary: 'Fix: Replace generic text with descriptive text that explains where the link goes or what it does.' }; })
+        });
+      } else if (allLinks.length > 0) {
+        manualPasses.push({ id: 'link-name', description: 'All links have descriptive text' });
+      }
+
+      // ── Duplicate ID detection (SC 4.1.1) ──
+      var allIds = doc.querySelectorAll('[id]');
+      var idMap = {};
+      for (var di = 0; di < allIds.length; di++) {
+        var idVal = allIds[di].id;
+        if (idVal) idMap[idVal] = (idMap[idVal] || 0) + 1;
+      }
+      var dupeIds = [];
+      for (var key in idMap) { if (idMap[key] > 1) dupeIds.push(key + ' (' + idMap[key] + ' times)'); }
+      if (dupeIds.length > 0) {
+        manualViolations.push({
+          id: 'duplicate-id', engine: 'manual', impact: 'serious',
+          help: 'ID attribute values must be unique',
+          description: 'Duplicate IDs break label associations, ARIA references, and fragment navigation. Screen readers may announce the wrong element.',
+          tags: ['wcag2a', 'wcag411'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/duplicate-id',
+          nodes: [{ html: '(duplicate IDs found)', failureSummary: 'Fix: Make each id value unique. Duplicates: ' + dupeIds.join(', ') }]
+        });
+      } else if (allIds.length > 0) {
+        manualPasses.push({ id: 'duplicate-id', description: 'All ID attribute values are unique' });
+      }
+
+      // ── ARIA role validation (SC 4.1.2) ──
+      var validAriaRoles = ['alert','alertdialog','application','article','banner','button','cell','checkbox','columnheader','combobox','complementary','contentinfo','definition','dialog','directory','document','feed','figure','form','grid','gridcell','group','heading','img','link','list','listbox','listitem','log','main','marquee','math','menu','menubar','menuitem','menuitemcheckbox','menuitemradio','meter','navigation','none','note','option','presentation','progressbar','radio','radiogroup','region','row','rowgroup','rowheader','scrollbar','search','searchbox','separator','slider','spinbutton','status','switch','tab','table','tablist','tabpanel','term','textbox','timer','toolbar','tooltip','tree','treegrid','treeitem'];
+      var roleEls = doc.querySelectorAll('[role]');
+      var invalidRoles = [];
+      for (var ri = 0; ri < roleEls.length; ri++) {
+        var roleVal = (roleEls[ri].getAttribute('role') || '').trim().toLowerCase();
+        if (roleVal && validAriaRoles.indexOf(roleVal) === -1) {
+          invalidRoles.push(roleEls[ri].outerHTML.substring(0, 150));
+        }
+      }
+      if (invalidRoles.length > 0) {
+        manualViolations.push({
+          id: 'aria-roles', engine: 'manual', impact: 'serious',
+          help: 'ARIA roles must be valid WAI-ARIA 1.2 roles',
+          description: 'Invalid ARIA roles are ignored by assistive technology, which means the element loses its intended semantic meaning.',
+          tags: ['wcag2a', 'wcag412'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/aria-roles',
+          nodes: invalidRoles.map(function (h) { return { html: h, failureSummary: 'Fix: Use a valid WAI-ARIA 1.2 role value. Check the ARIA specification for the list of allowed roles.' }; })
+        });
+      } else if (roleEls.length > 0) {
+        manualPasses.push({ id: 'aria-roles', description: 'All ARIA roles are valid' });
+      }
+
+      // ── Image alt text quality (SC 1.1.1) ──
+      var images = doc.querySelectorAll('img');
+      var badAltImages = [];
+      var redundantPrefixes = ['image of', 'picture of', 'photo of', 'graphic of', 'icon of', 'screenshot of', 'logo of'];
+      for (var ii = 0; ii < images.length; ii++) {
+        var alt = images[ii].getAttribute('alt');
+        if (alt === null) continue; // missing alt is caught by axe-core
+        var altLower = alt.trim().toLowerCase();
+        var isBad = false;
+        var reason = '';
+        for (var pi = 0; pi < redundantPrefixes.length; pi++) {
+          if (altLower.indexOf(redundantPrefixes[pi]) === 0) { isBad = true; reason = 'Redundant prefix "' + redundantPrefixes[pi] + '". Screen readers already announce the element as an image.'; break; }
+        }
+        if (!isBad && alt.length > 150) { isBad = true; reason = 'Alt text is ' + alt.length + ' characters. Consider using a shorter description and placing detail in surrounding text or a long description.'; }
+        if (!isBad && alt.trim() === '' && !images[ii].getAttribute('role') && !images[ii].closest('a, button')) { /* decorative is fine */ }
+        if (isBad) badAltImages.push({ html: images[ii].outerHTML.substring(0, 150), reason: reason });
+      }
+      if (badAltImages.length > 0) {
+        manualViolations.push({
+          id: 'image-alt-quality', engine: 'manual', impact: 'minor',
+          help: 'Image alt text should be concise and not redundant',
+          description: 'Alt text that starts with "image of" or "photo of" is redundant because screen readers already announce the element as an image. Overly long alt text is also problematic.',
+          tags: ['wcag2a', 'wcag111'],
+          helpUrl: 'https://www.w3.org/WAI/tutorials/images/tips/',
+          nodes: badAltImages.map(function (item) { return { html: item.html, failureSummary: 'Fix: ' + item.reason }; })
+        });
+      } else if (images.length > 0) {
+        manualPasses.push({ id: 'image-alt-quality', description: 'Image alt text is concise and not redundant' });
+      }
+
+      // ── Button accessible name (SC 4.1.2) ──
+      var buttons = doc.querySelectorAll('button, [role="button"], input[type="button"], input[type="submit"]');
+      var unnamedButtons = [];
+      for (var bi = 0; bi < buttons.length; bi++) {
+        var btn = buttons[bi];
+        var btnName = (btn.getAttribute('aria-label') || btn.getAttribute('aria-labelledby') || btn.getAttribute('title') || btn.getAttribute('value') || btn.textContent || '').trim();
+        if (!btnName) unnamedButtons.push(btn.outerHTML.substring(0, 150));
+      }
+      if (unnamedButtons.length > 0) {
+        manualViolations.push({
+          id: 'button-name', engine: 'manual', impact: 'serious',
+          help: 'Buttons must have an accessible name',
+          description: 'Buttons without accessible names are announced as "button" by screen readers with no indication of their purpose.',
+          tags: ['wcag2a', 'wcag412'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/button-name',
+          nodes: unnamedButtons.map(function (h) { return { html: h, failureSummary: 'Fix: Add visible text content, aria-label, or aria-labelledby to the button.' }; })
+        });
+      } else if (buttons.length > 0) {
+        manualPasses.push({ id: 'button-name', description: 'All buttons have accessible names' });
+      }
+
+      // ── Meta refresh detection (SC 2.2.1, SC 2.3.1) ──
+      var metaRefresh = doc.querySelector('meta[http-equiv="refresh"]');
+      if (metaRefresh) {
+        var refreshContent = metaRefresh.getAttribute('content') || '';
+        var refreshTime = parseInt(refreshContent, 10);
+        manualViolations.push({
+          id: 'meta-refresh', engine: 'manual', impact: refreshTime < 20 ? 'critical' : 'moderate',
+          help: 'Page must not use meta refresh to redirect or reload',
+          description: 'Automatic page refreshes disorient screen reader users and can cause loss of focus position. Users must be able to control timing.',
+          tags: ['wcag2a', 'wcag221', 'wcag231'],
+          helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/meta-refresh',
+          nodes: [{ html: metaRefresh.outerHTML, failureSummary: 'Fix: Remove the meta refresh tag. Use server-side redirects or provide a user-controllable mechanism instead.' }]
+        });
+      } else {
+        manualPasses.push({ id: 'meta-refresh', description: 'Page does not use meta refresh' });
+      }
+
+      // ── Autoplay media detection (SC 1.4.2) ──
+      var autoplayMedia = doc.querySelectorAll('video[autoplay], audio[autoplay]');
+      if (autoplayMedia.length > 0) {
+        var mediaNodes = [];
+        for (var mi = 0; mi < autoplayMedia.length; mi++) mediaNodes.push({ html: autoplayMedia[mi].outerHTML.substring(0, 150), failureSummary: 'Fix: Remove the autoplay attribute, or ensure the media has no audio, or provide a mechanism to pause/stop/mute within the first 3 seconds.' });
+        manualViolations.push({
+          id: 'no-autoplay-audio', engine: 'manual', impact: 'moderate',
+          help: 'Audio or video must not autoplay',
+          description: 'Autoplaying audio interferes with screen reader speech output. Users must be able to control audio playback.',
+          tags: ['wcag2a', 'wcag142'],
+          helpUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/audio-control.html',
+          nodes: mediaNodes
+        });
+      } else {
+        manualPasses.push({ id: 'no-autoplay-audio', description: 'No autoplaying media detected' });
       }
 
       return { violations: manualViolations, passes: manualPasses };
     }
 
     // =============================================
+    // HTML_CodeSniffer integration
+    // =============================================
+    function runHtmlCodeSniffer(testContainer) {
+      return new Promise(function (resolve) {
+        if (typeof HTMLCS === 'undefined') {
+          console.warn('[Checker] HTML_CodeSniffer not loaded.');
+          resolve({ violations: [], passes: [] });
+          return;
+        }
+
+        try {
+          HTMLCS.process('WCAG2AA', testContainer, function () {
+            var messages = HTMLCS.getMessages();
+            var violations = [];
+            var passCount = 0;
+
+            messages.forEach(function (msg) {
+              // Type 1 = ERROR, 2 = WARNING, 3 = NOTICE
+              if (msg.type === 1 || msg.type === 2) {
+                var impact = msg.type === 1 ? 'serious' : 'moderate';
+                var wcagCode = msg.code || '';
+                var wcagMatch = wcagCode.match(/WCAG2AA\.Principle(\d)\.Guideline(\d+_\d+)\.(\d+_\d+_\d+)/);
+                var wcagTag = '';
+                if (wcagMatch) {
+                  wcagTag = 'wcag' + wcagMatch[3].replace(/_/g, '');
+                }
+
+                var elementHtml = '';
+                if (msg.element && msg.element.outerHTML) {
+                  elementHtml = msg.element.outerHTML.substring(0, 200);
+                }
+
+                violations.push({
+                  id: wcagCode.split('.').pop() || wcagCode,
+                  engine: 'htmlcs',
+                  impact: impact,
+                  help: msg.msg,
+                  description: msg.msg,
+                  tags: wcagTag ? [wcagTag] : ['wcag2aa'],
+                  helpUrl: '',
+                  nodes: elementHtml ? [{ html: elementHtml, failureSummary: msg.msg }] : []
+                });
+              } else {
+                passCount++;
+              }
+            });
+
+            resolve({ violations: violations, passes: new Array(passCount).fill({ id: 'htmlcs-pass', description: 'Check passed' }) });
+          });
+        } catch (err) {
+          console.error('[Checker] HTMLCS error:', err);
+          resolve({ violations: [], passes: [] });
+        }
+      });
+    }
+
+    // =============================================
     // Render results
     // =============================================
+    // Store all violations for filtering
+    var allViolationsUnfiltered = [];
+    var lastScore = null;
+
+    function renderIssueList(violations) {
+      if (violations.length === 0) {
+        resultsList.innerHTML = '<div class="no-issues" role="status"><p>No issues match the current filters.</p></div>';
+        return;
+      }
+      var html = '<h3 id="issues-list-heading">' + violations.length + ' issue' + (violations.length !== 1 ? 's' : '') + ' shown</h3>';
+      html += '<ul class="issue-list" aria-label="Accessibility issues found">';
+
+      violations.forEach(function (violation, index) {
+        var nodeCount = violation.nodes ? violation.nodes.length : 0;
+        var firstNode = violation.nodes && violation.nodes[0] ? violation.nodes[0] : {};
+        var htmlSnippet = firstNode.html || '';
+        var failureSummary = firstNode.failureSummary || '';
+        var wcagTags = (violation.tags || []).filter(function (t) { return t.indexOf('wcag') === 0 || t.indexOf('best-practice') === 0; }).join(', ');
+        var engineName = violation.engine === 'htmlcs' ? 'HTML_CodeSniffer' : violation.engine === 'manual' ? 'Document Check' : 'axe-core';
+        var engineClass = violation.engine === 'htmlcs' ? 'htmlcs' : violation.engine === 'manual' ? 'manual' : 'axe';
+
+        html += '<li class="issue-item" data-severity="' + violation.impact + '" data-engine="' + violation.engine + '">';
+        html += '<button class="issue-header" aria-expanded="false" aria-controls="issue-detail-' + index + '" id="issue-btn-' + index + '">';
+        html += '<span class="issue-badge issue-badge--' + violation.impact + '">' + violation.impact + '</span>';
+        html += '<span class="issue-title">' + escapeHtml(violation.help) + '</span>';
+        html += '<span class="engine-tag engine-tag--' + engineClass + '">' + engineName + '</span>';
+        html += '<span class="issue-expand" aria-hidden="true">' + (nodeCount > 0 ? nodeCount + ' element' + (nodeCount !== 1 ? 's' : '') : '') + '</span>';
+        html += '</button>';
+        html += '<div class="issue-details" id="issue-detail-' + index + '" role="region" aria-labelledby="issue-btn-' + index + '">';
+        html += '<dl>';
+        html += '<dt>Rule</dt><dd>' + escapeHtml(violation.id) + '</dd>';
+        html += '<dt>Engine</dt><dd>' + engineName + '</dd>';
+        html += '<dt>Impact</dt><dd>' + violation.impact + '</dd>';
+        html += '<dt>WCAG Criteria</dt><dd>' + (wcagTags || 'Best practice') + '</dd>';
+        html += '<dt>Description</dt><dd>' + escapeHtml(violation.description) + '</dd>';
+        if (htmlSnippet) { html += '<dt>Affected Element</dt><dd><pre><code>' + escapeHtml(htmlSnippet) + '</code></pre></dd>'; }
+        if (failureSummary) { html += '<dt>How to Fix</dt><dd>' + escapeHtml(failureSummary) + '</dd>'; }
+        if (violation.helpUrl) { html += '<dt>Learn More</dt><dd><a href="' + escapeHtml(violation.helpUrl) + '" target="_blank" rel="noopener">Documentation on ' + escapeHtml(violation.id) + '</a></dd>'; }
+        if (nodeCount > 1) { html += '<dt>Total Affected</dt><dd>' + nodeCount + ' elements</dd>'; }
+        html += '</dl></div></li>';
+      });
+
+      html += '</ul>';
+      resultsList.innerHTML = html;
+
+      resultsList.querySelectorAll('.issue-header').forEach(function (header) {
+        header.addEventListener('click', function () {
+          var expanded = header.getAttribute('aria-expanded') === 'true';
+          var detail = document.getElementById(header.getAttribute('aria-controls'));
+          header.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+          detail.classList.toggle('open');
+        });
+        header.addEventListener('keydown', function (e) {
+          if (e.key === ' ') { e.preventDefault(); header.click(); }
+        });
+      });
+    }
+
+    function applyFilters() {
+      var severities = [];
+      document.querySelectorAll('.filter-severity:checked').forEach(function (cb) { severities.push(cb.value); });
+      var engines = [];
+      document.querySelectorAll('.filter-engine:checked').forEach(function (cb) { engines.push(cb.value); });
+      var sortVal = document.getElementById('sort-select').value;
+
+      var filtered = allViolationsUnfiltered.filter(function (v) {
+        return severities.indexOf(v.impact) !== -1 && engines.indexOf(v.engine) !== -1;
+      });
+
+      if (sortVal === 'severity-desc') filtered.sort(function (a, b) { return getImpactOrder(a.impact) - getImpactOrder(b.impact); });
+      else if (sortVal === 'severity-asc') filtered.sort(function (a, b) { return getImpactOrder(b.impact) - getImpactOrder(a.impact); });
+      else if (sortVal === 'engine') filtered.sort(function (a, b) { return a.engine.localeCompare(b.engine); });
+
+      renderIssueList(filtered);
+      var filterStatus = document.getElementById('filter-status');
+      var msg = 'Showing ' + filtered.length + ' of ' + allViolationsUnfiltered.length + ' issues';
+      filterStatus.textContent = msg;
+      if (window.srAnnounce) window.srAnnounce(msg);
+    }
+
     function renderResults(results) {
       var violations = results.violations || [];
       var passes = results.passes || [];
 
-      // Sort violations by impact severity
-      violations.sort(function (a, b) {
-        return getImpactOrder(a.impact) - getImpactOrder(b.impact);
-      });
+      lastResults = results;
+      allViolationsUnfiltered = violations.slice();
 
-      // Count by impact
+      violations.sort(function (a, b) { return getImpactOrder(a.impact) - getImpactOrder(b.impact); });
+
       var counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
-      violations.forEach(function (v) {
-        if (counts[v.impact] !== undefined) counts[v.impact]++;
-      });
+      violations.forEach(function (v) { if (counts[v.impact] !== undefined) counts[v.impact]++; });
 
       var totalIssues = violations.length;
+      var scoreData = calculateScore(violations, passes);
+      lastScore = scoreData;
 
-      // Summary cards
+      var gradeLabels = { A: 'Excellent', B: 'Good', C: 'Needs work', D: 'Poor' };
+
       resultsSummary.innerHTML =
-        '<div class="summary-card summary-card--critical" role="group" aria-label="Critical issues">' +
-        '  <span class="summary-count">' + counts.critical + '</span>' +
-        '  <span class="summary-label">Critical</span>' +
+        '<div class="summary-card summary-card--score ' + scoreData.gradeClass + '" role="group" aria-label="Accessibility score: ' + scoreData.score + ' out of 100, grade ' + scoreData.grade + '">' +
+          '<div class="score-circle">' + scoreData.score + '</div>' +
+          '<div class="score-info"><span class="score-grade">Grade ' + scoreData.grade + ' — ' + gradeLabels[scoreData.grade] + '</span><span class="score-desc">' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ', ' + passes.length + ' checks passed</span></div>' +
         '</div>' +
-        '<div class="summary-card summary-card--serious" role="group" aria-label="Serious issues">' +
-        '  <span class="summary-count">' + counts.serious + '</span>' +
-        '  <span class="summary-label">Serious</span>' +
-        '</div>' +
-        '<div class="summary-card summary-card--moderate" role="group" aria-label="Moderate issues">' +
-        '  <span class="summary-count">' + counts.moderate + '</span>' +
-        '  <span class="summary-label">Moderate</span>' +
-        '</div>' +
-        '<div class="summary-card summary-card--minor" role="group" aria-label="Minor issues">' +
-        '  <span class="summary-count">' + counts.minor + '</span>' +
-        '  <span class="summary-label">Minor</span>' +
-        '</div>' +
-        '<div class="summary-card summary-card--passes" role="group" aria-label="Checks passed">' +
-        '  <span class="summary-count">' + passes.length + '</span>' +
-        '  <span class="summary-label">Passed</span>' +
-        '</div>';
+        '<div class="summary-card summary-card--critical" role="group" aria-label="Critical issues"><span class="summary-count">' + counts.critical + '</span><span class="summary-label">Critical</span></div>' +
+        '<div class="summary-card summary-card--serious" role="group" aria-label="Serious issues"><span class="summary-count">' + counts.serious + '</span><span class="summary-label">Serious</span></div>' +
+        '<div class="summary-card summary-card--moderate" role="group" aria-label="Moderate issues"><span class="summary-count">' + counts.moderate + '</span><span class="summary-label">Moderate</span></div>' +
+        '<div class="summary-card summary-card--minor" role="group" aria-label="Minor issues"><span class="summary-count">' + counts.minor + '</span><span class="summary-label">Minor</span></div>' +
+        '<div class="summary-card summary-card--passes" role="group" aria-label="Checks passed"><span class="summary-count">' + passes.length + '</span><span class="summary-label">Passed</span></div>';
 
-      // Issue list
       if (totalIssues === 0) {
-        resultsList.innerHTML = '<div class="no-issues" role="status"><p>No accessibility violations found. Well done!</p><p>Note: Automated testing catches about 30-40% of accessibility issues. I always recommend manual testing with a screen reader for comprehensive coverage.</p></div>';
+        resultsList.innerHTML = '<div class="no-issues" role="status"><p>No accessibility violations found. Well done!</p><p>Note: Automated testing catches about 30-40% of issues. Manual screen reader testing is always recommended.</p></div>';
+        document.getElementById('results-filters').style.display = 'none';
       } else {
-        var html = '<h3 id="issues-list-heading">' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ' found</h3>';
-        html += '<ul class="issue-list" aria-label="Accessibility issues found">';
-
-        violations.forEach(function (violation, index) {
-          var nodeCount = violation.nodes ? violation.nodes.length : 0;
-          var firstNode = violation.nodes && violation.nodes[0] ? violation.nodes[0] : {};
-          var htmlSnippet = firstNode.html || '';
-          var failureSummary = firstNode.failureSummary || '';
-          var wcagTags = (violation.tags || []).filter(function (t) {
-            return t.indexOf('wcag') === 0 || t.indexOf('best-practice') === 0;
-          }).join(', ');
-
-          html += '<li class="issue-item">';
-          html += '<button class="issue-header" aria-expanded="false" aria-controls="issue-detail-' + index + '" id="issue-btn-' + index + '">';
-          html += '<span class="issue-badge issue-badge--' + violation.impact + '">' + violation.impact + '</span>';
-          html += '<span class="issue-title">' + escapeHtml(violation.help) + '</span>';
-          html += '<span class="issue-expand" aria-hidden="true">' + nodeCount + ' element' + (nodeCount !== 1 ? 's' : '') + '</span>';
-          html += '</button>';
-          html += '<div class="issue-details" id="issue-detail-' + index + '" role="region" aria-labelledby="issue-btn-' + index + '">';
-          html += '<dl>';
-          html += '<dt>Rule</dt><dd>' + escapeHtml(violation.id) + '</dd>';
-          html += '<dt>Impact</dt><dd>' + violation.impact + '</dd>';
-          html += '<dt>WCAG Criteria</dt><dd>' + (wcagTags || 'Best practice') + '</dd>';
-          html += '<dt>Description</dt><dd>' + escapeHtml(violation.description) + '</dd>';
-          if (htmlSnippet) {
-            html += '<dt>Affected Element</dt><dd><pre><code>' + escapeHtml(htmlSnippet) + '</code></pre></dd>';
-          }
-          if (failureSummary) {
-            html += '<dt>How to Fix</dt><dd>' + escapeHtml(failureSummary) + '</dd>';
-          }
-          if (violation.helpUrl) {
-            html += '<dt>Learn More</dt><dd><a href="' + escapeHtml(violation.helpUrl) + '" target="_blank" rel="noopener">Detailed documentation on ' + escapeHtml(violation.id) + ' rule</a></dd>';
-          }
-          if (nodeCount > 1) {
-            html += '<dt>Total Affected Elements</dt><dd>' + nodeCount + ' elements on the page have this issue</dd>';
-          }
-          html += '</dl>';
-          html += '</div>';
-          html += '</li>';
-        });
-
-        html += '</ul>';
-        resultsList.innerHTML = html;
-
-        // Add toggle behaviour to issue headers
-        var headers = resultsList.querySelectorAll('.issue-header');
-        headers.forEach(function (header) {
-          header.addEventListener('click', function () {
-            var expanded = header.getAttribute('aria-expanded') === 'true';
-            var detailId = header.getAttribute('aria-controls');
-            var detail = document.getElementById(detailId);
-            if (expanded) {
-              header.setAttribute('aria-expanded', 'false');
-              detail.classList.remove('open');
-            } else {
-              header.setAttribute('aria-expanded', 'true');
-              detail.classList.add('open');
-            }
-          });
-          header.addEventListener('keydown', function (e) {
-            if (e.key === ' ') {
-              e.preventDefault();
-              header.click();
-            }
-          });
-        });
+        document.getElementById('results-filters').style.display = 'flex';
+        // Reset filter checkboxes
+        document.querySelectorAll('.filter-severity, .filter-engine').forEach(function (cb) { cb.checked = true; });
+        document.getElementById('sort-select').value = 'severity-desc';
+        renderIssueList(violations);
       }
 
-      // Show results and move focus
       resultsSection.classList.add('visible');
-      resultsHeading.textContent = 'Results: ' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ' found, ' + passes.length + ' checks passed';
+      resultsHeading.textContent = 'Results: Score ' + scoreData.score + '/100 (Grade ' + scoreData.grade + ') — ' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ', ' + passes.length + ' passed';
       resultsHeading.focus();
+      document.getElementById('export-group').style.display = 'flex';
+
+      // Save to scan history
+      saveScanHistory(scoreData, violations, passes);
+      renderScanHistory();
     }
 
     // =============================================
-    // Run accessibility check
+    // Filtering event listeners
+    // =============================================
+    document.querySelectorAll('.filter-severity, .filter-engine').forEach(function (cb) {
+      cb.addEventListener('change', applyFilters);
+    });
+    document.getElementById('sort-select').addEventListener('change', applyFilters);
+
+    // =============================================
+    // Run accessibility check (both engines)
     // =============================================
     runBtn.addEventListener('click', function () {
       var code = htmlInput.value.trim();
-      if (!code) {
-        setStatus('Please paste some HTML code first.');
-        htmlInput.focus();
-        return;
-      }
+      if (!code) { setStatus('Please paste some HTML code first.'); htmlInput.focus(); return; }
 
-      setStatus('Running accessibility analysis, please wait...');
+      var useAxe = engineAxeCheckbox.checked;
+      var useHtmlcs = engineHtmlcsCheckbox.checked;
+      if (!useAxe && !useHtmlcs) { setStatus('Please select at least one testing engine.'); return; }
+
+      lastEngines = [];
+      if (useAxe) lastEngines.push('axe-core');
+      if (useHtmlcs) lastEngines.push('HTML_CodeSniffer');
+
+      setStatus('Running accessibility analysis with ' + lastEngines.join(' + ') + ', please wait...');
       runBtn.disabled = true;
+      document.getElementById('export-group').style.display = 'none';
       resultsSection.classList.remove('visible');
 
       var fullHtml = wrapSnippet(code);
-
-      // Parse user HTML with DOMParser (safe — no scripts execute)
       var parser = new DOMParser();
       var parsedDoc = parser.parseFromString(fullHtml, 'text/html');
 
-      // Create a hidden test container in the main document
-      // axe-core needs elements to be in the live DOM of the current page
       var testContainer = document.createElement('div');
       testContainer.id = 'axe-test-container';
       testContainer.setAttribute('aria-hidden', 'true');
       testContainer.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1024px;height:768px;overflow:hidden;visibility:hidden;pointer-events:none;';
 
-      // Copy parsed body content into the test container
-      // Use importNode to bring nodes from the parsed document into the main document
       var bodyNodes = parsedDoc.body.childNodes;
       for (var i = 0; i < bodyNodes.length; i++) {
         testContainer.appendChild(document.importNode(bodyNodes[i], true));
       }
-
       document.body.appendChild(testContainer);
 
-      // Run manual document-level checks (lang, title, viewport, heading order)
-      // These can't be detected by axe when running on a div
       var manualResults = runDocumentLevelChecks(fullHtml);
 
-      // Run axe-core on the test container (element-level checks)
-      setTimeout(function () {
-        try {
-          axe.run(testContainer, {
-            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
-          }).then(function (axeResults) {
-            // Merge manual document-level violations with axe violations
-            var allViolations = manualResults.violations.concat(axeResults.violations || []);
-            var allPasses = manualResults.passes.concat(axeResults.passes || []);
+      var promises = [];
 
-            // Clean up test container
-            if (testContainer.parentNode) {
-              document.body.removeChild(testContainer);
+      if (useAxe) {
+        promises.push(new Promise(function (resolve) {
+          setTimeout(function () {
+            try {
+              axe.run(testContainer, {
+                runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }
+              }).then(function (axeResults) {
+                var violations = (axeResults.violations || []).map(function (v) { v.engine = 'axe'; return v; });
+                resolve({ violations: violations, passes: axeResults.passes || [] });
+              }).catch(function (err) {
+                console.error('[Checker] axe error:', err);
+                resolve({ violations: [], passes: [] });
+              });
+            } catch (err) {
+              console.error('[Checker] axe error:', err);
+              resolve({ violations: [], passes: [] });
             }
+          }, 200);
+        }));
+      }
 
-            setStatus('Analysis complete. Found ' + allViolations.length + ' issue' + (allViolations.length !== 1 ? 's' : '') + '.');
-            runBtn.disabled = false;
-            renderResults({ violations: allViolations, passes: allPasses });
+      if (useHtmlcs) {
+        promises.push(runHtmlCodeSniffer(testContainer));
+      }
 
-          }).catch(function (err) {
-            // Clean up on error
-            if (testContainer.parentNode) {
-              document.body.removeChild(testContainer);
-            }
-            setStatus('Error during analysis: ' + err.message);
-            runBtn.disabled = false;
-            console.error('[Checker] axe.run error:', err);
-          });
-        } catch (err) {
-          if (testContainer.parentNode) {
-            document.body.removeChild(testContainer);
-          }
-          setStatus('Error: ' + err.message);
-          runBtn.disabled = false;
-          console.error('[Checker] Error:', err);
-        }
-      }, 300);
+      Promise.all(promises).then(function (engineResults) {
+        var allViolations = manualResults.violations.slice();
+        var allPasses = manualResults.passes.slice();
+
+        engineResults.forEach(function (result) {
+          allViolations = allViolations.concat(result.violations || []);
+          allPasses = allPasses.concat(result.passes || []);
+        });
+
+        var seen = {};
+        allViolations = allViolations.filter(function (v) {
+          var key = v.id + '|' + (v.nodes && v.nodes[0] ? v.nodes[0].html : '').substring(0, 80);
+          if (seen[key]) return false;
+          seen[key] = true;
+          return true;
+        });
+
+        if (testContainer.parentNode) document.body.removeChild(testContainer);
+
+        setStatus('Analysis complete with ' + lastEngines.join(' + ') + '. Found ' + allViolations.length + ' issue' + (allViolations.length !== 1 ? 's' : '') + '.');
+        runBtn.disabled = false;
+        renderResults({ violations: allViolations, passes: allPasses });
+      });
     });
+
+    // =============================================
+    // Export: HTML Report
+    // =============================================
+    function generateHtmlReport() {
+      if (!lastResults) return;
+      var violations = lastResults.violations || [];
+      var passes = lastResults.passes || [];
+      var counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+      violations.forEach(function (v) { if (counts[v.impact] !== undefined) counts[v.impact]++; });
+      var now = new Date();
+      var dateStr = now.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+      var timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      var scoreText = lastScore ? 'Score: ' + lastScore.score + '/100 (Grade ' + lastScore.grade + ')' : '';
+
+      var r = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">';
+      r += '<title>Accessibility Report - ' + dateStr + '</title>';
+      r += '<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;max-width:900px;margin:0 auto;padding:2rem 1.5rem;line-height:1.7;color:#1a1a2e;}';
+      r += 'h1{color:#1a5276;border-bottom:3px solid #1a5276;padding-bottom:0.5rem;}h2{color:#1a5276;margin-top:2rem;border-bottom:1px solid #d5dbe3;padding-bottom:0.3rem;}';
+      r += 'table{width:100%;border-collapse:collapse;margin:1rem 0;}th,td{border:1px solid #d5dbe3;padding:0.75rem;text-align:left;}th{background:#f4f6f9;font-weight:700;color:#1a5276;}';
+      r += '.critical{color:#c0392b;font-weight:700;}.serious{color:#e67e22;font-weight:700;}.moderate{color:#f39c12;font-weight:700;}.minor{color:#27ae60;font-weight:700;}';
+      r += '.summary-table td:first-child{font-weight:700;width:140px;}.issue{border:2px solid #d5dbe3;border-radius:8px;margin:1rem 0;padding:1.25rem;}';
+      r += '.issue-critical{border-left:5px solid #c0392b;}.issue-serious{border-left:5px solid #e67e22;}.issue-moderate{border-left:5px solid #f39c12;}.issue-minor{border-left:5px solid #27ae60;}';
+      r += 'code{background:#f4f6f9;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.88em;}pre{background:#f4f6f9;padding:1rem;border-radius:8px;overflow-x:auto;border:1px solid #d5dbe3;}pre code{background:none;padding:0;}';
+      r += '.engine{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.75rem;font-weight:700;}.engine-axe{background:#eaf2f8;color:#1a5276;}.engine-htmlcs{background:#f5eef8;color:#6c3483;}.engine-manual{background:#eafaf1;color:#1e8449;}';
+      r += '@media print{body{font-size:11pt;}.issue{break-inside:avoid;}}</style></head><body>';
+      r += '<h1>Web Accessibility Report</h1>';
+      r += '<table class="summary-table" role="presentation"><tbody>';
+      r += '<tr><td>Date</td><td>' + dateStr + ' at ' + timeStr + '</td></tr>';
+      r += '<tr><td>Engine(s)</td><td>' + lastEngines.join(', ') + '</td></tr>';
+      r += '<tr><td>Standard</td><td>WCAG 2.2 Level AA</td></tr>';
+      r += '<tr><td>Score</td><td>' + scoreText + '</td></tr>';
+      r += '<tr><td>Total Issues</td><td>' + violations.length + '</td></tr>';
+      r += '<tr><td>Checks Passed</td><td>' + passes.length + '</td></tr>';
+      r += '</tbody></table>';
+      r += '<h2>Summary by Severity</h2><table><thead><tr><th scope="col">Severity</th><th scope="col">Count</th></tr></thead><tbody>';
+      r += '<tr><td class="critical">Critical</td><td>' + counts.critical + '</td></tr>';
+      r += '<tr><td class="serious">Serious</td><td>' + counts.serious + '</td></tr>';
+      r += '<tr><td class="moderate">Moderate</td><td>' + counts.moderate + '</td></tr>';
+      r += '<tr><td class="minor">Minor</td><td>' + counts.minor + '</td></tr></tbody></table>';
+
+      if (violations.length > 0) {
+        r += '<h2>Detailed Findings</h2>';
+        violations.forEach(function (v, i) {
+          var eName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer' : v.engine === 'manual' ? 'Document Check' : 'axe-core';
+          var eClass = v.engine === 'htmlcs' ? 'htmlcs' : v.engine === 'manual' ? 'manual' : 'axe';
+          var fn = v.nodes && v.nodes[0] ? v.nodes[0] : {};
+          r += '<div class="issue issue-' + v.impact + '" role="region" aria-label="Issue ' + (i + 1) + '">';
+          r += '<h3>' + (i + 1) + '. <span class="' + v.impact + '">[' + v.impact.toUpperCase() + ']</span> ' + escapeHtml(v.help) + ' <span class="engine engine-' + eClass + '">' + eName + '</span></h3>';
+          r += '<p><strong>Rule:</strong> ' + escapeHtml(v.id) + '</p>';
+          r += '<p><strong>WCAG:</strong> ' + ((v.tags || []).filter(function (t) { return t.indexOf('wcag') === 0; }).join(', ') || 'Best practice') + '</p>';
+          r += '<p><strong>Description:</strong> ' + escapeHtml(v.description) + '</p>';
+          if (fn.html) r += '<p><strong>Affected Element:</strong></p><pre><code>' + escapeHtml(fn.html) + '</code></pre>';
+          if (fn.failureSummary) r += '<p><strong>How to Fix:</strong> ' + escapeHtml(fn.failureSummary) + '</p>';
+          if (v.helpUrl) r += '<p><strong>Learn More:</strong> <a href="' + escapeHtml(v.helpUrl) + '">' + escapeHtml(v.helpUrl) + '</a></p>';
+          r += '</div>';
+        });
+      } else {
+        r += '<h2>No Issues Found</h2><p>No accessibility violations detected. Automated testing catches about 30-40% of issues. Manual testing with a screen reader is recommended.</p>';
+      }
+      r += '<hr><p style="color:#666;font-size:0.85rem;">Generated by <strong>Akhilesh Malani\'s Web Accessibility Checker</strong> at <a href="https://akhileshmalani.com/checker.html">akhileshmalani.com/checker.html</a></p></body></html>';
+      return r;
+    }
+
+    document.getElementById('download-html').addEventListener('click', function () {
+      var report = generateHtmlReport();
+      if (!report) return;
+      var blob = new Blob([report], { type: 'text/html;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'accessibility-report-' + new Date().toISOString().split('T')[0] + '.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      if (window.srAnnounce) window.srAnnounce('Report downloaded as HTML file.');
+    });
+
+    // =============================================
+    // Export: JSON
+    // =============================================
+    document.getElementById('download-json').addEventListener('click', function () {
+      if (!lastResults) return;
+      var now = new Date();
+      var jsonData = {
+        meta: { date: now.toISOString(), engines: lastEngines, standard: 'WCAG 2.2 Level AA', generator: 'akhileshmalani.com/checker.html' },
+        score: lastScore ? { value: lastScore.score, grade: lastScore.grade } : null,
+        summary: { critical: 0, serious: 0, moderate: 0, minor: 0, passes: (lastResults.passes || []).length },
+        violations: (lastResults.violations || []).map(function (v) {
+          return { id: v.id, engine: v.engine, impact: v.impact, help: v.help, description: v.description, tags: v.tags, helpUrl: v.helpUrl, nodes: (v.nodes || []).map(function (n) { return { html: n.html, failureSummary: n.failureSummary }; }) };
+        })
+      };
+      (lastResults.violations || []).forEach(function (v) { if (jsonData.summary[v.impact] !== undefined) jsonData.summary[v.impact]++; });
+      var blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'accessibility-report-' + now.toISOString().split('T')[0] + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      if (window.srAnnounce) window.srAnnounce('Report downloaded as JSON file.');
+    });
+
+    // =============================================
+    // Export: CSV
+    // =============================================
+    document.getElementById('download-csv').addEventListener('click', function () {
+      if (!lastResults) return;
+      function csvEscape(str) { str = String(str || ''); if (str.indexOf('"') !== -1 || str.indexOf(',') !== -1 || str.indexOf('\n') !== -1) return '"' + str.replace(/"/g, '""') + '"'; return str; }
+      var rows = ['\uFEFF#,Severity,Rule ID,Engine,WCAG Criteria,Description,Affected Element,How to Fix'];
+      (lastResults.violations || []).forEach(function (v, i) {
+        var engineName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer' : v.engine === 'manual' ? 'Document Check' : 'axe-core';
+        var wcagTags = (v.tags || []).filter(function (t) { return t.indexOf('wcag') === 0; }).join(' ');
+        var fn = v.nodes && v.nodes[0] ? v.nodes[0] : {};
+        rows.push([i + 1, v.impact, v.id, engineName, wcagTags || 'Best practice', v.help, fn.html || '', fn.failureSummary || ''].map(csvEscape).join(','));
+      });
+      var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'accessibility-report-' + new Date().toISOString().split('T')[0] + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      if (window.srAnnounce) window.srAnnounce('Report downloaded as CSV file.');
+    });
+
+    // =============================================
+    // Scan History
+    // =============================================
+    function saveScanHistory(scoreData, violations, passes) {
+      var history = [];
+      try { history = JSON.parse(localStorage.getItem('checker-scan-history') || '[]'); } catch (e) { history = []; }
+      var counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+      violations.forEach(function (v) { if (counts[v.impact] !== undefined) counts[v.impact]++; });
+      history.unshift({
+        timestamp: new Date().toISOString(),
+        score: scoreData.score,
+        grade: scoreData.grade,
+        totalIssues: violations.length,
+        counts: counts,
+        passes: passes.length,
+        engines: lastEngines.slice()
+      });
+      if (history.length > 10) history = history.slice(0, 10);
+      try { localStorage.setItem('checker-scan-history', JSON.stringify(history)); } catch (e) {}
+    }
+
+    function renderScanHistory() {
+      var history = [];
+      try { history = JSON.parse(localStorage.getItem('checker-scan-history') || '[]'); } catch (e) { history = []; }
+      var container = document.getElementById('history-content');
+      var details = document.getElementById('scan-history');
+      if (history.length === 0) {
+        container.innerHTML = '<p>No scan history yet.</p>';
+        return;
+      }
+      details.querySelector('summary').textContent = 'Scan History (' + history.length + ' scan' + (history.length !== 1 ? 's' : '') + ')';
+      var html = '<table class="history-table" aria-label="Previous scan results"><thead><tr><th scope="col">Date</th><th scope="col">Score</th><th scope="col">Issues</th><th scope="col">Passed</th><th scope="col">Engines</th></tr></thead><tbody>';
+      history.forEach(function (entry) {
+        var d = new Date(entry.timestamp);
+        var dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        html += '<tr><td>' + dateStr + '</td>';
+        html += '<td>' + entry.score + '/100 (' + entry.grade + ')</td>';
+        html += '<td>' + entry.totalIssues + ' (C:' + entry.counts.critical + ' S:' + entry.counts.serious + ' M:' + entry.counts.moderate + ' m:' + entry.counts.minor + ')</td>';
+        html += '<td>' + entry.passes + '</td>';
+        html += '<td>' + entry.engines.join(', ') + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    document.getElementById('history-clear').addEventListener('click', function () {
+      try { localStorage.removeItem('checker-scan-history'); } catch (e) {}
+      renderScanHistory();
+      if (window.srAnnounce) window.srAnnounce('Scan history cleared.');
+    });
+
+    // Load history on page load
+    renderScanHistory();
 
     // Clear
     clearBtn.addEventListener('click', function () {
@@ -611,16 +1263,18 @@
       resultsSection.classList.remove('visible');
       resultsSummary.innerHTML = '';
       resultsList.innerHTML = '';
+      document.getElementById('export-group').style.display = 'none';
+      document.getElementById('results-filters').style.display = 'none';
+      lastResults = null;
+      lastScore = null;
+      allViolationsUnfiltered = [];
       setStatus('Cleared.');
       htmlInput.focus();
     });
 
     // Ctrl+Enter to run check
     htmlInput.addEventListener('keydown', function (e) {
-      if (e.ctrlKey && e.key === 'Enter') {
-        e.preventDefault();
-        runBtn.click();
-      }
+      if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runBtn.click(); }
     });
   })();
   </script>
