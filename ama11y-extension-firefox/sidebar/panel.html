@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMA11Y Audit Results</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <!-- Skip Navigation -->
+  <a href="#findings-section" class="skip-link">Skip to findings</a>
+
+  <!-- Header -->
+  <header role="banner">
+    <div class="header-bar">
+      <h1 id="panel-title">AMA11Y</h1>
+      <span class="version">v2.0.0</span>
+    </div>
+    <p id="page-info" class="page-info">Waiting for audit...</p>
+  </header>
+
+  <main id="main-content">
+    <!-- Live Region for screen reader announcements -->
+    <div id="live-region" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+    <!-- Summary Section -->
+    <section aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Summary</h2>
+      <div id="summary-cards" class="summary-cards" role="region" aria-label="Finding counts">
+        <div class="card"><span class="count count-fail" id="count-fail">—</span><span class="label">Failures</span></div>
+        <div class="card"><span class="count count-warn" id="count-warn">—</span><span class="label">Warnings</span></div>
+        <div class="card"><span class="count count-pass" id="count-pass">—</span><span class="label">Passes</span></div>
+        <div class="card"><span class="count count-info" id="count-info">—</span><span class="label">Info</span></div>
+        <div class="card"><span class="count count-total" id="count-total">—</span><span class="label">Total</span></div>
+      </div>
+      <div class="severity-row" role="region" aria-label="Severity breakdown">
+        <span class="sev-badge sev-critical"><span id="sev-critical">0</span> Critical</span>
+        <span class="sev-badge sev-serious"><span id="sev-serious">0</span> Serious</span>
+        <span class="sev-badge sev-moderate"><span id="sev-moderate">0</span> Moderate</span>
+        <span class="sev-badge sev-minor"><span id="sev-minor">0</span> Minor</span>
+      </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section aria-labelledby="filters-heading">
+      <h2 id="filters-heading">Filters</h2>
+      <div class="filters-row">
+        <div class="filter-group">
+          <label for="filter-engine">Engine</label>
+          <select id="filter-engine">
+            <option value="all">All Engines</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-verdict">Verdict</label>
+          <select id="filter-verdict">
+            <option value="all">All Verdicts</option>
+            <option value="Fail">Fail</option>
+            <option value="Warning">Warning</option>
+            <option value="Pass">Pass</option>
+            <option value="Info">Info</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-severity">Severity</label>
+          <select id="filter-severity">
+            <option value="all">All Severities</option>
+            <option value="Critical">Critical</option>
+            <option value="Serious">Serious</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Minor">Minor</option>
+          </select>
+        </div>
+        <button id="clear-filters" type="button" class="btn btn-small">Clear Filters</button>
+      </div>
+      <p id="filter-status" class="filter-status" aria-live="polite"></p>
+    </section>
+
+    <!-- Findings Section -->
+    <section id="findings-section" aria-labelledby="findings-heading">
+      <h2 id="findings-heading">Findings <span id="findings-count"></span></h2>
+      <div id="findings-container" role="region" aria-labelledby="findings-heading">
+        <table id="findings-table" class="findings-table" aria-label="Accessibility audit findings">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Engine</th>
+              <th scope="col">Verdict</th>
+              <th scope="col">Severity</th>
+              <th scope="col">Issue</th>
+            </tr>
+          </thead>
+          <tbody id="findings-body">
+            <tr><td colspan="5" class="empty-state">Press Alt+Shift+A on any page to run an audit.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Export Section -->
+    <section aria-labelledby="export-heading">
+      <h2 id="export-heading">Export</h2>
+      <div id="export-toolbar" role="toolbar" aria-label="Export formats" class="export-toolbar">
+        <button id="export-json" type="button" class="btn" disabled>JSON</button>
+        <button id="export-html" type="button" class="btn" disabled>HTML Report</button>
+        <button id="export-csv" type="button" class="btn" disabled>CSV</button>
+        <button id="export-text" type="button" class="btn" disabled>Plain Text</button>
+      </div>
+    </section>
+
+    <!-- Re-audit Button -->
+    <div class="reaudit-section">
+      <button id="reaudit-btn" type="button" class="btn btn-primary">Re-run Audit</button>
+    </div>
+  </main>
+
+  <footer role="contentinfo">
+    <p>AMA11Y v2.0.0 — ama11y.akhileshmalani.com — Private and Confidential</p>
+  </footer>
+
+  <script src="panel.js"></script>
+</body>
+</html>
