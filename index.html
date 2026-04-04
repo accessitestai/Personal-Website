@@ -35,18 +35,15 @@
   <script>
     (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
   </script>
-  <!-- Firebase SDK (v9 compat for simplicity) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <!-- EmailJS for admin notifications -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script>
-    (function() { if (typeof emailjs !== 'undefined') emailjs.init('EqzWlJ7LRxnccipv_'); })();
-  </script>
-<meta name="google-site-verification" content="QGON3ias_YR9u7-aNNYmhYNzXEqZ6LmK79ldSRe9UPc" />
-  <!-- Netlify Identity widget - handles invite/password confirmation -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <meta name="google-site-verification" content="QGON3ias_YR9u7-aNNYmhYNzXEqZ6LmK79ldSRe9UPc">
+  <!-- Firebase SDK (deferred — only needed for library auth & contact form) -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- EmailJS for admin notifications (deferred) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- Netlify Identity widget (deferred) -->
+  <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
   <!-- Skip Navigation -->
@@ -686,8 +683,8 @@
   </script>
   <script src="firebase-config.js"></script>
   <script src="script.js"></script>
-  <!-- Netlify Identity widget for CMS redirect -->
   <script>
+    (function() { if (typeof emailjs !== 'undefined') emailjs.init('EqzWlJ7LRxnccipv_'); })();
     if (window.netlifyIdentity) {
       window.netlifyIdentity.on("init", function(user) {
         if (!user) {
