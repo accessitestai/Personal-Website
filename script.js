@@ -836,9 +836,12 @@
     '<li>Go to Home: <kbd>Alt + 1</kbd></li>' +
     '<li>Go to Blog: <kbd>Alt + 2</kbd></li>' +
     '<li>Go to Contact: <kbd>Alt + 3</kbd></li>' +
+    '<li>Toggle Read Aloud: <kbd>Alt + 4</kbd></li>' +
+    '<li>Toggle Screen Reader: <kbd>Alt + 5</kbd></li>' +
     '<li>Accessibility Settings: <kbd>Alt + 0</kbd></li>' +
     '<li>Show this help: <kbd>?</kbd></li>' +
-    '<li>Toggle Screen Reader: <kbd>Alt + Shift + R</kbd></li>' +
+    '<li>SR — Toggle (alternate): <kbd>Alt + Shift + R</kbd></li>' +
+    '<li>Read Aloud (alternate): <kbd>Alt + Shift + A</kbd></li>' +
     '<li>SR — Next element: <kbd>↓</kbd></li>' +
     '<li>SR — Prev element: <kbd>↑</kbd></li>' +
     '<li>SR — Next heading: <kbd>Alt + Shift + H</kbd></li>' +
@@ -928,6 +931,20 @@
     if (e.altKey && e.key === '3') {
       e.preventDefault();
       window.location.href = prefix + 'index.html#contact';
+    }
+
+    // Alt+4: Toggle Read Aloud
+    if (e.altKey && !e.shiftKey && e.key === '4') {
+      e.preventDefault();
+      var raSwitch = document.getElementById('a11y-read-aloud');
+      if (raSwitch) raSwitch.click();
+    }
+
+    // Alt+5: Toggle Screen Reader
+    if (e.altKey && !e.shiftKey && e.key === '5') {
+      e.preventDefault();
+      var srSwitch = document.getElementById('a11y-screen-reader');
+      if (srSwitch) srSwitch.click();
     }
 
     // Alt+0: Accessibility Settings

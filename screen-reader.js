@@ -983,14 +983,20 @@
     handleToggle(srSwitch, WebSR, ReadAloud, raSwitch);
   }
 
-  // Global toggle shortcut: Alt+Shift+R for screen reader
+  // Global toggle shortcuts: Alt+Shift+R for screen reader, Alt+Shift+A for read aloud
   document.addEventListener('keydown', function (e) {
-    if (e.altKey && e.shiftKey && e.key.toLowerCase() === 'r') {
-      var t = e.target;
-      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') return;
+    if (!e.altKey || !e.shiftKey) return;
+    var t = e.target;
+    if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') return;
+    var key = e.key.toLowerCase();
+    if (key === 'r') {
       e.preventDefault();
-      var sw = document.getElementById('a11y-screen-reader');
-      if (sw) sw.click();
+      var sr = document.getElementById('a11y-screen-reader');
+      if (sr) sr.click();
+    } else if (key === 'a') {
+      e.preventDefault();
+      var ra = document.getElementById('a11y-read-aloud');
+      if (ra) ra.click();
     }
   });
 
