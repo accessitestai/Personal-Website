@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JAWS End-to-End Test Script — akhileshmalani.com &amp; AMA11Y</title>
+<title>Screen Reader End-to-End Test Script — akhileshmalani.com &amp; AMA11Y</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1a1a1a; background: #fff; line-height: 1.6; }
@@ -12,9 +12,10 @@
   header { background: #003366; color: #fff; padding: 28px 32px; }
   header h1 { font-size: 1.6rem; margin-bottom: 4px; }
   header p { font-size: .88rem; opacity: .85; }
-  main { max-width: 960px; margin: 0 auto; padding: 32px; }
+  main { max-width: 1000px; margin: 0 auto; padding: 32px; }
   h2 { font-size: 1.3rem; color: #003366; margin: 32px 0 12px; border-bottom: 2px solid #e0e8f0; padding-bottom: 6px; }
   h3 { font-size: 1.05rem; color: #1a5276; margin: 20px 0 8px; }
+  h4 { font-size: .95rem; color: #2c3e50; margin: 16px 0 6px; }
   p { margin-bottom: 12px; }
   .test-section { background: #f8fafc; border: 1px solid #e0e8f0; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
   .test-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; }
@@ -24,439 +25,806 @@
   .test-label strong { display: block; font-size: .95rem; }
   .test-label span { font-size: .84rem; color: #555; }
   .key { display: inline-block; background: #eef2f7; border: 1px solid #ccc; border-radius: 3px; padding: 1px 6px; font-family: 'Cascadia Code', Consolas, monospace; font-size: .82rem; }
-  .pass { color: #1e8449; font-weight: 700; }
-  .fail { color: #c0392b; font-weight: 700; }
   .note { background: #fef9e7; border-left: 3px solid #d68910; padding: 10px 14px; font-size: .88rem; margin: 10px 0; }
+  .sr-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
+  .sr-jaws { background: #eaf2f8; color: #1a5276; border: 1px solid #aed6f1; }
+  .sr-nvda { background: #f5eef8; color: #6c3483; border: 1px solid #d2b4de; }
+  .sr-vo { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+  .sr-narrator { background: #fef5e7; color: #b7950b; border: 1px solid #f9e79f; }
+  .sr-cvox { background: #fdebd0; color: #a04000; border: 1px solid #f0b27a; }
+  .cmd-table { width: 100%; border-collapse: collapse; font-size: .84rem; margin: 12px 0 20px; }
+  .cmd-table th { background: #003366; color: #fff; padding: 8px 12px; text-align: left; font-size: .74rem; text-transform: uppercase; }
+  .cmd-table td { padding: 8px 12px; border-bottom: 1px solid #e8eef5; font-family: 'Cascadia Code', Consolas, monospace; font-size: .82rem; }
+  .cmd-table tr:nth-child(even) td { background: #f8fafc; }
+  .sr-filter { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; padding: 10px; background: #f0f5fa; border-radius: 6px; }
+  .sr-filter label { display: flex; align-items: center; gap: 4px; font-size: .88rem; cursor: pointer; }
+  .sr-filter input { accent-color: #003366; }
+  .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+  .stat { background: #f0f5fa; border-radius: 6px; padding: 12px 18px; text-align: center; border: 1px solid #cde; }
+  .stat .n { font-size: 1.4rem; font-weight: 700; }
+  .stat .l { font-size: .72rem; color: #555; text-transform: uppercase; letter-spacing: .04em; }
+  .n-pass { color: #1e8449; } .n-fail { color: #c0392b; }
   footer { background: #f0f5fa; padding: 16px 32px; font-size: .8rem; color: #555; border-top: 1px solid #dde; }
-  @media print { .test-check { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  @media print { .test-check { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .sr-filter { display: none; } }
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
 <header role="banner">
-  <h1>JAWS End-to-End Test Script</h1>
-  <p>akhileshmalani.com &amp; AMA11Y Platform | Version 1.0 | 4 April 2026</p>
+  <h1>Screen Reader End-to-End Test Script</h1>
+  <p>akhileshmalani.com &amp; AMA11Y Platform | Version 2.0 | 4 April 2026 | JAWS, NVDA, VoiceOver, Narrator, ChromeVox</p>
 </header>
 <main id="main">
 
-<p>This test script covers every interactive element and screen reader checkpoint on the personal website and the AMA11Y platform. Execute each test with JAWS in both virtual cursor and forms/focus mode as noted. Check each box when the test passes.</p>
+<p>This test script covers every interactive element and screen reader checkpoint across the personal website, accessibility checker, and AMA11Y platform. Tests are organised by area, with screen reader specific keyboard commands for each of the five screen readers.</p>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Screen Reader Quick Reference</h2>
+<!-- ═══════════════════════════════════════════════ -->
 
 <div class="note">
-  <strong>Prerequisites:</strong> JAWS 2024 or later. Chrome or Edge. JAWS virtual cursor mode active (default). Switch to PC cursor mode with <span class="key">Insert+Z</span> where noted.
+  <strong>Key Modifiers:</strong>
+  <span class="sr-badge sr-jaws">JAWS</span> Insert key (JAWS key) &nbsp;
+  <span class="sr-badge sr-nvda">NVDA</span> Insert or CapsLock (NVDA key) &nbsp;
+  <span class="sr-badge sr-vo">VoiceOver</span> Ctrl+Option (VO keys) &nbsp;
+  <span class="sr-badge sr-narrator">Narrator</span> CapsLock or Insert (Narrator key) &nbsp;
+  <span class="sr-badge sr-cvox">ChromeVox</span> Search or Ctrl+Alt (CV keys)
+</div>
+
+<table class="cmd-table" aria-label="Screen reader command comparison">
+  <thead>
+    <tr><th scope="col">Action</th><th scope="col">JAWS</th><th scope="col">NVDA</th><th scope="col">VoiceOver (Mac)</th><th scope="col">Narrator</th><th scope="col">ChromeVox</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Next heading</td><td>H</td><td>H</td><td>VO+Cmd+H</td><td>H</td><td>Search+H</td></tr>
+    <tr><td>Heading level 1</td><td>1</td><td>1</td><td>—</td><td>1</td><td>—</td></tr>
+    <tr><td>Next landmark</td><td>; (semicolon)</td><td>D</td><td>—</td><td>D</td><td>Search+;</td></tr>
+    <tr><td>Next link</td><td>Tab or K</td><td>K</td><td>VO+Cmd+L</td><td>K</td><td>Search+L</td></tr>
+    <tr><td>Next form field</td><td>F</td><td>F</td><td>VO+Cmd+J</td><td>F</td><td>Search+F</td></tr>
+    <tr><td>Next table</td><td>T</td><td>T</td><td>VO+Cmd+T</td><td>T</td><td>Search+T</td></tr>
+    <tr><td>Table cell nav</td><td>Ctrl+Alt+Arrow</td><td>Ctrl+Alt+Arrow</td><td>VO+Arrow</td><td>Ctrl+Alt+Arrow</td><td>Search+Arrow</td></tr>
+    <tr><td>Next button</td><td>B</td><td>B</td><td>—</td><td>B</td><td>Search+B</td></tr>
+    <tr><td>Forms mode</td><td>Enter on field</td><td>Enter on field</td><td>VO+Space</td><td>Enter on field</td><td>Enter on field</td></tr>
+    <tr><td>Browse/virtual mode</td><td>Insert+Z (toggle)</td><td>NVDA+Space (toggle)</td><td>Always on</td><td>CapsLock+Space</td><td>Always on</td></tr>
+    <tr><td>Read current line</td><td>Insert+Up</td><td>NVDA+L</td><td>VO+L</td><td>CapsLock+I</td><td>Search+K+I</td></tr>
+    <tr><td>List headings</td><td>Insert+F6</td><td>NVDA+F7</td><td>VO+U (rotor)</td><td>CapsLock+F6</td><td>Search+L</td></tr>
+    <tr><td>List landmarks</td><td>Insert+F3</td><td>NVDA+F7 (tab)</td><td>VO+U (rotor)</td><td>CapsLock+F5</td><td>—</td></tr>
+    <tr><td>Stop speech</td><td>Ctrl</td><td>Ctrl</td><td>Ctrl</td><td>Ctrl</td><td>Ctrl</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Filter by Screen Reader</h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="sr-filter" role="group" aria-label="Show tests for specific screen readers">
+  <label><input type="checkbox" checked data-sr="all"> All screen readers</label>
+  <label><input type="checkbox" checked data-sr="jaws"> <span class="sr-badge sr-jaws">JAWS</span></label>
+  <label><input type="checkbox" checked data-sr="nvda"> <span class="sr-badge sr-nvda">NVDA</span></label>
+  <label><input type="checkbox" checked data-sr="vo"> <span class="sr-badge sr-vo">VoiceOver</span></label>
+  <label><input type="checkbox" checked data-sr="narrator"> <span class="sr-badge sr-narrator">Narrator</span></label>
+  <label><input type="checkbox" checked data-sr="cvox"> <span class="sr-badge sr-cvox">ChromeVox</span></label>
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
+<h2>Progress</h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="stats-bar" role="region" aria-label="Test progress" aria-live="polite">
+  <div class="stat"><div class="n" id="total-count">0</div><div class="l">Total Tests</div></div>
+  <div class="stat"><div class="n n-pass" id="pass-count">0</div><div class="l">Passed</div></div>
+  <div class="stat"><div class="n n-fail" id="remaining-count">0</div><div class="l">Remaining</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 <h2>Part 1: Personal Website — akhileshmalani.com</h2>
-<!-- ═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
-<h3>1.1 Page Load and Landmarks</h3>
+<h3>1.1 Page Load and Document Structure</h3>
 <div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t1"><label class="test-label" for="t1">
-    <strong>Page title announced</strong>
-    <span>Navigate to akhileshmalani.com. JAWS announces the page title: "Akhilesh Malani | Senior Accessibility Architect &amp; Digital Inclusion Strategist".</span>
+    <strong>Page title announced on load</strong>
+    <span><span class="sr-badge sr-jaws">JAWS</span><span class="sr-badge sr-nvda">NVDA</span><span class="sr-badge sr-vo">VO</span><span class="sr-badge sr-narrator">NAR</span><span class="sr-badge sr-cvox">CV</span> Navigate to akhileshmalani.com. Screen reader announces the full page title.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t2"><label class="test-label" for="t2">
-    <strong>Skip link works</strong>
-    <span>Press <span class="key">Tab</span>. First focusable element is "Skip to main content". Press <span class="key">Enter</span>. Focus moves to main content area.</span>
+    <strong>Skip link receives focus first</strong>
+    <span>Press <span class="key">Tab</span>. "Skip to main content" link is the first focusable element. Press <span class="key">Enter</span> — focus moves to main.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="jaws">
     <input type="checkbox" class="test-check" id="t3"><label class="test-label" for="t3">
-    <strong>Landmark regions available</strong>
-    <span>Press <span class="key">Insert+F5</span> to refresh buffer, then <span class="key">;</span> (semicolon) to cycle landmarks. Expected: banner, navigation "Primary navigation", main, contentinfo.</span>
+    <strong><span class="sr-badge sr-jaws">JAWS</span> Landmarks enumerated</strong>
+    <span>Press <span class="key">Insert+F3</span> to list landmarks. Expected: banner, navigation "Primary navigation", main, complementary, contentinfo.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="nvda">
     <input type="checkbox" class="test-check" id="t4"><label class="test-label" for="t4">
-    <strong>Heading hierarchy correct</strong>
-    <span>Press <span class="key">H</span> to cycle headings. Expected hierarchy: H1 "Akhilesh Malani", H2 "About Me", H2 "What I Do", H2 "The Journey", H2 "Areas of Expertise", H2 "Free Tools", H2 "From My Blog", H2 "Contact".</span>
+    <strong><span class="sr-badge sr-nvda">NVDA</span> Landmarks enumerated</strong>
+    <span>Press <span class="key">NVDA+F7</span>, switch to Landmarks tab. Same landmarks as above.</span>
   </label></div>
-</div>
-
-<h3>1.2 Navigation</h3>
-<div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="vo">
     <input type="checkbox" class="test-check" id="t5"><label class="test-label" for="t5">
-    <strong>Nav links announced correctly</strong>
-    <span>Press <span class="key">N</span> to jump to navigation. Arrow through links. Each announces its text and role.</span>
+    <strong><span class="sr-badge sr-vo">VoiceOver</span> Landmarks via rotor</strong>
+    <span>Press <span class="key">VO+U</span>, rotate to Landmarks. Same landmarks present.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="narrator">
     <input type="checkbox" class="test-check" id="t6"><label class="test-label" for="t6">
-    <strong>Home logo link has accessible name</strong>
-    <span>First link in navigation announces "Akhilesh Malani - Accessibility Architect, Home".</span>
+    <strong><span class="sr-badge sr-narrator">Narrator</span> Landmarks via Scan Mode</strong>
+    <span>Press <span class="key">D</span> to cycle landmarks. Expected landmarks present.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t7"><label class="test-label" for="t7">
-    <strong>Dark mode toggle announces state</strong>
-    <span>Tab to dark mode toggle button. JAWS announces "Switch to dark mode, button". Press <span class="key">Enter</span>. Announces "Switch to light mode".</span>
+    <strong>Heading hierarchy is logical</strong>
+    <span>Navigate headings: H1 "Akhilesh Malani", followed by H2 sections: About Me, What I Do, The Journey, Areas of Expertise, Free Tools, From My Blog, Contact. No skipped levels.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t8"><label class="test-label" for="t8">
-    <strong>Accessibility settings panel opens</strong>
-    <span>Tab to "Accessibility settings" button. Press <span class="key">Enter</span>. Panel opens. Controls announced with labels: text size, high contrast, dyslexia font, reduce motion.</span>
+    <strong>Language attribute announced</strong>
+    <span>Page lang="en" is set. Screen reader uses English voice. No language switching errors.</span>
   </label></div>
 </div>
 
-<h3>1.3 Hero Section</h3>
+<h3>1.2 Navigation and Controls</h3>
 <div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t9"><label class="test-label" for="t9">
-    <strong>H1 reads "Akhilesh Malani"</strong>
-    <span>Press <span class="key">1</span> (JAWS heading level 1). First H1 announces "Akhilesh Malani".</span>
+    <strong>Nav links have accessible names</strong>
+    <span>Navigate into "Primary navigation" landmark. All links announce their destination text. Home logo link announces full alternative text.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t10"><label class="test-label" for="t10">
-    <strong>CTA links accessible</strong>
-    <span>Tab through "Know More", "Get in Touch", and "Download Resume" links. Each announces its text. Resume link includes file format info.</span>
+    <strong>Dark mode toggle announces state change</strong>
+    <span>Tab to "Switch to dark mode" button. Press <span class="key">Enter</span>. Button label updates to "Switch to light mode". Screen reader announces the change.</span>
   </label></div>
-</div>
-
-<h3>1.4 Blog Section</h3>
-<div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t11"><label class="test-label" for="t11">
-    <strong>Blog post cards announced</strong>
-    <span>Navigate to "From My Blog" heading. Each blog card announces: article role, heading, date, description, and "Read more" link.</span>
+    <strong>Accessibility settings panel</strong>
+    <span>Activate "Accessibility settings" button. Panel opens. Controls announced: Text size (normal/large/extra large), High contrast toggle, Dyslexia font toggle, Reduce motion toggle. Each control has a label.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t12"><label class="test-label" for="t12">
-    <strong>Blog post page accessible</strong>
-    <span>Click a blog post link. New page loads. Verify: page title, breadcrumb navigation, H1 = article title, reading time announced, article content navigable by headings.</span>
+    <strong>Translate button accessible</strong>
+    <span>"Translate this page to another language" button announces its purpose.</span>
   </label></div>
-</div>
-
-<h3>1.5 Contact Form</h3>
-<div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t13"><label class="test-label" for="t13">
-    <strong>Form fields labelled</strong>
-    <span>Tab into contact form. Each field announces its label: "Your name", "Your email", "Subject", "Your message". Required fields announce "required".</span>
+    <strong>Mobile hamburger menu (responsive)</strong>
+    <span>At mobile viewport: "Toggle navigation menu" button exists. Opens/closes nav. State announced via aria-expanded.</span>
   </label></div>
-  <div class="test-item">
+</div>
+
+<h3>1.3 Content Sections</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t14"><label class="test-label" for="t14">
-    <strong>Submit button and validation</strong>
-    <span>Tab to "Send Message" button. Press Enter with empty form. Error messages announced via live region.</span>
+    <strong>Hero CTA links accessible</strong>
+    <span>"Know More", "Get in Touch", "Download Resume" — each announces text and role. Resume link indicates PDF format.</span>
   </label></div>
-</div>
-
-<!-- ═══════════════════════════════════════════════ -->
-<h2>Part 2: Web Accessibility Checker — /checker.html</h2>
-<!-- ═══════════════════════════════════════════════ -->
-
-<h3>2.1 Page Load</h3>
-<div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t15"><label class="test-label" for="t15">
-    <strong>Page title correct</strong>
-    <span>Navigate to /checker.html. JAWS announces "Web Accessibility Checker | Akhilesh Malani".</span>
+    <strong>Key highlights region announced</strong>
+    <span>Complementary region "Key highlights" contains "16+ Years in Accessibility" and "250+ Digital Products Evaluated".</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t16"><label class="test-label" for="t16">
-    <strong>Breadcrumb navigation available</strong>
-    <span>Press <span class="key">N</span>. "Breadcrumb" navigation region found. Links: Home > Web Accessibility Checker.</span>
+    <strong>Service cards use article role</strong>
+    <span>What I Do section: each service card is an article. Navigate with arrow keys — heading and description announced.</span>
   </label></div>
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t17"><label class="test-label" for="t17">
-    <strong>Checker tool tabs announced</strong>
-    <span>"Web Checker" link has aria-current="page". "Document Checker" is a sibling link.</span>
+    <strong>Timeline items readable</strong>
+    <span>The Journey section: each timeline item has a heading (role/title), date range, and description. All readable sequentially.</span>
   </label></div>
-</div>
-
-<h3>2.2 Running an Audit</h3>
-<div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t18"><label class="test-label" for="t18">
-    <strong>Textarea labelled</strong>
-    <span>Tab to textarea. JAWS announces "Paste your HTML code, edit" with hint text about snippets.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t19"><label class="test-label" for="t19">
-    <strong>Engine selection checkboxes</strong>
-    <span>Tab to engine selection fieldset. JAWS announces "Select testing engine(s), group". Both "axe-core" and "HTML_CodeSniffer" checkboxes announced with descriptions.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t20"><label class="test-label" for="t20">
-    <strong>Run button triggers audit</strong>
-    <span>Paste HTML, tab to "Run Accessibility Check" button, press Enter. Status region announces "Analysing with..." then "Analysis complete. Found X issues."</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t21"><label class="test-label" for="t21">
-    <strong>Score card announced</strong>
-    <span>Navigate to results summary. Score card announces "Accessibility score: X out of 100, grade Y". Summary cards announce counts: Critical, Serious, Moderate, Minor, Passed.</span>
+    <strong>Blog post cards announced correctly</strong>
+    <span>Each blog card announces: article role, heading, date, excerpt, "Read more" link.</span>
   </label></div>
 </div>
 
-<h3>2.3 Filters and Exports</h3>
+<h3>1.4 Contact Form</h3>
 <div class="test-section">
-  <div class="test-item">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t19"><label class="test-label" for="t19">
+    <strong>All form fields labelled</strong>
+    <span>Tab through form: "Your name" (required), "Your email" (required), "Subject" (required), "Your message" (required). Each label announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="jaws">
+    <input type="checkbox" class="test-check" id="t20"><label class="test-label" for="t20">
+    <strong><span class="sr-badge sr-jaws">JAWS</span> Forms mode auto-enters on Tab</strong>
+    <span>Tab into form field — JAWS enters forms mode automatically. Field label announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="nvda">
+    <input type="checkbox" class="test-check" id="t21"><label class="test-label" for="t21">
+    <strong><span class="sr-badge sr-nvda">NVDA</span> Focus mode auto-enters on Tab</strong>
+    <span>Tab into form field — NVDA enters focus mode. Field label announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
     <input type="checkbox" class="test-check" id="t22"><label class="test-label" for="t22">
-    <strong>Filter controls accessible</strong>
-    <span>Tab to filter area. Severity checkboxes in fieldset "Filter by severity". Engine checkboxes in fieldset "Filter by engine". Sort dropdown with label "Sort by".</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t23"><label class="test-label" for="t23">
-    <strong>Filters update results</strong>
-    <span>Uncheck a severity filter. Live region announces updated count. Results list updates.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t24"><label class="test-label" for="t24">
-    <strong>Export buttons work</strong>
-    <span>Tab to export group. "HTML Report", "JSON", "CSV" buttons available. Press each. File downloads.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t25"><label class="test-label" for="t25">
-    <strong>Scan history accessible</strong>
-    <span>Navigate to "Scan History" details element. Press Enter to expand. History table with columns: Date, Score, Issues, Passes, Engines.</span>
+    <strong>Validation errors announced</strong>
+    <span>Submit empty form. Error messages appear in a live region and are announced by the screen reader.</span>
   </label></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ -->
+<h3>1.5 Blog Post Page</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t23"><label class="test-label" for="t23">
+    <strong>Blog page structure correct</strong>
+    <span>Navigate to a blog post. Page title includes post title. H1 = article title. Breadcrumb: Home > Blog > [title]. Reading time announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t24"><label class="test-label" for="t24">
+    <strong>Share buttons accessible</strong>
+    <span>Share links (LinkedIn, X/Twitter, Email) announce their purpose and open in new tabs (announced).</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t25"><label class="test-label" for="t25">
+    <strong>Blog navigation links</strong>
+    <span>"Previous post" and "Next post" links work and announce their destination titles.</span>
+  </label></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>Part 2: Web Accessibility Checker — /checker.html</h2>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h3>2.1 Checker Interface</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t26"><label class="test-label" for="t26">
+    <strong>Page title and breadcrumb correct</strong>
+    <span>"Web Accessibility Checker | Akhilesh Malani". Breadcrumb: Home > Web Accessibility Checker.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t27"><label class="test-label" for="t27">
+    <strong>Checker nav indicates current page</strong>
+    <span>"Web Checker" has aria-current="page". "Document Checker" is a navigable sibling link.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t28"><label class="test-label" for="t28">
+    <strong>Textarea labelled with hint</strong>
+    <span>"Paste your HTML code" label with hint: "Paste a complete HTML page or a code snippet..."</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t29"><label class="test-label" for="t29">
+    <strong>Engine checkboxes in fieldset</strong>
+    <span>Fieldset "Select testing engine(s)" contains two labelled checkboxes: axe-core, HTML_CodeSniffer.</span>
+  </label></div>
+</div>
+
+<h3>2.2 Running Audit and Results</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t30"><label class="test-label" for="t30">
+    <strong>Status updates announced via live region</strong>
+    <span>Paste HTML, run check. Status region announces: "Analysing with axe-core..." then "Analysis complete with... Found X issues."</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t31"><label class="test-label" for="t31">
+    <strong>Score card accessible</strong>
+    <span>Score card has aria-label: "Accessibility score: X out of 100, grade Y". Grade and description announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t32"><label class="test-label" for="t32">
+    <strong>Summary cards announce counts</strong>
+    <span>Six summary cards: Score, Critical, Serious, Moderate, Minor, Passed. Each announces its count.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t33"><label class="test-label" for="t33">
+    <strong>Issues list readable</strong>
+    <span>Each issue item announces: severity, engine tag, issue title, WCAG criterion. Expandable details with element selector, how to fix.</span>
+  </label></div>
+</div>
+
+<h3>2.3 Filters, Exports, History</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t34"><label class="test-label" for="t34">
+    <strong>Filter fieldsets labelled</strong>
+    <span>"Filter by severity" and "Filter by engine" fieldsets. Sort dropdown labelled "Sort by".</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t35"><label class="test-label" for="t35">
+    <strong>Filter changes announced</strong>
+    <span>Toggle a filter checkbox. Filter status live region announces: "Showing X of Y issues."</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t36"><label class="test-label" for="t36">
+    <strong>Export buttons download files</strong>
+    <span>"HTML Report", "JSON", "CSV" buttons in export group. Each triggers a download.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t37"><label class="test-label" for="t37">
+    <strong>Scan history expandable</strong>
+    <span>"Scan History" details/summary element. Expand to see table: Date, Score, Issues, Passes, Engines. "Clear History" button.</span>
+  </label></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 <h2>Part 3: AMA11Y Platform — ama11y.akhileshmalani.com</h2>
-<!-- ═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <h3>3.1 PIN Authentication</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t26"><label class="test-label" for="t26">
-    <strong>PIN screen announced</strong>
-    <span>Navigate to ama11y.akhileshmalani.com. If first visit, setup screen announces "Create your AMA11Y PIN". Otherwise, login screen with PIN pad.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t38"><label class="test-label" for="t38">
+    <strong>PIN screen announced on load</strong>
+    <span>First visit: "Create your AMA11Y PIN" setup screen. Return visit: PIN pad with digit buttons.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t27"><label class="test-label" for="t27">
-    <strong>PIN entry via keyboard</strong>
-    <span>Type digits 0-9 on keyboard. Each digit announced: "Digit X entered. PIN length Y." Backspace clears. Enter submits.</span>
+  <div class="test-item" data-sr="jaws">
+    <input type="checkbox" class="test-check" id="t39"><label class="test-label" for="t39">
+    <strong><span class="sr-badge sr-jaws">JAWS</span> PIN keyboard entry in PC cursor mode</strong>
+    <span>Press <span class="key">Insert+Z</span> for PC cursor mode. Type digits — each announced: "Digit X entered. PIN length Y."</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t28"><label class="test-label" for="t28">
-    <strong>PIN pad buttons accessible</strong>
-    <span>Tab to number pad buttons. Each button announces its digit. Clear and Enter buttons labelled.</span>
+  <div class="test-item" data-sr="nvda">
+    <input type="checkbox" class="test-check" id="t40"><label class="test-label" for="t40">
+    <strong><span class="sr-badge sr-nvda">NVDA</span> PIN keyboard entry in focus mode</strong>
+    <span>NVDA should auto-switch or press <span class="key">NVDA+Space</span> for focus mode. Type digits — announcements as above.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t29"><label class="test-label" for="t29">
-    <strong>Successful login announced</strong>
-    <span>Enter correct PIN. JAWS announces "Signed in, AMA11Y platform loaded. Dashboard tab focused. Use arrow keys to navigate between tabs."</span>
+  <div class="test-item" data-sr="vo">
+    <input type="checkbox" class="test-check" id="t41"><label class="test-label" for="t41">
+    <strong><span class="sr-badge sr-vo">VoiceOver</span> PIN pad buttons navigable</strong>
+    <span>Use <span class="key">VO+Right Arrow</span> to navigate digit buttons. Activate with <span class="key">VO+Space</span>.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t42"><label class="test-label" for="t42">
+    <strong>Login success announced</strong>
+    <span>"Signed in, AMA11Y platform loaded. Dashboard tab focused. Use arrow keys to navigate between tabs."</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t43"><label class="test-label" for="t43">
+    <strong>Wrong PIN error announced</strong>
+    <span>Enter wrong PIN. Error message announced via live region: "Incorrect PIN."</span>
   </label></div>
 </div>
 
 <h3>3.2 Tab Navigation</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t30"><label class="test-label" for="t30">
-    <strong>Tab bar announced as tablist</strong>
-    <span>Focus on tab bar. JAWS announces "tab" role. Each tab announces: name, "tab", and "selected" or "not selected".</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t44"><label class="test-label" for="t44">
+    <strong>Tablist role announced</strong>
+    <span>Tab bar uses role="tablist". Each tab announces: name, "tab", selected/not selected state.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t31"><label class="test-label" for="t31">
-    <strong>Arrow key navigation between tabs</strong>
-    <span>Press <span class="key">Left/Right arrows</span> to move between tabs. Tab panel content changes. JAWS announces "Navigated to [section] section."</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t45"><label class="test-label" for="t45">
+    <strong>Arrow keys switch tabs</strong>
+    <span><span class="key">Left/Right Arrow</span> moves between tabs. Panel content changes. "Navigated to [section] section" announced.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t32"><label class="test-label" for="t32">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t46"><label class="test-label" for="t46">
     <strong>All 8 tabs reachable</strong>
-    <span>Cycle through: Dashboard, Import &amp; Report, Web Audit, Document Audit, Champions, VPAT, Mobile Audit, Settings.</span>
+    <span>Dashboard, Import &amp; Report, Web Audit, Document Audit, Champions, VPAT, Mobile Audit, Settings.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t47"><label class="test-label" for="t47">
+    <strong>Home/End keys work</strong>
+    <span><span class="key">Home</span> jumps to first tab (Dashboard). <span class="key">End</span> jumps to last tab (Settings).</span>
   </label></div>
 </div>
 
 <h3>3.3 Dashboard Tab</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t33"><label class="test-label" for="t33">
-    <strong>Session statistics announced</strong>
-    <span>Stats grid announces: Sessions count, Total Failures, Total Warnings, Pages Audited.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t48"><label class="test-label" for="t48">
+    <strong>Session statistics region announced</strong>
+    <span>Region "Session statistics" with cards: Sessions, Total Failures, Total Warnings, Pages Audited.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t34"><label class="test-label" for="t34">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t49"><label class="test-label" for="t49">
     <strong>Recent sessions list readable</strong>
-    <span>Session list items announce: page title, date, fail count, warning count.</span>
+    <span>Each session item: page title/URL, date, fail count, warning count. Colour dot is aria-hidden.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t35"><label class="test-label" for="t35">
-    <strong>URL audit history expandable</strong>
-    <span>Navigate to URL Audit History section. Expand a URL group. Table announces: Date, Failures, Warnings, Critical, Total, Trend direction.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t50"><label class="test-label" for="t50">
+    <strong>URL audit history groups expandable</strong>
+    <span>Details elements for each URL group. Expand: table shows Date, Failures, Warnings, Critical, Total, Trend. Trend arrows have aria-labels.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t51"><label class="test-label" for="t51">
+    <strong>Clear sessions button confirms action</strong>
+    <span>"Clear All Sessions" button. Confirm operation announced.</span>
   </label></div>
 </div>
 
 <h3>3.4 Web Audit Tab</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t36"><label class="test-label" for="t36">
-    <strong>URL input field labelled</strong>
-    <span>Tab to URL field. JAWS announces "Page URL to audit, edit".</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t52"><label class="test-label" for="t52">
+    <strong>URL field and dropdowns labelled</strong>
+    <span>"Page URL to audit" text field. "Standard" dropdown (WCAG 2.2, etc.). "Level" dropdown (A, AA, AAA).</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t37"><label class="test-label" for="t37">
-    <strong>Standard and level dropdowns accessible</strong>
-    <span>Standard dropdown lists: WCAG 2.2, WCAG 2.1, etc. Level dropdown: Level A, AA, AAA.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t53"><label class="test-label" for="t53">
+    <strong>Audit progress announced</strong>
+    <span>Press "Run Audit on This Page". Live region announces: page opening, audit running, each engine, then completion with finding counts.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t38"><label class="test-label" for="t38">
-    <strong>Run audit and results announced</strong>
-    <span>Enter a URL, press "Run Audit on This Page". Page opens in new tab. Audit runs. Results populate findings table. JAWS announces completion and finding counts.</span>
+  <div class="test-item" data-sr="jaws">
+    <input type="checkbox" class="test-check" id="t54"><label class="test-label" for="t54">
+    <strong><span class="sr-badge sr-jaws">JAWS</span> Findings table navigable with Ctrl+Alt+Arrows</strong>
+    <span>Navigate to findings table. Use <span class="key">Ctrl+Alt+Right/Down</span> to move between cells. Column headers announced for each cell.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t39"><label class="test-label" for="t39">
-    <strong>Findings table navigable</strong>
-    <span>Navigate findings table with <span class="key">Ctrl+Alt+Arrow</span> keys. Column headers announced: ID, Engine, Element, Criterion, Issue, etc.</span>
+  <div class="test-item" data-sr="nvda">
+    <input type="checkbox" class="test-check" id="t55"><label class="test-label" for="t55">
+    <strong><span class="sr-badge sr-nvda">NVDA</span> Findings table navigable with Ctrl+Alt+Arrows</strong>
+    <span>Same table navigation. Column headers announced for each cell.</span>
+  </label></div>
+  <div class="test-item" data-sr="vo">
+    <input type="checkbox" class="test-check" id="t56"><label class="test-label" for="t56">
+    <strong><span class="sr-badge sr-vo">VoiceOver</span> Findings table navigable with VO+Arrows</strong>
+    <span>Use <span class="key">VO+Arrow</span> to navigate table. Column headers announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t57"><label class="test-label" for="t57">
+    <strong>Export buttons generate downloads</strong>
+    <span>All five export formats: HTML, Word, CSV, Plain Text, JSON. Each downloads the file.</span>
   </label></div>
 </div>
 
 <h3>3.5 Document Audit Tab</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t40"><label class="test-label" for="t40">
-    <strong>PDF/DOCX tab switching</strong>
-    <span>Tab between "PDF Document" and "Word Document (DOCX)" tabs. Panel switches. Announcement confirms switch.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t58"><label class="test-label" for="t58">
+    <strong>PDF/DOCX tab switching announced</strong>
+    <span>"PDF Document" and "Word Document (DOCX)" tabs. Arrow keys switch. "Switched to [type] audit" announced.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t41"><label class="test-label" for="t41">
-    <strong>File upload accessible</strong>
-    <span>Tab to "Select PDF File" button. Press Enter. File dialog opens. Select a file. Audit runs and results announced.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t59"><label class="test-label" for="t59">
+    <strong>File input labelled</strong>
+    <span>PDF: "Select PDF document to audit". DOCX: "Select Word document to audit". Labels read correctly.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t42"><label class="test-label" for="t42">
-    <strong>DOCX audit works</strong>
-    <span>Switch to DOCX tab. Upload a .docx file. Results show: heading styles, alt text, table headers, language, lists, text boxes, bookmarks, colours.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t60"><label class="test-label" for="t60">
+    <strong>PDF audit results announced</strong>
+    <span>Upload a PDF. "Reading PDF file. Please wait." Then "PDF audit complete. X findings."</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t61"><label class="test-label" for="t61">
+    <strong>DOCX audit results announced</strong>
+    <span>Upload a DOCX. "Reading Word document. Please wait." Then "DOCX audit complete. X findings."</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t62"><label class="test-label" for="t62">
+    <strong>Results list readable</strong>
+    <span>Each finding: PASS/FAIL/WARN/INFO status, title, and detail text. All readable sequentially.</span>
   </label></div>
 </div>
 
 <h3>3.6 Import &amp; Report Tab</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t43"><label class="test-label" for="t43">
-    <strong>JSON import works</strong>
-    <span>Upload a JSON findings file from the extension or bookmarklet. Findings table populates. Session saved to dashboard.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t63"><label class="test-label" for="t63">
+    <strong>JSON import populates findings</strong>
+    <span>Upload JSON from extension/bookmarklet. Loaded info announced. Findings table populates.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t44"><label class="test-label" for="t44">
-    <strong>All 5 export formats work</strong>
-    <span>Test export buttons: HTML Report, Word Document, Excel CSV, Plain Text, JSON. Each downloads correctly.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t64"><label class="test-label" for="t64">
+    <strong>Engine and verdict filters work</strong>
+    <span>Dropdowns for engine and verdict. Selection updates table. Filter status announced.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t45"><label class="test-label" for="t45">
-    <strong>Standards cross-mapping available</strong>
-    <span>Standard and level dropdowns filter findings. Cross-mapping to WCAG 2.0-2.2, Section 508, EN 301 549, etc.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t65"><label class="test-label" for="t65">
+    <strong>Standards cross-mapping dropdown</strong>
+    <span>Standard dropdown includes: WCAG 2.0 through 2.2, Section 508, EN 301 549, AODA, GIGW 3.0, etc.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t66"><label class="test-label" for="t66">
+    <strong>All 5 export formats download</strong>
+    <span>HTML Report, Word Document, Excel CSV, Plain Text, JSON. Each generates and downloads.</span>
   </label></div>
 </div>
 
-<h3>3.7 Mobile Audit Tab</h3>
+<h3>3.7 Champions Tracker Tab</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t46"><label class="test-label" for="t46">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t67"><label class="test-label" for="t67">
+    <strong>Form fields labelled</strong>
+    <span>Champion name, client, role, engagement score, notes — all labelled. Required fields indicated.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t68"><label class="test-label" for="t68">
+    <strong>Champions table navigable</strong>
+    <span>Table with column headers. Data readable with table navigation commands.</span>
+  </label></div>
+</div>
+
+<h3>3.8 VPAT Generator Tab</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t69"><label class="test-label" for="t69">
+    <strong>Criteria table accessible</strong>
+    <span>VPAT criteria table with columns: Criterion, Conformance Level, Remarks. Each cell readable.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t70"><label class="test-label" for="t70">
+    <strong>Export generates VPAT report</strong>
+    <span>Export button generates the VPAT document in chosen format.</span>
+  </label></div>
+</div>
+
+<h3>3.9 Mobile Audit Tab</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t71"><label class="test-label" for="t71">
     <strong>Platform dropdown accessible</strong>
-    <span>Tab to platform select. Options: iOS, iPadOS, Android, WearOS. Selection loads platform-specific checklist.</span>
+    <span>App name field labelled. Platform select: iOS, iPadOS, Android, WearOS. Selection loads checklist. "Mobile checklist loaded for [platform]. X items." announced.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t47"><label class="test-label" for="t47">
-    <strong>Checklist items checkable</strong>
-    <span>Each checklist item has a checkbox and notes field. Check items and add notes. State persists.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t72"><label class="test-label" for="t72">
+    <strong>Checklist items interactive</strong>
+    <span>Each item has: checkbox (Pass/Fail/N/A), category, check description, criterion, assistive technology, method, notes field.</span>
   </label></div>
-</div>
-
-<h3>3.8 Settings Tab</h3>
-<div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t48"><label class="test-label" for="t48">
-    <strong>PIN change works</strong>
-    <span>Tab to change PIN fields. Enter current and new PIN. Success announced.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t49"><label class="test-label" for="t49">
-    <strong>Sign out works</strong>
-    <span>Press Sign Out button. Returns to PIN login screen. JAWS announces "Signed out."</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t73"><label class="test-label" for="t73">
+    <strong>Export checklist works</strong>
+    <span>Export button downloads mobile audit checklist as HTML report.</span>
   </label></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ -->
-<h2>Part 4: Browser Extension — Chrome/Edge</h2>
-<!-- ═══════════════════════════════════════════════ -->
-
+<h3>3.10 Settings Tab</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t50"><label class="test-label" for="t50">
-    <strong>Extension activates with keyboard</strong>
-    <span>Switch to PC cursor mode (<span class="key">Insert+Z</span>). Press <span class="key">Alt+Shift+A</span>. Side panel opens. JAWS announces "AMA11Y" heading.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t74"><label class="test-label" for="t74">
+    <strong>PIN change fields labelled</strong>
+    <span>Current PIN, New PIN, Confirm PIN fields. Success/error announced.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t51"><label class="test-label" for="t51">
-    <strong>Audit runs and results populate</strong>
-    <span>Side panel shows summary: Failures, Warnings, Passes, Info, Total. Severity badges show Critical/Serious/Moderate/Minor.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t52"><label class="test-label" for="t52">
-    <strong>Findings table navigable</strong>
-    <span>Findings table announces column headers. Each finding expandable — shows Element, Criterion, Computed, Required, How to Fix.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t53"><label class="test-label" for="t53">
-    <strong>Filters work in panel</strong>
-    <span>Engine, Verdict, and Severity filter dropdowns update the table. Filter status announced.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t54"><label class="test-label" for="t54">
-    <strong>Export toolbar accessible</strong>
-    <span>Arrow keys navigate between JSON, HTML Report, CSV, Plain Text buttons. Each exports correctly.</span>
-  </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t55"><label class="test-label" for="t55">
-    <strong>Re-audit button works</strong>
-    <span>Press "Re-run Audit" button. JAWS announces "Running audit..." then results refresh.</span>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t75"><label class="test-label" for="t75">
+    <strong>Sign out returns to PIN screen</strong>
+    <span>"Sign Out" button. "Signed out." announced. PIN login screen displayed.</span>
   </label></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ -->
-<h2>Part 5: Accessibility Statement — /accessibility.html</h2>
-<!-- ═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>Part 4: Browser Extension</h2>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
+<h3>4.1 Chrome/Edge Extension</h3>
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t56"><label class="test-label" for="t56">
-    <strong>Page loads with correct title</strong>
-    <span>Navigate to /accessibility.html. Title: "Accessibility Statement | Akhilesh Malani". Heading hierarchy correct.</span>
+  <div class="test-item" data-sr="jaws">
+    <input type="checkbox" class="test-check" id="t76"><label class="test-label" for="t76">
+    <strong><span class="sr-badge sr-jaws">JAWS</span> Activate with Alt+Shift+A in PC cursor mode</strong>
+    <span>Press <span class="key">Insert+Z</span> for PC cursor. Press <span class="key">Alt+Shift+A</span>. Side panel opens. "AMA11Y" heading announced.</span>
   </label></div>
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t57"><label class="test-label" for="t57">
-    <strong>Content readable in virtual cursor</strong>
-    <span>Navigate through the statement with <span class="key">Down Arrow</span>. All text readable. Links work. Contact information accessible.</span>
+  <div class="test-item" data-sr="nvda">
+    <input type="checkbox" class="test-check" id="t77"><label class="test-label" for="t77">
+    <strong><span class="sr-badge sr-nvda">NVDA</span> Activate with Alt+Shift+A in focus mode</strong>
+    <span>Press <span class="key">NVDA+Space</span> for focus mode. Press <span class="key">Alt+Shift+A</span>. Side panel opens.</span>
+  </label></div>
+  <div class="test-item" data-sr="narrator">
+    <input type="checkbox" class="test-check" id="t78"><label class="test-label" for="t78">
+    <strong><span class="sr-badge sr-narrator">Narrator</span> Activate with Alt+Shift+A</strong>
+    <span>Press <span class="key">CapsLock+Space</span> if in Scan Mode first. Then <span class="key">Alt+Shift+A</span>.</span>
+  </label></div>
+  <div class="test-item" data-sr="cvox">
+    <input type="checkbox" class="test-check" id="t79"><label class="test-label" for="t79">
+    <strong><span class="sr-badge sr-cvox">ChromeVox</span> Activate extension</strong>
+    <span>Click toolbar icon or use <span class="key">Alt+Shift+A</span>. Side panel opens. ChromeVox announces heading.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t80"><label class="test-label" for="t80">
+    <strong>Summary cards announced</strong>
+    <span>Region "Finding counts": Failures, Warnings, Passes, Info, Total. Severity badges: Critical, Serious, Moderate, Minor.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t81"><label class="test-label" for="t81">
+    <strong>Findings table with expandable details</strong>
+    <span>Each finding row: ID, Engine, Verdict, Severity, Issue (button). Expand for: Element, Criterion, Computed, Required, How to Fix.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t82"><label class="test-label" for="t82">
+    <strong>Filters update findings</strong>
+    <span>Engine, Verdict, Severity dropdowns. "Clear Filters" button. Filter status announced.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t83"><label class="test-label" for="t83">
+    <strong>Export toolbar arrow key navigation</strong>
+    <span>Toolbar role with JSON, HTML Report, CSV, Plain Text buttons. <span class="key">Arrow keys</span> move focus between buttons.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t84"><label class="test-label" for="t84">
+    <strong>Re-run Audit button works</strong>
+    <span>"Re-run Audit" button. "Running audit..." announced. Results refresh.</span>
   </label></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ -->
-<h2>Part 6: 404 Error Page</h2>
-<!-- ═══════════════════════════════════════════════ -->
+<h3>4.2 Firefox Extension</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="jaws">
+    <input type="checkbox" class="test-check" id="t85"><label class="test-label" for="t85">
+    <strong><span class="sr-badge sr-jaws">JAWS</span> Firefox sidebar opens</strong>
+    <span>Press <span class="key">Alt+Shift+A</span> in PC cursor mode. Firefox sidebar opens with AMA11Y results.</span>
+  </label></div>
+  <div class="test-item" data-sr="nvda">
+    <input type="checkbox" class="test-check" id="t86"><label class="test-label" for="t86">
+    <strong><span class="sr-badge sr-nvda">NVDA</span> Firefox sidebar opens</strong>
+    <span>Same activation in focus mode. Sidebar opens.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t87"><label class="test-label" for="t87">
+    <strong>Firefox sidebar results identical to Chrome</strong>
+    <span>Same summary, findings, filters, and exports available. All keyboard navigation works.</span>
+  </label></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>Part 5: Accessibility Statement and Error Pages</h2>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div class="test-section">
-  <div class="test-item">
-    <input type="checkbox" class="test-check" id="t58"><label class="test-label" for="t58">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t88"><label class="test-label" for="t88">
+    <strong>Accessibility statement page loads correctly</strong>
+    <span>Title: "Accessibility Statement | Akhilesh Malani". Heading hierarchy correct. Content readable. Contact link works.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t89"><label class="test-label" for="t89">
     <strong>404 page accessible</strong>
-    <span>Navigate to a non-existent URL. JAWS announces "Page Not Found". Link back to homepage available and announced.</span>
+    <span>Non-existent URL shows "Page Not Found". Link back to homepage announced and functional.</span>
   </label></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ -->
-<h2>Summary</h2>
-<!-- ═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>Part 6: Cross-Cutting Concerns</h2>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<h3>6.1 Live Regions and Announcements</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="jaws">
+    <input type="checkbox" class="test-check" id="t90"><label class="test-label" for="t90">
+    <strong><span class="sr-badge sr-jaws">JAWS</span> aria-live="polite" regions update correctly</strong>
+    <span>Status messages, filter counts, and non-urgent updates are announced after current speech finishes.</span>
+  </label></div>
+  <div class="test-item" data-sr="nvda">
+    <input type="checkbox" class="test-check" id="t91"><label class="test-label" for="t91">
+    <strong><span class="sr-badge sr-nvda">NVDA</span> aria-live="polite" regions update correctly</strong>
+    <span>Same polite announcements work correctly.</span>
+  </label></div>
+  <div class="test-item" data-sr="vo">
+    <input type="checkbox" class="test-check" id="t92"><label class="test-label" for="t92">
+    <strong><span class="sr-badge sr-vo">VoiceOver</span> aria-live regions respected</strong>
+    <span>VoiceOver announces polite live region updates. Assertive regions interrupt current speech.</span>
+  </label></div>
+  <div class="test-item" data-sr="narrator">
+    <input type="checkbox" class="test-check" id="t93"><label class="test-label" for="t93">
+    <strong><span class="sr-badge sr-narrator">Narrator</span> aria-live regions respected</strong>
+    <span>Narrator announces live region changes correctly.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t94"><label class="test-label" for="t94">
+    <strong>assertive live region used for audit completion</strong>
+    <span>AMA11Y platform: audit completion uses assertive live region — interrupts current speech.</span>
+  </label></div>
+</div>
+
+<h3>6.2 Focus Management</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t95"><label class="test-label" for="t95">
+    <strong>Focus visible on all interactive elements</strong>
+    <span>Tab through all pages. Every button, link, input, and checkbox shows a visible focus indicator (3px outline).</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t96"><label class="test-label" for="t96">
+    <strong>No focus traps</strong>
+    <span>Tab through entire page without getting trapped. Focus eventually reaches browser chrome.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t97"><label class="test-label" for="t97">
+    <strong>Focus moves to results after audit</strong>
+    <span>On both checker.html and AMA11Y platform: after audit completes, focus moves to the results heading.</span>
+  </label></div>
+</div>
+
+<h3>6.3 Keyboard-Only Operation</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t98"><label class="test-label" for="t98">
+    <strong>All functionality reachable by keyboard</strong>
+    <span>Every action possible without mouse: navigation, forms, buttons, dropdowns, exports, tab switching, filter toggling.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t99"><label class="test-label" for="t99">
+    <strong>Custom controls follow ARIA patterns</strong>
+    <span>Tablists use arrow keys. Toolbars use arrow keys. Expand/collapse uses Enter. Checkboxes use Space.</span>
+  </label></div>
+</div>
+
+<h3>6.4 Colour and Contrast</h3>
+<div class="test-section">
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t100"><label class="test-label" for="t100">
+    <strong>Information not conveyed by colour alone</strong>
+    <span>All status indicators (PASS/FAIL/WARN) use text labels, not colour alone. Severity is text, not just coloured dots.</span>
+  </label></div>
+  <div class="test-item" data-sr="all">
+    <input type="checkbox" class="test-check" id="t101"><label class="test-label" for="t101">
+    <strong>High contrast mode works</strong>
+    <span>Activate high contrast in accessibility settings. All text remains readable. Focus indicators remain visible.</span>
+  </label></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<h2>Test Summary</h2>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div class="test-section">
-  <p><strong>Total test cases: 58</strong></p>
-  <p>Passed: <span id="pass-count">0</span> / 58</p>
-  <p>Failed: <span id="fail-count">0</span> / 58</p>
+  <p><strong>Total test cases: <span id="total-display">101</span></strong></p>
+  <p>Passed: <span id="pass-display">0</span> / <span id="total-display2">101</span></p>
+  <p>Remaining: <span id="remaining-display">101</span></p>
+  <p style="margin-top:12px;font-size:.88rem;color:#555;">
+    Screen reader breakdown: Tests applicable to all SRs plus screen-reader-specific tests for
+    <span class="sr-badge sr-jaws">JAWS</span>
+    <span class="sr-badge sr-nvda">NVDA</span>
+    <span class="sr-badge sr-vo">VoiceOver</span>
+    <span class="sr-badge sr-narrator">Narrator</span>
+    <span class="sr-badge sr-cvox">ChromeVox</span>
+  </p>
 </div>
 
 </main>
 <footer role="contentinfo">
-  <p>AMA11Y JAWS End-to-End Test Script v1.0 — ama11y.akhileshmalani.com — Akhilesh Malani — Private and Confidential</p>
+  <p>AMA11Y Screen Reader End-to-End Test Script v2.0 — ama11y.akhileshmalani.com — Akhilesh Malani — Private and Confidential</p>
 </footer>
 
 <script>
+(function() {
+  'use strict';
+
+  function updateCounts() {
+    var all = document.querySelectorAll('.test-check');
+    var visible = document.querySelectorAll('.test-item:not([style*="display: none"]) .test-check');
+    var passed = 0;
+    visible.forEach(function(c) { if (c.checked) passed++; });
+    var total = visible.length;
+    document.getElementById('total-count').textContent = total;
+    document.getElementById('total-display').textContent = total;
+    document.getElementById('total-display2').textContent = total;
+    document.getElementById('pass-count').textContent = passed;
+    document.getElementById('pass-display').textContent = passed;
+    document.getElementById('remaining-count').textContent = total - passed;
+    document.getElementById('remaining-display').textContent = total - passed;
+  }
+
   document.querySelectorAll('.test-check').forEach(function(cb) {
+    cb.addEventListener('change', updateCounts);
+  });
+
+  // SR filter logic
+  var allCheckbox = document.querySelector('[data-sr="all"].sr-filter input, .sr-filter input[data-sr="all"]');
+  var srCheckboxes = document.querySelectorAll('.sr-filter input[data-sr]');
+
+  srCheckboxes.forEach(function(cb) {
     cb.addEventListener('change', function() {
-      var all = document.querySelectorAll('.test-check');
-      var passed = 0;
-      all.forEach(function(c) { if (c.checked) passed++; });
-      document.getElementById('pass-count').textContent = passed;
-      document.getElementById('fail-count').textContent = all.length - passed;
+      if (this.getAttribute('data-sr') === 'all') {
+        srCheckboxes.forEach(function(c) { c.checked = cb.checked; });
+      }
+      applyFilter();
     });
   });
+
+  function applyFilter() {
+    var activeSRs = [];
+    srCheckboxes.forEach(function(c) {
+      if (c.checked && c.getAttribute('data-sr') !== 'all') {
+        activeSRs.push(c.getAttribute('data-sr'));
+      }
+    });
+
+    document.querySelectorAll('.test-item').forEach(function(item) {
+      var sr = item.getAttribute('data-sr');
+      if (!sr) { item.style.display = ''; return; }
+      if (sr === 'all') {
+        item.style.display = activeSRs.length > 0 ? '' : 'none';
+      } else {
+        item.style.display = activeSRs.indexOf(sr) !== -1 ? '' : 'none';
+      }
+    });
+    updateCounts();
+  }
+
+  updateCounts();
+})();
 </script>
 </body>
 </html>
