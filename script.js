@@ -842,11 +842,17 @@
     '<li>Show this help: <kbd>?</kbd></li>' +
     '<li>SR — Toggle (alternate): <kbd>Alt + Shift + R</kbd></li>' +
     '<li>Read Aloud (alternate): <kbd>Alt + Shift + A</kbd></li>' +
-    '<li>SR — Next element: <kbd>↓</kbd></li>' +
-    '<li>SR — Prev element: <kbd>↑</kbd></li>' +
+    '<li>SR — Next / Prev element: <kbd>↓</kbd> / <kbd>↑</kbd></li>' +
+    '<li>SR — Activate element: <kbd>Enter</kbd></li>' +
+    '<li>SR — Stop speech: <kbd>Ctrl</kbd></li>' +
     '<li>SR — Next heading: <kbd>Alt + Shift + H</kbd></li>' +
     '<li>SR — Next link: <kbd>Alt + Shift + K</kbd></li>' +
     '<li>SR — Next landmark: <kbd>Alt + Shift + D</kbd></li>' +
+    '<li>SR — Next button: <kbd>Alt + Shift + B</kbd></li>' +
+    '<li>SR — Next form field: <kbd>Alt + Shift + F</kbd></li>' +
+    '<li>SR — Table cell nav: <kbd>Ctrl + Alt + Arrows</kbd></li>' +
+    '<li>SR — Read from here: <kbd>Alt + Shift + C</kbd></li>' +
+    '<li>SR — Element list: <kbd>Alt + Shift + E</kbd></li>' +
     '</ul>' +
     '<button type="button" class="kbd-help-close" id="kbd-help-close">Close</button>' +
     '</div></div>';

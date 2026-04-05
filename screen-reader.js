@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Web Screen Reader & Read Aloud
+   Web Screen Reader & Read Aloud — v2.0
    Zero-dependency, browser-native TTS (speechSynthesis API)
    ═══════════════════════════════════════════════════════════════════ */
 (function () {
@@ -9,13 +9,15 @@
   if (!window.speechSynthesis) return;
 
   /* ═══════════════════════════════════════════════
-     1. SHARED VOICE ENGINE
+     1. SHARED VOICE ENGINE (multi-language)
      ═══════════════════════════════════════════════ */
   var VoiceEngine = {
     synth: window.speechSynthesis,
-    voices: [],
+    allVoices: [],   // all available voices
+    voices: [],      // filtered for current language
     selectedVoice: null,
     rate: 1,
+    lang: 'en',      // current language prefix
     _utterance: null,
     _onEndCb: null,
     _chunkQueue: [],
@@ -24,21 +26,33 @@
     init: function () {
       var self = this;
       function loadVoices() {
-        self.voices = self.synth.getVoices().filter(function (v) {
-          return v.lang.indexOf('en') === 0;
-        });
-        if (self.voices.length && !self.selectedVoice) {
-          // prefer a natural-sounding voice
-          var preferred = self.voices.filter(function (v) {
-            return v.name.indexOf('Google') > -1 || v.name.indexOf('Microsoft') > -1 || v.name.indexOf('Samantha') > -1;
-          });
-          self.selectedVoice = preferred.length ? preferred[0] : self.voices[0];
-        }
+        self.allVoices = self.synth.getVoices();
+        self._filterVoicesForLang(self.lang);
       }
       loadVoices();
       if (self.synth.onvoiceschanged !== undefined) {
         self.synth.onvoiceschanged = loadVoices;
       }
+    },
+
+    _filterVoicesForLang: function (langPrefix) {
+      this.lang = langPrefix;
+      this.voices = this.allVoices.filter(function (v) {
+        return v.lang.indexOf(langPrefix) === 0;
+      });
+      // Fallback: if no voices for this language, show all
+      if (!this.voices.length) this.voices = this.allVoices.slice();
+      // Auto-select best voice
+      if (this.voices.length) {
+        var preferred = this.voices.filter(function (v) {
+          return v.name.indexOf('Google') > -1 || v.name.indexOf('Microsoft') > -1 || v.name.indexOf('Samantha') > -1;
+        });
+        this.selectedVoice = preferred.length ? preferred[0] : this.voices[0];
+      }
+    },
+
+    setLanguage: function (langPrefix) {
+      this._filterVoicesForLang(langPrefix);
     },
 
     speak: function (text, onEnd) {
@@ -119,6 +133,14 @@
   function announce(msg) {
     if (window.srAnnounce) window.srAnnounce(msg);
   }
+
+  /* Language map: translation langCode → speechSynthesis lang prefix */
+  var langMap = {
+    'hi': 'hi', 'ta': 'ta', 'te': 'te', 'kn': 'kn', 'ml': 'ml',
+    'bn': 'bn', 'mr': 'mr', 'gu': 'gu', 'pa': 'pa', 'ur': 'ur',
+    'es': 'es', 'fr': 'fr', 'de': 'de', 'zh': 'zh', 'ja': 'ja',
+    'ko': 'ko', 'ar': 'ar', 'pt': 'pt', 'ru': 'ru', 'it': 'it'
+  };
 
   /* ═══════════════════════════════════════════════
      2. READ ALOUD FEATURE
@@ -240,6 +262,16 @@
       return result;
     },
 
+    // Rebuild content after translation
+    rebuildContent: function () {
+      if (!this.active) return;
+      var wasPlaying = this.playing;
+      if (wasPlaying) this.stopReading();
+      this.elements = this._collectContent();
+      this._updateStatus('Content refreshed. ' + this.elements.length + ' sections.');
+      if (wasPlaying) this.play();
+    },
+
     _updateStatus: function (msg) {
       if (this._statusEl) this._statusEl.textContent = msg;
     },
@@ -282,7 +314,7 @@
           '<select id="ra-voice"></select>' +
           '<button type="button" class="wsr-close-btn" id="ra-close" aria-label="Close Read Aloud">Close</button>' +
         '</div>' +
-        '<div class="wsr-status" id="ra-status" aria-live="polite">Ready</div>';
+        '<div class="wsr-status" id="ra-status" aria-live="polite" aria-atomic="true">Ready</div>';
 
       document.body.appendChild(div);
       this._toolbar = div;
@@ -301,7 +333,6 @@
       div.querySelector('#ra-next').addEventListener('click', function () {
         VoiceEngine.stop();
         if (!self.playing) { self.currentIdx++; self.play(); }
-        // already playing: onEnd will advance
       });
       div.querySelector('#ra-close').addEventListener('click', function () {
         self.deactivate();
@@ -320,27 +351,31 @@
   };
 
   /* ═══════════════════════════════════════════════
-     3. WEB SCREEN READER
+     3. WEB SCREEN READER — v2.0
      ═══════════════════════════════════════════════ */
   var WebSR = {
     active: false,
     nodes: [],       // flat accessible node list
     cursor: -1,      // current position
     mode: 'browse',  // 'browse' | 'focus'
+    _continuousReading: false,
 
     _toolbar: null,
     _statusEl: null,
     _focusRing: null,
     _scrollRAF: null,
+    _listDialog: null,
 
     init: function () {
       this._buildToolbar();
       this._buildFocusRing();
+      this._buildListDialog();
     },
 
     activate: function () {
       this.active = true;
       this.mode = 'browse';
+      this._continuousReading = false;
       this.nodes = this._buildTree();
       this.cursor = -1;
       document.body.classList.add('wsr-toolbar-active');
@@ -348,58 +383,73 @@
       this._populateVoices();
       this._bindKeys();
       this._bindScroll();
-      this._updateStatus('Screen Reader active. ' + this.nodes.length + ' elements found. Use Arrow keys to navigate. Press Alt+Shift+? for help.');
+      this._updateStatus('Screen Reader active. ' + this.nodes.length + ' elements. Arrow keys to navigate, Enter to activate, Ctrl to stop speech.');
       announce('Web Screen Reader activated. ' + this.nodes.length + ' elements. Down arrow to start navigating.');
-      VoiceEngine.speak('Web Screen Reader activated. Use down arrow to navigate. Alt Shift question mark for help.');
+      VoiceEngine.speak('Web Screen Reader activated. ' + this.nodes.length + ' elements found. Use down arrow to navigate. Enter to activate. Alt Shift question mark for help.');
     },
 
     deactivate: function () {
       this.active = false;
+      this._continuousReading = false;
       VoiceEngine.stop();
       this._toolbar.setAttribute('aria-hidden', 'true');
       this._focusRing.style.display = 'none';
+      this._hideListDialog();
       document.body.classList.remove('wsr-toolbar-active');
       this._unbindKeys();
       this._unbindScroll();
       announce('Web Screen Reader deactivated');
     },
 
+    // Rebuild tree (after translation or dynamic content change)
+    rebuildTree: function () {
+      if (!this.active) return;
+      var oldCursorEl = (this.cursor >= 0 && this.cursor < this.nodes.length) ? this.nodes[this.cursor].element : null;
+      this.nodes = this._buildTree();
+      // Try to restore cursor to same element
+      if (oldCursorEl) {
+        for (var i = 0; i < this.nodes.length; i++) {
+          if (this.nodes[i].element === oldCursorEl) { this.cursor = i; break; }
+        }
+      }
+      this._updateStatus('Content refreshed. ' + this.nodes.length + ' elements.');
+      this._populateVoices();
+    },
+
     // ── Tree builder ──
     _buildTree: function () {
       var nodes = [];
       var root = document.getElementById('main-content') || document.querySelector('main') || document.body;
-
-      // Also include header nav
       var header = document.querySelector('header[role="banner"]');
-
       var scanRoots = header ? [header, root] : [root];
-      var self = this;
 
       for (var r = 0; r < scanRoots.length; r++) {
-        self._walkDOM(scanRoots[r], nodes);
+        this._walkDOM(scanRoots[r], nodes);
       }
       return nodes;
     },
 
     _walkDOM: function (root, nodes) {
+      var self = this;
       var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
         acceptNode: function (node) {
           // Skip our own UI
-          if (node.closest('.wsr-toolbar, .wsr-focus-ring')) return NodeFilter.FILTER_REJECT;
-          // Skip hidden
+          if (node.closest('.wsr-toolbar, .wsr-focus-ring, .wsr-list-dialog')) return NodeFilter.FILTER_REJECT;
+          // Skip hidden elements and aria-hidden ancestors
           if (node.hidden || node.getAttribute('aria-hidden') === 'true') return NodeFilter.FILTER_REJECT;
+          // Check for aria-hidden ancestor (not just the element itself)
+          if (node.parentElement && node.parentElement.closest('[aria-hidden="true"]')) return NodeFilter.FILTER_REJECT;
           if (node.offsetParent === null && node.tagName !== 'HTML' && node.tagName !== 'BODY' &&
               window.getComputedStyle(node).position !== 'fixed') return NodeFilter.FILTER_REJECT;
-          // Skip script/style
           var tag = node.tagName;
-          if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'BR') return NodeFilter.FILTER_SKIP;
+          if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'BR' || tag === 'SVG') return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         }
       });
 
       var el;
       while ((el = walker.nextNode())) {
-        var info = this._getNodeInfo(el);
+        var info = self._getNodeInfo(el);
         if (info) nodes.push(info);
       }
     },
@@ -445,7 +495,9 @@
         'P': 'paragraph', 'BLOCKQUOTE': 'blockquote',
         'FIGCAPTION': 'caption', 'FIGURE': 'figure',
         'DL': 'list', 'DT': 'term', 'DD': 'definition',
-        'LABEL': 'label', 'FIELDSET': 'group', 'LEGEND': 'legend'
+        'LABEL': 'label', 'FIELDSET': 'group', 'LEGEND': 'legend',
+        'TH': 'columnheader', 'TD': 'cell', 'TR': 'row',
+        'THEAD': 'rowgroup', 'TBODY': 'rowgroup'
       };
 
       if (tag === 'INPUT') return this._getInputRole(el);
@@ -499,7 +551,6 @@
       // wrapped in label
       if (el.closest && el.closest('label')) {
         var lbl = el.closest('label');
-        // Get label text excluding the control itself
         var clone = lbl.cloneNode(true);
         var inputs = clone.querySelectorAll('input, select, textarea, button');
         for (var j = 0; j < inputs.length; j++) inputs[j].remove();
@@ -513,9 +564,9 @@
       // Text content for interactive/heading elements
       if (role === 'heading' || role === 'link' || role === 'button' || role === 'listitem' ||
           role === 'paragraph' || role === 'blockquote' || role === 'term' || role === 'definition' ||
-          role === 'caption' || role === 'legend') {
+          role === 'caption' || role === 'legend' || role === 'switch' ||
+          role === 'cell' || role === 'columnheader') {
         var tc = (el.textContent || '').trim();
-        // Truncate long text for announcement
         return tc.length > 200 ? tc.substring(0, 200) + '...' : tc;
       }
 
@@ -570,6 +621,15 @@
         var items = node.element.querySelectorAll(':scope > li, :scope > dt');
         if (items.length) roleLabel += ', ' + items.length + ' items';
       }
+      if (node.role === 'table' && node.element) {
+        var rows = node.element.querySelectorAll('tr');
+        var cols = node.element.querySelector('tr') ? node.element.querySelector('tr').children.length : 0;
+        roleLabel += ', ' + rows.length + ' rows, ' + cols + ' columns';
+      }
+      if (node.role === 'form' && node.element) {
+        var fields = node.element.querySelectorAll('input, select, textarea');
+        if (fields.length) roleLabel += ', ' + fields.length + ' fields';
+      }
       if (node.role === 'image' && !node.name) {
         parts.push('image, no alternative text');
         return parts.join(', ');
@@ -587,43 +647,23 @@
 
     _getRoleLabel: function (role) {
       var labels = {
-        'heading': 'heading',
-        'link': 'link',
-        'button': 'button',
-        'image': 'image',
-        'textbox': 'edit text',
-        'searchbox': 'search edit',
-        'checkbox': 'check box',
-        'radio': 'radio button',
-        'combobox': 'combo box',
-        'slider': 'slider',
-        'spinbutton': 'spin button',
-        'navigation': 'navigation',
-        'main': 'main',
-        'complementary': 'complementary',
-        'contentinfo': 'content info',
-        'banner': 'banner',
-        'region': 'region',
-        'form': 'form',
-        'search': 'search',
-        'list': 'list',
-        'listitem': 'list item',
-        'table': 'table',
-        'paragraph': 'text',
-        'blockquote': 'block quote',
-        'figure': 'figure',
-        'caption': 'caption',
-        'term': 'term',
-        'definition': 'definition',
-        'group': 'group',
-        'legend': 'legend',
-        'switch': 'switch',
-        'tab': 'tab',
-        'tabpanel': 'tab panel',
-        'dialog': 'dialog',
-        'alert': 'alert',
-        'generic': 'text',
-        'label': 'label'
+        'heading': 'heading', 'link': 'link', 'button': 'button',
+        'image': 'image', 'textbox': 'edit text', 'searchbox': 'search edit',
+        'checkbox': 'check box', 'radio': 'radio button',
+        'combobox': 'combo box', 'slider': 'slider', 'spinbutton': 'spin button',
+        'navigation': 'navigation', 'main': 'main',
+        'complementary': 'complementary', 'contentinfo': 'content info',
+        'banner': 'banner', 'region': 'region', 'form': 'form', 'search': 'search',
+        'list': 'list', 'listitem': 'list item',
+        'table': 'table', 'row': 'row', 'cell': 'cell', 'columnheader': 'column header',
+        'rowgroup': 'row group',
+        'paragraph': 'text', 'blockquote': 'block quote',
+        'figure': 'figure', 'caption': 'caption',
+        'term': 'term', 'definition': 'definition',
+        'group': 'group', 'legend': 'legend',
+        'switch': 'switch', 'tab': 'tab', 'tabpanel': 'tab panel',
+        'dialog': 'dialog', 'alert': 'alert',
+        'generic': 'text', 'label': 'label'
       };
       return labels[role] || role;
     },
@@ -634,6 +674,7 @@
         this.cursor++;
         this._announceAndFocus();
       } else {
+        this._continuousReading = false;
         VoiceEngine.speak('End of page');
         this._updateStatus('End of page');
       }
@@ -677,26 +718,160 @@
       VoiceEngine.speak('No previous ' + roleFilter + ' elements');
     },
 
+    // ── Continuous reading (Read From Here) ──
+    readFromHere: function () {
+      this._continuousReading = true;
+      if (this.cursor < 0) this.cursor = 0;
+      this._readContinuous();
+    },
+
+    _readContinuous: function () {
+      if (!this._continuousReading || !this.active) return;
+      if (this.cursor >= this.nodes.length) {
+        this._continuousReading = false;
+        VoiceEngine.speak('End of page');
+        return;
+      }
+      var node = this.nodes[this.cursor];
+      var text = this._buildAnnouncement(node);
+      this._updateStatus(text);
+      this._positionFocusRing();
+      node.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      var self = this;
+      VoiceEngine.speak(text, function () {
+        if (self._continuousReading) {
+          self.cursor++;
+          self._readContinuous();
+        }
+      });
+    },
+
+    // ── Action handling ──
     activateCurrent: function () {
       if (this.cursor < 0 || this.cursor >= this.nodes.length) return;
-      var el = this.nodes[this.cursor].element;
-      var role = this.nodes[this.cursor].role;
+      var node = this.nodes[this.cursor];
+      var el = node.element;
+      var role = node.role;
 
-      if (role === 'link' || role === 'button') {
+      // Links — click and handle anchor navigation
+      if (role === 'link') {
+        var href = el.getAttribute('href') || '';
         el.click();
-        VoiceEngine.speak('Activated');
-      } else if (role === 'textbox' || role === 'searchbox' || role === 'combobox' || role === 'checkbox' || role === 'radio') {
+        if (href.charAt(0) === '#') {
+          // Anchor link — reset cursor to target section
+          var self = this;
+          setTimeout(function () {
+            self.nodes = self._buildTree();
+            var targetId = href.substring(1);
+            var targetEl = document.getElementById(targetId);
+            if (targetEl) {
+              // Find the first node inside or near the target
+              for (var i = 0; i < self.nodes.length; i++) {
+                if (targetEl.contains(self.nodes[i].element) || self.nodes[i].element === targetEl) {
+                  self.cursor = i;
+                  self._announceAndFocus();
+                  return;
+                }
+              }
+            }
+            VoiceEngine.speak('Navigated to ' + (targetId || 'section'));
+          }, 300);
+        } else {
+          VoiceEngine.speak('Link activated');
+        }
+        return;
+      }
+
+      // Buttons — click and announce new state
+      if (role === 'button') {
+        el.click();
+        // Re-read states after click (toggle may have changed)
+        var self2 = this;
+        setTimeout(function () {
+          var newStates = self2._getStates(el);
+          var stateText = newStates.length ? newStates.join(', ') : 'activated';
+          // Update the node's states
+          self2.nodes[self2.cursor].states = newStates;
+          // Read updated aria-label if it changed
+          var newLabel = el.getAttribute('aria-label') || '';
+          VoiceEngine.speak(newLabel ? newLabel + ', ' + stateText : stateText);
+          self2._updateStatus(stateText);
+        }, 150);
+        return;
+      }
+
+      // Switches (role="switch") — toggle and announce
+      if (role === 'switch') {
+        el.click();
+        var self3 = this;
+        setTimeout(function () {
+          var checked = el.getAttribute('aria-checked') === 'true';
+          var newStates = self3._getStates(el);
+          self3.nodes[self3.cursor].states = newStates;
+          VoiceEngine.speak(checked ? 'checked' : 'not checked');
+          self3._updateStatus(node.name + ', switch, ' + (checked ? 'checked' : 'not checked'));
+        }, 100);
+        return;
+      }
+
+      // Checkboxes — toggle and announce
+      if (role === 'checkbox') {
+        el.click();
+        var self4 = this;
+        setTimeout(function () {
+          var checked = el.checked || el.getAttribute('aria-checked') === 'true';
+          self4.nodes[self4.cursor].states = self4._getStates(el);
+          VoiceEngine.speak(checked ? 'checked' : 'not checked');
+        }, 50);
+        return;
+      }
+
+      // Radio buttons — select and announce
+      if (role === 'radio') {
+        el.click();
+        var self5 = this;
+        setTimeout(function () {
+          self5.nodes[self5.cursor].states = self5._getStates(el);
+          VoiceEngine.speak('selected');
+        }, 50);
+        return;
+      }
+
+      // Text fields — enter focus mode
+      if (role === 'textbox' || role === 'searchbox' || role === 'combobox' || role === 'spinbutton') {
         this.mode = 'focus';
         el.focus();
-        VoiceEngine.speak('Focus mode. Type to edit. Press Escape to return to browse mode.');
-        this._updateStatus('FOCUS MODE — Escape to exit');
-      } else {
-        el.click();
+        var fieldLabel = node.name || 'field';
+        var fieldStates = node.states.length ? ', ' + node.states.join(', ') : '';
+        VoiceEngine.speak('Focus mode. ' + fieldLabel + ', ' + this._getRoleLabel(role) + fieldStates + '. Type to edit. Press Escape to return to browse mode.');
+        this._updateStatus('FOCUS MODE — ' + fieldLabel + ' — Escape to exit');
+        return;
       }
+
+      // Sliders — enter focus mode with value
+      if (role === 'slider') {
+        this.mode = 'focus';
+        el.focus();
+        var val = el.value || el.getAttribute('aria-valuenow') || '';
+        VoiceEngine.speak('Slider, value ' + val + '. Use arrow keys to adjust. Escape to exit.');
+        this._updateStatus('FOCUS MODE — Slider — Escape to exit');
+        return;
+      }
+
+      // Default — just click
+      el.click();
+      VoiceEngine.speak('Activated');
     },
 
     exitFocusMode: function () {
       this.mode = 'browse';
+      // Re-read the current element state after editing
+      if (this.cursor >= 0 && this.cursor < this.nodes.length) {
+        var node = this.nodes[this.cursor];
+        node.states = this._getStates(node.element);
+        node.name = this._getName(node.element, node.tag, node.role);
+      }
       VoiceEngine.speak('Browse mode');
       this._updateStatus('Browse mode');
       this._positionFocusRing();
@@ -705,11 +880,176 @@
     _announceAndFocus: function () {
       var node = this.nodes[this.cursor];
       if (!node) return;
+      // Refresh name (text may have changed after translation)
+      node.name = this._getName(node.element, node.tag, node.role);
+      node.states = this._getStates(node.element);
       var text = this._buildAnnouncement(node);
       VoiceEngine.speak(text);
       this._updateStatus(text);
       this._positionFocusRing();
       node.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+
+    // ── Element List Dialog ──
+    _buildListDialog: function () {
+      var div = document.createElement('div');
+      div.className = 'wsr-list-dialog';
+      div.setAttribute('role', 'dialog');
+      div.setAttribute('aria-labelledby', 'wsr-list-title');
+      div.setAttribute('aria-modal', 'true');
+      div.style.display = 'none';
+      div.innerHTML =
+        '<div class="wsr-list-inner">' +
+          '<h2 id="wsr-list-title" tabindex="-1">Elements</h2>' +
+          '<div class="wsr-list-tabs" role="tablist">' +
+            '<button role="tab" aria-selected="true" data-list="heading">Headings</button>' +
+            '<button role="tab" aria-selected="false" data-list="link">Links</button>' +
+            '<button role="tab" aria-selected="false" data-list="landmark">Landmarks</button>' +
+            '<button role="tab" aria-selected="false" data-list="button">Buttons</button>' +
+            '<button role="tab" aria-selected="false" data-list="form">Form Fields</button>' +
+          '</div>' +
+          '<ul class="wsr-list-items" role="listbox" aria-label="Element list" tabindex="0"></ul>' +
+          '<button type="button" class="wsr-list-close">Close</button>' +
+        '</div>';
+      document.body.appendChild(div);
+      this._listDialog = div;
+
+      var self = this;
+      // Tab switching
+      var tabs = div.querySelectorAll('[role="tab"]');
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].addEventListener('click', function () {
+          for (var j = 0; j < tabs.length; j++) tabs[j].setAttribute('aria-selected', 'false');
+          this.setAttribute('aria-selected', 'true');
+          self._populateListDialog(this.getAttribute('data-list'));
+        });
+      }
+      // Close
+      div.querySelector('.wsr-list-close').addEventListener('click', function () { self._hideListDialog(); });
+      // Item selection
+      div.querySelector('.wsr-list-items').addEventListener('click', function (e) {
+        var li = e.target.closest('[data-idx]');
+        if (li) {
+          var idx = parseInt(li.getAttribute('data-idx'));
+          self._hideListDialog();
+          self.cursor = idx;
+          self._announceAndFocus();
+        }
+      });
+      // Keyboard in list
+      div.querySelector('.wsr-list-items').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          var focused = div.querySelector('[data-idx]:focus, [data-idx].wsr-list-active');
+          if (focused) {
+            var idx = parseInt(focused.getAttribute('data-idx'));
+            self._hideListDialog();
+            self.cursor = idx;
+            self._announceAndFocus();
+          }
+        } else if (e.key === 'Escape') {
+          self._hideListDialog();
+        }
+      });
+    },
+
+    showListDialog: function (type) {
+      this._listDialog.style.display = 'flex';
+      // Select right tab
+      var tabs = this._listDialog.querySelectorAll('[role="tab"]');
+      for (var i = 0; i < tabs.length; i++) {
+        var isMatch = tabs[i].getAttribute('data-list') === type;
+        tabs[i].setAttribute('aria-selected', String(isMatch));
+      }
+      this._populateListDialog(type);
+      this._listDialog.querySelector('#wsr-list-title').focus();
+      VoiceEngine.speak('Element list. ' + type + 's.');
+    },
+
+    _populateListDialog: function (type) {
+      var ul = this._listDialog.querySelector('.wsr-list-items');
+      ul.innerHTML = '';
+      var isForm = type === 'form';
+      var formRoles = ['textbox', 'searchbox', 'checkbox', 'radio', 'combobox', 'slider', 'spinbutton'];
+
+      for (var i = 0; i < this.nodes.length; i++) {
+        var n = this.nodes[i];
+        var match = false;
+        if (type === 'landmark') match = n.isLandmark;
+        else if (isForm) match = formRoles.indexOf(n.role) > -1;
+        else match = n.role === type;
+
+        if (match) {
+          var li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.setAttribute('data-idx', i);
+          li.tabIndex = 0;
+          var label = n.name || '(unnamed)';
+          if (n.role === 'heading' && n.level) label = 'H' + n.level + ': ' + label;
+          else label = this._getRoleLabel(n.role) + ': ' + label;
+          li.textContent = label;
+          ul.appendChild(li);
+        }
+      }
+      if (!ul.children.length) {
+        ul.innerHTML = '<li class="wsr-list-empty">No ' + type + ' elements found.</li>';
+      }
+    },
+
+    _hideListDialog: function () {
+      if (this._listDialog) this._listDialog.style.display = 'none';
+    },
+
+    // ── Table cell navigation ──
+    _getTableContext: function () {
+      if (this.cursor < 0) return null;
+      var el = this.nodes[this.cursor].element;
+      var td = el.closest('td, th');
+      if (!td) return null;
+      var tr = td.parentElement;
+      var table = td.closest('table');
+      if (!table || !tr) return null;
+      return { table: table, row: tr, cell: td };
+    },
+
+    _navigateTableCell: function (rowDelta, colDelta) {
+      var ctx = this._getTableContext();
+      if (!ctx) {
+        VoiceEngine.speak('Not in a table');
+        return;
+      }
+      var rows = ctx.table.querySelectorAll('tr');
+      var rowIdx = Array.prototype.indexOf.call(rows, ctx.row);
+      var colIdx = Array.prototype.indexOf.call(ctx.row.children, ctx.cell);
+
+      var newRowIdx = rowIdx + rowDelta;
+      var newColIdx = colIdx + colDelta;
+
+      if (newRowIdx < 0 || newRowIdx >= rows.length) { VoiceEngine.speak('Edge of table'); return; }
+      var newRow = rows[newRowIdx];
+      if (newColIdx < 0 || newColIdx >= newRow.children.length) { VoiceEngine.speak('Edge of table'); return; }
+
+      var newCell = newRow.children[newColIdx];
+      // Find this cell in our nodes list
+      for (var i = 0; i < this.nodes.length; i++) {
+        if (this.nodes[i].element === newCell) {
+          this.cursor = i;
+          // Announce column header if available
+          var header = '';
+          var headerRow = ctx.table.querySelector('thead tr, tr:first-child');
+          if (headerRow && headerRow.children[newColIdx]) {
+            header = (headerRow.children[newColIdx].textContent || '').trim();
+          }
+          var cellText = (newCell.textContent || '').trim();
+          var announcement = header ? header + ': ' + cellText : cellText;
+          announcement += ', row ' + (newRowIdx + 1) + ', column ' + (newColIdx + 1);
+          VoiceEngine.speak(announcement);
+          this._updateStatus(announcement);
+          this._positionFocusRing();
+          newCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      }
+      VoiceEngine.speak('Cell not accessible');
     },
 
     // ── Focus ring positioning ──
@@ -732,8 +1072,8 @@
       ring.style.display = 'block';
       ring.style.top = (rect.top - 3) + 'px';
       ring.style.left = (rect.left - 3) + 'px';
-      ring.style.width = (rect.width + 6) + 'px';
-      ring.style.height = (rect.height + 6) + 'px';
+      ring.style.width = (Math.min(rect.width, window.innerWidth - 10) + 6) + 'px';
+      ring.style.height = (Math.min(rect.height, window.innerHeight * 0.8) + 6) + 'px';
     },
 
     _bindScroll: function () {
@@ -764,11 +1104,43 @@
       this._keyHandler = function (e) {
         if (!self.active) return;
 
-        // Don't intercept when in focus mode (except Escape)
+        // Ctrl stops speech globally (like real screen readers)
+        if (e.key === 'Control') {
+          if (VoiceEngine.isSpeaking()) {
+            VoiceEngine.stop();
+            self._continuousReading = false;
+          }
+          return;
+        }
+
+        // Focus mode — only Escape and Tab pass through
         if (self.mode === 'focus') {
           if (e.key === 'Escape') {
             e.preventDefault();
             self.exitFocusMode();
+          }
+          // Allow Tab for navigating between form fields
+          if (e.key === 'Tab') {
+            // Let browser handle Tab, then announce the new field
+            setTimeout(function () {
+              var focused = document.activeElement;
+              if (focused) {
+                // Find it in our tree
+                for (var i = 0; i < self.nodes.length; i++) {
+                  if (self.nodes[i].element === focused) {
+                    self.cursor = i;
+                    var node = self.nodes[i];
+                    node.name = self._getName(node.element, node.tag, node.role);
+                    node.states = self._getStates(node.element);
+                    var text = self._buildAnnouncement(node);
+                    VoiceEngine.speak(text);
+                    self._updateStatus('FOCUS MODE — ' + text);
+                    self._positionFocusRing();
+                    return;
+                  }
+                }
+              }
+            }, 50);
           }
           return;
         }
@@ -780,17 +1152,25 @@
           return;
         }
 
+        // Prevent Tab in browse mode (real screen readers don't use Tab in browse mode)
+        if (e.key === 'Tab' && !e.altKey) {
+          e.preventDefault();
+          if (e.shiftKey) self.movePrev();
+          else self.moveNext();
+          return;
+        }
+
         // Alt+Shift shortcuts for type-based navigation
         if (e.altKey && e.shiftKey) {
           switch (e.key.toLowerCase()) {
-            case 'h': e.preventDefault(); self.moveToNextOfType('heading'); return;
-            case 'k': e.preventDefault(); self.moveToNextOfType('link'); return;
-            case 'd': e.preventDefault(); self.moveToNextOfType('landmark'); return;
-            case 'f': e.preventDefault(); self.moveToNextOfType('textbox'); return;
-            case 'b': e.preventDefault(); self.moveToNextOfType('button'); return;
-            case 'l': e.preventDefault(); self.moveToNextOfType('list'); return;
-            case 'i': e.preventDefault(); self.moveToNextOfType('image'); return;
-            case 't': e.preventDefault(); self.moveToNextOfType('table'); return;
+            case 'h': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('heading') : self.moveToNextOfType('heading'); return;
+            case 'k': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('link') : self.moveToNextOfType('link'); return;
+            case 'd': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('landmark') : self.moveToNextOfType('landmark'); return;
+            case 'f': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('textbox') : self.moveToNextOfType('textbox'); return;
+            case 'b': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('button') : self.moveToNextOfType('button'); return;
+            case 'l': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('list') : self.moveToNextOfType('list'); return;
+            case 'i': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('image') : self.moveToNextOfType('image'); return;
+            case 't': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('table') : self.moveToNextOfType('table'); return;
             case '1': e.preventDefault(); self.moveToNextOfType('heading', 1); return;
             case '2': e.preventDefault(); self.moveToNextOfType('heading', 2); return;
             case '3': e.preventDefault(); self.moveToNextOfType('heading', 3); return;
@@ -801,25 +1181,47 @@
               e.preventDefault();
               self._speakHelp();
               return;
+            // Element list dialogs
+            case 'e':
+              e.preventDefault();
+              self.showListDialog('heading');
+              return;
+            // Read from here (continuous reading)
+            case 'c':
+              e.preventDefault();
+              self.readFromHere();
+              return;
           }
         }
 
-        // Arrow-key navigation
+        // Ctrl+Alt+Arrow for table navigation
+        if (e.ctrlKey && e.altKey) {
+          switch (e.key) {
+            case 'ArrowDown': e.preventDefault(); self._navigateTableCell(1, 0); return;
+            case 'ArrowUp': e.preventDefault(); self._navigateTableCell(-1, 0); return;
+            case 'ArrowRight': e.preventDefault(); self._navigateTableCell(0, 1); return;
+            case 'ArrowLeft': e.preventDefault(); self._navigateTableCell(0, -1); return;
+          }
+        }
+
+        // Basic navigation keys
         switch (e.key) {
           case 'ArrowDown':
             e.preventDefault();
+            self._continuousReading = false;
             self.moveNext();
             break;
           case 'ArrowUp':
             e.preventDefault();
+            self._continuousReading = false;
             self.movePrev();
             break;
           case 'Enter':
             e.preventDefault();
+            self._continuousReading = false;
             self.activateCurrent();
             break;
           case ' ':
-            // Space to pause/resume speech
             if (!t.closest('button, a, input, select, textarea')) {
               e.preventDefault();
               if (VoiceEngine.isSpeaking()) {
@@ -830,10 +1232,15 @@
             break;
           case 'Escape':
             e.preventDefault();
-            self.deactivate();
-            var sw = document.getElementById('a11y-screen-reader');
-            if (sw) sw.setAttribute('aria-checked', 'false');
-            localStorage.setItem('a11y-screen-reader', 'false');
+            if (self._listDialog.style.display !== 'none') {
+              self._hideListDialog();
+            } else {
+              self._continuousReading = false;
+              self.deactivate();
+              var sw = document.getElementById('a11y-screen-reader');
+              if (sw) sw.setAttribute('aria-checked', 'false');
+              localStorage.setItem('a11y-screen-reader', 'false');
+            }
             break;
         }
       };
@@ -851,13 +1258,18 @@
       var helpText =
         'Web Screen Reader keyboard shortcuts. ' +
         'Down arrow: next element. Up arrow: previous element. ' +
+        'Tab: next element. Shift Tab: previous element. ' +
         'Enter: activate current element. ' +
+        'Ctrl: stop speech. Space: pause or resume. ' +
         'Alt Shift H: next heading. Alt Shift K: next link. ' +
         'Alt Shift D: next landmark. Alt Shift F: next form field. ' +
         'Alt Shift B: next button. Alt Shift L: next list. ' +
         'Alt Shift I: next image. Alt Shift T: next table. ' +
         'Alt Shift 1 through 6: heading by level. ' +
-        'Space: pause or resume speech. Escape: deactivate screen reader.';
+        'Ctrl Alt Arrow keys: navigate table cells. ' +
+        'Alt Shift C: read from here continuously. ' +
+        'Alt Shift E: open element list dialog. ' +
+        'Escape: close dialog or deactivate screen reader.';
       VoiceEngine.speak(helpText);
       this._updateStatus('Keyboard help — listening...');
     },
@@ -895,6 +1307,8 @@
           '<button type="button" id="wsr-prev" aria-label="Previous element">&laquo; Prev</button>' +
           '<button type="button" id="wsr-next" aria-label="Next element">Next &raquo;</button>' +
           '<button type="button" id="wsr-activate" aria-label="Activate current element">Activate</button>' +
+          '<button type="button" id="wsr-read" aria-label="Read from here">Read All</button>' +
+          '<button type="button" id="wsr-list" aria-label="Show element list">List</button>' +
           '<div class="wsr-sep" aria-hidden="true"></div>' +
           '<label for="wsr-speed">Speed</label>' +
           '<input type="range" id="wsr-speed" min="0.5" max="2" step="0.25" value="1">' +
@@ -905,7 +1319,7 @@
           '<button type="button" id="wsr-help" aria-label="Keyboard shortcuts help">?</button>' +
           '<button type="button" class="wsr-close-btn" id="wsr-close" aria-label="Close Screen Reader">Close</button>' +
         '</div>' +
-        '<div class="wsr-status" id="wsr-status" aria-live="polite">Ready</div>';
+        '<div class="wsr-status" id="wsr-status" aria-live="polite" aria-atomic="true">Ready</div>';
 
       document.body.appendChild(div);
       this._toolbar = div;
@@ -915,6 +1329,8 @@
       div.querySelector('#wsr-prev').addEventListener('click', function () { self.movePrev(); });
       div.querySelector('#wsr-next').addEventListener('click', function () { self.moveNext(); });
       div.querySelector('#wsr-activate').addEventListener('click', function () { self.activateCurrent(); });
+      div.querySelector('#wsr-read').addEventListener('click', function () { self.readFromHere(); });
+      div.querySelector('#wsr-list').addEventListener('click', function () { self.showListDialog('heading'); });
       div.querySelector('#wsr-help').addEventListener('click', function () { self._speakHelp(); });
       div.querySelector('#wsr-close').addEventListener('click', function () {
         self.deactivate();
@@ -938,7 +1354,6 @@
   ReadAloud.init();
   WebSR.init();
 
-  // Wait for DOM (the a11y panel toggles are added to index.html)
   function wireToggles() {
     var raSwitch = document.getElementById('a11y-read-aloud');
     var srSwitch = document.getElementById('a11y-screen-reader');
@@ -952,7 +1367,6 @@
         switchEl.setAttribute('aria-checked', String(newState));
 
         if (newState) {
-          // Deactivate the other feature first
           if (other.active) {
             other.deactivate();
             if (otherSwitch) otherSwitch.setAttribute('aria-checked', 'false');
@@ -1006,8 +1420,49 @@
     wireToggles();
   }
 
-  // Expose for external reset integration
+  /* ═══════════════════════════════════════════════
+     5. TRANSLATION HOOK — rebuild tree & switch voice
+     ═══════════════════════════════════════════════ */
+  // Listen for the srAnnounce calls that signal translation events
+  var origAnnounce = window.srAnnounce;
+  window.srAnnounce = function (message, isAssertive) {
+    // Call original
+    if (origAnnounce) origAnnounce(message, isAssertive);
+
+    // Detect translation events
+    if (typeof message === 'string') {
+      var translatedMatch = message.match(/Page translated to (.+)\./);
+      var restoredMatch = message.match(/Page restored to English/);
+
+      if (translatedMatch || restoredMatch) {
+        // Determine the language
+        var newLang = 'en';
+        if (translatedMatch) {
+          // Find lang code from localStorage
+          var storedLang = localStorage.getItem('translateLang');
+          if (storedLang && langMap[storedLang]) {
+            newLang = langMap[storedLang];
+          }
+        }
+
+        // Switch voice language
+        VoiceEngine.setLanguage(newLang);
+
+        // Rebuild trees after a short delay (let DOM settle)
+        setTimeout(function () {
+          WebSR.rebuildTree();
+          ReadAloud.rebuildContent();
+          // Repopulate voice dropdowns
+          if (WebSR.active) WebSR._populateVoices();
+          if (ReadAloud.active) ReadAloud._populateVoices();
+        }, 500);
+      }
+    }
+  };
+
+  // Expose for external integration
   window._wsrReadAloud = ReadAloud;
   window._wsrScreenReader = WebSR;
+  window._wsrVoiceEngine = VoiceEngine;
 
 })();

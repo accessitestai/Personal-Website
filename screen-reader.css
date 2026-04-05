@@ -173,6 +173,111 @@ body.wsr-toolbar-active {
   body.wsr-toolbar-active { padding-bottom: 100px; }
 }
 
+/* ─── Element List Dialog ─── */
+.wsr-list-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+.wsr-list-inner {
+  background: #fff;
+  color: #1a1a2e;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 480px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  font-family: var(--font-primary, 'Segoe UI', system-ui, sans-serif);
+}
+[data-theme="dark"] .wsr-list-inner {
+  background: #1a1a2e;
+  color: #e8e8f0;
+}
+.wsr-list-inner h2 {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  color: var(--color-primary, #1a5276);
+}
+[data-theme="dark"] .wsr-list-inner h2 { color: #8cb4d5; }
+.wsr-list-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.wsr-list-tabs button {
+  background: #f0f5fa;
+  border: 1px solid #cde;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: #1a1a2e;
+}
+[data-theme="dark"] .wsr-list-tabs button {
+  background: #252540;
+  border-color: #3a3a55;
+  color: #ccc;
+}
+.wsr-list-tabs button[aria-selected="true"] {
+  background: var(--color-primary, #1a5276);
+  color: #fff;
+  border-color: var(--color-primary, #1a5276);
+}
+.wsr-list-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 100px;
+}
+.wsr-list-items li {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eef;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 3px;
+}
+[data-theme="dark"] .wsr-list-items li { border-color: #2a2a45; }
+.wsr-list-items li:hover,
+.wsr-list-items li:focus {
+  background: rgba(36, 113, 163, 0.1);
+  outline: 2px solid var(--color-focus, #2471a3);
+  outline-offset: -2px;
+}
+.wsr-list-empty {
+  color: #888;
+  font-style: italic;
+  cursor: default !important;
+}
+.wsr-list-close {
+  margin-top: 12px;
+  align-self: flex-end;
+  background: var(--color-primary, #1a5276);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 18px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.wsr-list-close:hover,
+.wsr-list-close:focus-visible {
+  opacity: 0.85;
+  outline: 2px solid var(--color-focus, #2471a3);
+  outline-offset: 2px;
+}
+
 /* --- Print: hide toolbar --- */
 @media print {
   .wsr-toolbar,
