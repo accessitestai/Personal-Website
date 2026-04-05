@@ -799,6 +799,8 @@
       localStorage.removeItem('a11y-high-contrast');
       localStorage.removeItem('a11y-dyslexia-font');
       localStorage.removeItem('a11y-reduce-motion');
+      localStorage.removeItem('a11y-read-aloud');
+      localStorage.removeItem('a11y-screen-reader');
       html.removeAttribute('data-text-size');
       html.removeAttribute('data-high-contrast');
       html.removeAttribute('data-dyslexia-font');
@@ -807,6 +809,11 @@
       if (contrastSwitch) contrastSwitch.setAttribute('aria-checked', 'false');
       if (dyslexiaSwitch) dyslexiaSwitch.setAttribute('aria-checked', 'false');
       if (motionSwitch) motionSwitch.setAttribute('aria-checked', 'false');
+      // Reset Read Aloud & Screen Reader
+      var raSwitch = document.getElementById('a11y-read-aloud');
+      var srSwitch = document.getElementById('a11y-screen-reader');
+      if (raSwitch) { raSwitch.setAttribute('aria-checked', 'false'); if (window._wsrReadAloud && window._wsrReadAloud.active) window._wsrReadAloud.deactivate(); }
+      if (srSwitch) { srSwitch.setAttribute('aria-checked', 'false'); if (window._wsrScreenReader && window._wsrScreenReader.active) window._wsrScreenReader.deactivate(); }
       if (window.srAnnounce) window.srAnnounce('All accessibility preferences have been reset to defaults');
     });
   }
@@ -831,6 +838,12 @@
     '<li>Go to Contact: <kbd>Alt + 3</kbd></li>' +
     '<li>Accessibility Settings: <kbd>Alt + 0</kbd></li>' +
     '<li>Show this help: <kbd>?</kbd></li>' +
+    '<li>Toggle Screen Reader: <kbd>Alt + Shift + R</kbd></li>' +
+    '<li>SR — Next element: <kbd>↓</kbd></li>' +
+    '<li>SR — Prev element: <kbd>↑</kbd></li>' +
+    '<li>SR — Next heading: <kbd>Alt + Shift + H</kbd></li>' +
+    '<li>SR — Next link: <kbd>Alt + Shift + K</kbd></li>' +
+    '<li>SR — Next landmark: <kbd>Alt + Shift + D</kbd></li>' +
     '</ul>' +
     '<button type="button" class="kbd-help-close" id="kbd-help-close">Close</button>' +
     '</div></div>';

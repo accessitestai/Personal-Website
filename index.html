@@ -31,6 +31,7 @@
   <title>Akhilesh Malani | Senior Accessibility Architect & Digital Inclusion Strategist</title>
   <link rel="icon" type="image/svg+xml" href="images/logo-icon.svg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="screen-reader.css">
   <!-- Prevent flash of wrong theme/preferences -->
   <script>
     (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
@@ -117,6 +118,20 @@
           <span class="a11y-switch-label" id="label-motion">Reduce Motion</span>
           <button type="button" role="switch" aria-checked="false" aria-labelledby="label-motion" id="a11y-motion" class="a11y-switch"></button>
         </div>
+      </div>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-read-aloud">Read Aloud</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-read-aloud" id="a11y-read-aloud" class="a11y-switch"></button>
+        </div>
+        <p style="font-size:.8rem;color:var(--color-text-light);margin:4px 0 0">Reads page content aloud using text-to-speech.</p>
+      </div>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-screen-reader">Screen Reader</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-screen-reader" id="a11y-screen-reader" class="a11y-switch"></button>
+        </div>
+        <p style="font-size:.8rem;color:var(--color-text-light);margin:4px 0 0">Navigate this page like a screen reader. For users without assistive technology.</p>
       </div>
       <button type="button" class="a11y-reset" id="a11y-reset">Reset All Preferences</button>
     </div>
@@ -695,5 +710,6 @@
       });
     }
   </script>
+  <script src="screen-reader.js"></script>
 </body>
 </html>

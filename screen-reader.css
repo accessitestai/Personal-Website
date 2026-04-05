@@ -1,0 +1,181 @@
+/* ═══════════════════════════════════════════════════════════
+   Screen Reader & Read Aloud — Styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* --- Focus ring that follows the virtual cursor --- */
+.wsr-focus-ring {
+  position: fixed;
+  border: 3px solid var(--color-focus, #2471a3);
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(36, 113, 163, 0.3);
+  pointer-events: none;
+  z-index: 99998;
+  transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+  display: none;
+}
+[data-reduce-motion="true"] .wsr-focus-ring { transition: none; }
+
+/* --- Read-aloud highlight on the element being spoken --- */
+.wsr-reading-highlight {
+  background-color: rgba(36, 113, 163, 0.12) !important;
+  outline: 2px solid rgba(36, 113, 163, 0.4);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+[data-theme="dark"] .wsr-reading-highlight {
+  background-color: rgba(100, 181, 246, 0.15) !important;
+  outline-color: rgba(100, 181, 246, 0.4);
+}
+
+/* ─── Shared toolbar base ─── */
+.wsr-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  font-family: var(--font-primary, 'Segoe UI', system-ui, sans-serif);
+  background: rgba(26, 26, 46, 0.96);
+  color: #f0f0f0;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.35);
+  padding: 10px 16px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.wsr-toolbar[aria-hidden="false"] { display: flex; }
+
+[data-theme="dark"] .wsr-toolbar {
+  background: rgba(20, 20, 30, 0.98);
+}
+
+.wsr-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* --- Toolbar buttons --- */
+.wsr-toolbar button {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f0f0f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.wsr-toolbar button:hover,
+.wsr-toolbar button:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+}
+.wsr-toolbar button:focus-visible {
+  outline: 2px solid var(--color-focus, #2471a3);
+  outline-offset: 2px;
+}
+.wsr-toolbar button.wsr-active {
+  background: var(--color-focus, #2471a3);
+  border-color: var(--color-focus, #2471a3);
+  color: #fff;
+}
+
+/* --- Toolbar labels and inputs --- */
+.wsr-toolbar label {
+  font-size: 0.78rem;
+  color: #ccc;
+  white-space: nowrap;
+}
+.wsr-toolbar select {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f0f0f0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  max-width: 160px;
+}
+.wsr-toolbar select:focus-visible {
+  outline: 2px solid var(--color-focus, #2471a3);
+}
+.wsr-toolbar input[type="range"] {
+  width: 80px;
+  accent-color: var(--color-focus, #2471a3);
+  cursor: pointer;
+}
+
+/* --- Separator --- */
+.wsr-sep {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+/* --- Status line --- */
+.wsr-status {
+  font-size: 0.8rem;
+  color: #aab;
+  min-height: 1.2em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wsr-status strong { color: #fff; }
+
+/* --- Close/stop button --- */
+.wsr-close-btn {
+  margin-left: auto !important;
+  background: rgba(192, 57, 43, 0.6) !important;
+  border-color: rgba(192, 57, 43, 0.8) !important;
+}
+.wsr-close-btn:hover,
+.wsr-close-btn:focus-visible {
+  background: rgba(192, 57, 43, 0.85) !important;
+}
+
+/* --- Speed display --- */
+.wsr-speed-val {
+  font-size: 0.78rem;
+  color: #ddd;
+  min-width: 32px;
+  text-align: center;
+}
+
+/* --- Mode badge in toolbar --- */
+.wsr-mode-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--color-focus, #2471a3);
+  color: #fff;
+}
+
+/* --- Ensure toolbar doesn't overlap page content --- */
+body.wsr-toolbar-active {
+  padding-bottom: 80px;
+}
+
+/* --- Mobile adjustments --- */
+@media (max-width: 600px) {
+  .wsr-toolbar { padding: 8px 10px; }
+  .wsr-toolbar button { padding: 5px 8px; font-size: 0.78rem; }
+  .wsr-toolbar select { max-width: 110px; }
+  .wsr-toolbar input[type="range"] { width: 60px; }
+  body.wsr-toolbar-active { padding-bottom: 100px; }
+}
+
+/* --- Print: hide toolbar --- */
+@media print {
+  .wsr-toolbar,
+  .wsr-focus-ring { display: none !important; }
+  .wsr-reading-highlight { background: none !important; outline: none !important; }
+}
