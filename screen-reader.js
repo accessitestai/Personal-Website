@@ -177,6 +177,7 @@
       this.active = false;
       this.playing = false;
       VoiceEngine.stop();
+      VoiceEngine.speak('Read Aloud deactivated');
       this._clearHighlight();
       this._toolbar.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('wsr-toolbar-active');
@@ -392,6 +393,8 @@
       this.active = false;
       this._continuousReading = false;
       VoiceEngine.stop();
+      // Speak deactivation feedback AFTER stopping current speech
+      VoiceEngine.speak('Screen Reader deactivated');
       this._toolbar.setAttribute('aria-hidden', 'true');
       this._focusRing.style.display = 'none';
       this._hideListDialog();
@@ -785,18 +788,21 @@
 
       // Buttons — click and announce new state
       if (role === 'button') {
+        var hadExpanded = el.hasAttribute('aria-expanded');
         el.click();
         // Re-read states after click (toggle may have changed)
         var self2 = this;
         setTimeout(function () {
           var newStates = self2._getStates(el);
           var stateText = newStates.length ? newStates.join(', ') : 'activated';
-          // Update the node's states
           self2.nodes[self2.cursor].states = newStates;
-          // Read updated aria-label if it changed
           var newLabel = el.getAttribute('aria-label') || '';
           VoiceEngine.speak(newLabel ? newLabel + ', ' + stateText : stateText);
           self2._updateStatus(stateText);
+          // Rebuild tree if button toggled expanded state (new content may be visible)
+          if (hadExpanded) {
+            setTimeout(function () { self2.rebuildTree(); }, 200);
+          }
         }, 150);
         return;
       }
@@ -1423,42 +1429,36 @@
   /* ═══════════════════════════════════════════════
      5. TRANSLATION HOOK — rebuild tree & switch voice
      ═══════════════════════════════════════════════ */
-  // Listen for the srAnnounce calls that signal translation events
-  var origAnnounce = window.srAnnounce;
-  window.srAnnounce = function (message, isAssertive) {
-    // Call original
-    if (origAnnounce) origAnnounce(message, isAssertive);
+  // Detect translation by monitoring localStorage changes and DOM mutations
+  // This avoids wrapping srAnnounce which could break the original live region
+  var _lastTranslateLang = localStorage.getItem('translateLang') || '';
 
-    // Detect translation events
-    if (typeof message === 'string') {
-      var translatedMatch = message.match(/Page translated to (.+)\./);
-      var restoredMatch = message.match(/Page restored to English/);
+  function checkTranslation() {
+    var currentLang = localStorage.getItem('translateLang') || '';
+    if (currentLang === _lastTranslateLang) return;
+    _lastTranslateLang = currentLang;
 
-      if (translatedMatch || restoredMatch) {
-        // Determine the language
-        var newLang = 'en';
-        if (translatedMatch) {
-          // Find lang code from localStorage
-          var storedLang = localStorage.getItem('translateLang');
-          if (storedLang && langMap[storedLang]) {
-            newLang = langMap[storedLang];
-          }
-        }
-
-        // Switch voice language
-        VoiceEngine.setLanguage(newLang);
-
-        // Rebuild trees after a short delay (let DOM settle)
-        setTimeout(function () {
-          WebSR.rebuildTree();
-          ReadAloud.rebuildContent();
-          // Repopulate voice dropdowns
-          if (WebSR.active) WebSR._populateVoices();
-          if (ReadAloud.active) ReadAloud._populateVoices();
-        }, 500);
-      }
+    // Switch voice language
+    var newLang = 'en';
+    if (currentLang && langMap[currentLang]) {
+      newLang = langMap[currentLang];
     }
-  };
+    VoiceEngine.setLanguage(newLang);
+
+    // Rebuild trees after DOM settles
+    setTimeout(function () {
+      WebSR.rebuildTree();
+      ReadAloud.rebuildContent();
+      if (WebSR.active) {
+        WebSR._populateVoices();
+        VoiceEngine.speak('Page language changed. Content refreshed.');
+      }
+      if (ReadAloud.active) ReadAloud._populateVoices();
+    }, 600);
+  }
+
+  // Poll localStorage for translation changes (storage event only fires cross-tab)
+  setInterval(checkTranslation, 1000);
 
   // Expose for external integration
   window._wsrReadAloud = ReadAloud;
