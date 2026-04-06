@@ -39,7 +39,8 @@
       this.lang = langPrefix;
       var p = (langPrefix || 'en').toLowerCase();
       var base = p.split('-')[0];
-      // Try exact (e.g. zh-CN), then base (zh), then all.
+      this.matchedLang = true;
+      // Try exact (e.g. zh-cn), then base (zh).
       this.voices = this.allVoices.filter(function (v) {
         return v.lang.toLowerCase().indexOf(p) === 0;
       });
@@ -48,7 +49,11 @@
           return v.lang.toLowerCase().indexOf(base) === 0;
         });
       }
-      if (!this.voices.length) this.voices = this.allVoices.slice();
+      if (!this.voices.length) {
+        // No installed voice for this language — let browser pick via utt.lang
+        this.voices = this.allVoices.slice();
+        this.matchedLang = false;
+      }
       // Auto-select best voice
       if (this.voices.length) {
         var preferred = this.voices.filter(function (v) {
@@ -95,7 +100,10 @@
       var utt = new SpeechSynthesisUtterance(text);
       utt.rate = self.rate;
       utt.pitch = 1;
-      if (self.selectedVoice) utt.voice = self.selectedVoice;
+      // Always set lang so the browser can pick a matching engine even
+      // when no JS-visible voice is present (common on Windows/Edge).
+      utt.lang = self.lang || 'en';
+      if (self.selectedVoice && self.matchedLang) utt.voice = self.selectedVoice;
       utt.onend = function () {
         if (self._chunkQueue.length && !self._paused) {
           self._speakChunk(self._chunkQueue.shift());
