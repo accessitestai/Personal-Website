@@ -1187,7 +1187,28 @@
           return;
         }
 
-        // Alt+Shift shortcuts for type-based navigation
+        // Single-letter browse-mode navigation (JAWS/NVDA style)
+        // Only when no modifier keys held (except Shift for reverse)
+        if (!e.altKey && !e.ctrlKey && !e.metaKey && e.key.length === 1) {
+          var k = e.key.toLowerCase();
+          var rev = e.shiftKey;
+          var typeMap = {h:'heading', k:'link', b:'button', f:'textbox', d:'landmark', l:'list', i:'image', t:'table'};
+          if (typeMap[k]) {
+            e.preventDefault();
+            rev ? self.moveToPrevOfType(typeMap[k]) : self.moveToNextOfType(typeMap[k]);
+            return;
+          }
+          if (k >= '1' && k <= '6') {
+            e.preventDefault();
+            self.moveToNextOfType('heading', parseInt(k, 10));
+            return;
+          }
+          if (k === 'e') { e.preventDefault(); self.showListDialog('heading'); return; }
+          if (k === 'c') { e.preventDefault(); self.readFromHere(); return; }
+          if (k === '?' || k === '/') { e.preventDefault(); self._speakHelp(); return; }
+        }
+
+        // Alt+Shift shortcuts kept as alternates
         if (e.altKey && e.shiftKey) {
           switch (e.key.toLowerCase()) {
             case 'h': e.preventDefault(); e.ctrlKey ? self.moveToPrevOfType('heading') : self.moveToNextOfType('heading'); return;
