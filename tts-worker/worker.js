@@ -48,20 +48,35 @@ function resolveVoice(voice, lang) {
   return DEFAULT_VOICE_FOR_LANG[base] || DEFAULT_VOICE_FOR_LANG.en;
 }
 
+// Sec-MS-GEC token: SHA256 of (ticks-rounded-to-5min + clock-skew-key), upper-case hex.
+// Required by Edge Read-Aloud since mid-2024 to block unofficial clients.
+const GEC_TRUSTED_KEY = '6A5AA1D4EAFF4E9FB37E23D68491D6F4MSEdge';
+async function buildSecMsGec() {
+  // Windows file-time ticks since 1601-01-01, rounded down to 5-minute window.
+  const WIN_EPOCH = 11644473600n;            // seconds between 1601 and 1970
+  const nowSec = BigInt(Math.floor(Date.now() / 1000));
+  let ticks = (nowSec + WIN_EPOCH) * 10000000n;
+  ticks -= ticks % (3000000000n);            // round to 5 min (300s * 1e7)
+  const data = ticks.toString() + GEC_TRUSTED_KEY;
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
 async function synthesize(text, lang, voice, rate) {
   const voiceName = resolveVoice(voice, lang);
   const ratePct   = Number.isFinite(+rate) ? +rate : 0;
   const rateStr   = (ratePct >= 0 ? '+' : '') + ratePct + '%';
   const reqId     = uuid();
   const connId    = uuid();
+  const gec       = await buildSecMsGec();
 
-  // Open WebSocket to Edge, spoofing Origin (Workers allow setting it).
-  const wsUrl = EDGE_WSS + '&ConnectionId=' + connId;
+  // Open WebSocket to Edge with Sec-MS-GEC auth headers.
+  const wsUrl = EDGE_WSS + '&Sec-MS-GEC=' + gec + '&Sec-MS-GEC-Version=1-130.0.2849.68&ConnectionId=' + connId;
   const upstream = await fetch(wsUrl, {
     headers: {
       'Upgrade':    'websocket',
       'Origin':     'chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.2849.68'
     }
   });
 
