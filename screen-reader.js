@@ -36,7 +36,10 @@
     },
 
     _filterVoicesForLang: function (langPrefix) {
+      // Always refresh — voices may have been lazy-loaded since init.
+      this.allVoices = this.synth.getVoices();
       this.lang = langPrefix;
+      this.selectedVoice = null;
       var p = (langPrefix || 'en').toLowerCase();
       var base = p.split('-')[0];
       this.matchedLang = true;
@@ -152,17 +155,24 @@
   /* Language map: translation langCode → speechSynthesis lang prefix */
   // Map translation codes → speechSynthesis BCP-47 prefixes.
   // Any code not listed falls back to its first two characters.
+  // Map translation codes → preferred BCP-47 locale for TTS.
+  // Browsers/OS voices are registered with full locales (hi-IN, fr-FR)
+  // so we MUST pass the full code or voice selection fails silently.
   var langMap = {
-    'hi':'hi','ta':'ta','te':'te','kn':'kn','ml':'ml','bn':'bn','mr':'mr',
-    'gu':'gu','pa':'pa','ur':'ur','or':'or','as':'as',
-    'es':'es','fr':'fr','de':'de','pt':'pt','ar':'ar','ru':'ru','it':'it',
-    'zh':'zh','zh-CN':'zh-CN','zh-TW':'zh-TW','ja':'ja','ko':'ko',
-    'nl':'nl','tr':'tr','th':'th','vi':'vi','id':'id','ms':'ms','pl':'pl','sv':'sv'
+    'hi':'hi-IN','ta':'ta-IN','te':'te-IN','kn':'kn-IN','ml':'ml-IN',
+    'bn':'bn-IN','mr':'mr-IN','gu':'gu-IN','pa':'pa-IN','ur':'ur-PK',
+    'or':'or-IN','as':'as-IN',
+    'es':'es-ES','fr':'fr-FR','de':'de-DE','pt':'pt-PT','ar':'ar-SA',
+    'ru':'ru-RU','it':'it-IT',
+    'zh':'zh-CN','zh-CN':'zh-CN','zh-TW':'zh-TW','ja':'ja-JP','ko':'ko-KR',
+    'nl':'nl-NL','tr':'tr-TR','th':'th-TH','vi':'vi-VN','id':'id-ID',
+    'ms':'ms-MY','pl':'pl-PL','sv':'sv-SE','en':'en-US'
   };
   function resolveLang(code) {
-    if (!code) return 'en';
+    if (!code) return 'en-US';
     if (langMap[code]) return langMap[code];
-    return code.split('-')[0].toLowerCase();
+    var base = code.split('-')[0].toLowerCase();
+    return langMap[base] || base;
   }
 
   /* ═══════════════════════════════════════════════
