@@ -387,6 +387,14 @@
       this._updateStatus('Screen Reader active. ' + this.nodes.length + ' elements. Arrow keys to navigate, Enter to activate, Ctrl to stop speech.');
       announce('Web Screen Reader activated. ' + this.nodes.length + ' elements. Down arrow to start navigating.');
       VoiceEngine.speak('Web Screen Reader activated. ' + this.nodes.length + ' elements found. Use down arrow to navigate. Enter to activate. Alt Shift question mark for help.');
+      // Auto-land on first element so Enter/type-nav has a starting point
+      var self = this;
+      setTimeout(function () {
+        if (self.active && self.cursor < 0 && self.nodes.length > 0) {
+          self.cursor = 0;
+          self._announceAndFocus();
+        }
+      }, 1200);
     },
 
     deactivate: function () {
@@ -1110,6 +1118,19 @@
       this._keyHandler = function (e) {
         if (!self.active) return;
 
+        // Let toolbar own its keyboard interaction (Tab, Enter, Space, arrows on selects)
+        var tgt = e.target;
+        if (tgt && tgt.closest && tgt.closest('.wsr-toolbar')) {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            self.deactivate();
+            var sw0 = document.getElementById('a11y-screen-reader');
+            if (sw0) sw0.setAttribute('aria-checked', 'false');
+            localStorage.setItem('a11y-screen-reader', 'false');
+          }
+          return;
+        }
+
         // Ctrl stops speech globally (like real screen readers)
         if (e.key === 'Control') {
           if (VoiceEngine.isSpeaking()) {
@@ -1225,7 +1246,12 @@
           case 'Enter':
             e.preventDefault();
             self._continuousReading = false;
-            self.activateCurrent();
+            if (self.cursor < 0 && self.nodes.length > 0) {
+              self.cursor = 0;
+              self._announceAndFocus();
+            } else {
+              self.activateCurrent();
+            }
             break;
           case ' ':
             if (!t.closest('button, a, input, select, textarea')) {
