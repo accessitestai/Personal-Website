@@ -417,14 +417,21 @@
       if (!this.active) return;
       var oldCursorEl = (this.cursor >= 0 && this.cursor < this.nodes.length) ? this.nodes[this.cursor].element : null;
       this.nodes = this._buildTree();
-      // Try to restore cursor to same element
+      // Try to restore cursor to same element; if not present, reset to 0
+      var restored = false;
       if (oldCursorEl) {
         for (var i = 0; i < this.nodes.length; i++) {
-          if (this.nodes[i].element === oldCursorEl) { this.cursor = i; break; }
+          if (this.nodes[i].element === oldCursorEl) { this.cursor = i; restored = true; break; }
         }
       }
+      if (!restored) {
+        this.cursor = this.nodes.length > 0 ? 0 : -1;
+      }
+      // Clamp cursor
+      if (this.cursor >= this.nodes.length) this.cursor = this.nodes.length - 1;
       this._updateStatus('Content refreshed. ' + this.nodes.length + ' elements.');
       this._populateVoices();
+      this._positionFocusRing();
     },
 
     // ── Tree builder ──
@@ -1492,16 +1499,20 @@
     }
     VoiceEngine.setLanguage(newLang);
 
-    // Rebuild trees after DOM settles
-    setTimeout(function () {
-      WebSR.rebuildTree();
-      ReadAloud.rebuildContent();
-      if (WebSR.active) {
-        WebSR._populateVoices();
-        VoiceEngine.speak('Page language changed. Content refreshed.');
-      }
-      if (ReadAloud.active) ReadAloud._populateVoices();
-    }, 600);
+    // Translation DOM updates may arrive over several seconds.
+    // Rebuild the tree multiple times so we catch the final state.
+    var delays = [400, 1200, 2500, 4500];
+    delays.forEach(function (d, idx) {
+      setTimeout(function () {
+        WebSR.rebuildTree();
+        ReadAloud.rebuildContent();
+        if (WebSR.active) {
+          WebSR._populateVoices();
+          if (idx === 0) VoiceEngine.speak('Page language changed. Content refreshed.');
+        }
+        if (ReadAloud.active) ReadAloud._populateVoices();
+      }, d);
+    });
   }
 
   // Poll localStorage for translation changes (storage event only fires cross-tab)
