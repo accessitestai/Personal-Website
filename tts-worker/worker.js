@@ -6,7 +6,7 @@
    ───────────────────────────────────────────────────────────── */
 
 const EDGE_TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
-const EDGE_WSS   = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=' + EDGE_TOKEN;
+const EDGE_WSS   = 'https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=' + EDGE_TOKEN;
 
 const DEFAULT_VOICE_FOR_LANG = {
   en:'en-US-AriaNeural',
