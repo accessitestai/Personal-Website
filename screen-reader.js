@@ -37,10 +37,17 @@
 
     _filterVoicesForLang: function (langPrefix) {
       this.lang = langPrefix;
+      var p = (langPrefix || 'en').toLowerCase();
+      var base = p.split('-')[0];
+      // Try exact (e.g. zh-CN), then base (zh), then all.
       this.voices = this.allVoices.filter(function (v) {
-        return v.lang.indexOf(langPrefix) === 0;
+        return v.lang.toLowerCase().indexOf(p) === 0;
       });
-      // Fallback: if no voices for this language, show all
+      if (!this.voices.length) {
+        this.voices = this.allVoices.filter(function (v) {
+          return v.lang.toLowerCase().indexOf(base) === 0;
+        });
+      }
       if (!this.voices.length) this.voices = this.allVoices.slice();
       // Auto-select best voice
       if (this.voices.length) {
@@ -135,12 +142,20 @@
   }
 
   /* Language map: translation langCode → speechSynthesis lang prefix */
+  // Map translation codes → speechSynthesis BCP-47 prefixes.
+  // Any code not listed falls back to its first two characters.
   var langMap = {
-    'hi': 'hi', 'ta': 'ta', 'te': 'te', 'kn': 'kn', 'ml': 'ml',
-    'bn': 'bn', 'mr': 'mr', 'gu': 'gu', 'pa': 'pa', 'ur': 'ur',
-    'es': 'es', 'fr': 'fr', 'de': 'de', 'zh': 'zh', 'ja': 'ja',
-    'ko': 'ko', 'ar': 'ar', 'pt': 'pt', 'ru': 'ru', 'it': 'it'
+    'hi':'hi','ta':'ta','te':'te','kn':'kn','ml':'ml','bn':'bn','mr':'mr',
+    'gu':'gu','pa':'pa','ur':'ur','or':'or','as':'as',
+    'es':'es','fr':'fr','de':'de','pt':'pt','ar':'ar','ru':'ru','it':'it',
+    'zh':'zh','zh-CN':'zh-CN','zh-TW':'zh-TW','ja':'ja','ko':'ko',
+    'nl':'nl','tr':'tr','th':'th','vi':'vi','id':'id','ms':'ms','pl':'pl','sv':'sv'
   };
+  function resolveLang(code) {
+    if (!code) return 'en';
+    if (langMap[code]) return langMap[code];
+    return code.split('-')[0].toLowerCase();
+  }
 
   /* ═══════════════════════════════════════════════
      2. READ ALOUD FEATURE
@@ -1492,12 +1507,8 @@
     if (currentLang === _lastTranslateLang) return;
     _lastTranslateLang = currentLang;
 
-    // Switch voice language
-    var newLang = 'en';
-    if (currentLang && langMap[currentLang]) {
-      newLang = langMap[currentLang];
-    }
-    VoiceEngine.setLanguage(newLang);
+    // Switch voice language (covers every code, with region fallback)
+    VoiceEngine.setLanguage(resolveLang(currentLang));
 
     // Translation DOM updates may arrive over several seconds.
     // Rebuild the tree multiple times so we catch the final state.
