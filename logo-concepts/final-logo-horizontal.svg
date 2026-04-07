@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" role="img" aria-label="Akhilesh Malani - Accessibility Architect">
+  <title>Akhilesh Malani - Accessibility Architect</title>
+  <desc>Horizontal logo with the AM icon mark on the left and the full name Akhilesh Malani with the tagline Accessibility Architect on the right.</desc>
+
+  <!-- === ICON MARK (circle with AM) === -->
+
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="96" fill="none" stroke="#1a5276" stroke-width="4"/>
+
+  <!-- Circle background -->
+  <circle cx="100" cy="100" r="88" fill="#1a5276"/>
+
+  <!-- Inner accent ring -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="#5dade2" stroke-width="1" opacity="0.35"/>
+
+  <!-- Human head (peak of A) -->
+  <circle cx="72" cy="42" r="10" fill="#5dade2"/>
+
+  <!-- Body/spine -->
+  <line x1="72" y1="52" x2="72" y2="72" stroke="#5dade2" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Left leg of A -->
+  <line x1="40" y1="160" x2="72" y2="72" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Right leg of A -->
+  <line x1="104" y1="160" x2="72" y2="72" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Arms (A crossbar) -->
+  <line x1="35" y1="105" x2="110" y2="105" stroke="#5dade2" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Bridge arc -->
+  <path d="M72 42 Q115 18 140 46" stroke="#5dade2" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Letter M -->
+  <path d="M112 160 L112 55 L136 120 L160 55 L160 160" stroke="#ffffff" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Base line -->
+  <line x1="37" y1="165" x2="163" y2="165" stroke="#5dade2" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- === TEXT === -->
+
+  <!-- Vertical divider line -->
+  <line x1="220" y1="40" x2="220" y2="160" stroke="#5dade2" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Name -->
+  <text x="245" y="90" font-family="Georgia, 'Times New Roman', serif" font-size="46" font-weight="bold" fill="#1a5276" letter-spacing="2">AKHILESH MALANI</text>
+
+  <!-- Tagline -->
+  <text x="245" y="130" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="20" fill="#5dade2" letter-spacing="4">ACCESSIBILITY ARCHITECT</text>
+</svg>
