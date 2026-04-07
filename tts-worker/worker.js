@@ -81,7 +81,7 @@ async function synthesize(env, text, lang, voice, rate) {
   const rateStr   = (ratePct >= 0 ? '+' : '') + ratePct + '%';
 
   const ssml =
-    `<speak version='1.0' xml:lang='${locale}'>` +
+    `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${locale}'>` +
       `<voice xml:lang='${locale}' name='${voiceName}'>` +
         `<prosody rate='${rateStr}' pitch='+0Hz'>` +
           xmlEscape(text) +
