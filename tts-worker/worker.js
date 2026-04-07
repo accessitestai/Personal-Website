@@ -1,145 +1,148 @@
-/* ─────────────────────────────────────────────────────────────
-   Azure Speech TTS proxy — Cloudflare Worker
-   Accepts: GET /?text=...&lang=hi&voice=hi-IN-SwaraNeural&rate=0
-   Returns: audio/mpeg (MP3) with CORS headers.
-   The Azure key lives in the AZURE_TTS_KEY Worker secret — never
-   in source. Set it once with:
-     wrangler secret put AZURE_TTS_KEY
-   ───────────────────────────────────────────────────────────── */
+/* Azure Speech TTS proxy — Cloudflare Worker
+   Endpoints:
+     GET /version          → which build is live
+     GET /diag             → checks secret + Azure connectivity
+     GET /?text=...&lang=  → returns audio/mpeg
+*/
 
-const AZURE_REGION   = 'centralindia';
-const AZURE_ENDPOINT = `https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`;
+const BUILD_ID     = 'azure-v3-2026-04-07';
+const AZURE_REGION = 'centralindia';
+const AZURE_TTS    = `https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`;
+const AZURE_TOKEN  = `https://${AZURE_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
 
-const VOICE_FOR_LANG = {
-  en:'en-US-AriaNeural',
-  hi:'hi-IN-SwaraNeural',
-  ta:'ta-IN-PallaviNeural',
-  te:'te-IN-ShrutiNeural',
-  kn:'kn-IN-SapnaNeural',
-  ml:'ml-IN-SobhanaNeural',
-  bn:'bn-IN-TanishaaNeural',
-  mr:'mr-IN-AarohiNeural',
-  gu:'gu-IN-DhwaniNeural',
-  ur:'ur-PK-UzmaNeural',
-  // Azure has no native Punjabi/Odia/Assamese voices — fall back to Hindi
-  pa:'hi-IN-SwaraNeural',
-  or:'hi-IN-SwaraNeural',
+const VOICES = {
+  en:'en-US-AriaNeural', hi:'hi-IN-SwaraNeural', ta:'ta-IN-PallaviNeural',
+  te:'te-IN-ShrutiNeural', kn:'kn-IN-SapnaNeural', ml:'ml-IN-SobhanaNeural',
+  bn:'bn-IN-TanishaaNeural', mr:'mr-IN-AarohiNeural', gu:'gu-IN-DhwaniNeural',
+  ur:'ur-PK-UzmaNeural', pa:'hi-IN-SwaraNeural', or:'hi-IN-SwaraNeural',
   as:'hi-IN-SwaraNeural',
-  es:'es-ES-ElviraNeural',
-  fr:'fr-FR-DeniseNeural',
-  de:'de-DE-KatjaNeural',
-  pt:'pt-PT-RaquelNeural',
-  ar:'ar-SA-ZariyahNeural',
-  ru:'ru-RU-SvetlanaNeural',
+  es:'es-ES-ElviraNeural', fr:'fr-FR-DeniseNeural', de:'de-DE-KatjaNeural',
+  pt:'pt-PT-RaquelNeural', ar:'ar-SA-ZariyahNeural', ru:'ru-RU-SvetlanaNeural',
   it:'it-IT-ElsaNeural',
-  'zh':'zh-CN-XiaoxiaoNeural',
-  'zh-CN':'zh-CN-XiaoxiaoNeural',
-  'zh-TW':'zh-TW-HsiaoChenNeural',
-  ja:'ja-JP-NanamiNeural',
-  ko:'ko-KR-SunHiNeural',
-  nl:'nl-NL-ColetteNeural',
-  tr:'tr-TR-EmelNeural',
-  th:'th-TH-PremwadeeNeural',
-  vi:'vi-VN-HoaiMyNeural',
-  id:'id-ID-GadisNeural',
-  ms:'ms-MY-YasminNeural',
-  pl:'pl-PL-ZofiaNeural',
-  sv:'sv-SE-SofieNeural'
+  zh:'zh-CN-XiaoxiaoNeural','zh-CN':'zh-CN-XiaoxiaoNeural','zh-TW':'zh-TW-HsiaoChenNeural',
+  ja:'ja-JP-NanamiNeural', ko:'ko-KR-SunHiNeural',
+  nl:'nl-NL-ColetteNeural', tr:'tr-TR-EmelNeural', th:'th-TH-PremwadeeNeural',
+  vi:'vi-VN-HoaiMyNeural', id:'id-ID-GadisNeural', ms:'ms-MY-YasminNeural',
+  pl:'pl-PL-ZofiaNeural', sv:'sv-SE-SofieNeural'
 };
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  // Cache identical text+lang combinations at Cloudflare edge for 24h
-  'Cache-Control':                'public, max-age=86400'
+  'Access-Control-Allow-Headers': 'Content-Type'
 };
 
-function xmlEscape(s) {
-  return s.replace(/[<>&'"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
-}
+const json = (obj, status = 200) => new Response(JSON.stringify(obj, null, 2), {
+  status, headers: { ...CORS, 'Content-Type': 'application/json' }
+});
 
-function resolveVoice(voice, lang) {
-  if (voice) return voice;
-  if (VOICE_FOR_LANG[lang]) return VOICE_FOR_LANG[lang];
+const xmlEsc = s => s.replace(/[<>&'"]/g, c =>
+  ({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]));
+
+function pickVoice(lang) {
+  if (VOICES[lang]) return VOICES[lang];
   const base = (lang || 'en').split('-')[0].toLowerCase();
-  return VOICE_FOR_LANG[base] || VOICE_FOR_LANG.en;
+  return VOICES[base] || VOICES.en;
 }
 
-function voiceLocale(voice) {
-  // e.g. "hi-IN-SwaraNeural" → "hi-IN"
+function localeOf(voice) {
   const m = voice.match(/^([a-z]{2,3}-[A-Za-z]{2,4})-/);
   return m ? m[1] : 'en-US';
 }
 
-async function synthesize(env, text, lang, voice, rate) {
-  if (!env.AZURE_TTS_KEY) throw new Error('AZURE_TTS_KEY secret is not set');
-
-  const voiceName = resolveVoice(voice, lang);
-  const locale    = voiceLocale(voiceName);
-  const ratePct   = Number.isFinite(+rate) ? +rate : 0;
-  const rateStr   = (ratePct >= 0 ? '+' : '') + ratePct + '%';
-
-  const ssml =
+async function synth(env, text, lang, rate) {
+  const voice  = pickVoice(lang);
+  const locale = localeOf(voice);
+  const r      = Number.isFinite(+rate) ? +rate : 0;
+  const ssml   =
     `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${locale}'>` +
-      `<voice xml:lang='${locale}' name='${voiceName}'>` +
-        `<prosody rate='${rateStr}' pitch='+0Hz'>` +
-          xmlEscape(text) +
-        `</prosody>` +
+      `<voice xml:lang='${locale}' name='${voice}'>` +
+        `<prosody rate='${r >= 0 ? '+' : ''}${r}%'>${xmlEsc(text)}</prosody>` +
       `</voice>` +
     `</speak>`;
 
-  const res = await fetch(AZURE_ENDPOINT, {
+  const res = await fetch(AZURE_TTS, {
     method: 'POST',
     headers: {
       'Ocp-Apim-Subscription-Key': env.AZURE_TTS_KEY,
-      'Content-Type':              'application/ssml+xml',
+      'Content-Type':              'application/ssml+xml; charset=utf-8',
       'X-Microsoft-OutputFormat':  'audio-24khz-48kbitrate-mono-mp3',
-      'User-Agent':                'ama11y-tts-worker'
+      'User-Agent':                'ama11y-tts'
     },
     body: ssml
   });
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    throw new Error(`Azure TTS ${res.status}: ${errText.slice(0, 200)}`);
-  }
-  return await res.arrayBuffer();
+  return { res, voice, locale, ssml };
 }
 
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
-    const url   = new URL(request.url);
-    const text  = url.searchParams.get('text');
-    const lang  = url.searchParams.get('lang')  || 'en';
-    const voice = url.searchParams.get('voice') || '';
-    const rate  = url.searchParams.get('rate')  || '0';
+    const url  = new URL(request.url);
+    const path = url.pathname;
 
-    if (!text) {
-      return new Response(JSON.stringify({ error: 'Missing "text" param' }), {
-        status: 400,
-        headers: { ...CORS, 'Content-Type': 'application/json' }
-      });
+    // /version — confirm which build is live
+    if (path === '/version') {
+      return json({ build: BUILD_ID, region: AZURE_REGION, hasKey: !!env.AZURE_TTS_KEY });
     }
-    if (text.length > 3000) {
-      return new Response(JSON.stringify({ error: 'Text too long (max 3000 chars)' }), {
-        status: 413,
-        headers: { ...CORS, 'Content-Type': 'application/json' }
-      });
+
+    // /diag — try to get a token from Azure to prove the key works
+    if (path === '/diag') {
+      if (!env.AZURE_TTS_KEY) return json({ ok: false, step: 'secret', error: 'AZURE_TTS_KEY not set' }, 500);
+      try {
+        const t = await fetch(AZURE_TOKEN, {
+          method: 'POST',
+          headers: {
+            'Ocp-Apim-Subscription-Key': env.AZURE_TTS_KEY,
+            'Content-Length': '0'
+          }
+        });
+        const body = await t.text();
+        return json({
+          ok: t.ok,
+          step: 'issueToken',
+          status: t.status,
+          region: AZURE_REGION,
+          bodyPreview: body.slice(0, 120),
+          keyLen: env.AZURE_TTS_KEY.length
+        }, t.ok ? 200 : 502);
+      } catch (e) {
+        return json({ ok: false, step: 'fetch', error: String(e && e.message || e) }, 502);
+      }
     }
+
+    // / — synthesize
+    const text = url.searchParams.get('text');
+    const lang = url.searchParams.get('lang') || 'en';
+    const rate = url.searchParams.get('rate') || '0';
+
+    if (!text) return json({ error: 'Missing "text" param', hint: 'try /version or /diag' }, 400);
+    if (text.length > 3000) return json({ error: 'text too long' }, 413);
+    if (!env.AZURE_TTS_KEY) return json({ error: 'AZURE_TTS_KEY secret not set on this worker' }, 500);
 
     try {
-      const audio = await synthesize(env, text, lang, voice, rate);
+      const { res, voice, locale } = await synth(env, text, lang, rate);
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        return json({
+          error: 'azure',
+          status: res.status,
+          voice, locale,
+          azureBody: body.slice(0, 300)
+        }, 502);
+      }
+      const audio = await res.arrayBuffer();
       return new Response(audio, {
-        headers: { ...CORS, 'Content-Type': 'audio/mpeg' }
+        headers: {
+          ...CORS,
+          'Content-Type':  'audio/mpeg',
+          'Cache-Control': 'public, max-age=86400',
+          'X-TTS-Voice':   voice,
+          'X-TTS-Build':   BUILD_ID
+        }
       });
     } catch (e) {
-      return new Response(JSON.stringify({ error: String(e && e.message || e) }), {
-        status: 502,
-        headers: { ...CORS, 'Content-Type': 'application/json' }
-      });
+      return json({ error: String(e && e.message || e) }, 502);
     }
   }
 };
