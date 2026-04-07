@@ -844,15 +844,22 @@
     '<li>Read Aloud (alternate): <kbd>Alt + Shift + A</kbd></li>' +
     '<li>SR — Next / Prev element: <kbd>↓</kbd> / <kbd>↑</kbd></li>' +
     '<li>SR — Activate element: <kbd>Enter</kbd></li>' +
+    '<li>SR — Pause / resume speech: <kbd>Space</kbd></li>' +
     '<li>SR — Stop speech: <kbd>Ctrl</kbd></li>' +
-    '<li>SR — Next heading: <kbd>Alt + Shift + H</kbd></li>' +
-    '<li>SR — Next link: <kbd>Alt + Shift + K</kbd></li>' +
-    '<li>SR — Next landmark: <kbd>Alt + Shift + D</kbd></li>' +
-    '<li>SR — Next button: <kbd>Alt + Shift + B</kbd></li>' +
-    '<li>SR — Next form field: <kbd>Alt + Shift + F</kbd></li>' +
+    '<li>SR — Deactivate: <kbd>Esc</kbd></li>' +
+    '<li>SR — Next heading: <kbd>H</kbd> (reverse: <kbd>Shift + H</kbd>)</li>' +
+    '<li>SR — Headings by level: <kbd>1</kbd>–<kbd>6</kbd></li>' +
+    '<li>SR — Next link: <kbd>K</kbd></li>' +
+    '<li>SR — Next button: <kbd>B</kbd></li>' +
+    '<li>SR — Next form field: <kbd>F</kbd></li>' +
+    '<li>SR — Next landmark: <kbd>D</kbd></li>' +
+    '<li>SR — Next list: <kbd>L</kbd></li>' +
+    '<li>SR — Next image: <kbd>I</kbd></li>' +
+    '<li>SR — Next table: <kbd>T</kbd></li>' +
     '<li>SR — Table cell nav: <kbd>Ctrl + Alt + Arrows</kbd></li>' +
-    '<li>SR — Read from here: <kbd>Alt + Shift + C</kbd></li>' +
-    '<li>SR — Element list: <kbd>Alt + Shift + E</kbd></li>' +
+    '<li>SR — Read from here: <kbd>C</kbd></li>' +
+    '<li>SR — Element list: <kbd>E</kbd></li>' +
+    '<li>SR — Help: <kbd>?</kbd> (inside SR mode)</li>' +
     '</ul>' +
     '<button type="button" class="kbd-help-close" id="kbd-help-close">Close</button>' +
     '</div></div>';

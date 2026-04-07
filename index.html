@@ -30,8 +30,11 @@
 
   <title>Akhilesh Malani | Senior Accessibility Architect & Digital Inclusion Strategist</title>
   <link rel="icon" type="image/svg+xml" href="images/logo-icon.svg">
+  <link rel="preload" href="styles.css" as="style">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="screen-reader.css">
+  <link rel="preload" href="script.js" as="script">
+  <link rel="preload" href="screen-reader.js" as="script">
   <!-- Prevent flash of wrong theme/preferences -->
   <script>
     (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
@@ -696,8 +699,8 @@
     }
   }
   </script>
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
+  <script src="firebase-config.js" defer></script>
+  <script src="script.js" defer></script>
   <script>
     (function() { if (typeof emailjs !== 'undefined') emailjs.init('EqzWlJ7LRxnccipv_'); })();
     if (window.netlifyIdentity) {
@@ -710,6 +713,6 @@
       });
     }
   </script>
-  <script src="screen-reader.js"></script>
+  <script src="screen-reader.js" defer></script>
 </body>
 </html>
