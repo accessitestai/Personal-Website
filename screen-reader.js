@@ -11,133 +11,138 @@
   /* ═══════════════════════════════════════════════
      1. SHARED VOICE ENGINE (multi-language)
      ═══════════════════════════════════════════════ */
-  /* ─────────────────────────────────────────────────────────────
-     CLOUD TTS via a Cloudflare Worker that proxies Microsoft Edge's
-     neural "Read Aloud" voices. Zero dependency for visitors —
-     every user gets the same high-quality voice regardless of OS.
-     Deploy the worker from /tts-worker then paste its URL below.
-     speechSynthesis is retained only as a last-ditch fallback if
-     the worker is unreachable, so the site still speaks.
-     ───────────────────────────────────────────────────────────── */
-  var TTS_WORKER_URL = 'https://tts.accessitestai.workers.dev';
-
   var VoiceEngine = {
     synth: window.speechSynthesis,
-    voices: [],
+    allVoices: [],   // all available voices
+    voices: [],      // filtered for current language
     selectedVoice: null,
     rate: 1,
-    lang: 'en',
-    _audio: null,
+    lang: 'en',      // current language prefix
+    _utterance: null,
     _onEndCb: null,
     _chunkQueue: [],
     _paused: false,
-    _speaking: false,
 
-    init: function () { this.setLanguage('en'); },
+    init: function () {
+      var self = this;
+      function loadVoices() {
+        self.allVoices = self.synth.getVoices();
+        self._filterVoicesForLang(self.lang);
+      }
+      loadVoices();
+      if (self.synth.onvoiceschanged !== undefined) {
+        self.synth.onvoiceschanged = loadVoices;
+      }
+    },
+
+    _filterVoicesForLang: function (langPrefix) {
+      // Always refresh — voices may have been lazy-loaded since init.
+      this.allVoices = this.synth.getVoices();
+      this.lang = langPrefix;
+      this.selectedVoice = null;
+      var p = (langPrefix || 'en').toLowerCase();
+      var base = p.split('-')[0];
+      this.matchedLang = true;
+      // Try exact (e.g. zh-cn), then base (zh).
+      this.voices = this.allVoices.filter(function (v) {
+        return v.lang.toLowerCase().indexOf(p) === 0;
+      });
+      if (!this.voices.length) {
+        this.voices = this.allVoices.filter(function (v) {
+          return v.lang.toLowerCase().indexOf(base) === 0;
+        });
+      }
+      if (!this.voices.length) {
+        // No installed voice for this language — let browser pick via utt.lang
+        this.voices = this.allVoices.slice();
+        this.matchedLang = false;
+      }
+      // Auto-select best voice
+      if (this.voices.length) {
+        var preferred = this.voices.filter(function (v) {
+          return v.name.indexOf('Google') > -1 || v.name.indexOf('Microsoft') > -1 || v.name.indexOf('Samantha') > -1;
+        });
+        this.selectedVoice = preferred.length ? preferred[0] : this.voices[0];
+      }
+    },
 
     setLanguage: function (langPrefix) {
-      var code = (langPrefix || 'en').toLowerCase();
-      if (code !== 'zh-cn' && code !== 'zh-tw') code = code.split('-')[0];
-      else code = langPrefix; // preserve zh-CN / zh-TW casing
-      this.lang = code;
-      this.voices = [{ name: 'Cloud Neural (' + code + ')', lang: code }];
-      this.selectedVoice = this.voices[0];
+      this._filterVoicesForLang(langPrefix);
     },
 
     speak: function (text, onEnd) {
       if (!text) { if (onEnd) onEnd(); return; }
       this.stop();
       this._paused = false;
-      this._speaking = true;
-      var chunks = this._chunkText(text, 500);
+
+      // Chrome bug: speech stops after ~15s. Chunk long text.
+      var chunks = this._chunkText(text, 180);
       this._chunkQueue = chunks.slice(1);
       this._onEndCb = onEnd || null;
-      this._playChunk(chunks[0]);
+      this._speakChunk(chunks[0]);
     },
 
     _chunkText: function (text, maxLen) {
       if (text.length <= maxLen) return [text];
-      var out = [];
-      var sentences = text.match(/[^.!?。！？]+[.!?。！？]+|\s*[^.!?。！？]+$/g) || [text];
-      var cur = '';
+      var chunks = [];
+      var sentences = text.match(/[^.!?]+[.!?]+|\s*[^.!?]+$/g) || [text];
+      var current = '';
       for (var i = 0; i < sentences.length; i++) {
-        if ((cur + sentences[i]).length > maxLen && cur) { out.push(cur.trim()); cur = ''; }
-        cur += sentences[i];
+        if ((current + sentences[i]).length > maxLen && current) {
+          chunks.push(current.trim());
+          current = '';
+        }
+        current += sentences[i];
       }
-      if (cur.trim()) out.push(cur.trim());
-      // Hard-split any still-oversized chunks
-      var final = [];
-      for (var j = 0; j < out.length; j++) {
-        var c = out[j];
-        while (c.length > maxLen) { final.push(c.slice(0, maxLen)); c = c.slice(maxLen); }
-        if (c) final.push(c);
-      }
-      return final;
+      if (current.trim()) chunks.push(current.trim());
+      return chunks;
     },
 
-    _playChunk: function (text) {
+    _speakChunk: function (text) {
       var self = this;
-      var url = TTS_WORKER_URL + '/?lang=' + encodeURIComponent(self.lang) +
-                '&rate=' + Math.round((self.rate - 1) * 100) +
-                '&text=' + encodeURIComponent(text);
-      var audio = new Audio(url);
-      audio.playbackRate = 1; // rate already applied server-side
-      self._audio = audio;
-      audio.onended = function () { self._chunkDone(); };
-      audio.onerror = function () {
-        // Cloud path failed — fall back to local TTS for this chunk only
-        self._fallbackSpeak(text, function () { self._chunkDone(); });
+      var utt = new SpeechSynthesisUtterance(text);
+      utt.rate = self.rate;
+      utt.pitch = 1;
+      // Always set lang so the browser can pick a matching engine even
+      // when no JS-visible voice is present (common on Windows/Edge).
+      utt.lang = self.lang || 'en';
+      if (self.selectedVoice && self.matchedLang) utt.voice = self.selectedVoice;
+      utt.onend = function () {
+        if (self._chunkQueue.length && !self._paused) {
+          self._speakChunk(self._chunkQueue.shift());
+        } else if (!self._chunkQueue.length && self._onEndCb) {
+          self._onEndCb();
+          self._onEndCb = null;
+        }
       };
-      var p = audio.play();
-      if (p && p.catch) p.catch(function () { self._fallbackSpeak(text, function () { self._chunkDone(); }); });
-    },
-
-    _chunkDone: function () {
-      if (this._paused) return;
-      if (this._chunkQueue.length) this._playChunk(this._chunkQueue.shift());
-      else {
-        this._speaking = false;
-        if (this._onEndCb) { this._onEndCb(); this._onEndCb = null; }
-      }
-    },
-
-    _fallbackSpeak: function (text, done) {
-      try {
-        var utt = new SpeechSynthesisUtterance(text);
-        utt.lang = this.lang || 'en';
-        utt.rate = this.rate;
-        utt.onend = done;
-        utt.onerror = done;
-        this.synth.speak(utt);
-      } catch (e) { done(); }
+      utt.onerror = function () {
+        self._chunkQueue = [];
+        if (self._onEndCb) { self._onEndCb(); self._onEndCb = null; }
+      };
+      self._utterance = utt;
+      self.synth.speak(utt);
     },
 
     pause: function () {
       this._paused = true;
-      if (this._audio) { try { this._audio.pause(); } catch (e) {} }
-      if (this.synth.speaking) this.synth.pause();
+      this.synth.pause();
     },
 
     resume: function () {
       this._paused = false;
-      if (this._audio) { this._audio.play().catch(function () {}); }
-      if (this.synth.paused) this.synth.resume();
+      this.synth.resume();
     },
 
     stop: function () {
       this._paused = false;
-      this._speaking = false;
       this._chunkQueue = [];
       this._onEndCb = null;
-      if (this._audio) {
-        try { this._audio.pause(); } catch (e) {}
-        this._audio.src = '';
-        this._audio = null;
-      }
-      try { this.synth.cancel(); } catch (e) {}
+      this.synth.cancel();
     },
 
-    isSpeaking: function () { return this._speaking || this.synth.speaking; }
+    isSpeaking: function () {
+      return this.synth.speaking;
+    }
   };
 
   VoiceEngine.init();
