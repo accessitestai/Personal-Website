@@ -738,6 +738,330 @@ a:hover {
 }
 
 /* ===========================
+   Social Proof Strip
+   =========================== */
+.social-proof {
+  padding: var(--spacing-lg) 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.social-proof-label {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-sm);
+}
+
+.social-proof-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.proof-logo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  opacity: 0.6;
+  transition: opacity var(--transition);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.proof-logo:hover { opacity: 1; }
+
+/* ===========================
+   Problem / Cost Section
+   =========================== */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.problem-card {
+  text-align: center;
+  padding: var(--spacing-md);
+  border-radius: var(--radius);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+}
+
+.problem-stat {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  color: var(--color-accent);
+  line-height: 1.1;
+  margin-bottom: var(--spacing-xs);
+}
+
+.problem-card p {
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.problem-cta {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--color-text);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+/* ===========================
+   Process / Engagement Section
+   =========================== */
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--spacing-md);
+  counter-reset: process-step;
+}
+
+.process-step {
+  position: relative;
+  padding: var(--spacing-md);
+  padding-top: calc(var(--spacing-md) + 0.5rem);
+  border-radius: var(--radius);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.process-step:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.process-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.process-step h3 {
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-primary-dark);
+}
+
+.process-step p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* ===========================
+   Differentiator Section
+   =========================== */
+.differentiator-content {
+  max-width: 800px;
+}
+
+.differentiator-text {
+  margin-top: var(--spacing-sm);
+}
+
+.differentiator-lead {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-sm);
+  font-family: var(--font-heading);
+}
+
+.differentiator-text p {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+}
+
+/* ===========================
+   Case Studies / Results
+   =========================== */
+.cases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.case-card {
+  background: var(--color-card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.case-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.case-badge {
+  display: inline-block;
+  align-self: flex-start;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.1), rgba(3, 105, 161, 0.05));
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.case-card h3 {
+  font-size: 1.15rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-primary-dark);
+  line-height: 1.4;
+}
+
+.case-card > p {
+  color: var(--color-text-light);
+  font-size: 0.92rem;
+  flex-grow: 1;
+  line-height: 1.7;
+}
+
+.case-result {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+}
+
+.case-metric {
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.case-label {
+  font-size: 0.88rem;
+  color: var(--color-text-light);
+}
+
+/* ===========================
+   Blog Featured Post
+   =========================== */
+.blog-featured {
+  background: var(--color-card-bg);
+  border-radius: var(--radius);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-accent);
+  margin-bottom: var(--spacing-lg);
+  transition: box-shadow var(--transition);
+}
+
+.blog-featured:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.blog-featured-badge {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.blog-featured-content time {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+}
+
+.blog-featured-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-primary-dark);
+  line-height: 1.3;
+}
+
+.blog-featured-content > p {
+  color: var(--color-text-light);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  max-width: 700px;
+  margin-bottom: var(--spacing-md);
+}
+
+/* ===========================
+   Updated Testimonials
+   =========================== */
+.testimonial-card blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+.testimonial-card blockquote p {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-text);
+  font-style: italic;
+}
+
+.testimonial-author {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.testimonial-author strong {
+  font-size: 0.92rem;
+  color: var(--color-primary-dark);
+}
+
+.testimonial-author span {
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+}
+
+/* ===========================
    Recognition
    =========================== */
 .recognition-grid {
