@@ -75,18 +75,21 @@
 
     _playChunk: function (text) {
       var self = this;
+      var fell = false;
+      function fallback() {
+        if (fell) return; fell = true;
+        self._audio = null;
+        self._fallbackSpeak(text, function () { self._chunkDone(); });
+      }
       var url = TTS_WORKER_URL + '/?lang=' + encodeURIComponent(self.lang) +
                 '&rate=' + Math.round((self.rate - 1) * 100) +
                 '&text=' + encodeURIComponent(text);
       var audio = new Audio(url);
       self._audio = audio;
-      audio.onended = function () { self._chunkDone(); };
-      audio.onerror = function () {
-        // Worker unreachable → fall back to the visitor's local TTS
-        self._fallbackSpeak(text, function () { self._chunkDone(); });
-      };
+      audio.onended = function () { if (!fell) self._chunkDone(); };
+      audio.onerror = fallback;
       var p = audio.play();
-      if (p && p.catch) p.catch(function () { self._fallbackSpeak(text, function () { self._chunkDone(); }); });
+      if (p && p.catch) p.catch(fallback);
     },
 
     _chunkDone: function () {
@@ -112,13 +115,13 @@
     pause: function () {
       this._paused = true;
       if (this._audio) { try { this._audio.pause(); } catch (e) {} }
-      if (this.synth.speaking) this.synth.pause();
+      else if (this.synth.speaking) { this.synth.pause(); }
     },
 
     resume: function () {
       this._paused = false;
       if (this._audio) { this._audio.play().catch(function () {}); }
-      if (this.synth.paused) this.synth.resume();
+      else if (this.synth.paused) { this.synth.resume(); }
     },
 
     stop: function () {
