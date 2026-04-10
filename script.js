@@ -1541,6 +1541,67 @@
 })();
 
 // ===========================
+// Animated Number Counters on Scroll
+// ===========================
+(function () {
+  'use strict';
+  var counters = document.querySelectorAll('.count-up');
+  if (!counters.length) return;
+
+  // Respect reduced motion preference
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduceMotionAttr = document.documentElement.hasAttribute('data-reduce-motion');
+
+  function animateCounter(el) {
+    if (el.dataset.counted) return;
+    el.dataset.counted = 'true';
+
+    var target = parseInt(el.dataset.target, 10);
+    var suffix = el.dataset.suffix || '';
+
+    if (prefersReduced || reduceMotionAttr) {
+      el.textContent = target + suffix;
+      return;
+    }
+
+    var duration = 1200;
+    var start = null;
+
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      var progress = Math.min((timestamp - start) / duration, 1);
+      // ease-out cubic
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.round(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animateCounter(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    counters.forEach(function (el) { observer.observe(el); });
+  } else {
+    // Fallback: show final values immediately
+    counters.forEach(function (el) {
+      el.textContent = el.dataset.target + (el.dataset.suffix || '');
+    });
+  }
+})();
+
+// ===========================
 // Reading Time Calculator (for blog pages)
 // ===========================
 (function () {

@@ -1705,6 +1705,64 @@ a:hover {
 [data-theme="dark"] .timeline-content { background: var(--color-card-bg); }
 [data-theme="dark"] .library-embed { background: var(--color-card-bg); }
 
+/* Dark mode: Standards strip */
+[data-theme="dark"] .standards-strip,
+[data-theme="dark"] .speaking-credentials {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .standard-badge {
+  background: var(--color-bg-alt);
+  border-color: var(--color-border);
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] .standard-badge:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+[data-theme="dark"] .credential-item {
+  background: var(--color-bg-alt);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .credential-item:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Dark mode: Checker promo */
+[data-theme="dark"] .checker-promo {
+  background: linear-gradient(135deg, #082f49 0%, #164e63 100%);
+}
+
+[data-theme="dark"] .checker-promo .btn-primary {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .checker-promo .btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Dark mode: FAQ */
+[data-theme="dark"] .faq-item {
+  background: var(--color-card-bg);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .faq-item[open] {
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .faq-item summary:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 /* Dark mode toggle button */
 .nav-actions {
   display: flex;
@@ -2445,6 +2503,323 @@ html[data-text-size="larger"] { font-size: 140%; }
 }
 
 .kbd-help-close:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ===========================
+   About Resume Button
+   =========================== */
+.about-resume {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: var(--spacing-sm);
+}
+
+.about-resume svg {
+  flex-shrink: 0;
+}
+
+/* ===========================
+   Standards & Certifications Strip
+   =========================== */
+.standards-strip {
+  padding: var(--spacing-md) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+}
+
+.standards-label {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-sm);
+}
+
+.standards-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.standard-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+.standard-badge:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+/* ===========================
+   Checker Promotion
+   =========================== */
+.checker-promo {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.checker-promo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.checker-promo-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.checker-promo-text h2 {
+  color: #fff;
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.checker-promo-text p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-md);
+}
+
+.checker-promo .btn-primary {
+  background: #fff;
+  color: var(--color-primary);
+  border-color: #fff;
+  font-weight: 700;
+}
+
+.checker-promo .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.checker-promo-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.checker-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+  transition: background var(--transition);
+}
+
+.checker-feature:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.checker-feature svg {
+  flex-shrink: 0;
+  color: var(--color-accent-light);
+}
+
+.checker-feature span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* ===========================
+   Speaking Credentials Strip
+   =========================== */
+.speaking-credentials {
+  padding: var(--spacing-md) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+}
+
+.credentials-label {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-sm);
+}
+
+.credentials-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.credential-item {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  padding: 0.5rem 1.25rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+.credential-item:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===========================
+   FAQ Section
+   =========================== */
+.faq-list {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.faq-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card-bg);
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.faq-item:hover {
+  border-color: var(--color-primary);
+}
+
+.faq-item[open] {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  list-style: none;
+  transition: background var(--transition);
+  min-height: 44px;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: '+';
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--color-primary);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.faq-item[open] summary::after {
+  content: '−';
+}
+
+.faq-item summary:hover {
+  background: var(--color-bg-alt);
+}
+
+.faq-item summary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.faq-answer {
+  padding: 0 1.5rem 1.25rem;
+  color: var(--color-text-light);
+  line-height: 1.8;
+}
+
+.faq-answer p {
+  margin: 0;
+}
+
+/* ===========================
+   Responsive: New Sections
+   =========================== */
+@media (max-width: 768px) {
+  .checker-promo-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .checker-promo-text h2 {
+    font-size: 1.5rem;
+  }
+
+  .checker-promo .btn-primary {
+    margin: 0 auto;
+  }
+
+  .standards-badges {
+    gap: 0.5rem;
+  }
+
+  .standard-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .credentials-list {
+    gap: 0.75rem;
+  }
+
+  .credential-item {
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .faq-item summary {
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .faq-answer {
+    padding: 0 1.25rem 1rem;
+  }
+}
 
 /* ===========================
    Print Styles

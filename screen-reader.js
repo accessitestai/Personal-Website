@@ -32,6 +32,7 @@
     _chunkQueue: [],
     _paused: false,
     _speaking: false,
+    _generation: 0,
 
     init: function () { this.setLanguage('en'); },
 
@@ -50,6 +51,7 @@
     speak: function (text, onEnd) {
       if (!text) { if (onEnd) onEnd(); return; }
       this.stop();
+      this._generation++;
       this._paused = false;
       this._speaking = true;
       if (text.length < this._SHORT_LIMIT) {
@@ -86,12 +88,14 @@
 
     _destroyAudio: function (audio) {
       if (!audio) return;
-      try { audio.pause(); } catch (e) {}
+      // Null handlers FIRST to prevent queued events from firing
       audio.onended = null;
       audio.onerror = null;
       audio.oncanplay = null;
-      audio.removeAttribute('src');
-      audio.load();
+      audio.oncanplaythrough = null;
+      audio.onplay = null;
+      try { audio.pause(); } catch (e) {}
+      try { audio.removeAttribute('src'); audio.load(); } catch (e) {}
     },
 
     // Preload next chunk URL so browser caches it while current plays
@@ -113,27 +117,38 @@
     _playChunk: function (text) {
       var self = this;
       var settled = false;
+      var gen = self._generation;
+
+      function stale() { return gen !== self._generation; }
 
       function useCloud(audio) {
-        if (settled) return;
+        if (settled || stale()) { self._destroyAudio(audio); return; }
         settled = true;
         self.synth.cancel();
-        audio.onended = function () { self._chunkDone(); };
+        audio.oncanplay = null; // prevent re-entry
+        audio.onended = function () {
+          if (!stale()) self._chunkDone();
+        };
         audio.play().then(function () {
-          self._preloadNext();
+          if (!stale()) self._preloadNext();
         }).catch(function () {
+          if (stale()) return;
           self._destroyAudio(audio);
           self._audio = null;
-          self._fallbackSpeak(text, function () { self._chunkDone(); });
+          self._fallbackSpeak(text, function () {
+            if (!stale()) self._chunkDone();
+          });
         });
       }
 
       function useFallback(audio) {
-        if (settled) return;
+        if (settled || stale()) return;
         settled = true;
         self._destroyAudio(audio);
         self._audio = null;
-        self._fallbackSpeak(text, function () { self._chunkDone(); });
+        self._fallbackSpeak(text, function () {
+          if (!stale()) self._chunkDone();
+        });
       }
 
       var url = TTS_WORKER_URL + '/?lang=' + encodeURIComponent(self.lang) +
@@ -184,6 +199,7 @@
     },
 
     stop: function () {
+      this._generation++;
       this._paused = false;
       this._speaking = false;
       this._chunkQueue = [];
