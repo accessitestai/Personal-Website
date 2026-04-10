@@ -1214,10 +1214,12 @@
         if (tgt && tgt.closest && tgt.closest('.wsr-toolbar')) {
           if (e.key === 'Escape') {
             e.preventDefault();
-            self.deactivate();
-            var sw0 = document.getElementById('a11y-screen-reader');
-            if (sw0) sw0.setAttribute('aria-checked', 'false');
-            localStorage.setItem('a11y-screen-reader', 'false');
+            // Move focus back to the page content instead of deactivating
+            if (self.nodes && self.nodes[self.currentIdx]) {
+              self.nodes[self.currentIdx].focus();
+            } else {
+              document.body.focus();
+            }
           }
           return;
         }
@@ -1378,12 +1380,9 @@
             e.preventDefault();
             if (self._listDialog.style.display !== 'none') {
               self._hideListDialog();
-            } else {
+            } else if (VoiceEngine.isSpeaking()) {
+              VoiceEngine.stop();
               self._continuousReading = false;
-              self.deactivate();
-              var sw = document.getElementById('a11y-screen-reader');
-              if (sw) sw.setAttribute('aria-checked', 'false');
-              localStorage.setItem('a11y-screen-reader', 'false');
             }
             break;
         }
@@ -1413,7 +1412,7 @@
         'Ctrl Alt Arrow keys: navigate table cells. ' +
         'Alt Shift C: read from here continuously. ' +
         'Alt Shift E: open element list dialog. ' +
-        'Escape: close dialog or deactivate screen reader.';
+        'Escape: close dialog or stop speech.';
       VoiceEngine.speak(helpText);
       this._updateStatus('Keyboard help — listening...');
     },
