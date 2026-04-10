@@ -43,11 +43,22 @@
       this.selectedVoice = this.voices[0];
     },
 
+    // Short UI feedback (< 100 chars) uses instant local speech.
+    // Longer content uses cloud TTS for neural voice quality.
+    _SHORT_LIMIT: 100,
+
     speak: function (text, onEnd) {
       if (!text) { if (onEnd) onEnd(); return; }
       this.stop();
       this._paused = false;
       this._speaking = true;
+      if (text.length < this._SHORT_LIMIT) {
+        this._fallbackSpeak(text, function () {
+          this._speaking = false;
+          if (onEnd) onEnd();
+        }.bind(this));
+        return;
+      }
       var chunks = this._chunkText(text, 1500);
       this._chunkQueue = chunks.slice(1);
       this._onEndCb = onEnd || null;
@@ -78,9 +89,25 @@
       try { audio.pause(); } catch (e) {}
       audio.onended = null;
       audio.onerror = null;
-      audio.oncanplaythrough = null;
+      audio.oncanplay = null;
       audio.removeAttribute('src');
-      audio.load(); // forces release
+      audio.load();
+    },
+
+    // Preload next chunk URL so browser caches it while current plays
+    _preloadNext: function () {
+      if (!this._chunkQueue.length) return;
+      var next = this._chunkQueue[0];
+      var url = TTS_WORKER_URL + '/?lang=' + encodeURIComponent(this.lang) +
+                '&rate=' + Math.round((this.rate - 1) * 100) +
+                '&text=' + encodeURIComponent(next);
+      var link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'fetch';
+      link.href = url;
+      document.head.appendChild(link);
+      // Clean up after 30s
+      setTimeout(function () { try { document.head.removeChild(link); } catch (e) {} }, 30000);
     },
 
     _playChunk: function (text) {
@@ -90,12 +117,11 @@
       function useCloud(audio) {
         if (settled) return;
         settled = true;
-        self.synth.cancel(); // kill any lingering local speech
+        self.synth.cancel();
         audio.onended = function () { self._chunkDone(); };
         audio.play().then(function () {
-          // playing cloud audio
+          self._preloadNext();
         }).catch(function () {
-          // play blocked even after load — use fallback
           self._destroyAudio(audio);
           self._audio = null;
           self._fallbackSpeak(text, function () { self._chunkDone(); });
@@ -117,8 +143,8 @@
       audio.preload = 'auto';
       self._audio = audio;
 
-      // Wait for audio data before playing — prevents premature fallback
-      audio.oncanplaythrough = function () { useCloud(audio); };
+      // canplay fires sooner than canplaythrough — faster start
+      audio.oncanplay = function () { useCloud(audio); };
       audio.onerror = function () { useFallback(audio); };
 
       // Timeout: if cloud takes > 5s, fall back to local
