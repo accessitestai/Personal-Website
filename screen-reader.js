@@ -73,23 +73,56 @@
       return final;
     },
 
+    _destroyAudio: function (audio) {
+      if (!audio) return;
+      try { audio.pause(); } catch (e) {}
+      audio.onended = null;
+      audio.onerror = null;
+      audio.oncanplaythrough = null;
+      audio.removeAttribute('src');
+      audio.load(); // forces release
+    },
+
     _playChunk: function (text) {
       var self = this;
-      var fell = false;
-      function fallback() {
-        if (fell) return; fell = true;
+      var settled = false;
+
+      function useCloud(audio) {
+        if (settled) return;
+        settled = true;
+        self.synth.cancel(); // kill any lingering local speech
+        audio.onended = function () { self._chunkDone(); };
+        audio.play().then(function () {
+          // playing cloud audio
+        }).catch(function () {
+          // play blocked even after load — use fallback
+          self._destroyAudio(audio);
+          self._audio = null;
+          self._fallbackSpeak(text, function () { self._chunkDone(); });
+        });
+      }
+
+      function useFallback(audio) {
+        if (settled) return;
+        settled = true;
+        self._destroyAudio(audio);
         self._audio = null;
         self._fallbackSpeak(text, function () { self._chunkDone(); });
       }
+
       var url = TTS_WORKER_URL + '/?lang=' + encodeURIComponent(self.lang) +
                 '&rate=' + Math.round((self.rate - 1) * 100) +
                 '&text=' + encodeURIComponent(text);
       var audio = new Audio(url);
+      audio.preload = 'auto';
       self._audio = audio;
-      audio.onended = function () { if (!fell) self._chunkDone(); };
-      audio.onerror = fallback;
-      var p = audio.play();
-      if (p && p.catch) p.catch(fallback);
+
+      // Wait for audio data before playing — prevents premature fallback
+      audio.oncanplaythrough = function () { useCloud(audio); };
+      audio.onerror = function () { useFallback(audio); };
+
+      // Timeout: if cloud takes > 5s, fall back to local
+      setTimeout(function () { useFallback(audio); }, 5000);
     },
 
     _chunkDone: function () {
@@ -129,11 +162,8 @@
       this._speaking = false;
       this._chunkQueue = [];
       this._onEndCb = null;
-      if (this._audio) {
-        try { this._audio.pause(); } catch (e) {}
-        this._audio.src = '';
-        this._audio = null;
-      }
+      this._destroyAudio(this._audio);
+      this._audio = null;
       try { this.synth.cancel(); } catch (e) {}
     },
 
