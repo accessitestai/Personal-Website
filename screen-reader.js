@@ -270,7 +270,7 @@
       this._toolbar.setAttribute('aria-hidden', 'false');
       this._populateVoices();
       this._updateStatus('Ready. ' + this.elements.length + ' sections found. Press Play to start.');
-      announce('Read Aloud activated. ' + this.elements.length + ' sections found.');
+      VoiceEngine.speak('Read Aloud activated. ' + this.elements.length + ' sections found.');
     },
 
     deactivate: function () {
@@ -281,7 +281,6 @@
       this._clearHighlight();
       this._toolbar.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('wsr-toolbar-active');
-      announce('Read Aloud deactivated');
     },
 
     play: function () {
@@ -321,7 +320,6 @@
       if (!this.playing || this.currentIdx >= this.elements.length) {
         this.stopReading();
         this._updateStatus('Finished reading.');
-        announce('Read Aloud finished');
         return;
       }
       var el = this.elements[this.currentIdx];
@@ -415,7 +413,7 @@
           '<select id="ra-voice"></select>' +
           '<button type="button" class="wsr-close-btn" id="ra-close" aria-label="Close Read Aloud">Close</button>' +
         '</div>' +
-        '<div class="wsr-status" id="ra-status" aria-live="polite" aria-atomic="true">Ready</div>';
+        '<div class="wsr-status" id="ra-status" role="status" aria-live="off">Ready</div>';
 
       document.body.appendChild(div);
       this._toolbar = div;
@@ -485,7 +483,6 @@
       this._bindKeys();
       this._bindScroll();
       this._updateStatus('Screen Reader active. ' + this.nodes.length + ' elements. Arrow keys to navigate, Enter to activate, Ctrl to stop speech.');
-      announce('Web Screen Reader activated. ' + this.nodes.length + ' elements. Down arrow to start navigating.');
       VoiceEngine.speak('Web Screen Reader activated. ' + this.nodes.length + ' elements found. Use down arrow to navigate. Enter to activate. Alt Shift question mark for help.');
       // Auto-land on first element so Enter/type-nav has a starting point
       var self = this;
@@ -509,7 +506,6 @@
       document.body.classList.remove('wsr-toolbar-active');
       this._unbindKeys();
       this._unbindScroll();
-      announce('Web Screen Reader deactivated');
     },
 
     // Rebuild tree (after translation or dynamic content change)
@@ -1478,7 +1474,7 @@
           '<button type="button" id="wsr-help" aria-label="Keyboard shortcuts help">?</button>' +
           '<button type="button" class="wsr-close-btn" id="wsr-close" aria-label="Close Screen Reader">Close</button>' +
         '</div>' +
-        '<div class="wsr-status" id="wsr-status" aria-live="polite" aria-atomic="true">Ready</div>';
+        '<div class="wsr-status" id="wsr-status" role="status" aria-live="off">Ready</div>';
 
       document.body.appendChild(div);
       this._toolbar = div;
