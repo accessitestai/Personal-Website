@@ -48,6 +48,123 @@
   <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- Netlify Identity widget (deferred) -->
   <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+  <!-- Structured Data: JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://akhileshmalani.com/#website",
+        "url": "https://akhileshmalani.com/",
+        "name": "Akhilesh Malani",
+        "description": "Personal website of Akhilesh Malani — Blind Accessibility Architect at Virtusa with 16+ years of experience in digital inclusion.",
+        "inLanguage": "en"
+      },
+      {
+        "@type": "Person",
+        "@id": "https://akhileshmalani.com/#person",
+        "name": "Akhilesh Malani",
+        "url": "https://akhileshmalani.com/",
+        "image": "https://akhileshmalani.com/images/og-banner.png",
+        "jobTitle": "Accessibility Test Architect",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Virtusa Systems India Pvt. Ltd.",
+          "url": "https://www.virtusa.com"
+        },
+        "description": "Blind accessibility architect based in Chennai, India with 16+ years of professional experience in digital accessibility, WCAG auditing, assistive technology, and team training.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Chennai",
+          "addressRegion": "Tamil Nadu",
+          "addressCountry": "IN"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/in/akhilesh-malani-67073bb",
+          "https://akhileshmalani.com/"
+        ],
+        "knowsAbout": [
+          "Web Accessibility",
+          "WCAG 2.2",
+          "Section 508",
+          "ADA Compliance",
+          "EN 301 549",
+          "WAI-ARIA",
+          "Screen Reader Testing",
+          "NVDA",
+          "JAWS",
+          "VoiceOver",
+          "Braille Display",
+          "Digital Inclusion",
+          "RPwD Act 2016",
+          "GIGW 3.0",
+          "SEBI Accessibility Mandate",
+          "Accessibility Auditing",
+          "Assistive Technology"
+        ],
+        "award": [
+          "ACE Award 2023 — Highest performance recognition, Tech Mahindra",
+          "Youngest Web Researcher, WWW2011"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How did Akhilesh Malani get into accessibility?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Akhilesh lost his sight at age 12 and experienced first-hand how much of the digital world is built without people with disabilities in mind. That frustration became a career — he turned lived experience into professional expertise and has spent 16+ years making sure others don't face the same barriers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is AMA11Y?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AMA11Y is Akhilesh's personal open-source accessibility testing and knowledge project, built in his own time. It aims to make accessibility knowledge free and available to everyone."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which accessibility standards does Akhilesh specialise in?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Akhilesh's expertise spans WCAG 2.0, 2.1, and 2.2 (Levels A, AA, and AAA), Section 508, ADA, EN 301 549, and India-specific regulations including the RPwD Act 2016, GIGW 3.0, and the SEBI accessibility mandate. He also works with WAI-ARIA, PDF/UA, and mobile accessibility guidelines."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What assistive technology does Akhilesh use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Akhilesh uses NVDA and JAWS as his primary screen readers, a Braille display for reading and editing, and keyboard-only navigation for everything. He also regularly tests with VoiceOver on iOS and macOS, TalkBack on Android, and Dragon NaturallySpeaking for voice input."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What does a typical accessibility audit involve?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A thorough audit involves manual testing with real assistive technology, automated scanning as a starting point, keyboard-only navigation testing, colour contrast checks, cognitive load assessment, and evaluation against the relevant WCAG success criteria. The output is a prioritised report with severity ratings and developer-ready fix guidance."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I connect with Akhilesh Malani?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "LinkedIn is the best way to reach Akhilesh at linkedin.com/in/akhilesh-malani-67073bb. He is happy to discuss accessibility, share knowledge, or talk about speaking opportunities."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <!-- Skip Navigation -->
@@ -145,11 +262,11 @@
     <section id="hero" class="hero">
       <div class="container hero-content">
         <p class="hero-greeting">Akhilesh Malani</p>
-        <h1 id="hero-heading">Your digital products should work for everyone. I make sure they do.</h1>
-        <p class="hero-subtitle">Blind accessibility architect with 16+ years helping enterprises pass audits, reduce compliance risk, and build products that a billion people can actually use.</p>
+        <h1 id="hero-heading">Blind. Determined. Building an accessible world — one product at a time.</h1>
+        <p class="hero-subtitle">Accessibility Architect at Virtusa with 16+ years of lived experience navigating the digital world as a blind user. Sharing knowledge, building tools, and proving that disability is not a barrier to expertise.</p>
         <div class="hero-cta">
-          <a href="#contact" class="btn btn-primary">Book a Discovery Call</a>
-          <a href="#about" class="btn btn-outline">Learn How I Work</a>
+          <a href="https://www.linkedin.com/in/akhilesh-malani-67073bb" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Connect on LinkedIn</a>
+          <a href="#about" class="btn btn-outline">My Story</a>
         </div>
       </div>
     </section>
@@ -157,7 +274,7 @@
     <!-- Social Proof Strip -->
     <section class="social-proof" aria-label="Trusted by leading organisations">
       <div class="container">
-        <p class="social-proof-label">Trusted by teams at</p>
+        <p class="social-proof-label">Professional experience across</p>
         <div class="social-proof-logos">
           <span class="proof-logo">Global Technology Leader</span>
           <span class="proof-logo">Top 3 Indian Bank</span>
@@ -177,7 +294,7 @@
             <p>I am a <strong>blind accessibility architect</strong> based in Chennai, India. I lost my sight at age 12, and since then I have navigated the digital world using screen readers, a Braille display, and keyboard-only interaction &mdash; every single day.</p>
             <p>Over <strong>16+ years</strong>, I have worked across accessibility auditing, strategy, team leadership, and training. My work spans web, mobile, and document accessibility for organisations in technology, banking, and financial services.</p>
             <p>I don't simulate disability to test for it. I live it. That perspective shapes everything I do &mdash; from the audits I conduct to the teams I train.</p>
-            <p>If you'd like to know more about my work and the organisations I've partnered with, <strong><a href="#contact">let's have a conversation</a></strong>.</p>
+            <p>If you'd like to know more about my work and the organisations I've been part of, <strong><a href="https://www.linkedin.com/in/akhilesh-malani-67073bb" target="_blank" rel="noopener noreferrer">connect with me on LinkedIn</a></strong>.</p>
             <a href="Akhilesh_Malani_CV.pdf" download class="btn btn-outline about-resume" aria-label="Download Akhilesh Malani's Resume as PDF">
               <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Download Resume
@@ -226,35 +343,35 @@
     <!-- What I Do Section -->
     <section id="unique" class="section fade-in">
       <div class="container">
-        <h2 id="unique-heading">What I Do</h2>
+        <h2 id="unique-heading">My Expertise</h2>
         <div class="cards-grid">
           <article class="card">
             <div class="card-icon" aria-hidden="true">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
             <h3>Accessibility Auditing</h3>
-            <p>I evaluate websites, mobile apps, and documents against WCAG and other standards &mdash; using assistive technology as my primary tool, not just automated scanners.</p>
+            <p>Evaluating websites, mobile apps, and documents against WCAG and global standards &mdash; using real assistive technology as the primary tool, not just automated scanners.</p>
           </article>
           <article class="card">
             <div class="card-icon" aria-hidden="true">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
             <h3>Strategy &amp; Compliance</h3>
-            <p>I help organisations define their accessibility roadmap, align with regulatory requirements, and integrate accessibility into their development lifecycle.</p>
+            <p>Defining accessibility roadmaps, aligning with regulatory requirements, and embedding accessibility into product development lifecycles across enterprise organisations.</p>
           </article>
           <article class="card">
             <div class="card-icon" aria-hidden="true">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <h3>Training &amp; Mentorship</h3>
-            <p>I train developers, designers, and QA teams on accessibility practices. I also help organisations set up internal accessibility champions programmes.</p>
+            <p>Upskilling developers, designers, and QA teams on accessibility best practices &mdash; and helping organisations build internal accessibility champion programmes that last.</p>
           </article>
           <article class="card">
             <div class="card-icon" aria-hidden="true">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h3>Regulatory Guidance</h3>
-            <p>I work with global standards like WCAG, ADA, Section 508, and EN 301 549 &mdash; as well as India-specific regulations including RPwD Act 2016, GIGW 3.0, and the SEBI accessibility mandate.</p>
+            <h3>Standards &amp; Regulation</h3>
+            <p>Deep expertise across WCAG 2.2, ADA, Section 508, EN 301 549, and India-specific mandates including RPwD Act 2016, GIGW 3.0, and the SEBI accessibility regulation.</p>
           </article>
         </div>
       </div>
@@ -263,28 +380,28 @@
     <!-- Process Section -->
     <section id="process" class="section section-alt fade-in">
       <div class="container">
-        <h2 id="process-heading">How We Work Together</h2>
-        <p class="section-intro">A predictable, structured engagement model that fits enterprise workflows.</p>
+        <h2 id="process-heading">How I Approach Accessibility</h2>
+        <p class="section-intro">The methodology behind every accessibility engagement I've been part of across my career.</p>
         <div class="process-grid">
           <div class="process-step">
             <span class="process-number" aria-hidden="true">1</span>
-            <h3>Discovery</h3>
-            <p>We discuss your products, compliance goals, timelines, and the standards that apply to your organisation.</p>
+            <h3>Understand</h3>
+            <p>Every product has a unique user base, technology stack, and regulatory context. The first step is always understanding the full picture before making any recommendations.</p>
           </div>
           <div class="process-step">
             <span class="process-number" aria-hidden="true">2</span>
-            <h3>Audit</h3>
-            <p>I evaluate your digital products using real assistive technology &mdash; screen readers, Braille display, keyboard-only &mdash; against WCAG and applicable regulations.</p>
+            <h3>Evaluate</h3>
+            <p>Using real assistive technology — screen readers, Braille display, keyboard-only navigation — to find what automated tools miss and what sighted testers overlook.</p>
           </div>
           <div class="process-step">
             <span class="process-number" aria-hidden="true">3</span>
-            <h3>Remediation Roadmap</h3>
-            <p>You receive a prioritised, actionable report with clear fix guidance, severity ratings, and developer-ready recommendations.</p>
+            <h3>Prioritise</h3>
+            <p>Translating findings into a clear, prioritised roadmap with severity ratings, developer-ready fix guidance, and executive summaries that leadership can act on.</p>
           </div>
           <div class="process-step">
             <span class="process-number" aria-hidden="true">4</span>
-            <h3>Team Enablement</h3>
-            <p>I train your developers, designers, and QA teams so accessibility becomes part of how you build &mdash; not something you bolt on later.</p>
+            <h3>Enable</h3>
+            <p>Upskilling the people who build the product so accessibility becomes part of the culture — not a one-time audit that gets repeated every year.</p>
           </div>
         </div>
       </div>
@@ -520,9 +637,9 @@
       <div class="container differentiator-content">
         <h2 id="diff-heading">Why a Blind Accessibility Architect?</h2>
         <div class="differentiator-text">
-          <p class="differentiator-lead">Most accessibility consultants simulate disability. I don't have to.</p>
-          <p>I navigate the digital world the same way your end users with disabilities do &mdash; with a screen reader, a Braille display, and a keyboard. Every single day. When I audit your product, I'm not running a checklist. I'm <em>using</em> it. That means I catch what automated tools miss, what sighted testers overlook, and what actually breaks the experience for real people.</p>
-          <p>This isn't a perspective you can hire from a textbook. It's 16 years of lived experience turned into a strategic advantage for your organisation.</p>
+          <p class="differentiator-lead">Most accessibility professionals simulate disability to understand it. I live it.</p>
+          <p>I navigate the digital world the same way a billion people with disabilities do &mdash; with a screen reader, a Braille display, and a keyboard. Every single day. That means when I evaluate a product, I'm not running through a checklist. I'm <em>experiencing</em> it. I catch what automated tools miss, what sighted testers overlook, and what genuinely breaks the experience for real users.</p>
+          <p>This perspective isn't something you learn from a certification course. It's 16 years of lived experience, professional practice, and a deeply personal understanding of what digital inclusion actually means.</p>
         </div>
       </div>
     </section>
@@ -570,13 +687,13 @@
     <!-- Case Studies / Results -->
     <section id="results" class="section fade-in">
       <div class="container">
-        <h2 id="results-heading">Results That Speak</h2>
-        <p class="section-intro">Anonymised highlights from real engagements. Specific details available under NDA.</p>
+        <h2 id="results-heading">Professional Impact</h2>
+        <p class="section-intro">Key outcomes from my career in accessibility across banking, technology, and financial services.</p>
         <div class="cases-grid">
           <article class="case-card">
             <span class="case-badge">Banking</span>
             <h3>Reduced accessibility defects by 73%</h3>
-            <p>Conducted end-to-end audits across web and mobile banking platforms for a top Indian bank. Delivered a prioritised remediation roadmap that the development team executed over two release cycles.</p>
+            <p>Led end-to-end accessibility evaluation across web and mobile banking platforms. Delivered a prioritised remediation roadmap that the engineering team executed across two release cycles.</p>
             <div class="case-result">
               <span class="case-metric count-up" data-target="73" data-suffix="%">0%</span>
               <span class="case-label">fewer critical defects after remediation</span>
@@ -585,7 +702,7 @@
           <article class="case-card">
             <span class="case-badge">Technology</span>
             <h3>Enabled 12 product teams to ship accessible code</h3>
-            <p>Designed and delivered an accessibility training programme for a global technology leader. Trained developers, designers, and QA across multiple product lines on WCAG 2.2 and assistive technology testing.</p>
+            <p>Designed and delivered a hands-on accessibility training programme across a global technology organisation. Upskilled developers, designers, and QA engineers on WCAG 2.2 and real-world assistive technology testing.</p>
             <div class="case-result">
               <span class="case-metric count-up" data-target="12" data-suffix="">0</span>
               <span class="case-label">teams trained and independently auditing</span>
@@ -594,7 +711,7 @@
           <article class="case-card">
             <span class="case-badge">Financial Services</span>
             <h3>Achieved SEBI compliance ahead of deadline</h3>
-            <p>Partnered with a financial services firm to meet India's SEBI accessibility mandate. Audited all customer-facing digital touchpoints and guided the team through remediation to full compliance.</p>
+            <p>Led accessibility evaluation and remediation guidance across all customer-facing digital touchpoints for a financial services organisation, achieving full compliance with India's SEBI accessibility mandate ahead of the regulatory deadline.</p>
             <div class="case-result">
               <span class="case-metric count-up" data-target="100" data-suffix="%">0%</span>
               <span class="case-label">SEBI mandate compliance achieved</span>
@@ -645,8 +762,8 @@
         </div>
 
         <div class="speaking-cta">
-          <p>Interested in having me speak at your event or conduct a training session?</p>
-          <a href="#contact" class="btn btn-primary">Let's Discuss</a>
+          <p>Interested in having me speak at your event or run a session for your team?</p>
+          <a href="https://www.linkedin.com/in/akhilesh-malani-67073bb" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Reach Out on LinkedIn</a>
         </div>
       </div>
     </section>
@@ -821,44 +938,44 @@
         <div class="faq-list">
 
           <details class="faq-item">
-            <summary>How long does an accessibility audit take?</summary>
+            <summary>How did you get into accessibility?</summary>
             <div class="faq-answer">
-              <p>A typical audit of a web application takes 2&ndash;4 weeks, depending on the number of pages, user flows, and platforms involved. I provide a timeline estimate during the discovery call.</p>
+              <p>I lost my sight at age 12. From that point, I experienced first-hand how much of the digital world is built without people like me in mind. That frustration became a career. I turned lived experience into professional expertise &mdash; and now I spend every day making sure others don't face the same barriers I did.</p>
             </div>
           </details>
 
           <details class="faq-item">
-            <summary>What deliverables do I receive?</summary>
+            <summary>What is AMA11Y?</summary>
             <div class="faq-answer">
-              <p>You receive a detailed audit report with every issue documented &mdash; including WCAG success criterion, severity rating, screen reader behaviour, and developer-ready fix guidance. I also provide an executive summary for leadership stakeholders.</p>
+              <p>AMA11Y is my personal open-source project &mdash; an accessibility testing and knowledge tool I'm building in my own time. It's driven by a simple belief: accessibility knowledge should be free and available to everyone, not locked behind expensive tooling or enterprise contracts. Follow my journey on LinkedIn or check back here for updates.</p>
             </div>
           </details>
 
           <details class="faq-item">
-            <summary>Do you work under NDA?</summary>
+            <summary>Which accessibility standards do you specialise in?</summary>
             <div class="faq-answer">
-              <p>Yes. I regularly work under NDA with enterprise clients in banking, technology, and financial services. All engagement details remain confidential.</p>
+              <p>My expertise spans WCAG 2.0, 2.1, and 2.2 (Levels A, AA, and AAA), Section 508, ADA, EN 301 549, and India-specific regulations including the RPwD Act 2016, GIGW 3.0, and the SEBI accessibility mandate. I also work with WAI-ARIA, PDF/UA, and mobile accessibility guidelines.</p>
             </div>
           </details>
 
           <details class="faq-item">
-            <summary>What's your engagement model?</summary>
+            <summary>What assistive technology do you use daily?</summary>
             <div class="faq-answer">
-              <p>I offer project-based engagements (SOW), retainer agreements, and advisory arrangements. The model depends on your needs &mdash; we discuss this during discovery and I recommend what fits best.</p>
+              <p>I use NVDA and JAWS as my primary screen readers, a Braille display for reading and editing, and keyboard-only navigation for everything. I also regularly test with VoiceOver on iOS and macOS, TalkBack on Android, and Dragon NaturallySpeaking for voice input. This isn't a testing setup &mdash; it's how I live.</p>
             </div>
           </details>
 
           <details class="faq-item">
-            <summary>Which standards do you audit against?</summary>
+            <summary>What does a typical accessibility audit involve?</summary>
             <div class="faq-answer">
-              <p>I audit against WCAG 2.0, 2.1, and 2.2 (Level A, AA, and AAA as needed), Section 508, ADA, EN 301 549, and India-specific regulations including RPwD Act 2016, GIGW 3.0, and the SEBI accessibility mandate.</p>
+              <p>A thorough audit involves manual testing with real assistive technology, automated scanning (as a starting point, not an endpoint), keyboard-only navigation testing, colour contrast checks, cognitive load assessment, and evaluation against the relevant WCAG success criteria. The output is a prioritised report with severity ratings and developer-ready fix guidance.</p>
             </div>
           </details>
 
           <details class="faq-item">
-            <summary>Can you train our team after the audit?</summary>
+            <summary>How can I connect or collaborate with you?</summary>
             <div class="faq-answer">
-              <p>Absolutely. I offer hands-on training for developers, designers, QA engineers, and product managers. Training can be tailored to your tech stack and the specific issues found during the audit.</p>
+              <p>LinkedIn is the best way to reach me &mdash; <a href="https://www.linkedin.com/in/akhilesh-malani-67073bb" target="_blank" rel="noopener noreferrer">connect with me there</a>. I'm always happy to talk accessibility, share knowledge, or discuss speaking opportunities. For everything else, use the contact form on this page.</p>
             </div>
           </details>
 
@@ -869,8 +986,8 @@
     <!-- Contact Section -->
     <section id="contact" class="section section-alt fade-in">
       <div class="container">
-        <h2 id="contact-heading">Get in Touch</h2>
-        <p class="section-intro">Interested in working together or want to learn more? Let's connect.</p>
+        <h2 id="contact-heading">Let's Connect</h2>
+        <p class="section-intro">Want to discuss accessibility, share ideas, or just say hello? I'd love to hear from you.</p>
         <div class="contact-grid">
           <div class="contact-info">
             <address>
