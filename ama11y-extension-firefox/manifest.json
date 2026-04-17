@@ -53,6 +53,14 @@
     "scripts": ["background.js"]
   },
 
+  "content_scripts": [
+    {
+      "matches": ["https://ama11y.akhileshmalani.com/*"],
+      "js": ["content-script-platform.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
   "browser_specific_settings": {
     "gecko": {
       "id": "ama11y@akhileshmalani.com",

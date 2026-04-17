@@ -3157,6 +3157,62 @@ function waRenderTable(findings) {
 
 
 /* ══════════════════════════════════════════════════════════════
+   EXTENSION → PLATFORM BRIDGE
+   Receives findings sent by the AMA11Y browser extension after
+   it audits any page (bypasses CSP via content script isolation).
+   Results appear in the Web Audit tab automatically, with the AI
+   toolbar injected and ready — no manual import needed.
+══════════════════════════════════════════════════════════════ */
+window.addEventListener('message', function (e) {
+  if (!e.data || e.data.type !== 'ama11y_extension_results') return;
+
+  const findings  = e.data.findings  || [];
+  const pageTitle = e.data.pageTitle || 'Extension Audit';
+  const pageUrl   = e.data.pageUrl   || '';
+
+  if (!findings.length) {
+    announce('Extension audit received but contained no findings for ' + pageTitle + '.');
+    return;
+  }
+
+  // ── Populate web audit globals ──
+  waCurrentFindings = findings;
+  waAuditedTitle    = pageTitle;
+  waAuditedURL      = pageUrl;
+
+  // ── Show audited URL in the URL field ──
+  const urlField = $('wa-url');
+  if (urlField) urlField.value = pageUrl;
+
+  // ── Switch to the Web Audit tab ──
+  const waTabBtn = $('tab-webaudit');
+  if (waTabBtn) waTabBtn.click();
+
+  // ── Render findings (also wires AI toolbar via the hook inside waRenderResults) ──
+  waRenderResults(findings);
+
+  // ── Override status line so it's clear results came from the extension ──
+  const fails = findings.filter(f => f.verdict === 'Fail').length;
+  const warns = findings.filter(f => f.verdict === 'Warning').length;
+  const crits = findings.filter(f => f.severity === 'Critical' && f.verdict === 'Fail').length;
+  const statusEl = $('wa-status');
+  if (statusEl) {
+    statusEl.textContent =
+      'AMA11Y Extension audit of \u201c' + pageTitle + '\u201d \u2014 ' +
+      fails + ' failures, ' + warns + ' warnings, ' + crits + ' critical. ' +
+      'AI toolbar is ready below the findings table.';
+  }
+
+  announce(
+    'Extension audit results loaded. ' + pageTitle + '. ' +
+    fails + ' failures. ' + warns + ' warnings. ' + crits + ' critical. ' +
+    findings.length + ' total findings. ' +
+    'AI toolbar is ready below the findings table. ' +
+    'Navigate to the Web Audit tab to review.'
+  );
+});
+
+/* ══════════════════════════════════════════════════════════════
    PHASE 4 JAVASCRIPT
    4.2 DOCX Document Audit
    4.3 Champions Tracker

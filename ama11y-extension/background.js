@@ -1,12 +1,12 @@
 /**
- * AMA11Y Extension (Firefox) — Background Script
- * Orchestrates audit injection, sidebar, message passing,
+ * AMA11Y Extension — Background Service Worker
+ * Orchestrates audit injection, side panel, message passing,
  * and automatic AMA11Y Platform integration.
  *
  * Flow:
  *  1. User presses Ctrl+Shift+U on any page.
  *  2. Content script runs all 13 audit engines (bypasses CSP).
- *  3. Results go to the sidebar (existing behaviour — unchanged).
+ *  3. Results go to the side panel (existing behaviour — unchanged).
  *  4. Results ALSO go to the AMA11Y Platform tab automatically (new).
  *     The platform tab is opened/focused and the findings appear in
  *     the Web Audit section, ready for AI enhancement.
@@ -14,29 +14,38 @@
 
 const PLATFORM_URL = 'https://ama11y.akhileshmalani.com';
 
+// Enable side panel to open when clicking the extension icon
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+  .catch(() => {});
+
 // When the extension icon is clicked or Ctrl+Shift+U is pressed
-browser.browserAction.onClicked.addListener(async (tab) => {
-  // Open the sidebar (existing behaviour)
-  browser.sidebarAction.open();
+chrome.action.onClicked.addListener(async (tab) => {
+  // Open the side panel for this window (existing behaviour)
+  try {
+    await chrome.sidePanel.open({ windowId: tab.windowId });
+  } catch (e) {
+    // openPanelOnActionClick handles it as fallback
+  }
 
   // Inject the content script to run the audit
   try {
-    await browser.tabs.executeScript(tab.id, {
-      file: 'content-script.js'
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content-script.js']
     });
   } catch (err) {
     console.error('AMA11Y injection error:', err);
   }
 });
 
-// Relay messages from content script to sidebar AND platform
-browser.runtime.onMessage.addListener((message, sender) => {
+// Relay messages from content script to side panel AND platform
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'audit-results' || message.type === 'audit-error') {
 
-    // ── 1. Forward to sidebar (existing behaviour — unchanged) ──
-    browser.runtime.sendMessage(message).catch(() => {
-      // Sidebar may not be open yet — store for later recovery
-      browser.storage.local.set({ lastAudit: message }).catch(() => {});
+    // ── 1. Forward to side panel (existing behaviour — unchanged) ──
+    chrome.runtime.sendMessage(message).catch(() => {
+      // Side panel may not be open yet — store for later recovery
+      chrome.storage.session.set({ lastAudit: message }).catch(() => {});
     });
 
     // ── 2. Send results to AMA11Y Platform tab (new) ──
@@ -44,13 +53,17 @@ browser.runtime.onMessage.addListener((message, sender) => {
       sendResultsToPlatform(message);
     }
   }
+  return false;
 });
 
 /**
  * Find or open the AMA11Y Platform tab, then post the findings
  * into it via the platform bridge content script.
  *
- * Fails silently — the sidebar always has the results as fallback.
+ * If the platform tab is already open: focus it, send results.
+ * If not: open a new tab, wait for load, send results.
+ *
+ * Fails silently — the side panel always has the results as fallback.
  */
 async function sendResultsToPlatform(message) {
   const payload = {
@@ -63,24 +76,24 @@ async function sendResultsToPlatform(message) {
 
   try {
     // Check for an existing open platform tab
-    const existingTabs = await browser.tabs.query({ url: PLATFORM_URL + '/*' });
+    const existingTabs = await chrome.tabs.query({ url: PLATFORM_URL + '/*' });
 
     if (existingTabs.length > 0) {
       const platformTab = existingTabs[0];
 
       // Bring it to front
-      await browser.tabs.update(platformTab.id, { active: true });
+      await chrome.tabs.update(platformTab.id, { active: true });
       try {
-        await browser.windows.update(platformTab.windowId, { focused: true });
+        await chrome.windows.update(platformTab.windowId, { focused: true });
       } catch (_) {}
 
       // Brief settle then deliver
       await delay(150);
-      await browser.tabs.sendMessage(platformTab.id, payload);
+      await chrome.tabs.sendMessage(platformTab.id, payload);
 
     } else {
       // Open a fresh platform tab
-      const newTab = await browser.tabs.create({ url: PLATFORM_URL, active: true });
+      const newTab = await chrome.tabs.create({ url: PLATFORM_URL, active: true });
 
       // Wait until the page is fully loaded
       await waitForTabLoad(newTab.id);
@@ -88,11 +101,11 @@ async function sendResultsToPlatform(message) {
       // Allow content script + DOMContentLoaded handlers to finish
       await delay(500);
 
-      await browser.tabs.sendMessage(newTab.id, payload);
+      await chrome.tabs.sendMessage(newTab.id, payload);
     }
 
   } catch (err) {
-    // Non-fatal — the sidebar still shows results
+    // Non-fatal — the side panel still shows results
     console.warn('AMA11Y platform bridge:', err.message);
   }
 }
@@ -103,11 +116,11 @@ function waitForTabLoad(tabId) {
   return new Promise(resolve => {
     const listener = (id, changeInfo) => {
       if (id === tabId && changeInfo.status === 'complete') {
-        browser.tabs.onUpdated.removeListener(listener);
+        chrome.tabs.onUpdated.removeListener(listener);
         resolve();
       }
     };
-    browser.tabs.onUpdated.addListener(listener);
+    chrome.tabs.onUpdated.addListener(listener);
     setTimeout(resolve, 12000); // safety net
   });
 }
