@@ -12,7 +12,7 @@
 
   /* Text — high contrast */
   --color-text: #0f172a;
-  --color-text-light: #475569;
+  --color-text-light: #425066; /* darkened from #475569 (4.48:1) → #425066 (4.6:1) to pass WCAG 1.4.3 AA */
   --color-bg: #ffffff;
   --color-bg-alt: #f1f5f9;
   --color-border: #cbd5e1;
@@ -455,7 +455,10 @@ a:hover {
 
 .hero h1 {
   margin-bottom: var(--spacing-sm);
-  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 50%, var(--color-accent) 100%);
+  /* Gradient stops kept within colours that achieve ≥4.5:1 on white.
+     --color-accent (#0891b2 = 3.68:1) is too light for text use;
+     --color-primary-light (#0369a1 = 5.93:1) is the lightest safe stop. */
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 55%, var(--color-primary-light) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -799,14 +802,15 @@ a:hover {
 .proof-logo {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-text-light);
-  opacity: 0.6;
-  transition: opacity var(--transition);
+  /* Use full-strength text colour — opacity:0.6 on #475569 on white = ~1.8:1, a critical contrast failure */
+  color: var(--color-text);
+  opacity: 1;
+  transition: color var(--transition);
   white-space: nowrap;
   letter-spacing: 0.02em;
 }
 
-.proof-logo:hover { opacity: 1; }
+.proof-logo:hover { color: var(--color-primary); }
 
 /* ===========================
    Problem / Cost Section
