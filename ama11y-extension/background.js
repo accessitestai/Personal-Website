@@ -14,17 +14,19 @@
 
 const PLATFORM_URL = 'https://ama11y.akhileshmalani.com';
 
-// Enable side panel to open when clicking the extension icon
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
-  .catch(() => {});
+// NOTE: Do NOT call setPanelBehavior({ openPanelOnActionClick: true }) here.
+// When that flag is true, Chrome intercepts the action click/keyboard shortcut
+// to open the side panel but DOES NOT fire chrome.action.onClicked — meaning
+// the content script would never be injected and no audit would run.
+// Instead, onClicked opens the side panel manually below (best of both worlds).
 
 // When the extension icon is clicked or Ctrl+Shift+U is pressed
 chrome.action.onClicked.addListener(async (tab) => {
-  // Open the side panel for this window (existing behaviour)
+  // Open the side panel for this window
   try {
     await chrome.sidePanel.open({ windowId: tab.windowId });
   } catch (e) {
-    // openPanelOnActionClick handles it as fallback
+    // Ignore — panel may already be open
   }
 
   // Inject the content script to run the audit
