@@ -1121,12 +1121,19 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
     grid-template-columns: 56px 1fr;
   }
   .nav-brand-tagline,
-  .nav-label,
   .nav-pin-label { display: none; }
+  /* Visually hidden — stays in accessibility tree so AT announces tab names */
+  .nav-label {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+  }
   .nav-brand { padding: 16px 12px; }
   .nav-brand-name { font-size: 0.9rem; }
   .nav-tabs li { margin: 1px 4px; }
-  .nav-tab { padding: 10px; justify-content: center; }
+  .nav-tab { padding: 10px; justify-content: center; position: relative; }
   .tab-panel { padding: 20px 16px; }
   .ai-provider-grid { grid-template-columns: 1fr; }
 }
@@ -1260,7 +1267,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
     <ul class="nav-tabs" role="tablist" aria-label="Application sections" aria-orientation="vertical">
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-dashboard"
-          aria-controls="panel-dashboard" aria-selected="true" type="button">
+          aria-controls="panel-dashboard" aria-selected="true" tabindex="0" type="button">
           <!-- Home icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
@@ -1270,7 +1277,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-webaudit"
-          aria-controls="panel-webaudit" aria-selected="false" type="button">
+          aria-controls="panel-webaudit" aria-selected="false" tabindex="-1" type="button">
           <!-- Globe icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
@@ -1280,7 +1287,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-document"
-          aria-controls="panel-document" aria-selected="false" type="button">
+          aria-controls="panel-document" aria-selected="false" tabindex="-1" type="button">
           <!-- Document icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
@@ -1290,7 +1297,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-import"
-          aria-controls="panel-import" aria-selected="false" type="button">
+          aria-controls="panel-import" aria-selected="false" tabindex="-1" type="button">
           <!-- Upload/report icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"/>
@@ -1305,7 +1312,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-vpat"
-          aria-controls="panel-vpat" aria-selected="false" type="button">
+          aria-controls="panel-vpat" aria-selected="false" tabindex="-1" type="button">
           <!-- Clipboard/VPAT icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
@@ -1316,7 +1323,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-mobile"
-          aria-controls="panel-mobile" aria-selected="false" type="button">
+          aria-controls="panel-mobile" aria-selected="false" tabindex="-1" type="button">
           <!-- Mobile icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zm3 14a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
@@ -1326,7 +1333,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-champions"
-          aria-controls="panel-champions" aria-selected="false" type="button">
+          aria-controls="panel-champions" aria-selected="false" tabindex="-1" type="button">
           <!-- Star/champions icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -1336,7 +1343,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-copilot"
-          aria-controls="panel-copilot" aria-selected="false" type="button">
+          aria-controls="panel-copilot" aria-selected="false" tabindex="-1" type="button">
           <!-- Lightning/live icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
@@ -1351,7 +1358,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-settings"
-          aria-controls="panel-settings" aria-selected="false" type="button">
+          aria-controls="panel-settings" aria-selected="false" tabindex="-1" type="button">
           <!-- Settings icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
@@ -1362,7 +1369,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       <!-- AI Settings tab: always in DOM for JS, visible via Settings panel link -->
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-ai-settings"
-          aria-controls="panel-ai-settings" aria-selected="false" type="button">
+          aria-controls="panel-ai-settings" aria-selected="false" tabindex="-1" type="button">
           <!-- Sparkle/AI icon -->
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
@@ -1569,9 +1576,9 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 
       <div class="method-tabs" role="tablist" aria-label="Document type">
         <button class="method-tab" role="tab" id="dtab-pdf" aria-selected="true"
-          aria-controls="dpanel-pdf" type="button">PDF Document</button>
+          aria-controls="dpanel-pdf" tabindex="0" type="button">PDF Document</button>
         <button class="method-tab" role="tab" id="dtab-docx" aria-selected="false"
-          aria-controls="dpanel-docx" type="button">Word Document (DOCX)</button>
+          aria-controls="dpanel-docx" tabindex="-1" type="button">Word Document (DOCX)</button>
       </div>
 
       <div id="dpanel-pdf" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:24px;margin-bottom:16px;background:var(--card);box-shadow:var(--shadow);">
@@ -2290,17 +2297,40 @@ function showView(id) {
 /* ── Tab switching ── */
 const TABS = ['dashboard','import','webaudit','document','champions','vpat','mobile','settings','ai-settings','copilot'];
 
+/* Tab labels for announce() — matches the visible .nav-label text */
+const TAB_LABELS = {
+  'dashboard':   'Dashboard',
+  'webaudit':    'Web Audit',
+  'document':    'Documents',
+  'import':      'Reports',
+  'vpat':        'VPAT / ACR',
+  'mobile':      'Mobile',
+  'champions':   'Champions',
+  'copilot':     'Live Audit',
+  'settings':    'Settings',
+  'ai-settings': 'AI Settings'
+};
+
+/**
+ * switchTab(name)
+ * Activates a tab panel and manages roving tabindex.
+ * Focus stays on the tab button — screen reader announces the tab name naturally.
+ * Pressing Tab from the selected tab moves into panel content (WAI-ARIA pattern).
+ */
 function switchTab(name) {
   TABS.forEach(t => {
-    const tabEl  = $('tab-'+t);
+    const tabEl   = $('tab-'+t);
     const panelEl = $('panel-'+t);
-    const isActive = t === name;
-    if (tabEl)  { tabEl.setAttribute('aria-selected', String(isActive)); }
-    if (panelEl){ panelEl.classList.toggle('active', isActive); }
+    const isActive = (t === name);
+    if (tabEl) {
+      tabEl.setAttribute('aria-selected', String(isActive));
+      tabEl.setAttribute('tabindex', isActive ? '0' : '-1');
+    }
+    if (panelEl) { panelEl.classList.toggle('active', isActive); }
   });
-  const panel = $('panel-'+name);
-  if (panel) { panel.setAttribute('tabindex','-1'); setTimeout(()=>panel.focus(),100); }
-  announce('Navigated to ' + name.charAt(0).toUpperCase() + name.slice(1) + ' section.');
+  /* Announce tab name so screen readers confirm the switch */
+  const label = TAB_LABELS[name] || name;
+  announce(label + ' tab selected. Press Tab to move into the panel.');
 }
 
 /* ══════════════════════════════════════════════
@@ -2414,8 +2444,10 @@ function enterApp() {
   mob_renderChecklist();
   renderChampions();
   setTimeout(() => {
+    /* Ensure roving tabindex is correct on app entry */
+    switchTab('dashboard');
     $('tab-dashboard').focus();
-    announce('AMA11Y platform loaded. Dashboard tab focused. Use arrow keys to navigate between tabs.');
+    announce('AMA11Y platform loaded. Dashboard tab is selected. Use Up and Down arrow keys to move between tabs. Press Tab to enter the panel.');
   }, 200);
 }
 
@@ -2426,17 +2458,34 @@ $('sign-out-btn').addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════════════
-   TAB NAVIGATION
+   SIDEBAR TAB NAVIGATION  (vertical tablist)
+   WAI-ARIA Tabs Pattern:
+   • Only the selected tab is in the tab order (tabindex="0")
+   • All others have tabindex="-1"
+   • ArrowDown / ArrowUp move focus between tabs and activate them
+   • Home / End jump to first / last tab
+   • Tab from selected tab moves focus into the panel content
+   • Shift+Tab from panel returns focus to the selected tab
 ══════════════════════════════════════════════ */
-document.querySelectorAll('.nav-tab').forEach((tab, idx, all) => {
-  tab.addEventListener('click', () => switchTab(tab.id.replace('tab-','')));
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    switchTab(tab.id.replace('tab-',''));
+    /* Focus stays on the clicked tab — switchTab does not move it */
+  });
+
   tab.addEventListener('keydown', e => {
+    const all = Array.from(document.querySelectorAll('.nav-tab'));
+    const cur = all.indexOf(tab);
     let next = null;
-    if (e.key === 'ArrowDown')  next = all[(idx+1) % all.length];   /* vertical tablist */
-    if (e.key === 'ArrowUp')    next = all[(idx-1+all.length) % all.length];
-    if (e.key === 'Home')       next = all[0];
-    if (e.key === 'End')        next = all[all.length-1];
-    if (next) { e.preventDefault(); next.click(); next.focus(); }
+    if (e.key === 'ArrowDown') next = all[(cur + 1) % all.length];
+    if (e.key === 'ArrowUp')   next = all[(cur - 1 + all.length) % all.length];
+    if (e.key === 'Home')      next = all[0];
+    if (e.key === 'End')       next = all[all.length - 1];
+    if (next) {
+      e.preventDefault();
+      switchTab(next.id.replace('tab-',''));  /* activate + update tabindex */
+      next.focus();                           /* keep focus on the tab button */
+    }
   });
 });
 
@@ -3461,25 +3510,42 @@ window.addEventListener('message', function (e) {
    4.6 NVDA Keyboard Guidance (integrated into panel descriptions)
 ══════════════════════════════════════════════════════════════ */
 
-/* ── Document type tab switching ── */
+/* ── Document type tab switching (horizontal tablist) ──
+   WAI-ARIA Tabs Pattern:
+   • ArrowRight / ArrowLeft navigate between tabs
+   • Roving tabindex: selected = tabindex="0", others = tabindex="-1"
+────────────────────────────────────────────── */
 const dtabs   = document.querySelectorAll('[id^="dtab-"]');
 const dpanels = document.querySelectorAll('[id^="dpanel-"]');
-dtabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    dtabs.forEach(t => t.setAttribute('aria-selected','false'));
-    dpanels.forEach(p => { p.hidden = true; });
-    tab.setAttribute('aria-selected','true');
-    const panel = document.getElementById(tab.getAttribute('aria-controls'));
-    if (panel) panel.hidden = false;
-    announce('Switched to ' + tab.textContent.trim() + ' audit.');
+
+function switchDTab(activeTab) {
+  dtabs.forEach(t => {
+    const isActive = (t === activeTab);
+    t.setAttribute('aria-selected', String(isActive));
+    t.setAttribute('tabindex', isActive ? '0' : '-1');
   });
+  dpanels.forEach(p => { p.hidden = true; });
+  const panel = document.getElementById(activeTab.getAttribute('aria-controls'));
+  if (panel) panel.hidden = false;
+  announce(activeTab.textContent.trim() + ' tab selected.');
+}
+
+dtabs.forEach(tab => {
+  tab.addEventListener('click', () => switchDTab(tab));
+
   tab.addEventListener('keydown', e => {
     const all = Array.from(dtabs);
-    const idx = all.indexOf(tab);
+    const cur = all.indexOf(tab);
     let next = null;
-    if (e.key === 'ArrowRight') next = all[(idx+1) % all.length];
-    if (e.key === 'ArrowLeft')  next = all[(idx-1+all.length) % all.length];
-    if (next) { e.preventDefault(); next.click(); next.focus(); }
+    if (e.key === 'ArrowRight') next = all[(cur + 1) % all.length];
+    if (e.key === 'ArrowLeft')  next = all[(cur - 1 + all.length) % all.length];
+    if (e.key === 'Home')       next = all[0];
+    if (e.key === 'End')        next = all[all.length - 1];
+    if (next) {
+      e.preventDefault();
+      switchDTab(next);   /* activate + update tabindex */
+      next.focus();        /* keep focus on the tab button */
+    }
   });
 });
 
