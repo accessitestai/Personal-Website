@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AMA11Y — Accessibility Audit Tool",
   "version": "3.0.0",
-  "description": "Blind-first accessibility audit tool. WCAG 2.2 audit engines + Visual-to-Audio AI modules: Focus Indicator Narrator, Visual Layout Auditor, State Change Watchdog.",
+  "description": "Blind-first WCAG 2.2 audit tool with Vision AI modules: Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog.",
   "author": "Akhilesh Malani",
   "homepage_url": "https://ama11y.akhileshmalani.com",
 
