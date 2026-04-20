@@ -695,6 +695,32 @@ main {
 }
 
 /* ================================================================
+   MODULE 3: STATE CHANGE WATCHDOG
+================================================================ */
+
+/* Live status line shown below the action bar */
+.scw-status {
+  font-size: 0.78rem;
+  color: var(--ama-muted);
+  min-height: 1.4em;
+  margin: 4px 0 8px;
+  font-style: italic;
+}
+
+/* Active / monitoring state */
+.scw-status.active {
+  color: var(--ama-accent);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* ── Verdict classes used in state-watchdog table ── */
+/* 'verdict-info' is also used by WCAG panel — ensure it exists */
+.verdict-info    { color: var(--ama-info); }
+/* Alias used in scwAppendRow for Warning rows */
+.verdict-warning { color: var(--ama-warn); font-weight: 600; }
+
+/* ================================================================
    REDUCED MOTION
 ================================================================ */
 

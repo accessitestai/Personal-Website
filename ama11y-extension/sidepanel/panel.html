@@ -248,6 +248,69 @@
       </div>
     </section>
 
+    <hr class="module-divider" aria-hidden="true">
+
+    <!-- ── 2c: State Change Watchdog ── -->
+    <section aria-labelledby="scw-heading">
+      <h2 id="scw-heading">State Change Watchdog</h2>
+      <p class="section-desc">
+        Monitors the active page in real time using a MutationObserver. Detects dynamic
+        content additions, ARIA state changes, dialog appearances, and hidden-attribute
+        toggles — then checks whether each change is correctly surfaced to assistive
+        technology via live regions or focus management. Covers WCAG SC 4.1.3 (Status
+        Messages) and SC 2.4.3 (Focus Order).
+      </p>
+
+      <div class="action-bar">
+        <button id="scw-start-btn" type="button" class="btn btn-primary">
+          Start Monitoring
+        </button>
+        <button id="scw-stop-btn" type="button" class="btn" disabled>
+          Stop
+        </button>
+        <button id="scw-clear-btn" type="button" class="btn btn-small" disabled>
+          Clear
+        </button>
+        <button id="scw-export-btn" type="button" class="btn" disabled>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- Live status line -->
+      <p id="scw-status" class="scw-status" aria-live="polite"></p>
+
+      <!-- Results -->
+      <div id="scw-results-wrap" hidden>
+        <h3 id="scw-results-heading" class="results-subheading">
+          State Change Events —
+          <span id="scw-event-count">0</span> detected
+        </h3>
+        <div id="scw-summary-strip" class="fn-summary-strip" role="region"
+             aria-label="State change event summary">
+          <span id="scw-count-fail"  class="fn-badge fn-fail">0 Fail</span>
+          <span id="scw-count-warn"  class="fn-badge fn-warn">0 Warning</span>
+          <span id="scw-count-info"  class="fn-badge fn-total">0 Info</span>
+        </div>
+        <div role="region" aria-labelledby="scw-results-heading" style="overflow-x:auto;">
+          <table class="findings-table" aria-label="State change events">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Time</th>
+                <th scope="col">Verdict</th>
+                <th scope="col">Type</th>
+                <th scope="col">Element</th>
+                <th scope="col">WCAG SC</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody id="scw-results-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </div><!-- /ppanel-visual -->
 
 

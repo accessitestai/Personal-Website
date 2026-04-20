@@ -4,8 +4,8 @@
  * Orchestrates:
  *   A. WCAG Audit  — injects content-script.js, relays findings to side panel + platform
  *   B. Focus Narrator (Module 2) — screenshots + Vision LLM per focused element
- *   C. Visual Layout Auditor (Module 1) — debugger-based multi-breakpoint screenshots [COMING]
- *   D. State Change Watchdog (Module 3) — pixel diff + live region correlation [COMING]
+ *   C. Visual Layout Auditor (Module 1) — debugger-based multi-breakpoint screenshots + Vision LLM
+ *   D. State Change Watchdog (Module 3) — MutationObserver + live region / focus management checks
  */
 
 'use strict';
@@ -68,6 +68,44 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   /* ── Side panel triggers a Visual Layout Audit run ── */
   if (message.type === 'visual-layout-run') {
     startVisualLayoutAudit();
+    return false;
+  }
+
+  /* ── State Change Watchdog ── */
+  if (message.type === 'state-watchdog-run') {
+    startStateWatchdog(sender);
+    return false;
+  }
+
+  if (message.type === 'state-watchdog-stop-request') {
+    stopStateWatchdog();
+    return false;
+  }
+
+  if (message.type === 'state-watchdog-started') {
+    chrome.runtime.sendMessage({
+      type:  'state-watchdog-ui',
+      phase: 'started',
+      url:   message.url,
+      title: message.title
+    }).catch(() => {});
+    return false;
+  }
+
+  if (message.type === 'state-watchdog-event') {
+    chrome.runtime.sendMessage({
+      type:  'state-watchdog-ui',
+      phase: 'event',
+      event: message.event
+    }).catch(() => {});
+    return false;
+  }
+
+  if (message.type === 'state-watchdog-stopped') {
+    chrome.runtime.sendMessage({
+      type:  'state-watchdog-ui',
+      phase: 'stopped'
+    }).catch(() => {});
     return false;
   }
 
@@ -432,9 +470,66 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
 }
 
 /* ════════════════════════════════════════════════════════
-   D. STATE CHANGE WATCHDOG — Module 3 (Coming next)
+   D. STATE CHANGE WATCHDOG — Module 3
 ════════════════════════════════════════════════════════ */
-/* Placeholder — will be implemented in Module 3 sprint */
+
+let watchdogTabId  = null;
+let watchdogActive = false;
+
+async function startStateWatchdog() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab) {
+    chrome.runtime.sendMessage({
+      type:    'state-watchdog-ui',
+      phase:   'error',
+      message: 'No active tab found.'
+    }).catch(() => {});
+    return;
+  }
+
+  watchdogTabId  = tab.id;
+  watchdogActive = true;
+
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files:  ['engines/state-watchdog-inject.js']
+    });
+  } catch (err) {
+    watchdogActive = false;
+    watchdogTabId  = null;
+    chrome.runtime.sendMessage({
+      type:    'state-watchdog-ui',
+      phase:   'error',
+      message: err.message
+    }).catch(() => {});
+  }
+}
+
+function stopStateWatchdog() {
+  if (watchdogTabId) {
+    chrome.tabs.sendMessage(watchdogTabId, { type: 'state-watchdog-stop' })
+      .catch(() => {
+        /* Tab may have closed — send stopped signal anyway */
+        chrome.runtime.sendMessage({ type: 'state-watchdog-ui', phase: 'stopped' }).catch(() => {});
+      });
+    watchdogTabId  = null;
+    watchdogActive = false;
+  }
+}
+
+/* Clean up watchdog state when a monitored tab navigates away */
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (tabId === watchdogTabId && changeInfo.status === 'loading') {
+    watchdogActive = false;
+    watchdogTabId  = null;
+    chrome.runtime.sendMessage({
+      type:    'state-watchdog-ui',
+      phase:   'stopped',
+      reason:  'Page navigated away — watchdog detached.'
+    }).catch(() => {});
+  }
+});
 
 /* ════════════════════════════════════════════════════════
    WCAG PLATFORM BRIDGE (unchanged)

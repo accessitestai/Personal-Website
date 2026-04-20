@@ -147,6 +147,10 @@
     /* Visual Layout */
     } else if (message.type === 'visual-layout-ui') {
       handleVisualLayoutUI(message);
+
+    /* State Change Watchdog */
+    } else if (message.type === 'state-watchdog-ui') {
+      handleStateWatchdogUI(message);
     }
   });
 
@@ -647,5 +651,146 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     downloadFile(lines.join('\n'), 'ama11y-visual-layout.txt', 'text/plain');
     announce('Visual Layout report exported.');
   });
+
+  /* ================================================================
+     MODULE 3: STATE CHANGE WATCHDOG
+  ================================================================ */
+
+  let scwEvents  = [];
+  let scwRunning = false;
+
+  /* ── Start ── */
+  $('scw-start-btn').addEventListener('click', () => {
+    if (scwRunning) return;
+    scwStartUI();
+    chrome.runtime.sendMessage({ type: 'state-watchdog-run' });
+  });
+
+  /* ── Stop ── */
+  $('scw-stop-btn').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'state-watchdog-stop-request' });
+    /* UI update happens when 'stopped' phase arrives */
+  });
+
+  /* ── Clear ── */
+  $('scw-clear-btn').addEventListener('click', () => {
+    scwEvents = [];
+    $('scw-results-body').innerHTML = '';
+    $('scw-event-count').textContent = '0';
+    scwUpdateSummary();
+    $('scw-results-wrap').hidden = true;
+    $('scw-export-btn').disabled = true;
+    $('scw-clear-btn').disabled  = true;
+    $('scw-status').textContent = 'Events cleared.';
+    announce('State Change Watchdog events cleared.');
+    setTimeout(() => { $('scw-status').textContent = scwRunning ? 'Monitoring…' : ''; }, 2000);
+  });
+
+  /* ── Export CSV ── */
+  $('scw-export-btn').addEventListener('click', () => {
+    const headers = ['#', 'Time', 'Verdict', 'Type', 'Element', 'WCAG SC', 'Description'];
+    const rows = scwEvents.map(ev => [
+      ev.id, ev.time, ev.verdict, ev.eventType,
+      ev.selector, ev.wcag, ev.description
+    ].map(csvEscape));
+    downloadFile(
+      [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n'),
+      'ama11y-state-watchdog.csv', 'text/csv'
+    );
+    announce('State Change Watchdog CSV exported.');
+  });
+
+  /* ── UI helpers ── */
+
+  function scwStartUI() {
+    scwEvents  = [];
+    scwRunning = true;
+    $('scw-start-btn').disabled = true;
+    $('scw-stop-btn').disabled  = false;
+    $('scw-clear-btn').disabled = false;
+    $('scw-results-body').innerHTML = '';
+    $('scw-event-count').textContent = '0';
+    scwUpdateSummary();
+    $('scw-results-wrap').hidden = true;
+    $('scw-export-btn').disabled = true;
+    $('scw-status').textContent  = 'Injecting watchdog…';
+    announce('State Change Watchdog started. Monitoring the active page for state changes.');
+  }
+
+  function scwStopUI(reason) {
+    scwRunning = false;
+    $('scw-start-btn').disabled = false;
+    $('scw-stop-btn').disabled  = true;
+    $('scw-status').textContent =
+      reason || `Monitoring stopped. ${scwEvents.length} events captured.`;
+    $('scw-export-btn').disabled = scwEvents.length === 0;
+    announce(`State Change Watchdog stopped. ${scwEvents.length} events recorded.`);
+  }
+
+  /* ── Message handler ── */
+
+  function handleStateWatchdogUI(msg) {
+    if (msg.phase === 'started') {
+      $('scw-status').textContent =
+        `Monitoring ${msg.title || msg.url || 'page'}…`;
+      announce(`State Change Watchdog active on ${msg.title || 'the page'}.`);
+
+    } else if (msg.phase === 'event') {
+      const ev = msg.event;
+      scwEvents.push(ev);
+      scwAppendRow(ev);
+      $('scw-event-count').textContent = scwEvents.length;
+      scwUpdateSummary();
+      $('scw-results-wrap').hidden = false;
+      $('scw-export-btn').disabled = false;
+
+    } else if (msg.phase === 'stopped') {
+      scwStopUI(msg.reason || null);
+
+    } else if (msg.phase === 'error') {
+      scwRunning = false;
+      $('scw-start-btn').disabled = false;
+      $('scw-stop-btn').disabled  = true;
+      $('scw-status').textContent = 'Error: ' + msg.message;
+      announce('State Change Watchdog error: ' + msg.message);
+    }
+  }
+
+  /* ── Append a row to the results table ── */
+
+  function scwAppendRow(ev) {
+    const tbody = $('scw-results-body');
+    const tr    = document.createElement('tr');
+
+    const verdictClass =
+      ev.verdict === 'Fail'    ? 'verdict-fail'    :
+      ev.verdict === 'Warning' ? 'verdict-warning'  :
+                                  'verdict-info';
+
+    tr.innerHTML = `
+      <td>${ev.id}</td>
+      <td>${escHtml(ev.time)}</td>
+      <td class="${verdictClass}">${escHtml(ev.verdict)}</td>
+      <td>${escHtml(ev.eventType)}</td>
+      <td><code>${escHtml(ev.selector)}</code></td>
+      <td>${escHtml(ev.wcag)}</td>
+      <td>${escHtml(ev.description)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  /* ── Update summary badge counts ── */
+
+  function scwUpdateSummary() {
+    const fail = scwEvents.filter(e => e.verdict === 'Fail').length;
+    const warn = scwEvents.filter(e => e.verdict === 'Warning').length;
+    const info = scwEvents.filter(e => e.verdict === 'Info').length;
+    $('scw-count-fail').textContent = `${fail} Fail`;
+    $('scw-count-warn').textContent = `${warn} Warning`;
+    $('scw-count-info').textContent = `${info} Info`;
+  }
+
+  /* ── Route state-watchdog-ui messages ── */
+  /* (Wired into the global message listener above) */
 
 })();
