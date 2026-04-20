@@ -16,8 +16,9 @@
 ════════════════════════════════════════════════════════ */
 :root {
   /* Brand */
-  --primary:        #0369A1;   /* 5.93:1 on white ✓ */
-  --primary-dark:   #025482;
+  --primary:        #0369A1;   /* 5.93:1 — use for backgrounds/borders/UI only */
+  --primary-text:   #025482;   /* 8.11:1 on white ✓ AAA — use for text */
+  --primary-dark:   #013D6B;   /* 11.16:1 — hover/pressed states */
   --primary-light:  #E0F2FE;
   --primary-mid:    #0284C7;
 
@@ -40,32 +41,32 @@
   /* Text */
   --text:           #0F2233;   /* ~15:1 on white */
   --text-2:         #3B5268;   /* 7.8:1 on white */
-  --text-3:         #60798A;   /* 4.7:1 — large/UI text only */
+  --text-3:         #425C6E;   /* 7.03:1 on white ✓ AAA */
 
   /* Borders */
   --border:         #D3DFE9;
   --border-strong:  #A8BCC9;
 
   /* Severity */
-  --critical:       #B91C1C;   /* 6.3:1 on white ✓ */
+  --critical:       #991B1B;   /* 8.33:1 on white ✓ AAA */
   --critical-bg:    #FFF0F0;
   --critical-border:#FCA5A5;
-  --serious:        #B45309;   /* 4.84:1 on white ✓ */
+  --serious:        #92400E;   /* 7.08:1 on white ✓ AAA */
   --serious-bg:     #FFFBEB;
   --serious-border: #FCD34D;
-  --moderate:       #1D4ED8;   /* 6.5:1 on white ✓ */
+  --moderate:       #1E40AF;   /* 8.71:1 on white ✓ AAA */
   --moderate-bg:    #EFF6FF;
   --moderate-border:#93C5FD;
-  --minor:          #047857;   /* 5.6:1 on white ✓ */
+  --minor:          #065F46;   /* 7.66:1 on white ✓ AAA */
   --minor-bg:       #F0FDF9;
   --minor-border:   #6EE7B7;
-  --pass:           #047857;
+  --pass:           #065F46;   /* 7.66:1 on white ✓ AAA */
   --pass-bg:        #F0FDF9;
-  --warn:           #B45309;
+  --warn:           #92400E;   /* 7.08:1 on white ✓ AAA */
   --warn-bg:        #FFFBEB;
 
   /* Interaction */
-  --focus-ring:     0 0 0 3px rgba(3,105,161,0.35);
+  --focus-ring:     0 0 0 3px #0369A1;   /* solid — SC 2.4.11/2.4.12 ✓ */
 
   /* Radius, shadow, spacing */
   --r:              8px;
@@ -145,7 +146,7 @@ body {
   font-family: var(--mono);
   font-size: 1.8rem;
   font-weight: 600;
-  color: var(--primary);
+  color: var(--primary-text);
   letter-spacing: 0.06em;
   margin-bottom: 4px;
 }
@@ -426,6 +427,7 @@ body {
   border: 1.5px solid var(--border);
   border-radius: var(--r-sm);
   padding: 9px 18px;
+  min-height: 44px;   /* SC 2.5.5 AAA target size */
   font-family: var(--sans);
   font-size: 14px;
   font-weight: 500;
@@ -455,11 +457,12 @@ body {
 
 .btn-sm {
   padding: 6px 14px;
+  min-height: 44px;   /* SC 2.5.5 AAA target size */
   font-size: 13px;
 }
 
 /* ── Tab panels ── */
-.tab-panel { display: none; padding: 36px 40px; max-width: 1060px; }
+.tab-panel { display: none; padding: 28px 24px; max-width: 1060px; } /* SC 1.4.10 reflow */
 .tab-panel.active { display: block; }
 
 /* ── Section + panel headings ── */
@@ -601,7 +604,7 @@ body {
 .session-url {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--primary);
+  color: var(--primary-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -701,7 +704,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   line-height: 1.6;
   box-shadow: var(--shadow);
 }
-#findings-loaded-info strong { color: var(--primary); }
+#findings-loaded-info strong { color: var(--primary-text); }
 
 /* ════════════════════════════════════════════════════════
    EXPORT FORMAT CARDS
@@ -728,7 +731,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   font-family: var(--mono);
   font-size: 15px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--primary-text);
   margin-bottom: 4px;
 }
 .export-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
@@ -782,7 +785,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 .v-fail { color: var(--critical); font-weight: 700; font-family: var(--mono); font-size: 12px; }
 .v-warn { color: var(--serious);  font-weight: 700; font-family: var(--mono); font-size: 12px; }
 .v-pass { color: var(--minor);    font-family: var(--mono); font-size: 12px; }
-.v-info { color: var(--primary);  font-family: var(--mono); font-size: 12px; }
+.v-info { color: var(--primary-text);  font-family: var(--mono); font-size: 12px; }
 
 .s-critical { color: var(--critical); font-weight: 700; font-family: var(--mono); font-size: 12px; }
 .s-serious  { color: var(--serious);  font-weight: 700; font-family: var(--mono); font-size: 12px; }
@@ -793,7 +796,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 .expand-btn {
   background: transparent;
   border: 1.5px solid var(--border);
-  color: var(--primary);
+  color: var(--primary-text);
   padding: 4px 10px;
   border-radius: var(--r-sm);
   font-size: 12px;
@@ -917,7 +920,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 #loading-overlay.active { display: flex; }
 .loading-text {
   font-family: var(--mono); font-size: 14px;
-  color: var(--primary); letter-spacing: 0.06em;
+  color: var(--primary-text); letter-spacing: 0.06em;
 }
 .loading-dots::after {
   content: ''; animation: dots 1.4s infinite;
@@ -947,7 +950,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 .method-tab:hover { color: var(--text); }
 .method-tab:focus { outline: none; box-shadow: var(--focus-ring); }
 .method-tab[aria-selected="true"] {
-  color: var(--primary); border-bottom-color: var(--primary); font-weight: 600;
+  color: var(--primary-text); border-bottom-color: var(--primary-text); font-weight: 600;
 }
 
 /* ════════════════════════════════════════════════════════
@@ -965,7 +968,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   padding: 20px;
   box-shadow: var(--shadow);
 }
-.ai-provider-card h3 { color: var(--primary); font-size: 1rem; margin-bottom: 4px; font-weight: 700; }
+.ai-provider-card h3 { color: var(--primary-text); font-size: 1rem; margin-bottom: 4px; font-weight: 700; }
 .ai-provider-card .provider-role { font-size: 12px; color: var(--text-2); margin-bottom: 16px; font-style: italic; }
 .ai-field-group { margin-bottom: 14px; }
 .ai-field-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
@@ -980,7 +983,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 .field-hint { font-size: 12px; color: var(--text-2); margin-top: 4px; }
 
 .test-conn-btn {
-  background: transparent; border: 1.5px solid var(--primary); color: var(--primary);
+  background: transparent; border: 1.5px solid var(--primary-text); color: var(--primary-text);
   font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 6px 14px;
   border-radius: var(--r-sm); cursor: pointer; margin-top: 8px;
   transition: background 0.12s;
@@ -1019,7 +1022,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   border-radius: var(--r);
   box-shadow: var(--shadow);
 }
-.ai-insights h4 { font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 700; }
+.ai-insights h4 { font-size: 12px; color: var(--primary-text); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 700; }
 .ai-insights h5 { font-size: 12px; color: var(--text-2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 
 .sr-description-block {
@@ -1031,7 +1034,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 .impact-block p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
 
 .code-fix-details { margin-top: 8px; }
-.code-fix-details summary { font-size: 13px; color: var(--primary); cursor: pointer; padding: 4px 0; font-weight: 500; }
+.code-fix-details summary { font-size: 13px; color: var(--primary-text); cursor: pointer; padding: 4px 0; font-weight: 500; }
 .code-fix-details summary:focus { outline: none; box-shadow: var(--focus-ring); }
 .code-block-label { font-size: 11px; color: var(--text-3); font-family: var(--mono); margin: 6px 0 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 .code-fix-details pre {
@@ -1046,7 +1049,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   border-radius: var(--r); padding: 24px; margin-top: 20px;
   box-shadow: var(--shadow);
 }
-.ai-report-section h3 { color: var(--primary); font-size: 1.05rem; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 700; }
+.ai-report-section h3 { color: var(--primary-text); font-size: 1.05rem; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 700; }
 .ai-report-content { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
 
 .criterion-research { margin-top: 8px; }
@@ -1058,7 +1061,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   border-radius: var(--r-sm); cursor: pointer; margin-bottom: 8px;
   transition: border-color 0.12s, color 0.12s;
 }
-.criterion-research-btn:hover { border-color: var(--primary); color: var(--primary); }
+.criterion-research-btn:hover { border-color: var(--primary-text); color: var(--primary-text); }
 .criterion-research-btn:focus { outline: none; box-shadow: var(--focus-ring); }
 .criterion-content { font-size: 12px; color: var(--text-2); line-height: 1.7; white-space: pre-wrap; padding: 10px; background: var(--bg-2); border-radius: var(--r-sm); }
 
@@ -1077,6 +1080,19 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 @keyframes copilot-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 .copilot-status-text { font-size: 13px; color: var(--text-2); }
 
+/* ── Reduced-motion: SC 2.3.3 AAA — remove all animations when user prefers ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .loading-dots::after { content: '...'; animation: none; }
+  .copilot-dot.active  { animation: none; }
+  .progress-bar, .ai-progress-fill { transition: none; }
+  .pin-dot { transition: none; }
+}
+
 .journey-log {
   list-style: none; max-height: 400px; overflow-y: auto;
   border: 1px solid var(--border); border-radius: var(--r);
@@ -1090,7 +1106,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   font-size: 13px;
 }
 .journey-log li:last-child { border-bottom: none; }
-.journey-element { font-family: var(--mono); color: var(--primary); font-size: 12px; font-weight: 500; }
+.journey-element { font-family: var(--mono); color: var(--primary-text); font-size: 12px; font-weight: 500; }
 .journey-annotation { color: var(--text-2); font-size: 13px; margin-top: 3px; line-height: 1.5; }
 .journey-empty { padding: 24px; text-align: center; color: var(--text-3); font-style: italic; }
 
@@ -1147,9 +1163,9 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 <!-- ═══════════════════════════════════════════
      VIEW 1: PIN SETUP (first run only)
 ═══════════════════════════════════════════ -->
-<div id="view-setup" class="view" role="main">
+<div id="view-setup" class="view" role="region" aria-label="Account setup">
   <div class="setup-card">
-    <span class="brand-mark" aria-label="AMA11Y">AMA11Y</span>
+    <span class="brand-mark">AMA11Y</span>
     <span class="brand-sub">Accessibility Management and Audit Layer</span>
     <h1 class="setup-title">Create Your PIN</h1>
     <p class="setup-desc">
@@ -1180,9 +1196,9 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 <!-- ═══════════════════════════════════════════
      VIEW 2: PIN LOGIN
 ═══════════════════════════════════════════ -->
-<div id="view-login" class="view" role="main">
+<div id="view-login" class="view" role="region" aria-label="Sign in">
   <div class="login-card">
-    <span class="brand-mark" aria-label="AMA11Y">AMA11Y</span>
+    <span class="brand-mark">AMA11Y</span>
     <p class="brand-sub">ama11y.akhileshmalani.com</p>
     <h1 class="login-title">Enter Your PIN</h1>
     <p class="login-sub">Enter your PIN to access the audit platform.</p>
@@ -1232,16 +1248,16 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 <!-- ═══════════════════════════════════════════
      VIEW 3: MAIN APPLICATION
 ═══════════════════════════════════════════ -->
-<div id="view-app" class="view" role="application" aria-label="AMA11Y audit platform">
+<div id="view-app" class="view">
 
   <!-- ── Sidebar Navigation ── -->
   <nav id="app-nav" aria-label="AMA11Y navigation">
     <div class="nav-brand">
-      <span class="nav-brand-name" aria-label="AMA11Y">AMA11Y</span>
+      <span class="nav-brand-name">AMA11Y</span>
       <span class="nav-brand-tagline">Accessibility Platform</span>
     </div>
 
-    <ul class="nav-tabs" role="tablist" aria-label="Application sections">
+    <ul class="nav-tabs" role="tablist" aria-label="Application sections" aria-orientation="vertical">
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-dashboard"
           aria-controls="panel-dashboard" aria-selected="true" type="button">
@@ -1480,7 +1496,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       </div>
 
       <div id="wa-progress-wrap" style="display:none;margin-bottom:16px;">
-        <div class="progress-wrap"><div class="progress-bar" id="wa-progress-bar"></div></div>
+        <div class="progress-wrap"><div class="progress-bar" id="wa-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Audit progress"></div></div>
         <p id="wa-progress-label" style="font-size:12px;color:var(--text-2);font-family:var(--mono);margin-top:4px;"></p>
       </div>
 
@@ -2416,8 +2432,8 @@ document.querySelectorAll('.nav-tab').forEach((tab, idx, all) => {
   tab.addEventListener('click', () => switchTab(tab.id.replace('tab-','')));
   tab.addEventListener('keydown', e => {
     let next = null;
-    if (e.key === 'ArrowRight') next = all[(idx+1) % all.length];
-    if (e.key === 'ArrowLeft')  next = all[(idx-1+all.length) % all.length];
+    if (e.key === 'ArrowDown')  next = all[(idx+1) % all.length];   /* vertical tablist */
+    if (e.key === 'ArrowUp')    next = all[(idx-1+all.length) % all.length];
     if (e.key === 'Home')       next = all[0];
     if (e.key === 'End')        next = all[all.length-1];
     if (next) { e.preventDefault(); next.click(); next.focus(); }
@@ -3144,6 +3160,7 @@ $('wa-run-btn').addEventListener('click', () => {
   $('wa-status').textContent = 'Opening page for audit. Please wait. Do not close the new tab that opens.';
   $('wa-progress-wrap').style.display = 'block';
   $('wa-progress-bar').style.width    = '10%';
+  $('wa-progress-bar').setAttribute('aria-valuenow','10');
   $('wa-progress-label').textContent  = 'Opening target page...';
   $('wa-results-section').style.display = 'none';
   $('wa-run-btn').disabled = true;
@@ -3160,7 +3177,9 @@ $('wa-run-btn').addEventListener('click', () => {
   // Poll until the page is ready, then inject
   const pollReady = setInterval(() => {
     attempts++;
-    $('wa-progress-bar').style.width = Math.min(10 + attempts * 2, 60) + '%';
+    const pct = Math.min(10 + attempts * 2, 60);
+    $('wa-progress-bar').style.width = pct + '%';
+    $('wa-progress-bar').setAttribute('aria-valuenow', String(pct));
 
     if (attempts > maxAttempts) {
       clearInterval(pollReady);
@@ -3191,6 +3210,7 @@ $('wa-run-btn').addEventListener('click', () => {
         injected = true;
         clearInterval(pollReady);
         $('wa-progress-bar').style.width   = '65%';
+        $('wa-progress-bar').setAttribute('aria-valuenow','65');
         $('wa-progress-label').textContent = 'Page loaded. Running audit engines...';
         announce('Page loaded. Audit running. Please wait for results.');
 
@@ -3236,6 +3256,7 @@ $('wa-run-btn').addEventListener('click', () => {
       waAuditedTitle    = event.data.title || targetURL.hostname;
 
       $('wa-progress-bar').style.width   = '100%';
+      $('wa-progress-bar').setAttribute('aria-valuenow','100');
       $('wa-progress-label').textContent = 'Audit complete. Rendering results...';
 
       setTimeout(() => {
