@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMA11Y Audit Panel</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Global live region for screen reader announcements -->
+<div id="live-region" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<!-- Header -->
+<header role="banner">
+  <div class="header-bar">
+    <h1>AMA11Y</h1>
+    <span class="version">v3.0</span>
+  </div>
+  <p id="page-info" class="page-info">Waiting for audit…</p>
+</header>
+
+<!-- Panel navigation tabs -->
+<nav aria-label="AMA11Y panel sections" class="panel-nav">
+  <ul role="tablist" aria-label="Panel tabs" aria-orientation="horizontal"
+      aria-describedby="panel-nav-hint">
+    <p id="panel-nav-hint" hidden>Use Left and Right arrow keys to switch panels.</p>
+    <li role="presentation">
+      <button class="panel-tab" role="tab" id="ptab-wcag"
+              aria-controls="ppanel-wcag" aria-selected="true" tabindex="0"
+              type="button">WCAG Audit</button>
+    </li>
+    <li role="presentation">
+      <button class="panel-tab" role="tab" id="ptab-visual"
+              aria-controls="ppanel-visual" aria-selected="false" tabindex="-1"
+              type="button">Visual Audit</button>
+    </li>
+    <li role="presentation">
+      <button class="panel-tab" role="tab" id="ptab-settings"
+              aria-controls="ppanel-settings" aria-selected="false" tabindex="-1"
+              type="button">Settings</button>
+    </li>
+  </ul>
+</nav>
+
+<main id="main-content">
+
+  <!-- ═══════════════════════════════════════════════
+       PANEL 1: WCAG AUDIT (existing)
+  ═══════════════════════════════════════════════ -->
+  <div role="tabpanel" id="ppanel-wcag" aria-labelledby="ptab-wcag" tabindex="-1">
+
+    <section aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Summary</h2>
+      <div id="summary-cards" class="summary-cards" role="region" aria-label="Finding counts">
+        <div class="card"><span class="count count-fail" id="count-fail">—</span><span class="label">Failures</span></div>
+        <div class="card"><span class="count count-warn" id="count-warn">—</span><span class="label">Warnings</span></div>
+        <div class="card"><span class="count count-pass" id="count-pass">—</span><span class="label">Passes</span></div>
+        <div class="card"><span class="count count-info" id="count-info">—</span><span class="label">Info</span></div>
+        <div class="card"><span class="count count-total" id="count-total">—</span><span class="label">Total</span></div>
+      </div>
+      <div class="severity-row" role="region" aria-label="Severity breakdown">
+        <span class="sev-badge sev-critical"><span id="sev-critical">0</span> Critical</span>
+        <span class="sev-badge sev-serious"><span id="sev-serious">0</span> Serious</span>
+        <span class="sev-badge sev-moderate"><span id="sev-moderate">0</span> Moderate</span>
+        <span class="sev-badge sev-minor"><span id="sev-minor">0</span> Minor</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="filters-heading">
+      <h2 id="filters-heading">Filters</h2>
+      <div class="filters-row">
+        <div class="filter-group">
+          <label for="filter-engine">Engine</label>
+          <select id="filter-engine"><option value="all">All Engines</option></select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-verdict">Verdict</label>
+          <select id="filter-verdict">
+            <option value="all">All Verdicts</option>
+            <option value="Fail">Fail</option>
+            <option value="Warning">Warning</option>
+            <option value="Pass">Pass</option>
+            <option value="Info">Info</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-severity">Severity</label>
+          <select id="filter-severity">
+            <option value="all">All Severities</option>
+            <option value="Critical">Critical</option>
+            <option value="Serious">Serious</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Minor">Minor</option>
+          </select>
+        </div>
+        <button id="clear-filters" type="button" class="btn btn-small">Clear</button>
+      </div>
+      <p id="filter-status" class="filter-status" aria-live="polite"></p>
+    </section>
+
+    <section id="findings-section" aria-labelledby="findings-heading">
+      <h2 id="findings-heading">Findings <span id="findings-count"></span></h2>
+      <div id="findings-container" role="region" aria-labelledby="findings-heading">
+        <table id="findings-table" class="findings-table" aria-label="Accessibility audit findings">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Engine</th>
+              <th scope="col">Verdict</th>
+              <th scope="col">Severity</th>
+              <th scope="col">Issue</th>
+            </tr>
+          </thead>
+          <tbody id="findings-body">
+            <tr><td colspan="5" class="empty-state">Press Ctrl+Shift+U on any page to run an audit.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="export-heading">
+      <h2 id="export-heading">Export</h2>
+      <div id="export-toolbar" role="toolbar" aria-label="Export formats" class="export-toolbar">
+        <button id="export-json"  type="button" class="btn" disabled>JSON</button>
+        <button id="export-html"  type="button" class="btn" disabled>HTML</button>
+        <button id="export-csv"   type="button" class="btn" disabled>CSV</button>
+        <button id="export-text"  type="button" class="btn" disabled>Text</button>
+      </div>
+    </section>
+
+    <div class="reaudit-section">
+      <button id="reaudit-btn" type="button" class="btn btn-primary">Re-run Audit</button>
+    </div>
+
+  </div><!-- /ppanel-wcag -->
+
+
+  <!-- ═══════════════════════════════════════════════
+       PANEL 2: VISUAL AUDIT
+         2a. Focus Indicator Narrator  (Module 2)
+         2b. Visual Layout Auditor     (Module 1)
+  ═══════════════════════════════════════════════ -->
+  <div role="tabpanel" id="ppanel-visual" aria-labelledby="ptab-visual" tabindex="-1" hidden>
+
+    <!-- ── 2a: Focus Indicator Narrator ── -->
+    <section aria-labelledby="fn-heading">
+      <h2 id="fn-heading">Focus Indicator Narrator</h2>
+      <p class="section-desc">
+        Tabs through every interactive element on the active page, takes a screenshot
+        at each focus state, and uses Vision AI to verify whether a visible focus
+        indicator is present and WCAG-compliant. Gives blind testers independence on
+        SC 2.4.7 and SC 2.4.11 checks.
+      </p>
+
+      <div class="action-bar">
+        <button id="fn-run-btn" type="button" class="btn btn-primary">
+          Run Focus Audit
+        </button>
+        <button id="fn-export-btn" type="button" class="btn" disabled>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- Progress -->
+      <div id="fn-progress-wrap" hidden aria-live="polite" class="progress-wrap">
+        <div class="progress-bar-track" role="progressbar"
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+             aria-label="Focus audit progress" id="fn-progress-bar">
+          <div class="progress-bar-fill" id="fn-progress-fill" style="width:0%"></div>
+        </div>
+        <p id="fn-progress-label" class="progress-label">Starting…</p>
+      </div>
+
+      <!-- Results -->
+      <div id="fn-results-wrap" hidden>
+        <h3 id="fn-results-heading" class="results-subheading">
+          Focus Audit Results — <span id="fn-page-title"></span>
+        </h3>
+        <div id="fn-summary-strip" class="fn-summary-strip" role="region" aria-label="Focus audit summary">
+          <span id="fn-count-pass"  class="fn-badge fn-pass">0 Pass</span>
+          <span id="fn-count-fail"  class="fn-badge fn-fail">0 Fail</span>
+          <span id="fn-count-warn"  class="fn-badge fn-warn">0 Warning</span>
+          <span id="fn-count-total" class="fn-badge fn-total">0 Checked</span>
+        </div>
+        <div role="region" aria-labelledby="fn-results-heading" style="overflow-x:auto;">
+          <table class="findings-table" aria-label="Focus indicator findings">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Element</th>
+                <th scope="col">Label / Text</th>
+                <th scope="col">Verdict</th>
+                <th scope="col">Indicator</th>
+                <th scope="col">SC 2.4.7</th>
+                <th scope="col">SC 2.4.11</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody id="fn-results-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <hr class="module-divider" aria-hidden="true">
+
+    <!-- ── 2b: Visual Layout Auditor ── -->
+    <section aria-labelledby="vla-heading">
+      <h2 id="vla-heading">Visual Layout Auditor</h2>
+      <p class="section-desc">
+        Emulates four viewport widths (320px, 375px, 768px, 1280px), captures a
+        screenshot at each breakpoint, and uses Vision AI to detect overlapping
+        elements, clipped content, reflow failures, and small touch targets.
+        Covers WCAG 1.4.10 (Reflow) and SC 2.5.5 (Target Size) visually.
+      </p>
+
+      <div class="action-bar">
+        <button id="vla-run-btn" type="button" class="btn btn-primary">
+          Run Layout Audit
+        </button>
+        <button id="vla-export-btn" type="button" class="btn" disabled>
+          Export Report
+        </button>
+      </div>
+
+      <!-- Progress -->
+      <div id="vla-progress-wrap" hidden aria-live="polite" class="progress-wrap">
+        <div class="progress-bar-track" role="progressbar"
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+             aria-label="Layout audit progress" id="vla-progress-bar">
+          <div class="progress-bar-fill" id="vla-progress-fill" style="width:0%"></div>
+        </div>
+        <p id="vla-progress-label" class="progress-label">Starting…</p>
+      </div>
+
+      <!-- Results -->
+      <div id="vla-results-wrap" hidden>
+        <h3 id="vla-results-heading" class="results-subheading">
+          Layout Audit Results — <span id="vla-page-title"></span>
+        </h3>
+        <div id="vla-breakpoints-container" class="vla-bps">
+          <!-- Populated by JS: one card per breakpoint -->
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /ppanel-visual -->
+
+
+  <!-- ═══════════════════════════════════════════════
+       PANEL 3: SETTINGS
+  ═══════════════════════════════════════════════ -->
+  <div role="tabpanel" id="ppanel-settings" aria-labelledby="ptab-settings" tabindex="-1" hidden>
+
+    <section aria-labelledby="settings-heading">
+      <h2 id="settings-heading">Vision AI Settings</h2>
+      <p class="section-desc">
+        Focus Narrator and Visual Layout Auditor send screenshots to a Vision LLM for
+        analysis. Add at least one API key. Keys are stored locally in the extension
+        and never transmitted anywhere except the selected provider.
+      </p>
+
+      <fieldset class="settings-fieldset">
+        <legend>AI Provider</legend>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="vision-provider" id="provider-anthropic" value="anthropic" checked>
+            Anthropic (Claude — recommended)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="vision-provider" id="provider-openai" value="openai">
+            OpenAI (GPT-4o)
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="settings-field">
+        <label for="anthropic-key">Anthropic API Key</label>
+        <input type="password" id="anthropic-key" class="key-input"
+               placeholder="sk-ant-…" autocomplete="off"
+               aria-describedby="anthropic-key-hint">
+        <p id="anthropic-key-hint" class="field-hint">
+          Get your key at console.anthropic.com. Used for Claude Vision analysis.
+        </p>
+      </div>
+
+      <div class="settings-field">
+        <label for="openai-key">OpenAI API Key</label>
+        <input type="password" id="openai-key" class="key-input"
+               placeholder="sk-…" autocomplete="off"
+               aria-describedby="openai-key-hint">
+        <p id="openai-key-hint" class="field-hint">
+          Get your key at platform.openai.com. Used for GPT-4o Vision analysis.
+        </p>
+      </div>
+
+      <div class="settings-actions">
+        <button id="save-settings-btn" type="button" class="btn btn-primary">Save Settings</button>
+        <button id="clear-settings-btn" type="button" class="btn btn-danger">Clear Keys</button>
+      </div>
+
+      <p id="settings-status" class="settings-status" aria-live="polite"></p>
+    </section>
+
+    <section aria-labelledby="about-heading">
+      <h2 id="about-heading">About</h2>
+      <p class="section-desc">
+        AMA11Y v3.0 — Built by Akhilesh Malani, Accessibility Architect &amp;
+        Digital Inclusion Strategist.<br>
+        <a href="https://ama11y.akhileshmalani.com" target="_blank" rel="noopener">
+          ama11y.akhileshmalani.com
+        </a>
+      </p>
+    </section>
+
+  </div><!-- /ppanel-settings -->
+
+</main>
+
+<footer role="contentinfo">
+  <p>AMA11Y v3.0 — Private and Confidential</p>
+</footer>
+
+<script src="panel.js"></script>
+</body>
+</html>

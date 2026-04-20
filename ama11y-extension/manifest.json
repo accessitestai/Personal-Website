@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "AMA11Y — Accessibility Audit Tool",
-  "version": "2.0.0",
-  "description": "Blind-first accessibility audit tool. 13 WCAG 2.2 audit engines with accessible side panel results. Built by Akhilesh Malani.",
+  "version": "3.0.0",
+  "description": "Blind-first accessibility audit tool. WCAG 2.2 audit engines + Visual-to-Audio AI modules: Focus Indicator Narrator, Visual Layout Auditor, State Change Watchdog.",
   "author": "Akhilesh Malani",
   "homepage_url": "https://ama11y.akhileshmalani.com",
 
@@ -11,7 +11,12 @@
     "scripting",
     "sidePanel",
     "tabs",
-    "storage"
+    "storage",
+    "debugger"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
   ],
 
   "action": {
