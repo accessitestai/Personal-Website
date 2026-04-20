@@ -4,1033 +4,1136 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>AMA11Y — Accessibility Audit Platform v5.0.0</title>
+  <title>AMA11Y — Accessibility Audit Platform</title>
   <meta name="description" content="Private accessibility audit platform for Akhilesh Malani.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ═══════════════════════════════════════════════
-       DESIGN SYSTEM — Precision Instrument Aesthetic
-    ═══════════════════════════════════════════════ */
-    :root {
-      --navy:       #050d1a;
-      --navy-2:     #091422;
-      --navy-3:     #0d1e32;
-      --navy-4:     #112540;
-      --blue:       #003366;
-      --blue-mid:   #0a2a4a;
-      --accent:     #00c8e0;
-      --accent-dim: #0a8fa0;
-      --accent-glow:rgba(0,200,224,.15);
-      --green:      #00e09a;
-      --red:        #ff4458;
-      --amber:      #ffaa00;
-      --text:       #d8eaf8;
-      --text-dim:   #7a9ab8;
-      --text-muted: #3a5a78;
-      --border:     #0e2840;
-      --border-bright: #1a4060;
-      --mono:       'JetBrains Mono', monospace;
-      --display:    'Syne', system-ui, sans-serif;
-      --radius:     6px;
-      --shadow:     0 4px 24px rgba(0,0,0,.5);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; height: 100%; }
-
-    body {
-      background: var(--navy);
-      color: var(--text);
-      font-family: var(--display);
-      font-size: 15px;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Background grid pattern */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 48px 48px;
-      opacity: .4;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── Skip link ── */
-    .skip {
-      position: absolute; top: -999px; left: -999px;
-      background: var(--accent); color: var(--navy);
-      padding: 10px 18px; font-weight: 700;
-      border-radius: 0 0 var(--radius) 0;
-      text-decoration: none; z-index: 9999;
-      font-family: var(--mono); font-size: 13px;
-    }
-    .skip:focus { top: 0; left: 0; }
-
-    /* ── Live region ── */
-    #sr-live {
-      position: absolute; width: 1px; height: 1px;
-      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
-    }
-
-    /* ══════════════════════════════════════════════
-       PAGE VIEWS — shown/hidden via JS
-    ══════════════════════════════════════════════ */
-    .view { display: none; position: relative; z-index: 1; }
-    .view.active { display: block; }
-
-    /* ══════════════════════════════════════════════
-       PIN SETUP VIEW
-    ══════════════════════════════════════════════ */
-    #view-setup {
-      min-height: 100vh;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    #view-setup.active { display: flex; }
-
-    .setup-card {
-      background: var(--navy-3);
-      border: 1px solid var(--border-bright);
-      border-radius: 12px;
-      padding: 48px 40px;
-      max-width: 440px;
-      width: 100%;
-      box-shadow: var(--shadow), 0 0 60px var(--accent-glow);
-    }
-
-    .brand-mark {
-      font-family: var(--mono);
-      font-size: 2.4rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: .08em;
-      margin-bottom: 6px;
-    }
-
-    .brand-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      margin-bottom: 32px;
-      font-family: var(--mono);
-    }
-
-    .setup-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .setup-desc {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 28px;
-      line-height: 1.7;
-    }
-
-    /* ══════════════════════════════════════════════
-       LOGIN VIEW
-    ══════════════════════════════════════════════ */
-    #view-login {
-      min-height: 100vh;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    #view-login.active { display: flex; }
-
-    .login-card {
-      background: var(--navy-3);
-      border: 1px solid var(--border-bright);
-      border-radius: 12px;
-      padding: 48px 40px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: var(--shadow), 0 0 60px var(--accent-glow);
-    }
-
-    .login-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .login-sub {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 32px;
-    }
-
-    /* PIN dots display */
-    .pin-dots {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 28px;
-    }
-
-    .pin-dot {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      border: 2px solid var(--border-bright);
-      background: transparent;
-      transition: background .15s, border-color .15s;
-    }
-
-    .pin-dot.filled {
-      background: var(--accent);
-      border-color: var(--accent);
-      box-shadow: 0 0 8px var(--accent-glow);
-    }
-
-    /* PIN keypad */
-    .pin-pad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .pin-key {
-      background: var(--navy-4);
-      color: var(--text);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius);
-      padding: 16px;
-      font-family: var(--mono);
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: background .1s, border-color .1s, transform .08s;
-      min-width: 0;
-    }
-
-    .pin-key:hover { background: var(--blue-mid); border-color: var(--accent-dim); }
-    .pin-key:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .pin-key:active { transform: scale(.95); }
-
-    .pin-key.wide {
-      grid-column: span 2;
-      font-size: .85rem;
-      letter-spacing: .06em;
-    }
-
-    .pin-key.clear { color: var(--amber); }
-    .pin-key.submit {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--navy);
-      font-weight: 700;
-    }
-    .pin-key.submit:hover { background: var(--accent); }
-
-    .pin-error {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--red);
-      text-align: center;
-      min-height: 18px;
-      margin-bottom: 8px;
-    }
-
-    /* ══════════════════════════════════════════════
-       MAIN APP VIEW
-    ══════════════════════════════════════════════ */
-    #view-app {
-      min-height: 100vh;
-      display: none;
-      flex-direction: column;
-    }
-    #view-app.active { display: flex; }
-
-    /* Top navigation bar */
-    #app-nav {
-      background: var(--navy-2);
-      border-bottom: 1px solid var(--border-bright);
-      padding: 0 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      flex-shrink: 0;
-    }
-
-    .nav-brand {
-      font-family: var(--mono);
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: .08em;
-      flex-shrink: 0;
-    }
-
-    .nav-tabs {
-      display: flex;
-      gap: 2px;
-      list-style: none;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    .nav-tab {
-      background: transparent;
-      color: var(--text-dim);
-      border: none;
-      border-bottom: 2px solid transparent;
-      padding: 18px 16px 16px;
-      font-family: var(--display);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: .04em;
-      cursor: pointer;
-      transition: color .15s, border-color .15s;
-      white-space: nowrap;
-    }
-    .nav-tab:hover { color: var(--text); }
-    .nav-tab:focus { outline: 3px solid var(--accent); outline-offset: -3px; }
-    .nav-tab[aria-selected="true"] {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-
-    .nav-pin-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* ── Shared form controls ── */
-    .field-label {
-      display: block;
-      font-family: var(--mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .field-input {
-      width: 100%;
-      background: var(--navy-2);
-      color: var(--text);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      font-family: var(--mono);
-      font-size: 13px;
-      margin-bottom: 16px;
-      transition: border-color .15s, box-shadow .15s;
-    }
-    .field-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .field-select {
-      width: 100%;
-      background: var(--navy-2);
-      color: var(--text);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      font-family: var(--mono);
-      font-size: 13px;
-      margin-bottom: 16px;
-      cursor: pointer;
-    }
-    .field-select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--blue);
-      color: var(--text);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius);
-      padding: 10px 20px;
-      font-family: var(--display);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .15s, border-color .15s;
-      white-space: nowrap;
-    }
-    .btn:hover { background: var(--blue-mid); border-color: var(--accent-dim); }
-    .btn:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-
-    .btn-primary {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--navy);
-      font-weight: 700;
-    }
-    .btn-primary:hover { background: var(--accent); }
-
-    .btn-danger {
-      background: transparent;
-      border-color: var(--red);
-      color: var(--red);
-    }
-    .btn-danger:hover { background: rgba(255,68,88,.1); }
-
-    .btn-sm {
-      padding: 7px 14px;
-      font-size: 12px;
-    }
-
-    /* ── Tab panels ── */
-    .tab-panel { display: none; padding: 28px; max-width: 1100px; margin: 0 auto; width: 100%; }
-    .tab-panel.active { display: block; }
-
-    /* ── Section headings ── */
-    .section-heading {
-      font-family: var(--mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      color: var(--accent);
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-bright);
-    }
-
-    .panel-title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .panel-desc {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 28px;
-      max-width: 640px;
-      line-height: 1.7;
-    }
-
-    /* ── Cards ── */
-    .card {
-      background: var(--navy-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .card-sub {
-      font-size: 12px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-    }
-
-    /* ══════════════════════════════════════════════
-       DASHBOARD TAB
-    ══════════════════════════════════════════════ */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: var(--navy-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      text-align: center;
-    }
-
-    .stat-n {
-      font-family: var(--mono);
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .stat-l {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--text-muted);
-      font-family: var(--mono);
-    }
-
-    .n-fail { color: var(--red); }
-    .n-warn { color: var(--amber); }
-    .n-pass { color: var(--green); }
-    .n-info { color: var(--accent); }
-
-    /* Recent sessions list */
-    .session-list { list-style: none; }
-
-    .session-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .session-item:last-child { border-bottom: none; }
-
-    .session-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .session-meta { flex: 1; min-width: 0; }
-
-    .session-url {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .session-date {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .session-counts {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    /* URL Audit History */
-    .url-group { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
-    .url-group summary { padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; }
-    .url-group summary:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
-    .url-group-url { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
-    .url-group-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-    .url-group-badge.improved { background: rgba(39,174,96,0.2); color: var(--green); }
-    .url-group-badge.regressed { background: rgba(231,76,60,0.2); color: var(--red); }
-    .url-group-badge.stable { background: rgba(127,140,141,0.2); color: var(--text-muted); }
-    .url-history-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono); }
-    .url-history-table th { text-align: left; padding: 8px 12px; background: var(--navy-3); color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-    .url-history-table td { padding: 8px 12px; border-top: 1px solid var(--border); }
-    .trend-arrow { font-weight: 700; }
-    .trend-arrow.up { color: var(--red); }
-    .trend-arrow.down { color: var(--green); }
-    .trend-arrow.flat { color: var(--text-muted); }
-
-    /* ══════════════════════════════════════════════
-       IMPORT & REPORT TAB
-    ══════════════════════════════════════════════ */
-    .upload-zone {
-      background: var(--navy-3);
-      border: 2px dashed var(--border-bright);
-      border-radius: var(--radius);
-      padding: 40px 28px;
-      text-align: center;
-      margin-bottom: 20px;
-      transition: border-color .2s, background .2s;
-    }
-
-    .upload-zone:focus-within {
-      border-color: var(--accent);
-      background: var(--navy-4);
-    }
-
-    .upload-icon {
-      font-size: 2rem;
-      margin-bottom: 10px;
-      color: var(--accent);
-      font-family: var(--mono);
-    }
-
-    .upload-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .upload-hint {
-      font-size: 12px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-    }
-
-    .file-input-wrapper {
-      position: relative;
-      display: inline-block;
-      margin-top: 16px;
-    }
-
-    .file-input-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--blue);
-      color: var(--text);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius);
-      padding: 9px 18px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .file-input-label:hover { background: var(--blue-mid); border-color: var(--accent-dim); }
-
-    input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    input[type="file"]:focus + .file-input-label {
-      outline: 3px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    /* Loaded findings summary */
-    #findings-loaded-info {
-      display: none;
-      background: var(--navy-3);
-      border: 1px solid var(--border-bright);
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-
-    #findings-loaded-info strong { color: var(--accent); }
-
-    /* Export format grid */
-    .export-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-
-    .export-card {
-      background: var(--navy-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      cursor: pointer;
-      transition: border-color .15s, background .15s;
-    }
-
-    .export-card:hover { border-color: var(--accent-dim); background: var(--navy-4); }
-    .export-card:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-
-    .export-card.selected {
-      border-color: var(--accent);
-      background: var(--navy-4);
-    }
-
-    .export-format {
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-
-    .export-desc {
-      font-size: 11px;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    /* ══════════════════════════════════════════════
-       FINDINGS TABLE
-    ══════════════════════════════════════════════ */
-    #findings-table-region {
-      overflow-x: auto;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-    }
-
-    .findings-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .findings-table th {
-      background: var(--navy-2);
-      color: var(--accent);
-      font-family: var(--mono);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      padding: 11px 14px;
-      text-align: left;
-      white-space: nowrap;
-      border-bottom: 1px solid var(--border-bright);
-      position: sticky;
-      top: 56px;
-      z-index: 10;
-    }
-
-    .findings-table td {
-      padding: 11px 14px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-      line-height: 1.5;
-    }
-
-    .findings-table tr:last-child td { border-bottom: none; }
-    .findings-table tr:hover td { background: var(--navy-4); }
-
-    .findings-table code {
-      font-family: var(--mono);
-      font-size: 11px;
-      background: var(--navy-2);
-      padding: 1px 5px;
-      border-radius: 3px;
-      color: var(--accent);
-    }
-
-    .v-fail { color: var(--red); font-weight: 700; font-family: var(--mono); }
-    .v-warn { color: var(--amber); font-weight: 700; font-family: var(--mono); }
-    .v-pass { color: var(--green); font-family: var(--mono); }
-    .v-info { color: var(--accent); font-family: var(--mono); }
-
-    .s-critical { color: var(--red); font-family: var(--mono); font-size: 11px; }
-    .s-serious  { color: var(--amber); font-family: var(--mono); font-size: 11px; }
-    .s-moderate { color: #ffcc44; font-family: var(--mono); font-size: 11px; }
-    .s-minor    { color: var(--green); font-family: var(--mono); font-size: 11px; }
-
-    .expand-btn {
-      background: transparent;
-      border: 1px solid var(--border-bright);
-      color: var(--accent);
-      padding: 3px 8px;
-      border-radius: 3px;
-      font-size: 11px;
-      cursor: pointer;
-      font-family: var(--mono);
-      white-space: nowrap;
-    }
-    .expand-btn:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-
-    .finding-detail {
-      display: none;
-      margin-top: 8px;
-      padding: 10px 12px;
-      background: var(--navy-2);
-      border-radius: 4px;
-      border-left: 2px solid var(--accent);
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    .finding-detail.open { display: block; }
-    .finding-detail p { margin-bottom: 5px; }
-    .finding-detail strong { color: var(--text-dim); }
-
-    /* ══════════════════════════════════════════════
-       DOCUMENT AUDIT TAB
-    ══════════════════════════════════════════════ */
-    .doc-result-item {
-      background: var(--navy-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 18px;
-      margin-bottom: 10px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .doc-result-status {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .doc-result-body { flex: 1; }
-
-    .doc-result-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 3px;
-    }
-
-    .doc-result-detail {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    /* ══════════════════════════════════════════════
-       SETTINGS TAB
-    ══════════════════════════════════════════════ */
-    .settings-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .settings-row:last-child { border-bottom: none; }
-
-    .settings-label { font-size: 13px; color: var(--text); font-weight: 600; }
-    .settings-desc  { font-size: 12px; color: var(--text-dim); margin-top: 2px; font-family: var(--mono); }
-
-    /* ══════════════════════════════════════════════
-       FILTER BAR
-    ══════════════════════════════════════════════ */
-    .filter-bar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .filter-bar .field-select {
-      margin-bottom: 0;
-      flex: 1;
-      min-width: 140px;
-      max-width: 200px;
-    }
-
-    .filter-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
-
-    /* ══════════════════════════════════════════════
-       PROGRESS BAR
-    ══════════════════════════════════════════════ */
-    .progress-wrap {
-      background: var(--navy-2);
-      border-radius: 3px;
-      height: 4px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
-      border-radius: 3px;
-      transition: width .3s ease;
-      width: 0%;
-    }
-
-    /* ══════════════════════════════════════════════
-       NOTICE
-    ══════════════════════════════════════════════ */
-    .notice {
-      background: var(--navy-3);
-      border-left: 3px solid var(--accent);
-      border-radius: 0 var(--radius) var(--radius) 0;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      font-size: 12px;
-      color: var(--text-dim);
-      font-family: var(--mono);
-    }
-    .notice.warn { border-color: var(--amber); }
-    .notice.success { border-color: var(--green); color: var(--green); }
-
-    /* ══════════════════════════════════════════════
-       LOADING OVERLAY
-    ══════════════════════════════════════════════ */
-    #loading-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(5,13,26,.85);
-      z-index: 9998;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-    }
-    #loading-overlay.active { display: flex; }
-
-    .loading-text {
-      font-family: var(--mono);
-      font-size: 14px;
-      color: var(--accent);
-      letter-spacing: .08em;
-    }
-
-    .loading-dots::after {
-      content: '';
-      animation: dots 1.4s infinite;
-    }
-
-    @keyframes dots {
-      0%   { content: ''; }
-      33%  { content: '.'; }
-      66%  { content: '..'; }
-      100% { content: '...'; }
-    }
-
-    /* ══════════════════════════════════════════════
-       RESPONSIVE
-    ══════════════════════════════════════════════ */
-    @media (max-width: 700px) {
-      .nav-tabs { display: none; }
-      #app-nav  { padding: 0 16px; }
-      .tab-panel { padding: 16px; }
-      .setup-card, .login-card { padding: 32px 20px; }
-      .findings-table th:nth-child(4),
-      .findings-table td:nth-child(4) { display: none; }
-    }
-
-    /* ═══════════════════════════════════════════════
-       AI SETTINGS & ENHANCEMENT — v5.0.0
-    ═══════════════════════════════════════════════ */
-    .ai-provider-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px; margin: 20px 0;
-    }
-    .ai-provider-card {
-      background: var(--navy-3);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius); padding: 20px;
-    }
-    .ai-provider-card h3 { color: var(--accent); font-family: var(--mono); font-size: 1rem; margin-bottom: 6px; }
-    .ai-provider-card .provider-role { font-size: .82rem; color: var(--text-dim); margin-bottom: 16px; font-style: italic; }
-    .ai-field-group { margin-bottom: 14px; }
-    .ai-field-group label { display: block; font-size: .85rem; color: var(--text-dim); margin-bottom: 6px; font-family: var(--mono); }
-    .ai-field-group input[type="password"], .ai-field-group input[type="text"] {
-      width: 100%; background: var(--navy-2); border: 1px solid var(--border-bright);
-      border-radius: var(--radius); color: var(--text); font-family: var(--mono);
-      font-size: .85rem; padding: 8px 12px;
-    }
-    .ai-field-group input:focus { outline: 3px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
-    .field-hint { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
-    .test-conn-btn {
-      background: transparent; border: 1px solid var(--accent); color: var(--accent);
-      font-family: var(--mono); font-size: .8rem; padding: 6px 14px;
-      border-radius: var(--radius); cursor: pointer; margin-top: 8px;
-    }
-    .test-conn-btn:hover { background: var(--accent-glow); }
-    .test-conn-btn:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .conn-status { font-size: .8rem; font-family: var(--mono); margin-left: 10px; }
-    .conn-ok { color: var(--green); } .conn-fail { color: var(--red); }
-    .ai-toolbar {
-      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-      padding: 12px 0; border-top: 1px solid var(--border); margin-top: 12px;
-    }
-    .btn-ai {
-      background: linear-gradient(135deg, var(--accent-dim), #005a80);
-      color: #fff; border: none; font-family: var(--mono); font-size: .82rem;
-      padding: 8px 18px; border-radius: var(--radius); cursor: pointer; font-weight: 600;
-    }
-    .btn-ai:hover { filter: brightness(1.15); }
-    .btn-ai:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .btn-ai:disabled { opacity: .5; cursor: not-allowed; }
-    .ai-progress-wrap { margin: 12px 0; }
-    .ai-progress-bar { width: 100%; height: 6px; background: var(--navy-3); border-radius: 3px; overflow: hidden; }
-    .ai-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 3px; transition: width .3s ease; }
-    .ai-progress-label { font-size: .8rem; color: var(--text-dim); font-family: var(--mono); margin-top: 4px; }
-    .ai-insights {
-      margin-top: 12px; padding: 14px; background: var(--navy-2);
-      border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0;
-    }
-    .ai-insights h4 { font-size: .8rem; font-family: var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
-    .ai-insights h5 { font-size: .78rem; color: var(--text-dim); font-family: var(--mono); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
-    .sr-description-block { background: var(--navy-4); border: 1px solid var(--accent-dim); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px; }
-    .sr-description-block p { font-family: var(--mono); font-size: .85rem; color: var(--text); line-height: 1.6; }
-    .impact-block { margin-bottom: 10px; }
-    .impact-block p { font-size: .85rem; color: var(--text-dim); line-height: 1.6; }
-    .code-fix-details { margin-top: 8px; }
-    .code-fix-details summary { font-size: .8rem; font-family: var(--mono); color: var(--accent-dim); cursor: pointer; padding: 4px 0; }
-    .code-fix-details summary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .code-block-label { font-size: .72rem; color: var(--text-muted); font-family: var(--mono); margin: 6px 0 2px; text-transform: uppercase; letter-spacing: .06em; }
-    .code-fix-details pre { background: var(--navy); border: 1px solid var(--border-bright); border-radius: var(--radius); padding: 8px 12px; overflow-x: auto; margin-bottom: 6px; }
-    .code-fix-details code { font-family: var(--mono); font-size: .8rem; color: var(--green); }
-    .code-note { font-size: .78rem; color: var(--text-dim); font-style: italic; }
-    .ai-report-section { background: var(--navy-2); border: 1px solid var(--border-bright); border-radius: var(--radius); padding: 24px; margin-top: 20px; }
-    .ai-report-section h3 { color: var(--accent); font-family: var(--mono); font-size: 1.1rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .ai-report-content { font-size: .9rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
-    .criterion-research { margin-top: 8px; }
-    .criterion-research summary { font-size: .78rem; font-family: var(--mono); color: var(--text-muted); cursor: pointer; padding: 3px 0; }
-    .criterion-research summary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .criterion-research-btn { background: transparent; border: 1px solid var(--border-bright); color: var(--text-dim); font-family: var(--mono); font-size: .75rem; padding: 4px 10px; border-radius: var(--radius); cursor: pointer; margin-bottom: 8px; }
-    .criterion-research-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .criterion-research-btn:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .criterion-content { font-size: .82rem; color: var(--text-dim); line-height: 1.7; white-space: pre-wrap; padding: 8px; background: var(--navy); border-radius: var(--radius); }
-    .copilot-status { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--navy-3); border-radius: var(--radius); margin-bottom: 16px; border: 1px solid var(--border-bright); }
-    .copilot-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
-    .copilot-dot.active { background: var(--green); animation: copilot-pulse 1.5s infinite; }
-    @keyframes copilot-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-    .copilot-status-text { font-family: var(--mono); font-size: .85rem; }
-    .journey-log { list-style: none; max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius); padding: 0; margin-bottom: 16px; }
-    .journey-log li { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: .85rem; }
-    .journey-log li:last-child { border-bottom: none; }
-    .journey-element { font-family: var(--mono); color: var(--accent); font-size: .8rem; }
-    .journey-annotation { color: var(--text-dim); font-size: .82rem; margin-top: 3px; }
-    .journey-empty { padding: 20px; text-align: center; color: var(--text-muted); font-style: italic; }
+/* ════════════════════════════════════════════════════════
+   AMA11Y — Design System v6.0
+   Light-first. Sidebar navigation. Human-readable.
+   Different from every accessibility tool on the market.
+════════════════════════════════════════════════════════ */
+:root {
+  /* Brand */
+  --primary:        #0369A1;   /* 5.93:1 on white ✓ */
+  --primary-dark:   #025482;
+  --primary-light:  #E0F2FE;
+  --primary-mid:    #0284C7;
+
+  /* Surfaces */
+  --bg:             #FFFFFF;
+  --bg-2:           #F4F8FC;
+  --bg-3:           #E9EFF5;
+  --card:           #FFFFFF;
+
+  /* Sidebar (dark) */
+  --sb-bg:          #0B1929;
+  --sb-text:        #94B4C8;
+  --sb-text-active: #FFFFFF;
+  --sb-hover:       rgba(255,255,255,0.07);
+  --sb-active-bg:   rgba(3,105,161,0.22);
+  --sb-active-bar:  #38BDF8;
+  --sb-border:      rgba(255,255,255,0.06);
+  --sb-width:       240px;
+
+  /* Text */
+  --text:           #0F2233;   /* ~15:1 on white */
+  --text-2:         #3B5268;   /* 7.8:1 on white */
+  --text-3:         #60798A;   /* 4.7:1 — large/UI text only */
+
+  /* Borders */
+  --border:         #D3DFE9;
+  --border-strong:  #A8BCC9;
+
+  /* Severity */
+  --critical:       #B91C1C;   /* 6.3:1 on white ✓ */
+  --critical-bg:    #FFF0F0;
+  --critical-border:#FCA5A5;
+  --serious:        #B45309;   /* 4.84:1 on white ✓ */
+  --serious-bg:     #FFFBEB;
+  --serious-border: #FCD34D;
+  --moderate:       #1D4ED8;   /* 6.5:1 on white ✓ */
+  --moderate-bg:    #EFF6FF;
+  --moderate-border:#93C5FD;
+  --minor:          #047857;   /* 5.6:1 on white ✓ */
+  --minor-bg:       #F0FDF9;
+  --minor-border:   #6EE7B7;
+  --pass:           #047857;
+  --pass-bg:        #F0FDF9;
+  --warn:           #B45309;
+  --warn-bg:        #FFFBEB;
+
+  /* Interaction */
+  --focus-ring:     0 0 0 3px rgba(3,105,161,0.35);
+
+  /* Radius, shadow, spacing */
+  --r:              8px;
+  --r-sm:           5px;
+  --r-lg:           12px;
+  --shadow:         0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:      0 4px 12px rgba(0,0,0,0.09);
+  --shadow-lg:      0 8px 24px rgba(0,0,0,0.11);
+
+  /* Type */
+  --sans:           'Inter', system-ui, -apple-system, sans-serif;
+  --mono:           'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Skip link ── */
+.skip {
+  position: absolute; top: -999px; left: -999px;
+  background: var(--primary); color: #fff;
+  padding: 10px 18px; font-weight: 600; font-size: 14px;
+  border-radius: 0 0 var(--r) 0; text-decoration: none; z-index: 9999;
+}
+.skip:focus { top: 0; left: 0; }
+
+/* ── Live region ── */
+#sr-live {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════════════════
+   VIEWS
+════════════════════════════════════════════════════════ */
+.view { display: none; position: relative; }
+.view.active { display: block; }
+
+/* ════════════════════════════════════════════════════════
+   PIN SETUP & LOGIN — Centered card layout
+════════════════════════════════════════════════════════ */
+#view-setup,
+#view-login {
+  min-height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg-2);
+}
+#view-setup.active,
+#view-login.active { display: flex; }
+
+.setup-card,
+.login-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 44px 40px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+}
+
+.brand-mark {
+  font-family: var(--mono);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  margin-bottom: 32px;
+}
+
+.setup-title,
+.login-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.setup-desc,
+.login-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 28px;
+  line-height: 1.65;
+}
+
+/* PIN dots */
+.pin-dots {
+  display: flex; gap: 14px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pin-dot.filled {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* PIN keypad */
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.pin-key {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 15px;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.1s, border-color 0.1s, transform 0.07s;
+}
+.pin-key:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); }
+.pin-key:focus { outline: none; box-shadow: var(--focus-ring); border-color: var(--primary); }
+.pin-key:active { transform: scale(0.95); }
+.pin-key.wide { grid-column: span 2; font-size: 0.85rem; letter-spacing: 0.04em; }
+.pin-key.clear { color: var(--serious); }
+.pin-key.submit {
+  background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700;
+}
+.pin-key.submit:hover { background: var(--primary-dark); }
+
+.pin-error {
+  font-family: var(--mono); font-size: 12px; color: var(--critical);
+  text-align: center; min-height: 18px; margin-bottom: 8px;
+}
+
+/* ════════════════════════════════════════════════════════
+   MAIN APP — Sidebar + Content layout
+════════════════════════════════════════════════════════ */
+#view-app {
+  min-height: 100vh;
+  display: none;
+}
+#view-app.active {
+  display: grid;
+  grid-template-columns: var(--sb-width) 1fr;
+  grid-template-rows: 100vh;
+}
+
+/* ── Sidebar ── */
+#app-nav {
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+}
+
+.nav-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.nav-brand-name {
+  font-family: var(--mono);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  letter-spacing: 0.06em;
+  display: block;
+}
+.nav-brand-tagline {
+  font-size: 11px;
+  color: var(--sb-text);
+  margin-top: 3px;
+  display: block;
+  letter-spacing: 0.03em;
+}
+
+/* Nav tabs list */
+.nav-tabs {
+  list-style: none;
+  padding: 12px 0;
+  flex: 1;
+}
+
+.nav-tabs li { margin: 1px 8px; }
+
+.nav-tab {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--sb-text);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+  position: relative;
+}
+.nav-tab:hover { background: var(--sb-hover); color: #fff; }
+.nav-tab:focus { outline: none; box-shadow: 0 0 0 2px var(--sb-active-bar) inset; }
+.nav-tab[aria-selected="true"] {
+  background: var(--sb-active-bg);
+  color: #fff;
+  font-weight: 600;
+}
+.nav-tab[aria-selected="true"]::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 3px;
+  background: var(--sb-active-bar);
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.nav-tab[aria-selected="true"] .nav-icon,
+.nav-tab:hover .nav-icon { opacity: 1; }
+
+.nav-section-divider {
+  height: 1px;
+  background: var(--sb-border);
+  margin: 8px 16px;
+}
+
+/* Sidebar footer */
+.nav-actions {
+  padding: 16px 12px;
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+.nav-pin-label {
+  display: block;
+  font-size: 11px;
+  color: var(--sb-text);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+#sign-out-btn {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  color: var(--sb-text);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.12s, color 0.12s;
+}
+#sign-out-btn:hover { background: rgba(185,28,28,0.15); color: #FCA5A5; border-color: rgba(185,28,28,0.3); }
+#sign-out-btn:focus { outline: none; box-shadow: 0 0 0 2px var(--sb-active-bar) inset; }
+
+/* ── Main content area ── */
+#main-content {
+  background: var(--bg-2);
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* ── Shared form controls ── */
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+
+.field-input {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 13px;
+  font-family: var(--sans);
+  font-size: 14px;
+  margin-bottom: 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+.field-input::placeholder { color: var(--text-3); }
+
+.field-select {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 13px;
+  font-family: var(--sans);
+  font-size: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 9px 18px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn:hover { background: var(--bg-2); border-color: var(--border-strong); }
+.btn:focus { outline: none; box-shadow: var(--focus-ring); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--critical);
+  color: var(--critical);
+}
+.btn-danger:hover { background: var(--critical-bg); }
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* ── Tab panels ── */
+.tab-panel { display: none; padding: 36px 40px; max-width: 1060px; }
+.tab-panel.active { display: block; }
+
+/* ── Section + panel headings ── */
+.panel-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.panel-intro {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 32px;
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+/* alias — old panel-desc used in JS-generated content */
+.panel-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 32px;
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+.section-heading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  margin-bottom: 14px;
+  margin-top: 32px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.section-heading:first-of-type { margin-top: 0; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px;
+}
+.card-sub {
+  font-size: 12px; color: var(--text-2); font-family: var(--mono);
+}
+
+/* ════════════════════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════════════════════ */
+/* Quick-start hero (shown when empty) */
+.qs-hero {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 40px;
+  margin-bottom: 32px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.qs-hero-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.qs-hero-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 24px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+.qs-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-n {
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-l {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  font-weight: 600;
+}
+.n-fail { color: var(--critical); }
+.n-warn { color: var(--serious); }
+.n-pass { color: var(--minor); }
+.n-info { color: var(--primary); }
+
+/* Session list */
+.session-list { list-style: none; }
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.session-item:last-child { border-bottom: none; }
+.session-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.session-meta { flex: 1; min-width: 0; }
+.session-url {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+.session-date { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.session-counts { font-size: 12px; color: var(--text-2); text-align: right; flex-shrink: 0; font-family: var(--mono); }
+
+/* URL history */
+.url-group {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.url-group summary {
+  padding: 13px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  list-style: none;
+  user-select: none;
+}
+.url-group summary::-webkit-details-marker { display: none; }
+.url-group summary:focus { outline: none; box-shadow: var(--focus-ring) inset; }
+.url-group-url { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-family: var(--mono); font-size: 12px; }
+.url-group-badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; letter-spacing: 0.02em; }
+.url-group-badge.improved { background: var(--minor-bg); color: var(--minor); border: 1px solid var(--minor-border); }
+.url-group-badge.regressed { background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+.url-group-badge.stable { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); }
+.url-history-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono); }
+.url-history-table th { text-align: left; padding: 8px 14px; background: var(--bg-2); color: var(--text-2); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+.url-history-table td { padding: 8px 14px; border-top: 1px solid var(--border); }
+.trend-arrow { font-weight: 700; }
+.trend-arrow.up { color: var(--critical); }
+.trend-arrow.down { color: var(--minor); }
+.trend-arrow.flat { color: var(--text-3); }
+
+/* ════════════════════════════════════════════════════════
+   UPLOAD ZONE
+════════════════════════════════════════════════════════ */
+.upload-zone {
+  background: var(--card);
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r);
+  padding: 44px 28px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.upload-zone:focus-within {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.upload-icon {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  color: var(--primary);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.upload-label {
+  font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px;
+}
+.upload-hint {
+  font-size: 13px; color: var(--text-2); line-height: 1.5;
+}
+
+.file-input-wrapper { position: relative; display: inline-block; margin-top: 18px; }
+.file-input-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--primary); color: #fff;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--r-sm);
+  padding: 9px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 0.12s;
+}
+.file-input-label:hover { background: var(--primary-dark); }
+input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--focus-ring); }
+
+/* Findings loaded banner */
+#findings-loaded-info {
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+  box-shadow: var(--shadow);
+}
+#findings-loaded-info strong { color: var(--primary); }
+
+/* ════════════════════════════════════════════════════════
+   EXPORT FORMAT CARDS
+════════════════════════════════════════════════════════ */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.export-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  box-shadow: var(--shadow);
+}
+.export-card:hover { border-color: var(--primary); background: var(--primary-light); }
+.export-card:focus { outline: none; box-shadow: var(--focus-ring); }
+.export-card.selected { border-color: var(--primary); background: var(--primary-light); }
+.export-format {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.export-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+/* ════════════════════════════════════════════════════════
+   FINDINGS TABLE
+════════════════════════════════════════════════════════ */
+#findings-table-region {
+  overflow-x: auto;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+.findings-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.findings-table th {
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 11px 14px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.findings-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.findings-table tr:last-child td { border-bottom: none; }
+.findings-table tr:hover td { background: var(--bg-2); }
+.findings-table code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg-3);
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: var(--primary-dark);
+}
+
+/* Verdict / severity labels */
+.v-fail { color: var(--critical); font-weight: 700; font-family: var(--mono); font-size: 12px; }
+.v-warn { color: var(--serious);  font-weight: 700; font-family: var(--mono); font-size: 12px; }
+.v-pass { color: var(--minor);    font-family: var(--mono); font-size: 12px; }
+.v-info { color: var(--primary);  font-family: var(--mono); font-size: 12px; }
+
+.s-critical { color: var(--critical); font-weight: 700; font-family: var(--mono); font-size: 12px; }
+.s-serious  { color: var(--serious);  font-weight: 700; font-family: var(--mono); font-size: 12px; }
+.s-moderate { color: var(--moderate); font-weight: 600; font-family: var(--mono); font-size: 12px; }
+.s-minor    { color: var(--minor);    font-family: var(--mono); font-size: 12px; }
+
+/* Expand button */
+.expand-btn {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--mono);
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+.expand-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+.expand-btn:focus { outline: none; box-shadow: var(--focus-ring); }
+
+/* Finding detail panel */
+.finding-detail {
+  display: none;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border-radius: var(--r-sm);
+  border-left: 3px solid var(--primary);
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+.finding-detail.open { display: block; }
+.finding-detail p { margin-bottom: 6px; }
+.finding-detail strong { color: var(--text); font-weight: 600; }
+
+/* ════════════════════════════════════════════════════════
+   DOCUMENT AUDIT RESULTS
+════════════════════════════════════════════════════════ */
+.doc-result-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  box-shadow: var(--shadow);
+}
+.doc-result-status {
+  font-family: var(--mono); font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+}
+.doc-result-body { flex: 1; }
+.doc-result-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.doc-result-detail { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+/* ════════════════════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════════════════════ */
+.settings-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-label { font-size: 14px; color: var(--text); font-weight: 600; }
+.settings-desc  { font-size: 13px; color: var(--text-2); margin-top: 3px; line-height: 1.5; }
+
+/* ════════════════════════════════════════════════════════
+   FILTER BAR
+════════════════════════════════════════════════════════ */
+.filter-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  align-items: center; margin-bottom: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+.filter-bar .field-select {
+  margin-bottom: 0; flex: 1; min-width: 120px; max-width: 180px;
+}
+.filter-label {
+  font-size: 12px; font-weight: 600; color: var(--text-2); white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════════════════
+   PROGRESS
+════════════════════════════════════════════════════════ */
+.progress-wrap { background: var(--bg-3); border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 8px; }
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--sb-active-bar));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* ════════════════════════════════════════════════════════
+   NOTICES / BANNERS
+════════════════════════════════════════════════════════ */
+.notice {
+  background: var(--primary-light);
+  border: 1px solid #93C5FD;
+  border-radius: var(--r);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.notice.warn { background: var(--serious-bg); border-color: #FCD34D; }
+.notice.success { background: var(--minor-bg); border-color: var(--minor-border); }
+
+/* ════════════════════════════════════════════════════════
+   LOADING OVERLAY
+════════════════════════════════════════════════════════ */
+#loading-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(255,255,255,0.88);
+  z-index: 9998;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+  backdrop-filter: blur(4px);
+}
+#loading-overlay.active { display: flex; }
+.loading-text {
+  font-family: var(--mono); font-size: 14px;
+  color: var(--primary); letter-spacing: 0.06em;
+}
+.loading-dots::after {
+  content: ''; animation: dots 1.4s infinite;
+}
+@keyframes dots {
+  0%   { content: ''; }
+  33%  { content: '.'; }
+  66%  { content: '..'; }
+  100% { content: '...'; }
+}
+
+/* ════════════════════════════════════════════════════════
+   DOCUMENT AUDIT INNER TABS
+════════════════════════════════════════════════════════ */
+.method-tabs {
+  display: flex; gap: 0; margin-bottom: 0;
+  border-bottom: 2px solid var(--border);
+}
+.method-tab {
+  background: transparent; color: var(--text-2);
+  border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  padding: 10px 20px; font-family: var(--sans);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.method-tab:hover { color: var(--text); }
+.method-tab:focus { outline: none; box-shadow: var(--focus-ring); }
+.method-tab[aria-selected="true"] {
+  color: var(--primary); border-bottom-color: var(--primary); font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════
+   AI SETTINGS
+════════════════════════════════════════════════════════ */
+.ai-provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px; margin: 20px 0;
+}
+.ai-provider-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.ai-provider-card h3 { color: var(--primary); font-size: 1rem; margin-bottom: 4px; font-weight: 700; }
+.ai-provider-card .provider-role { font-size: 12px; color: var(--text-2); margin-bottom: 16px; font-style: italic; }
+.ai-field-group { margin-bottom: 14px; }
+.ai-field-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.ai-field-group input[type="password"],
+.ai-field-group input[type="text"] {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); color: var(--text);
+  font-family: var(--mono); font-size: 13px; padding: 8px 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ai-field-group input:focus { outline: none; border-color: var(--primary); box-shadow: var(--focus-ring); }
+.field-hint { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+
+.test-conn-btn {
+  background: transparent; border: 1.5px solid var(--primary); color: var(--primary);
+  font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 6px 14px;
+  border-radius: var(--r-sm); cursor: pointer; margin-top: 8px;
+  transition: background 0.12s;
+}
+.test-conn-btn:hover { background: var(--primary-light); }
+.test-conn-btn:focus { outline: none; box-shadow: var(--focus-ring); }
+.conn-status { font-size: 13px; font-family: var(--mono); margin-left: 10px; }
+.conn-ok { color: var(--minor); font-weight: 700; }
+.conn-fail { color: var(--critical); font-weight: 700; }
+
+.ai-toolbar {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px;
+}
+
+.btn-ai {
+  background: var(--primary);
+  color: #fff; border: none;
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  padding: 8px 18px; border-radius: var(--r-sm); cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-ai:hover { background: var(--primary-dark); }
+.btn-ai:focus { outline: none; box-shadow: var(--focus-ring); }
+.btn-ai:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.ai-progress-wrap { margin: 12px 0; }
+.ai-progress-bar { width: 100%; height: 5px; background: var(--bg-3); border-radius: 4px; overflow: hidden; }
+.ai-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #38BDF8); border-radius: 4px; transition: width 0.3s ease; }
+.ai-progress-label { font-size: 12px; color: var(--text-2); font-family: var(--mono); margin-top: 4px; }
+
+.ai-insights {
+  margin-top: 12px; padding: 16px 18px;
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+}
+.ai-insights h4 { font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 700; }
+.ai-insights h5 { font-size: 12px; color: var(--text-2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+.sr-description-block {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 10px;
+}
+.sr-description-block p { font-family: var(--mono); font-size: 13px; color: var(--text); line-height: 1.6; }
+.impact-block { margin-bottom: 10px; }
+.impact-block p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+.code-fix-details { margin-top: 8px; }
+.code-fix-details summary { font-size: 13px; color: var(--primary); cursor: pointer; padding: 4px 0; font-weight: 500; }
+.code-fix-details summary:focus { outline: none; box-shadow: var(--focus-ring); }
+.code-block-label { font-size: 11px; color: var(--text-3); font-family: var(--mono); margin: 6px 0 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.code-fix-details pre {
+  background: #1E2A3A; border: 1px solid #2D4A62; border-radius: var(--r-sm);
+  padding: 10px 14px; overflow-x: auto; margin-bottom: 6px;
+}
+.code-fix-details code { font-family: var(--mono); font-size: 12px; color: #7DD3FC; }
+.code-note { font-size: 12px; color: var(--text-2); font-style: italic; }
+
+.ai-report-section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 24px; margin-top: 20px;
+  box-shadow: var(--shadow);
+}
+.ai-report-section h3 { color: var(--primary); font-size: 1.05rem; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 700; }
+.ai-report-content { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+
+.criterion-research { margin-top: 8px; }
+.criterion-research summary { font-size: 12px; color: var(--text-2); cursor: pointer; padding: 3px 0; }
+.criterion-research summary:focus { outline: none; box-shadow: var(--focus-ring); }
+.criterion-research-btn {
+  background: transparent; border: 1.5px solid var(--border); color: var(--text-2);
+  font-family: var(--mono); font-size: 12px; padding: 4px 10px;
+  border-radius: var(--r-sm); cursor: pointer; margin-bottom: 8px;
+  transition: border-color 0.12s, color 0.12s;
+}
+.criterion-research-btn:hover { border-color: var(--primary); color: var(--primary); }
+.criterion-research-btn:focus { outline: none; box-shadow: var(--focus-ring); }
+.criterion-content { font-size: 12px; color: var(--text-2); line-height: 1.7; white-space: pre-wrap; padding: 10px; background: var(--bg-2); border-radius: var(--r-sm); }
+
+/* ════════════════════════════════════════════════════════
+   LIVE CO-PILOT
+════════════════════════════════════════════════════════ */
+.copilot-status {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; background: var(--card);
+  border-radius: var(--r); margin-bottom: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.copilot-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg-3); flex-shrink: 0; }
+.copilot-dot.active { background: var(--minor); animation: copilot-pulse 1.5s infinite; }
+@keyframes copilot-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+.copilot-status-text { font-size: 13px; color: var(--text-2); }
+
+.journey-log {
+  list-style: none; max-height: 400px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: var(--r);
+  padding: 0; margin-bottom: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.journey-log li {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.journey-log li:last-child { border-bottom: none; }
+.journey-element { font-family: var(--mono); color: var(--primary); font-size: 12px; font-weight: 500; }
+.journey-annotation { color: var(--text-2); font-size: 13px; margin-top: 3px; line-height: 1.5; }
+.journey-empty { padding: 24px; text-align: center; color: var(--text-3); font-style: italic; }
+
+/* ── AI save status ── */
+.copilot-dot { width: 10px; height: 10px; }
+
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE — sidebar collapses to icon strip on mobile
+════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  #view-app.active {
+    grid-template-columns: 56px 1fr;
+  }
+  .nav-brand-tagline,
+  .nav-label,
+  .nav-pin-label { display: none; }
+  .nav-brand { padding: 16px 12px; }
+  .nav-brand-name { font-size: 0.9rem; }
+  .nav-tabs li { margin: 1px 4px; }
+  .nav-tab { padding: 10px; justify-content: center; }
+  .tab-panel { padding: 20px 16px; }
+  .ai-provider-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 500px) {
+  #view-app.active { grid-template-columns: 1fr; }
+  #app-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 56px; flex-direction: row;
+    width: 100%; border-right: none;
+    border-top: 1px solid var(--sb-border);
+    z-index: 200;
+  }
+  .nav-tabs {
+    display: flex; flex-direction: row;
+    overflow-x: auto; padding: 0;
+    width: 100%; flex: 1;
+  }
+  .nav-tabs li { margin: 0; }
+  .nav-tab[aria-selected="true"]::before { display: none; }
+  .nav-brand, .nav-actions { display: none; }
+  #main-content { padding-bottom: 56px; }
+}
   </style>
 </head>
 <body>
@@ -1046,29 +1149,29 @@
 ═══════════════════════════════════════════ -->
 <div id="view-setup" class="view" role="main">
   <div class="setup-card">
-    <div class="brand-mark" aria-label="AMA11Y">AMA11Y</div>
-    <p class="brand-sub">Accessibility Management and Audit Layer</p>
+    <span class="brand-mark" aria-label="AMA11Y">AMA11Y</span>
+    <span class="brand-sub">Accessibility Management and Audit Layer</span>
     <h1 class="setup-title">Create Your PIN</h1>
     <p class="setup-desc">
-      This is your first visit. Set a numeric PIN to protect access to your audit platform.
-      Choose a PIN between 4 and 8 digits. You will enter this PIN each time you sign in.
+      First visit — set a numeric PIN to protect access to your audit platform.
+      Choose between 4 and 8 digits. You'll enter it each time you sign in.
     </p>
     <div>
       <label class="field-label" for="setup-pin-1">Choose a PIN (4 to 8 digits)</label>
       <input class="field-input" type="password" inputmode="numeric"
         id="setup-pin-1" autocomplete="new-password"
         placeholder="Enter PIN" maxlength="8" aria-describedby="setup-hint-1">
-      <p id="setup-hint-1" style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:-10px;margin-bottom:16px;">
+      <p id="setup-hint-1" style="font-size:12px;color:var(--text-3);font-family:var(--mono);margin-top:-10px;margin-bottom:16px;">
         Numbers only. Minimum 4 digits.
       </p>
       <label class="field-label" for="setup-pin-2">Confirm PIN</label>
       <input class="field-input" type="password" inputmode="numeric"
         id="setup-pin-2" autocomplete="new-password"
         placeholder="Confirm PIN" maxlength="8">
-      <p id="setup-error" style="font-size:12px;color:var(--red);min-height:18px;font-family:var(--mono);margin-bottom:12px;"
+      <p id="setup-error" style="font-size:13px;color:var(--critical);min-height:18px;font-family:var(--mono);margin-bottom:12px;"
         role="alert" aria-live="polite"></p>
-      <button class="btn btn-primary" id="setup-btn" type="button" style="width:100%;justify-content:center;">
-        Set PIN and Enter
+      <button class="btn btn-primary" id="setup-btn" type="button" style="width:100%;justify-content:center;padding:11px 20px;">
+        Set PIN and Continue
       </button>
     </div>
   </div>
@@ -1079,10 +1182,10 @@
 ═══════════════════════════════════════════ -->
 <div id="view-login" class="view" role="main">
   <div class="login-card">
-    <div class="brand-mark" aria-label="AMA11Y">AMA11Y</div>
+    <span class="brand-mark" aria-label="AMA11Y">AMA11Y</span>
     <p class="brand-sub">ama11y.akhileshmalani.com</p>
     <h1 class="login-title">Enter Your PIN</h1>
-    <p class="login-sub">Enter your PIN to access your audit platform.</p>
+    <p class="login-sub">Enter your PIN to access the audit platform.</p>
 
     <div class="pin-dots" aria-hidden="true">
       <div class="pin-dot" id="dot-0"></div>
@@ -1095,7 +1198,6 @@
       <div class="pin-dot" id="dot-7"></div>
     </div>
 
-    <!-- Screen reader accessible PIN input (visually hidden, focused on keyboard entry) -->
     <label class="field-label" for="sr-pin-input"
       style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">
       Enter PIN digits
@@ -1121,9 +1223,8 @@
     </div>
 
     <p id="login-status" class="pin-error" role="alert" aria-live="polite"></p>
-
-    <p style="font-size:11px;color:var(--text-muted);font-family:var(--mono);text-align:center;">
-      You can also type your PIN directly using the number keys on your keyboard.
+    <p style="font-size:12px;color:var(--text-3);font-family:var(--mono);text-align:center;margin-top:4px;">
+      You can also type your PIN directly using the keyboard.
     </p>
   </div>
 </div>
@@ -1133,87 +1234,143 @@
 ═══════════════════════════════════════════ -->
 <div id="view-app" class="view" role="application" aria-label="AMA11Y audit platform">
 
-  <!-- Navigation -->
+  <!-- ── Sidebar Navigation ── -->
   <nav id="app-nav" aria-label="AMA11Y navigation">
-    <span class="nav-brand" aria-label="AMA11Y">AMA11Y</span>
+    <div class="nav-brand">
+      <span class="nav-brand-name" aria-label="AMA11Y">AMA11Y</span>
+      <span class="nav-brand-tagline">Accessibility Platform</span>
+    </div>
+
     <ul class="nav-tabs" role="tablist" aria-label="Application sections">
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-dashboard"
           aria-controls="panel-dashboard" aria-selected="true" type="button">
-          Dashboard
-        </button>
-      </li>
-      <li role="presentation">
-        <button class="nav-tab" role="tab" id="tab-import"
-          aria-controls="panel-import" aria-selected="false" type="button">
-          Import and Report
+          <!-- Home icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+          </svg>
+          <span class="nav-label">Dashboard</span>
         </button>
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-webaudit"
           aria-controls="panel-webaudit" aria-selected="false" type="button">
-          Web Audit
+          <!-- Globe icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">Web Audit</span>
         </button>
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-document"
           aria-controls="panel-document" aria-selected="false" type="button">
-          Document Audit
+          <!-- Document icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">Documents</span>
         </button>
       </li>
       <li role="presentation">
-        <button class="nav-tab" role="tab" id="tab-champions"
-          aria-controls="panel-champions" aria-selected="false" type="button">
-          Champions
+        <button class="nav-tab" role="tab" id="tab-import"
+          aria-controls="panel-import" aria-selected="false" type="button">
+          <!-- Upload/report icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">Reports</span>
         </button>
       </li>
+
+      <li role="presentation" aria-hidden="true">
+        <div class="nav-section-divider"></div>
+      </li>
+
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-vpat"
           aria-controls="panel-vpat" aria-selected="false" type="button">
-          VPAT / ACR
+          <!-- Clipboard/VPAT icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">VPAT / ACR</span>
         </button>
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-mobile"
           aria-controls="panel-mobile" aria-selected="false" type="button">
-          Mobile Audit
+          <!-- Mobile icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zm3 14a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">Mobile</span>
         </button>
       </li>
       <li role="presentation">
-        <button class="nav-tab" role="tab" id="tab-settings"
-          aria-controls="panel-settings" aria-selected="false" type="button">
-          Settings
-        </button>
-      </li>
-      <li role="presentation">
-        <button class="nav-tab" role="tab" id="tab-ai-settings"
-          aria-controls="panel-ai-settings" aria-selected="false" type="button">
-          AI Settings
+        <button class="nav-tab" role="tab" id="tab-champions"
+          aria-controls="panel-champions" aria-selected="false" type="button">
+          <!-- Star/champions icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span class="nav-label">Champions</span>
         </button>
       </li>
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-copilot"
           aria-controls="panel-copilot" aria-selected="false" type="button">
-          Live Audit
+          <!-- Lightning/live icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">Live Audit</span>
+        </button>
+      </li>
+
+      <li role="presentation" aria-hidden="true">
+        <div class="nav-section-divider"></div>
+      </li>
+
+      <li role="presentation">
+        <button class="nav-tab" role="tab" id="tab-settings"
+          aria-controls="panel-settings" aria-selected="false" type="button">
+          <!-- Settings icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+          </svg>
+          <span class="nav-label">Settings</span>
+        </button>
+      </li>
+      <!-- AI Settings tab: always in DOM for JS, visible via Settings panel link -->
+      <li role="presentation">
+        <button class="nav-tab" role="tab" id="tab-ai-settings"
+          aria-controls="panel-ai-settings" aria-selected="false" type="button">
+          <!-- Sparkle/AI icon -->
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+          </svg>
+          <span class="nav-label">AI Settings</span>
         </button>
       </li>
     </ul>
+
     <div class="nav-actions">
       <span class="nav-pin-label" aria-label="Signed in">Signed in</span>
-      <button class="btn btn-sm btn-danger" id="sign-out-btn" type="button"
-        aria-label="Sign out of AMA11Y">Sign Out</button>
+      <button id="sign-out-btn" type="button" aria-label="Sign out of AMA11Y">Sign Out</button>
     </div>
   </nav>
 
+  <!-- ── Main Content ── -->
   <main id="main-content">
 
-    <!-- ── DASHBOARD ── -->
+    <!-- ═══ DASHBOARD ═══ -->
     <div class="tab-panel active" id="panel-dashboard" role="tabpanel"
       aria-labelledby="tab-dashboard" tabindex="-1">
-      <h1 class="panel-title">Audit Dashboard</h1>
+      <h1 class="panel-title">Dashboard</h1>
       <p class="panel-desc">
-        Your audit history and session summaries. Import a JSON findings file from the
-        bookmarklet or extension to generate reports and view findings here.
+        Your audit history at a glance. Import a findings JSON from the bookmarklet or extension to see results here.
       </p>
 
       <h2 class="section-heading">Session Statistics</h2>
@@ -1224,11 +1381,11 @@
         </div>
         <div class="stat-card">
           <div class="stat-n n-fail" id="stat-failures">0</div>
-          <div class="stat-l">Total Failures</div>
+          <div class="stat-l">Failures</div>
         </div>
         <div class="stat-card">
           <div class="stat-n n-warn" id="stat-warnings">0</div>
-          <div class="stat-l">Total Warnings</div>
+          <div class="stat-l">Warnings</div>
         </div>
         <div class="stat-card">
           <div class="stat-n n-pass" id="stat-pages">0</div>
@@ -1237,61 +1394,240 @@
       </div>
 
       <h2 class="section-heading">Recent Sessions</h2>
-      <ul class="session-list" id="session-list" aria-label="Recent audit sessions">
-        <li style="padding:16px 0;font-size:13px;color:var(--text-muted);font-family:var(--mono);">
-          No sessions yet. Import a JSON findings file to create your first session.
-        </li>
-      </ul>
-
-      <div style="margin-top:16px;">
-        <button class="btn" id="clear-sessions-btn" type="button">Clear All Sessions</button>
+      <div class="card" style="padding: 0 24px;">
+        <ul class="session-list" id="session-list" aria-label="Recent audit sessions">
+          <li style="padding:20px 0;font-size:14px;color:var(--text-3);">
+            No sessions yet. Import a findings JSON file to create your first session.
+          </li>
+        </ul>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="btn btn-sm" id="clear-sessions-btn" type="button">Clear All Sessions</button>
       </div>
 
       <h2 class="section-heading">URL Audit History</h2>
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
-        Sessions grouped by URL. Compare audit results over time to track improvements and regressions.
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;">
+        Audits grouped by URL. Requires at least two sessions on the same URL to show trends.
       </p>
       <div id="url-history" role="region" aria-label="URL-based audit history" aria-live="polite">
-        <p style="font-size:13px;color:var(--text-muted);font-family:var(--mono);">
-          No URL history available. At least two sessions for the same URL are needed to show comparisons.
+        <p style="font-size:13px;color:var(--text-3);">
+          No URL history yet. Run two or more audits on the same URL to compare results.
         </p>
       </div>
     </div>
 
-    <!-- ── IMPORT AND REPORT ── -->
-    <div class="tab-panel" id="panel-import" role="tabpanel"
-      aria-labelledby="tab-import" tabindex="-1">
-      <h1 class="panel-title">Import Findings and Generate Reports</h1>
+    <!-- ═══ WEB AUDIT ═══ -->
+    <div class="tab-panel" id="panel-webaudit" role="tabpanel"
+      aria-labelledby="tab-webaudit" tabindex="-1">
+      <h1 class="panel-title">Web Audit</h1>
       <p class="panel-desc">
-        Import a JSON findings file exported from the AMA11Y bookmarklet or extension.
-        Review findings, apply filters, and export reports in all five accessible formats.
+        Enter a URL and run a full WCAG accessibility audit directly from this platform.
+        The page opens in a new tab, the audit runs automatically, and findings come back here.
       </p>
 
-      <h2 class="section-heading">Step 1: Import Findings JSON</h2>
+      <div class="notice warn">
+        <strong>Note:</strong> Pages with strict Content Security Policies may block injection.
+        If that happens, use the bookmarklet or browser extension directly, then import the
+        JSON file in the Reports tab.
+      </div>
+
+      <div class="card">
+        <h2 class="section-heading" style="margin-top:0;">Audit Configuration</h2>
+
+        <label class="field-label" for="wa-url">Page URL</label>
+        <input class="field-input" type="url" id="wa-url"
+          placeholder="https://example.com"
+          aria-describedby="wa-url-hint">
+        <p id="wa-url-hint" style="font-size:12px;color:var(--text-3);font-family:var(--mono);margin-top:-10px;margin-bottom:20px;">
+          Include https:// or http://
+        </p>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+          <div style="flex:1;min-width:140px;">
+            <label class="field-label" for="wa-standard">Standard</label>
+            <select class="field-select" id="wa-standard" style="margin-bottom:0;"
+              aria-label="Select accessibility standard">
+              <option value="wcag22">WCAG 2.2</option>
+              <option value="wcag21">WCAG 2.1</option>
+              <option value="wcag20">WCAG 2.0</option>
+              <option value="section508">Section 508</option>
+              <option value="en301549">EN 301 549</option>
+              <option value="aoda">AODA</option>
+              <option value="gigw">GIGW 3.0</option>
+              <option value="rpwd">RPD Act 2016</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:120px;">
+            <label class="field-label" for="wa-level">Conformance Level</label>
+            <select class="field-select" id="wa-level" style="margin-bottom:0;"
+              aria-label="Select conformance level">
+              <option value="A">Level A</option>
+              <option value="AA" selected>Level AA</option>
+              <option value="AAA">Level AAA</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="wa-run-btn" type="button"
+          aria-describedby="wa-status" style="padding:11px 28px;font-size:15px;">
+          Run Audit
+        </button>
+      </div>
+
+      <div id="wa-status" role="status" aria-live="polite"
+        style="font-size:13px;color:var(--text-2);min-height:20px;margin:12px 0;">
+        Enter a URL above and press Run Audit.
+      </div>
+
+      <div id="wa-progress-wrap" style="display:none;margin-bottom:16px;">
+        <div class="progress-wrap"><div class="progress-bar" id="wa-progress-bar"></div></div>
+        <p id="wa-progress-label" style="font-size:12px;color:var(--text-2);font-family:var(--mono);margin-top:4px;"></p>
+      </div>
+
+      <div id="wa-results-section" style="display:none;">
+        <h2 class="section-heading">Audit Results</h2>
+
+        <div id="wa-summary" class="stats-grid" role="region" aria-label="Audit finding counts"
+          style="margin-bottom:20px;"></div>
+
+        <div class="filter-bar" role="group" aria-label="Filter findings">
+          <span class="filter-label">Verdict:</span>
+          <select class="field-select" id="wa-filter-verdict" style="margin-bottom:0;"
+            aria-label="Filter findings by verdict">
+            <option value="All">All verdicts</option>
+            <option value="Fail">Fail</option>
+            <option value="Warning">Warning</option>
+            <option value="Pass">Pass</option>
+            <option value="Info">Info</option>
+          </select>
+          <span class="filter-label">Engine:</span>
+          <select class="field-select" id="wa-filter-engine" style="margin-bottom:0;"
+            aria-label="Filter findings by engine">
+            <option value="All">All engines</option>
+          </select>
+          <span class="filter-label">Severity:</span>
+          <select class="field-select" id="wa-filter-severity" style="margin-bottom:0;"
+            aria-label="Filter findings by severity">
+            <option value="All">All severities</option>
+            <option value="Critical">Critical</option>
+            <option value="Serious">Serious</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Minor">Minor</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn btn-primary btn-sm" id="wa-export-html" type="button">Export HTML</button>
+          <button class="btn btn-sm" id="wa-export-csv"  type="button">Export CSV</button>
+          <button class="btn btn-sm" id="wa-export-txt"  type="button">Plain Text</button>
+          <button class="btn btn-sm" id="wa-export-json" type="button">Export JSON</button>
+        </div>
+
+        <div style="overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);"
+          role="region" aria-label="Web audit findings table" tabindex="0">
+          <table class="findings-table" id="wa-findings-table" aria-label="Web accessibility audit findings">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Engine</th>
+                <th scope="col">Criterion</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Verdict</th>
+                <th scope="col">Detail</th>
+              </tr>
+            </thead>
+            <tbody id="wa-findings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DOCUMENT AUDIT ═══ -->
+    <div class="tab-panel" id="panel-document" role="tabpanel"
+      aria-labelledby="tab-document" tabindex="-1">
+      <h1 class="panel-title">Document Audit</h1>
+      <p class="panel-desc">
+        Upload a PDF or Word document to check its accessibility structure. Covers tags,
+        language, headings, alt text, table headers, bookmarks, and reading order.
+      </p>
+
+      <div class="method-tabs" role="tablist" aria-label="Document type">
+        <button class="method-tab" role="tab" id="dtab-pdf" aria-selected="true"
+          aria-controls="dpanel-pdf" type="button">PDF Document</button>
+        <button class="method-tab" role="tab" id="dtab-docx" aria-selected="false"
+          aria-controls="dpanel-docx" type="button">Word Document (DOCX)</button>
+      </div>
+
+      <div id="dpanel-pdf" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:24px;margin-bottom:16px;background:var(--card);box-shadow:var(--shadow);">
+        <div class="upload-zone" role="region" aria-label="PDF upload area">
+          <div class="upload-icon" aria-hidden="true">PDF</div>
+          <p class="upload-label">Upload PDF for Accessibility Audit</p>
+          <p class="upload-hint">Checks: tagged structure · language · title · headings · alt text · table headers · bookmarks</p>
+          <div class="file-input-wrapper">
+            <input type="file" id="doc-file-input" accept=".pdf"
+              aria-label="Select PDF document to audit">
+            <label class="file-input-label" for="doc-file-input">Select PDF</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="dpanel-docx" hidden style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:24px;margin-bottom:16px;background:var(--card);box-shadow:var(--shadow);">
+        <div class="upload-zone" role="region" aria-label="DOCX upload area">
+          <div class="upload-icon" aria-hidden="true">DOC</div>
+          <p class="upload-label">Upload Word Document for Accessibility Audit</p>
+          <p class="upload-hint">Checks: heading styles · alt text · table headers · language · lists · text boxes · bookmarks · colour contrast</p>
+          <div class="file-input-wrapper">
+            <input type="file" id="docx-file-input" accept=".docx"
+              aria-label="Select Word document to audit">
+            <label class="file-input-label" for="docx-file-input">Select DOCX</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice warn">
+        <strong>Note:</strong> Scanned PDFs with no machine-readable text will report no tag structure.
+        Password-protected documents cannot be audited.
+      </div>
+
+      <div id="doc-results" style="display:none;">
+        <h2 class="section-heading">Results</h2>
+        <div id="doc-results-list" role="list" aria-label="Document audit findings"></div>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="doc-export-html" type="button">Export HTML Report</button>
+          <button class="btn" id="doc-export-txt" type="button">Export Plain Text</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ IMPORT AND REPORT ═══ -->
+    <div class="tab-panel" id="panel-import" role="tabpanel"
+      aria-labelledby="tab-import" tabindex="-1">
+      <h1 class="panel-title">Reports</h1>
+      <p class="panel-desc">
+        Import a JSON findings file from the AMA11Y bookmarklet or extension.
+        Review findings, apply filters, and export in any of five accessible formats.
+      </p>
+
+      <h2 class="section-heading">Step 1 — Import Findings</h2>
       <div class="upload-zone" role="region" aria-label="JSON file upload area">
         <div class="upload-icon" aria-hidden="true">{ }</div>
-        <p class="upload-label">Import AMA11Y Findings JSON</p>
-        <p class="upload-hint">Select the JSON file exported from your bookmarklet or extension</p>
+        <p class="upload-label">Import Findings JSON</p>
+        <p class="upload-hint">The JSON file exported from the AMA11Y bookmarklet or browser extension</p>
         <div class="file-input-wrapper">
           <input type="file" id="json-file-input" accept=".json"
             aria-label="Select JSON findings file"
             aria-describedby="json-file-hint">
-          <label class="file-input-label" for="json-file-input">
-            Select JSON File
-          </label>
+          <label class="file-input-label" for="json-file-input">Select JSON File</label>
         </div>
-        <p id="json-file-hint" style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:10px;">
-          File must be exported from AMA11Y bookmarklet or extension
+        <p id="json-file-hint" style="font-size:12px;color:var(--text-3);font-family:var(--mono);margin-top:10px;">
+          Exported from AMA11Y bookmarklet or extension
         </p>
       </div>
 
       <div id="findings-loaded-info" role="region" aria-label="Loaded findings information" aria-live="polite"></div>
 
       <div id="report-section" style="display:none;">
-        <h2 class="section-heading">Step 2: Export Report</h2>
-        <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">
-          Select a format and press Generate Report. All formats are fully accessible.
-        </p>
+        <h2 class="section-heading">Step 2 — Generate Report</h2>
 
         <div class="export-grid" role="group" aria-label="Report format selection">
           <div class="export-card selected" role="button" tabindex="0"
@@ -1304,54 +1640,60 @@
             data-format="word" aria-pressed="false"
             aria-label="Word document format">
             <div class="export-format">Word</div>
-            <div class="export-desc">Accessible DOCX with built-in heading styles</div>
+            <div class="export-desc">DOCX with built-in heading styles</div>
           </div>
           <div class="export-card" role="button" tabindex="0"
             data-format="csv" aria-pressed="false"
-            aria-label="Excel CSV format">
-            <div class="export-format">Excel CSV</div>
-            <div class="export-desc">CSV with column headers for Excel and screen readers</div>
+            aria-label="CSV format">
+            <div class="export-format">CSV</div>
+            <div class="export-desc">Spreadsheet-ready for Excel or Numbers</div>
           </div>
           <div class="export-card" role="button" tabindex="0"
             data-format="txt" aria-pressed="false"
             aria-label="Plain text format">
             <div class="export-format">Plain Text</div>
-            <div class="export-desc">Structured plain text for braille display and any reader</div>
+            <div class="export-desc">Structured text for braille displays</div>
           </div>
           <div class="export-card" role="button" tabindex="0"
             data-format="json" aria-pressed="false"
             aria-label="JSON data format">
             <div class="export-format">JSON</div>
-            <div class="export-desc">Raw findings data for further processing</div>
+            <div class="export-desc">Raw data for further processing</div>
           </div>
         </div>
 
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px;">
-          <label class="field-label" for="report-title"
-            style="margin:0;white-space:nowrap;">Report Title:</label>
-          <input class="field-input" type="text" id="report-title"
-            style="margin:0;flex:1;min-width:200px;max-width:400px;"
-            placeholder="e.g. BMO Homepage Audit — March 2026">
-          <label class="field-label" for="report-standard"
-            style="margin:0;white-space:nowrap;">Standard:</label>
-          <select class="field-select" id="report-standard"
-            style="margin:0;min-width:140px;max-width:180px;"
-            aria-label="Select accessibility standard for report">
-            <option value="wcag22">WCAG 2.2</option>
-            <option value="wcag21">WCAG 2.1</option>
-            <option value="wcag20">WCAG 2.0</option>
-            <option value="section508">Section 508</option>
-            <option value="en301549">EN 301 549</option>
-            <option value="aoda">AODA</option>
-            <option value="gigw">GIGW 3.0</option>
-            <option value="rpwd">RPD Act 2016</option>
-          </select>
-          <button class="btn btn-primary" id="generate-report-btn" type="button">
-            Generate Report
-          </button>
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:2;min-width:200px;">
+              <label class="field-label" for="report-title">Report Title</label>
+              <input class="field-input" type="text" id="report-title"
+                style="margin-bottom:0;"
+                placeholder="e.g. BMO Homepage Audit — April 2026">
+            </div>
+            <div style="flex:1;min-width:140px;">
+              <label class="field-label" for="report-standard">Standard</label>
+              <select class="field-select" id="report-standard"
+                style="margin-bottom:0;"
+                aria-label="Select accessibility standard for report">
+                <option value="wcag22">WCAG 2.2</option>
+                <option value="wcag21">WCAG 2.1</option>
+                <option value="wcag20">WCAG 2.0</option>
+                <option value="section508">Section 508</option>
+                <option value="en301549">EN 301 549</option>
+                <option value="aoda">AODA</option>
+                <option value="gigw">GIGW 3.0</option>
+                <option value="rpwd">RPD Act 2016</option>
+              </select>
+            </div>
+            <div style="padding-bottom:0;">
+              <button class="btn btn-primary" id="generate-report-btn" type="button" style="padding:10px 22px;">
+                Generate Report
+              </button>
+            </div>
+          </div>
         </div>
 
-        <h2 class="section-heading">Step 3: Review Findings</h2>
+        <h2 class="section-heading">Step 3 — Review Findings</h2>
 
         <div class="filter-bar" role="group" aria-label="Filter findings">
           <span class="filter-label">Verdict:</span>
@@ -1394,212 +1736,17 @@
       </div>
     </div>
 
-    <!-- ── WEB AUDIT ── -->
-    <div class="tab-panel" id="panel-webaudit" role="tabpanel"
-      aria-labelledby="tab-webaudit" tabindex="-1">
-      <h1 class="panel-title">Web Accessibility Audit</h1>
-      <p class="panel-desc">
-        Run a full accessibility audit on any web page directly from this platform.
-        Enter the URL below and press Run Audit. The page opens in a new tab,
-        the audit runs automatically, and findings are posted back here for review and export.
-      </p>
-
-      <div class="notice warn">
-        <p>
-          <strong>How this works:</strong> The audit runs inside the target page using the
-          AMA11Y engine. Some pages with strict Content Security Policies may block this.
-          If that happens, use the bookmarklet or extension on that page instead,
-          then import the JSON file in the Import and Report tab.
-        </p>
-      </div>
-
-      <h2 class="section-heading">Audit Configuration</h2>
-
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
-        <div style="flex:1;min-width:260px;">
-          <label class="field-label" for="wa-url">Page URL to audit</label>
-          <input class="field-input" type="url" id="wa-url"
-            placeholder="https://example.com"
-            aria-describedby="wa-url-hint"
-            style="margin-bottom:0;">
-          <p id="wa-url-hint" style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:4px;">
-            Must include https:// or http://
-          </p>
-        </div>
-        <div style="min-width:140px;">
-          <label class="field-label" for="wa-standard">Standard</label>
-          <select class="field-select" id="wa-standard" style="margin-bottom:0;"
-            aria-label="Select accessibility standard">
-            <option value="wcag22">WCAG 2.2</option>
-            <option value="wcag21">WCAG 2.1</option>
-            <option value="wcag20">WCAG 2.0</option>
-            <option value="section508">Section 508</option>
-            <option value="en301549">EN 301 549</option>
-            <option value="aoda">AODA</option>
-            <option value="gigw">GIGW 3.0</option>
-            <option value="rpwd">RPD Act 2016</option>
-          </select>
-        </div>
-        <div style="min-width:120px;">
-          <label class="field-label" for="wa-level">Level</label>
-          <select class="field-select" id="wa-level" style="margin-bottom:0;"
-            aria-label="Select conformance level">
-            <option value="A">Level A</option>
-            <option value="AA" selected>Level AA</option>
-            <option value="AAA">Level AAA</option>
-          </select>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" id="wa-run-btn" type="button"
-        aria-describedby="wa-status" style="margin-bottom:12px;">
-        Run Audit on This Page
-      </button>
-
-      <div id="wa-status" role="status" aria-live="polite"
-        style="font-family:var(--mono);font-size:12px;color:var(--text-dim);min-height:20px;margin-bottom:16px;">
-        Enter a URL above and press Run Audit.
-      </div>
-
-      <div id="wa-progress-wrap" style="display:none;margin-bottom:16px;">
-        <div class="progress-wrap"><div class="progress-bar" id="wa-progress-bar"></div></div>
-        <p id="wa-progress-label" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:4px;"></p>
-      </div>
-
-      <div id="wa-results-section" style="display:none;">
-        <h2 class="section-heading">Audit Results</h2>
-
-        <div id="wa-summary" class="stats-grid" role="region" aria-label="Audit finding counts"
-          style="margin-bottom:20px;"></div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
-          <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);">Filter:</span>
-          <select class="field-select" id="wa-filter-verdict" style="margin-bottom:0;min-width:110px;"
-            aria-label="Filter findings by verdict">
-            <option value="All">All verdicts</option>
-            <option value="Fail">Fail</option>
-            <option value="Warning">Warning</option>
-            <option value="Pass">Pass</option>
-            <option value="Info">Info</option>
-          </select>
-          <select class="field-select" id="wa-filter-engine" style="margin-bottom:0;min-width:140px;"
-            aria-label="Filter findings by engine">
-            <option value="All">All engines</option>
-          </select>
-          <select class="field-select" id="wa-filter-severity" style="margin-bottom:0;min-width:120px;"
-            aria-label="Filter findings by severity">
-            <option value="All">All severities</option>
-            <option value="Critical">Critical</option>
-            <option value="Serious">Serious</option>
-            <option value="Moderate">Moderate</option>
-            <option value="Minor">Minor</option>
-          </select>
-        </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-          <button class="btn btn-primary btn-sm" id="wa-export-html" type="button">Export HTML</button>
-          <button class="btn btn-sm" id="wa-export-csv"  type="button">Export CSV</button>
-          <button class="btn btn-sm" id="wa-export-txt"  type="button">Export Plain Text</button>
-          <button class="btn btn-sm" id="wa-export-json" type="button">Export JSON</button>
-        </div>
-
-        <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);"
-          role="region" aria-label="Web audit findings table" tabindex="0">
-          <table class="findings-table" id="wa-findings-table" aria-label="Web accessibility audit findings">
-            <thead>
-              <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Engine</th>
-                <th scope="col">Criterion</th>
-                <th scope="col">Severity</th>
-                <th scope="col">Verdict</th>
-                <th scope="col">Detail</th>
-              </tr>
-            </thead>
-            <tbody id="wa-findings-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── DOCUMENT AUDIT ── -->
-    <div class="tab-panel" id="panel-document" role="tabpanel"
-      aria-labelledby="tab-document" tabindex="-1">
-      <h1 class="panel-title">Document Accessibility Audit</h1>
-      <p class="panel-desc">
-        Upload a PDF or Word document to audit its accessibility structure.
-        PDF audit checks tag structure, language, alt text, headings, tables, and bookmarks.
-        DOCX audit checks heading styles, alt text, table headers, language, lists,
-        reading order, bookmarks, and colour contrast of text.
-      </p>
-
-      <h2 class="section-heading">Upload Document</h2>
-
-      <div class="method-tabs" role="tablist" aria-label="Document type" style="margin-bottom:0;">
-        <button class="method-tab" role="tab" id="dtab-pdf" aria-selected="true"
-          aria-controls="dpanel-pdf" type="button">PDF Document</button>
-        <button class="method-tab" role="tab" id="dtab-docx" aria-selected="false"
-          aria-controls="dpanel-docx" type="button">Word Document (DOCX)</button>
-      </div>
-
-      <div id="dpanel-pdf" style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;padding:20px;margin-bottom:16px;">
-        <div class="upload-zone" role="region" aria-label="PDF upload area">
-          <div class="upload-icon" aria-hidden="true">PDF</div>
-          <p class="upload-label">Upload PDF for Accessibility Audit</p>
-          <p class="upload-hint">Checks: Tagged status, language, title, headings, alt text, table headers, bookmarks, structure tree</p>
-          <div class="file-input-wrapper">
-            <input type="file" id="doc-file-input" accept=".pdf"
-              aria-label="Select PDF document to audit">
-            <label class="file-input-label" for="doc-file-input">Select PDF File</label>
-          </div>
-        </div>
-      </div>
-
-      <div id="dpanel-docx" hidden style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;padding:20px;margin-bottom:16px;">
-        <div class="upload-zone" role="region" aria-label="DOCX upload area">
-          <div class="upload-icon" aria-hidden="true">DOC</div>
-          <p class="upload-label">Upload Word Document for Accessibility Audit</p>
-          <p class="upload-hint">Checks: Heading styles, alt text, table headers, language, lists, text boxes, bookmarks, colour contrast</p>
-          <div class="file-input-wrapper">
-            <input type="file" id="docx-file-input" accept=".docx"
-              aria-label="Select Word document to audit">
-            <label class="file-input-label" for="docx-file-input">Select DOCX File</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="notice warn" style="margin-top:4px;">
-        <strong>Note:</strong> Both audits use structural and content analysis. Scanned PDFs with no machine-readable text will report no tag structure. Password-protected documents cannot be audited.
-      </div>
-
-      <div id="doc-results" style="display:none;">
-        <h2 class="section-heading">Document Audit Results</h2>
-        <div id="doc-results-list" role="list" aria-label="Document audit findings"></div>
-        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-primary" id="doc-export-html" type="button">
-            Export as HTML Report
-          </button>
-          <button class="btn" id="doc-export-txt" type="button">
-            Export as Plain Text
-          </button>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ── CHAMPIONS TRACKER ── -->
+    <!-- ═══ CHAMPIONS ═══ -->
     <div class="tab-panel" id="panel-champions" role="tabpanel"
       aria-labelledby="tab-champions" tabindex="-1">
-      <h1 class="panel-title">Accessibility Champions Tracker</h1>
+      <h1 class="panel-title">Champions Tracker</h1>
       <p class="panel-desc">
         Track engagement metrics for your Accessibility Champions programme.
-        Record audits completed, issues reported, issues resolved, and training status
-        for each champion across your client engagements.
       </p>
 
       <h2 class="section-heading">Add Champion</h2>
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+      <div class="card" style="margin-bottom:24px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px;">
           <div>
             <label class="field-label" for="ch-name">Full Name</label>
             <input class="field-input" type="text" id="ch-name" placeholder="Champion name" style="margin-bottom:0;">
@@ -1609,7 +1756,7 @@
             <input class="field-input" type="text" id="ch-role" placeholder="Developer, Designer..." style="margin-bottom:0;">
           </div>
           <div>
-            <label class="field-label" for="ch-team">Team or Product</label>
+            <label class="field-label" for="ch-team">Team / Product</label>
             <input class="field-input" type="text" id="ch-team" placeholder="Team name" style="margin-bottom:0;">
           </div>
           <div>
@@ -1617,21 +1764,23 @@
             <input class="field-input" type="text" id="ch-client" placeholder="e.g. BMO" style="margin-bottom:0;">
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" id="ch-add-btn" type="button">Add Champion</button>
-        <span id="ch-add-status" role="status" aria-live="polite"
-          style="font-family:var(--mono);font-size:11px;color:var(--green);margin-left:12px;"></span>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button class="btn btn-primary btn-sm" id="ch-add-btn" type="button">Add Champion</button>
+          <span id="ch-add-status" role="status" aria-live="polite"
+            style="font-size:13px;color:var(--minor);"></span>
+        </div>
       </div>
 
       <h2 class="section-heading">Champion Roster</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
         <label class="field-label" for="ch-filter-client" style="margin:0;">Filter by client:</label>
         <select class="field-select" id="ch-filter-client" style="margin:0;min-width:140px;" aria-label="Filter champions by client">
           <option value="All">All clients</option>
         </select>
-        <button class="btn btn-sm" id="ch-export-btn" type="button">Export Champion Data as CSV</button>
+        <button class="btn btn-sm" id="ch-export-btn" type="button">Export as CSV</button>
       </div>
 
-      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);"
+      <div style="overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);"
         role="region" aria-label="Champions table" tabindex="0">
         <table class="findings-table" id="ch-table" aria-label="Accessibility champions and engagement metrics">
           <thead>
@@ -1641,96 +1790,96 @@
               <th scope="col">Team</th>
               <th scope="col">Client</th>
               <th scope="col">Audits</th>
-              <th scope="col">Issues Reported</th>
-              <th scope="col">Issues Resolved</th>
+              <th scope="col">Reported</th>
+              <th scope="col">Resolved</th>
               <th scope="col">Training</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody id="ch-tbody">
-            <tr><td colspan="9" style="color:var(--text-muted);font-family:var(--mono);font-size:12px;padding:20px;">
-              No champions added yet. Use the form above to add your first champion.
+            <tr><td colspan="9" style="color:var(--text-3);font-size:13px;padding:24px;">
+              No champions added yet. Use the form above to add your first.
             </td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- ── VPAT / ACR ── -->
+    <!-- ═══ VPAT / ACR ═══ -->
     <div class="tab-panel" id="panel-vpat" role="tabpanel"
       aria-labelledby="tab-vpat" tabindex="-1">
-      <h1 class="panel-title">VPAT 2.5 and ACR Generator</h1>
+      <h1 class="panel-title">VPAT 2.5 / ACR Generator</h1>
       <p class="panel-desc">
-        Generate a VPAT 2.5 Accessibility Conformance Report in Word format.
-        Complete the product information and conformance levels for each criterion.
-        The generated Word document follows the ITI VPAT 2.5 template structure
-        and is compatible with BMO and other enterprise client requirements.
+        Generate a VPAT 2.5 Accessibility Conformance Report in Word format, following
+        the ITI VPAT 2.5 template structure.
       </p>
 
       <h2 class="section-heading">Product Information</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:20px;">
-        <div>
-          <label class="field-label" for="vpat-product">Product Name</label>
-          <input class="field-input" type="text" id="vpat-product" placeholder="e.g. BMO Online Banking Portal">
-        </div>
-        <div>
-          <label class="field-label" for="vpat-version">Product Version</label>
-          <input class="field-input" type="text" id="vpat-version" placeholder="e.g. 2.4.1">
-        </div>
-        <div>
-          <label class="field-label" for="vpat-vendor">Vendor or Developer</label>
-          <input class="field-input" type="text" id="vpat-vendor" placeholder="Organisation name">
-        </div>
-        <div>
-          <label class="field-label" for="vpat-contact">Contact Name</label>
-          <input class="field-input" type="text" id="vpat-contact" placeholder="Akhilesh Malani">
-        </div>
-        <div>
-          <label class="field-label" for="vpat-email">Contact Email</label>
-          <input class="field-input" type="email" id="vpat-email" placeholder="email@example.com">
-        </div>
-        <div>
-          <label class="field-label" for="vpat-date">Report Date</label>
-          <input class="field-input" type="date" id="vpat-date">
-        </div>
-        <div>
-          <label class="field-label" for="vpat-standard">Applicable Standard</label>
-          <select class="field-select" id="vpat-standard" aria-label="Select applicable standard">
-            <option value="wcag22">WCAG 2.2</option>
-            <option value="wcag21">WCAG 2.1</option>
-            <option value="section508">Section 508</option>
-            <option value="en301549">EN 301 549</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label" for="vpat-eval-method">Evaluation Method</label>
-          <input class="field-input" type="text" id="vpat-eval-method"
-            value="Manual testing with JAWS, NVDA, VoiceOver. Automated testing with AMA11Y.">
+      <div class="card">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+          <div>
+            <label class="field-label" for="vpat-product">Product Name</label>
+            <input class="field-input" type="text" id="vpat-product" placeholder="e.g. BMO Online Banking Portal">
+          </div>
+          <div>
+            <label class="field-label" for="vpat-version">Version</label>
+            <input class="field-input" type="text" id="vpat-version" placeholder="e.g. 2.4.1">
+          </div>
+          <div>
+            <label class="field-label" for="vpat-vendor">Vendor / Developer</label>
+            <input class="field-input" type="text" id="vpat-vendor" placeholder="Organisation name">
+          </div>
+          <div>
+            <label class="field-label" for="vpat-contact">Contact Name</label>
+            <input class="field-input" type="text" id="vpat-contact" placeholder="Akhilesh Malani">
+          </div>
+          <div>
+            <label class="field-label" for="vpat-email">Contact Email</label>
+            <input class="field-input" type="email" id="vpat-email" placeholder="email@example.com">
+          </div>
+          <div>
+            <label class="field-label" for="vpat-date">Report Date</label>
+            <input class="field-input" type="date" id="vpat-date">
+          </div>
+          <div>
+            <label class="field-label" for="vpat-standard">Standard</label>
+            <select class="field-select" id="vpat-standard" aria-label="Select applicable standard">
+              <option value="wcag22">WCAG 2.2</option>
+              <option value="wcag21">WCAG 2.1</option>
+              <option value="section508">Section 508</option>
+              <option value="en301549">EN 301 549</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="vpat-eval-method">Evaluation Method</label>
+            <input class="field-input" type="text" id="vpat-eval-method"
+              value="Manual testing with JAWS, NVDA, VoiceOver. Automated testing with AMA11Y.">
+          </div>
         </div>
       </div>
 
-      <div style="margin-bottom:20px;">
+      <h2 class="section-heading">Notes</h2>
+      <div class="card">
         <label class="field-label" for="vpat-notes">Executive Summary and Evaluation Notes</label>
         <textarea class="field-input" id="vpat-notes" rows="4"
-          style="resize:vertical;height:100px;"
+          style="resize:vertical;height:100px;margin-bottom:0;"
           placeholder="Describe the scope of evaluation, pages tested, and any known limitations..."></textarea>
       </div>
 
       <h2 class="section-heading">WCAG 2.2 Conformance Levels</h2>
-      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">
-        Set the conformance level for each success criterion. Use the quick-set buttons
-        to apply a level to all criteria at once, then adjust exceptions individually.
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;">
+        Use the quick-set buttons to apply a conformance level to all criteria, then adjust exceptions individually.
       </p>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" role="group" aria-label="Quick set conformance for all criteria">
-        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Supports')">Set All: Supports</button>
-        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Partially Supports')">Set All: Partially Supports</button>
-        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Does Not Support')">Set All: Does Not Support</button>
-        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Not Applicable')">Set All: Not Applicable</button>
-        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Not Evaluated')">Set All: Not Evaluated</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Supports')">All: Supports</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Partially Supports')">All: Partially Supports</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Does Not Support')">All: Does Not Support</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Not Applicable')">All: Not Applicable</button>
+        <button class="btn btn-sm" type="button" onclick="vpat_setAll('Not Evaluated')">All: Not Evaluated</button>
       </div>
 
-      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:24px;"
+      <div style="overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);margin-bottom:24px;box-shadow:var(--shadow);"
         role="region" aria-label="WCAG criteria conformance table" tabindex="0">
         <table class="findings-table" id="vpat-criteria-table" aria-label="WCAG 2.2 success criteria conformance levels">
           <thead>
@@ -1748,50 +1897,50 @@
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-primary" id="vpat-generate-btn" type="button">Generate VPAT 2.5 Word Document</button>
         <span id="vpat-status" role="status" aria-live="polite"
-          style="font-family:var(--mono);font-size:12px;color:var(--text-dim);"></span>
+          style="font-size:13px;color:var(--text-2);"></span>
       </div>
     </div>
 
-    <!-- ── MOBILE AUDIT CHECKLIST ── -->
+    <!-- ═══ MOBILE AUDIT ═══ -->
     <div class="tab-panel" id="panel-mobile" role="tabpanel"
       aria-labelledby="tab-mobile" tabindex="-1">
-      <h1 class="panel-title">Mobile Accessibility Checklist</h1>
+      <h1 class="panel-title">Mobile Checklist</h1>
       <p class="panel-desc">
-        A structured checklist for auditing mobile applications across iOS, iPadOS, Android,
-        and WearOS. Each item includes the WCAG criterion, the platform-specific test method,
-        and the assistive technology to use. Check items as you test, add notes, and export
-        the completed checklist as a report.
+        Structured checklist for auditing iOS, iPadOS, Android, and WearOS apps.
+        Each item includes the WCAG criterion, platform test method, and assistive technology to use.
       </p>
 
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;">
-        <div>
-          <label class="field-label" for="mob-app">App Name</label>
-          <input class="field-input" type="text" id="mob-app" placeholder="e.g. BMO Mobile Banking" style="margin-bottom:0;">
+      <div class="card" style="margin-bottom:24px;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:2;min-width:180px;">
+            <label class="field-label" for="mob-app">App Name</label>
+            <input class="field-input" type="text" id="mob-app" placeholder="e.g. BMO Mobile Banking" style="margin-bottom:0;">
+          </div>
+          <div style="flex:2;min-width:180px;">
+            <label class="field-label" for="mob-platform">Platform</label>
+            <select class="field-select" id="mob-platform" style="margin-bottom:0;" aria-label="Select mobile platform" onchange="mob_renderChecklist()">
+              <option value="ios">iOS / iPadOS with VoiceOver</option>
+              <option value="android">Android with TalkBack</option>
+              <option value="wearos">WearOS</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:120px;">
+            <label class="field-label" for="mob-version">App Version</label>
+            <input class="field-input" type="text" id="mob-version" placeholder="e.g. 4.2.1" style="margin-bottom:0;">
+          </div>
+          <button class="btn btn-sm" type="button" onclick="mob_resetChecklist()" style="flex-shrink:0;">Reset</button>
         </div>
-        <div>
-          <label class="field-label" for="mob-platform">Platform</label>
-          <select class="field-select" id="mob-platform" style="margin-bottom:0;" aria-label="Select mobile platform" onchange="mob_renderChecklist()">
-            <option value="ios">iOS and iPadOS with VoiceOver</option>
-            <option value="android">Android with TalkBack</option>
-            <option value="wearos">WearOS</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label" for="mob-version">App Version</label>
-          <input class="field-input" type="text" id="mob-version" placeholder="e.g. 4.2.1" style="margin-bottom:0;">
-        </div>
-        <button class="btn btn-sm" type="button" onclick="mob_resetChecklist()" style="align-self:flex-end;">Reset Checklist</button>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <button class="btn btn-primary btn-sm" id="mob-export-html" type="button">Export as HTML Report</button>
-        <button class="btn btn-sm" id="mob-export-txt" type="button">Export as Plain Text</button>
+        <button class="btn btn-primary btn-sm" id="mob-export-html" type="button">Export HTML Report</button>
+        <button class="btn btn-sm" id="mob-export-txt" type="button">Export Plain Text</button>
       </div>
 
       <div id="mob-checklist-region" role="region" aria-label="Mobile accessibility checklist" aria-live="polite"></div>
     </div>
 
-    <!-- ── SETTINGS ── -->
+    <!-- ═══ SETTINGS ═══ -->
     <div class="tab-panel" id="panel-settings" role="tabpanel"
       aria-labelledby="tab-settings" tabindex="-1">
       <h1 class="panel-title">Settings</h1>
@@ -1806,7 +1955,7 @@
           </div>
           <button class="btn btn-sm" id="change-pin-btn" type="button">Change PIN</button>
         </div>
-        <div id="change-pin-form" style="display:none;padding-top:16px;">
+        <div id="change-pin-form" style="display:none;padding-top:16px;border-top:1px solid var(--border);margin-top:4px;">
           <label class="field-label" for="new-pin-1">New PIN (4 to 8 digits)</label>
           <input class="field-input" type="password" inputmode="numeric"
             id="new-pin-1" maxlength="8" placeholder="New PIN"
@@ -1815,10 +1964,10 @@
           <input class="field-input" type="password" inputmode="numeric"
             id="new-pin-2" maxlength="8" placeholder="Confirm PIN"
             style="max-width:240px;">
-          <p id="change-pin-error" style="font-size:12px;color:var(--red);min-height:18px;font-family:var(--mono);margin-bottom:12px;"
+          <p id="change-pin-error" style="font-size:13px;color:var(--critical);min-height:18px;font-family:var(--mono);margin-bottom:12px;"
             role="alert" aria-live="polite"></p>
           <div style="display:flex;gap:10px;">
-            <button class="btn btn-primary btn-sm" id="save-pin-btn" type="button">Save New PIN</button>
+            <button class="btn btn-primary btn-sm" id="save-pin-btn" type="button">Save PIN</button>
             <button class="btn btn-sm" id="cancel-pin-btn" type="button">Cancel</button>
           </div>
         </div>
@@ -1829,7 +1978,7 @@
         <div class="settings-row">
           <div>
             <div class="settings-label">Clear All Session History</div>
-            <div class="settings-desc">Permanently removes all stored audit sessions</div>
+            <div class="settings-desc">Permanently removes all stored audit sessions from this browser</div>
           </div>
           <button class="btn btn-sm btn-danger" id="clear-data-btn" type="button">Clear Data</button>
         </div>
@@ -1846,7 +1995,7 @@
         <div class="settings-row">
           <div>
             <div class="settings-label">Akhilesh Malani</div>
-            <div class="settings-desc">Senior Accessibility Architect and Digital Inclusion Strategist</div>
+            <div class="settings-desc">Accessibility Architect and Digital Inclusion Strategist</div>
           </div>
         </div>
         <div class="settings-row">
@@ -1858,17 +2007,18 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════
-         PANEL: AI SETTINGS (v5.0.0)
-    ═══════════════════════════════════════════════ -->
+    <!-- ═══ AI SETTINGS ═══ -->
     <div id="panel-ai-settings" class="tab-panel" role="tabpanel" aria-labelledby="tab-ai-settings" hidden>
-      <h2 class="panel-title">AI Settings</h2>
-      <p class="panel-intro">Configure your AI providers. Each is used for the task it does best. Keys are stored locally in your browser — never sent anywhere except directly to the provider's own API.</p>
+      <h1 class="panel-title">AI Settings</h1>
+      <p class="panel-desc">
+        Configure your AI providers. Keys are stored locally in your browser — never sent anywhere
+        except directly to each provider's own API.
+      </p>
       <div aria-live="polite" id="ai-save-status" class="sr-only"></div>
 
       <div class="ai-provider-grid">
         <div class="ai-provider-card">
-          <h3>OpenAI — GPT-4o</h3>
+          <h2>OpenAI — GPT-4o</h2>
           <p class="provider-role">Used for: screen reader descriptions, code fixes, finding explanations</p>
           <div class="ai-field-group">
             <label for="key-openai">API Key</label>
@@ -1880,7 +2030,7 @@
         </div>
 
         <div class="ai-provider-card">
-          <h3>Anthropic — Claude</h3>
+          <h2>Anthropic — Claude</h2>
           <p class="provider-role">Used for: professional report generation, impact narratives, priority analysis</p>
           <div class="ai-field-group">
             <label for="key-anthropic">API Key</label>
@@ -1892,7 +2042,7 @@
         </div>
 
         <div class="ai-provider-card">
-          <h3>Google — Gemini</h3>
+          <h2>Google — Gemini</h2>
           <p class="provider-role">Used for: WCAG criterion deep dives, standards research, technique references</p>
           <div class="ai-field-group">
             <label for="key-gemini">API Key</label>
@@ -1910,27 +2060,28 @@
       </div>
 
       <div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border);">
-        <h3 style="color:var(--text-dim);font-size:.9rem;margin-bottom:12px;font-family:var(--mono);">How AI powers AMA11Y v5.0.0</h3>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
-          <li style="font-size:.82rem;color:var(--text-dim);padding:10px 14px;background:var(--navy-3);border-radius:var(--radius);border-left:3px solid var(--accent);">
-            <strong style="color:var(--accent);">GPT-4o</strong> — Describes exactly what JAWS or NVDA announces for each failing element. Also generates copy-paste code fixes.
+        <h2 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:14px;">How AI powers AMA11Y</h2>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li style="font-size:13px;color:var(--text-2);padding:14px 16px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);border-left:4px solid var(--primary);box-shadow:var(--shadow);">
+            <strong style="color:var(--primary);">GPT-4o</strong> — Describes exactly what JAWS or NVDA announces for each failing element. Generates copy-paste code fixes.
           </li>
-          <li style="font-size:.82rem;color:var(--text-dim);padding:10px 14px;background:var(--navy-3);border-radius:var(--radius);border-left:3px solid var(--accent);">
-            <strong style="color:var(--accent);">Claude</strong> — Writes the full professional audit report: executive summary, priority roadmap, and impact narratives from the blind user's perspective.
+          <li style="font-size:13px;color:var(--text-2);padding:14px 16px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);border-left:4px solid var(--primary);box-shadow:var(--shadow);">
+            <strong style="color:var(--primary);">Claude</strong> — Writes the full professional audit report: executive summary, priority roadmap, and impact narratives from the blind user's perspective.
           </li>
-          <li style="font-size:.82rem;color:var(--text-dim);padding:10px 14px;background:var(--navy-3);border-radius:var(--radius);border-left:3px solid var(--accent);">
-            <strong style="color:var(--accent);">Gemini</strong> — Explains any WCAG criterion in depth: what it requires, how screen reader users are affected, and the exact test procedure.
+          <li style="font-size:13px;color:var(--text-2);padding:14px 16px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);border-left:4px solid var(--primary);box-shadow:var(--shadow);">
+            <strong style="color:var(--primary);">Gemini</strong> — Explains any WCAG criterion in depth: what it requires, how screen reader users are affected, and the exact test procedure.
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════
-         PANEL: LIVE CO-PILOT (v5.0.0)
-    ═══════════════════════════════════════════════ -->
+    <!-- ═══ LIVE CO-PILOT ═══ -->
     <div id="panel-copilot" class="tab-panel" role="tabpanel" aria-labelledby="tab-copilot" hidden>
-      <h2 class="panel-title">Live Audit Co-pilot</h2>
-      <p class="panel-intro">Navigate the target page with JAWS or NVDA while AMA11Y observes and logs what the screen reader encounters. AI annotates each step in real time using GPT-4o.</p>
+      <h1 class="panel-title">Live Audit Co-pilot</h1>
+      <p class="panel-desc">
+        Navigate the target page with JAWS or NVDA while AMA11Y observes and logs what the
+        screen reader encounters. AI annotates each step in real time using GPT-4o.
+      </p>
 
       <div class="copilot-status" role="status">
         <div class="copilot-dot" id="copilot-dot" aria-hidden="true"></div>
@@ -1939,18 +2090,18 @@
 
       <div aria-live="polite" aria-atomic="false" id="copilot-live" class="sr-only"></div>
 
-      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <button class="btn-ai" id="copilot-clear" type="button">Clear Journey Log</button>
         <button class="btn-ai" id="copilot-end" type="button" disabled>End Session &amp; Generate Summary</button>
       </div>
 
-      <h3 style="font-size:.9rem;color:var(--text-dim);font-family:var(--mono);margin-bottom:8px;">Screen Reader Journey Log</h3>
+      <h2 style="font-size:13px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Screen Reader Journey Log</h2>
       <ol class="journey-log" id="journey-log" aria-label="Screen reader journey steps" aria-live="polite" aria-relevant="additions">
         <li class="journey-empty" id="journey-empty">No steps recorded yet. Navigate the target page with your screen reader.</li>
       </ol>
 
       <div id="copilot-summary-wrap" hidden>
-        <h3 style="font-size:.95rem;color:var(--accent);font-family:var(--mono);margin:20px 0 10px;">Session Summary — Generated by Claude</h3>
+        <h2 style="font-size:1rem;color:var(--primary);font-weight:700;margin:24px 0 12px;">Session Summary — Generated by Claude</h2>
         <div class="ai-report-section">
           <div class="ai-report-content" id="copilot-summary-content" aria-label="AI generated session summary"></div>
         </div>
@@ -1959,6 +2110,7 @@
 
   </main>
 </div>
+
 
 <script>
 /* ═══════════════════════════════════════════════════════════
