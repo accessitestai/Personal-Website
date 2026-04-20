@@ -1264,7 +1264,10 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       <span class="nav-brand-tagline">Accessibility Platform</span>
     </div>
 
-    <ul class="nav-tabs" role="tablist" aria-label="Application sections" aria-orientation="vertical">
+    <!-- #tablist-hint is read once by AT when tablist first receives focus -->
+    <p id="tablist-hint" hidden>Use Up and Down arrow keys to move between tabs. Press Tab to enter panel content.</p>
+    <ul class="nav-tabs" role="tablist" aria-label="Application sections"
+        aria-orientation="vertical" aria-describedby="tablist-hint">
       <li role="presentation">
         <button class="nav-tab" role="tab" id="tab-dashboard"
           aria-controls="panel-dashboard" aria-selected="true" tabindex="0" type="button">
@@ -2328,9 +2331,13 @@ function switchTab(name) {
     }
     if (panelEl) { panelEl.classList.toggle('active', isActive); }
   });
-  /* Announce tab name so screen readers confirm the switch */
-  const label = TAB_LABELS[name] || name;
-  announce(label + ' tab selected. Press Tab to move into the panel.');
+  /*
+   * No announce() here — the screen reader already announces the tab
+   * button name + "selected" state the moment focus lands on it (via
+   * next.focus() in the arrow-key handler) or when aria-selected flips
+   * on click. Adding announce() on top causes double-announcement.
+   * The keyboard hint lives in #tablist-hint (aria-describedby, read once).
+   */
 }
 
 /* ══════════════════════════════════════════════
@@ -2447,7 +2454,7 @@ function enterApp() {
     /* Ensure roving tabindex is correct on app entry */
     switchTab('dashboard');
     $('tab-dashboard').focus();
-    announce('AMA11Y platform loaded. Dashboard tab is selected. Use Up and Down arrow keys to move between tabs. Press Tab to enter the panel.');
+    announce('AMA11Y platform loaded. Dashboard is open.');
   }, 200);
 }
 
@@ -3527,7 +3534,7 @@ function switchDTab(activeTab) {
   dpanels.forEach(p => { p.hidden = true; });
   const panel = document.getElementById(activeTab.getAttribute('aria-controls'));
   if (panel) panel.hidden = false;
-  announce(activeTab.textContent.trim() + ' tab selected.');
+  /* No announce() — SR announces tab name + selected state naturally on focus */
 }
 
 dtabs.forEach(tab => {
