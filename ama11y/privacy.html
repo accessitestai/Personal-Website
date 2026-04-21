@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — AMA11Y Accessibility Audit Tool</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1a2a3a;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    header {
+      background: #003366;
+      color: #fff;
+      padding: 32px 0;
+      border-bottom: 4px solid #7ec8e3;
+    }
+    header .inner { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+    header h1 { font-size: 1.8rem; color: #7ec8e3; margin-bottom: 4px; }
+    header p  { font-size: 0.9rem; opacity: 0.75; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+    h2 {
+      font-size: 1.15rem;
+      color: #003366;
+      margin: 36px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2eaf4;
+    }
+    p  { margin-bottom: 14px; color: #2a3a4a; }
+    ul { margin: 0 0 14px 20px; }
+    ul li { margin-bottom: 6px; color: #2a3a4a; }
+    strong { color: #003366; }
+    a { color: #0369a1; }
+    .updated {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 32px;
+      padding: 10px 16px;
+      background: #e8f0fb;
+      border-left: 4px solid #7ec8e3;
+      border-radius: 0 4px 4px 0;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.82rem;
+      color: #64748b;
+      border-top: 1px solid #e2eaf4;
+    }
+    footer a { color: #0369a1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>AMA11Y — Privacy Policy</h1>
+    <p>Accessibility Audit Tool for Chrome · v3.0</p>
+  </div>
+</header>
+
+<main>
+
+  <p class="updated">Last updated: April 2026</p>
+
+  <p>
+    AMA11Y ("the Extension") is a Chrome browser extension that audits web pages for
+    WCAG 2.2 accessibility compliance. This Privacy Policy explains what data the
+    Extension handles, how it is used, and your rights as a user.
+  </p>
+
+  <h2>1. Data We Do Not Collect</h2>
+  <p>The developer of AMA11Y <strong>does not collect, store, or have access to</strong> any of the following:</p>
+  <ul>
+    <li>Your name, email address, or any personally identifiable information</li>
+    <li>Your browsing history or the URLs of pages you visit</li>
+    <li>Your financial, health, or authentication information</li>
+    <li>Content from the pages you audit</li>
+    <li>Any data from your device beyond what is described in Section 2</li>
+  </ul>
+  <p>
+    No data from your use of AMA11Y is ever transmitted to the extension developer's
+    servers.
+  </p>
+
+  <h2>2. Data Stored Locally on Your Device</h2>
+  <p>
+    The Extension stores the following data in Chrome's local extension storage
+    (<code>chrome.storage.local</code>), which remains entirely on your device:
+  </p>
+  <ul>
+    <li>
+      <strong>Vision AI API keys</strong> — If you choose to use the Focus Indicator
+      Narrator or Visual Layout Auditor modules, you may optionally enter an API key
+      for Anthropic (Claude) or OpenAI (GPT-4o). This key is stored locally and is
+      never transmitted to anyone other than the API provider you select.
+    </li>
+    <li>
+      <strong>AI provider preference</strong> — Which Vision AI provider you have
+      selected (Anthropic or OpenAI).
+    </li>
+  </ul>
+  <p>
+    Audit results are held in <code>chrome.storage.session</code> only for the
+    duration of the browser session and are discarded when the session ends.
+  </p>
+
+  <h2>3. Website Content and Vision AI Analysis</h2>
+  <p>
+    When you run the <strong>Focus Indicator Narrator</strong> or
+    <strong>Visual Layout Auditor</strong> modules, the Extension captures screenshots
+    of the web page you are auditing. These screenshots are sent directly from your
+    browser to the Vision AI provider you have configured (Anthropic or OpenAI) using
+    your own API key.
+  </p>
+  <ul>
+    <li>Screenshots are processed by the AI provider under their own privacy policy and terms of service.</li>
+    <li>The extension developer does not receive, store, or view these screenshots.</li>
+    <li>These features are entirely optional and require explicit user action to activate.</li>
+    <li>No other page content (text, links, user data) is transmitted outside your device.</li>
+  </ul>
+  <p>
+    The <strong>WCAG Audit Engine</strong> and <strong>State Change Watchdog</strong>
+    modules run entirely locally in your browser and make no external network requests.
+  </p>
+
+  <h2>4. Permissions Used and Why</h2>
+  <ul>
+    <li><strong>activeTab</strong> — To run audits on the page you are currently viewing, on demand.</li>
+    <li><strong>scripting</strong> — To inject locally bundled audit scripts into the active tab.</li>
+    <li><strong>sidePanel</strong> — To display audit results in the Chrome side panel.</li>
+    <li><strong>tabs</strong> — To read the current tab's URL and title for inclusion in audit reports.</li>
+    <li><strong>storage</strong> — To persist your API key preferences locally on your device.</li>
+    <li><strong>debugger</strong> — To emulate viewport sizes for the Visual Layout Auditor using Chrome DevTools Protocol.</li>
+    <li><strong>host_permissions (&lt;all_urls&gt;)</strong> — To allow auditing of any website the user chooses to test.</li>
+  </ul>
+
+  <h2>5. Third-Party Services</h2>
+  <p>
+    If you configure a Vision AI provider, your screenshots are processed under
+    the provider's own policies:
+  </p>
+  <ul>
+    <li><a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic Privacy Policy</a></li>
+    <li><a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI Privacy Policy</a></li>
+  </ul>
+  <p>
+    AMA11Y has no affiliation with Anthropic or OpenAI beyond providing an optional
+    integration.
+  </p>
+
+  <h2>6. Data Sharing</h2>
+  <p>
+    AMA11Y does not sell, rent, or share any user data with third parties. The only
+    external data transfer that occurs is the optional transmission of page screenshots
+    to the Vision AI provider you configure, using your own API credentials.
+  </p>
+
+  <h2>7. Children's Privacy</h2>
+  <p>
+    AMA11Y is intended for professional accessibility testers and developers. It is not
+    directed at children under 13, and we do not knowingly collect data from children.
+  </p>
+
+  <h2>8. Changes to This Policy</h2>
+  <p>
+    We may update this policy from time to time. Material changes will be reflected
+    in the "Last updated" date above. Continued use of the Extension after changes
+    constitutes acceptance of the revised policy.
+  </p>
+
+  <h2>9. Contact</h2>
+  <p>
+    For privacy questions or concerns, contact Akhilesh Malani via
+    <a href="https://ama11y.akhileshmalani.com">ama11y.akhileshmalani.com</a>.
+  </p>
+
+</main>
+
+<footer>
+  <p>AMA11Y v3.0 · Built by Akhilesh Malani · Accessibility Architect &amp; Digital Inclusion Strategist</p>
+  <p style="margin-top:6px"><a href="https://ama11y.akhileshmalani.com">ama11y.akhileshmalani.com</a></p>
+</footer>
+
+</body>
+</html>
