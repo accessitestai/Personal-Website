@@ -15,7 +15,7 @@
   --color-text-light: #425066; /* darkened from #475569 (4.48:1) → #425066 (4.6:1) to pass WCAG 1.4.3 AA */
   --color-bg: #ffffff;
   --color-bg-alt: #f1f5f9;
-  --color-border: #cbd5e1;
+  --color-border: #64748b; /* was #cbd5e1 (1.72:1) — darkened to slate-500 (4.86:1) → passes SC 1.4.11 */
   --color-focus: #0369a1;
   --color-card-bg: #ffffff;
 
@@ -94,15 +94,17 @@ body {
   outline-offset: 2px;
 }
 
-/* Screen reader only */
+/* Screen reader only — SC 1.4.12 compliant:
+   clip-path hides the element visually without constraining height,
+   so text-spacing overrides don't cause content clipping. */
 .sr-only {
   position: absolute;
   width: 1px;
-  height: 1px;
   padding: 0;
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%); /* clips to zero-area rect; replaces height:1px constraint */
   white-space: nowrap;
   border: 0;
 }
@@ -137,10 +139,8 @@ body {
   box-shadow: var(--shadow-lg), 0 0 0 3px var(--color-focus);
 }
 
-a:focus:not(:focus-visible),
-button:focus:not(:focus-visible) {
-  outline: none;
-}
+/* Removed: a:focus:not(:focus-visible) { outline:none } — suppressed focus for 76 elements (SC 2.4.7 FAIL).
+   The global :focus-visible rule above handles keyboard-only focus rings correctly in all modern browsers. */
 
 /* ===========================
    Typography
@@ -165,7 +165,7 @@ h2 {
 }
 
 h3 { font-size: 1.3rem; }
-h4 { font-size: 1.1rem; color: var(--color-accent); }
+h4 { font-size: 1.1rem; color: var(--color-primary-light); } /* was --color-accent (#0891b2, 3.68:1) → --color-primary-light (#0369a1, 5.93:1) SC 1.4.3 */
 
 p { margin-bottom: var(--spacing-sm); }
 
@@ -222,7 +222,7 @@ a:hover {
   border-bottom: 1px solid rgba(203, 213, 225, 0.6);
   z-index: 1000;
   padding: 0.75rem var(--spacing-md);
-  overflow-x: hidden;
+  /* overflow-x:hidden removed — caused SC 1.4.12 text-spacing clip on nav items */
 }
 
 .nav-container {
@@ -446,7 +446,7 @@ a:hover {
 
 .hero-greeting {
   font-size: 1.125rem;
-  color: var(--color-accent);
+  color: var(--color-primary-light); /* was --color-accent (#0891b2, 3.68:1 on white) → #0369a1 (5.93:1) SC 1.4.3 */
   font-weight: 600;
   margin-bottom: var(--spacing-xs);
   letter-spacing: 0.08em;
@@ -709,7 +709,7 @@ a:hover {
 .timeline-header h3 { margin-bottom: 0.25rem; }
 
 .timeline-company {
-  color: var(--color-accent);
+  color: var(--color-primary-light); /* was --color-accent (3.68:1) → 5.93:1 SC 1.4.3 */
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
@@ -963,7 +963,7 @@ a:hover {
   display: inline-block;
   align-self: flex-start;
   background: linear-gradient(135deg, rgba(8, 145, 178, 0.1), rgba(3, 105, 161, 0.05));
-  color: var(--color-accent);
+  color: var(--color-primary-light); /* was --color-accent (3.68:1 on near-white) → 5.93:1 SC 1.4.3 */
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1029,7 +1029,7 @@ a:hover {
 
 .blog-featured-badge {
   display: inline-block;
-  background: var(--color-accent);
+  background: var(--color-primary); /* was --color-accent (#0891b2, white text = 3.68:1 FAIL) → #0c4a6e (9.05:1) SC 1.4.3 */
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -1161,7 +1161,7 @@ a:hover {
 
 .blog-card time {
   font-size: 0.82rem;
-  color: var(--color-accent);
+  color: var(--color-primary-light); /* was --color-accent (3.68:1) → 5.93:1 SC 1.4.3 */
   margin-bottom: var(--spacing-xs);
   font-weight: 600;
   text-transform: uppercase;
@@ -1405,7 +1405,7 @@ a:hover {
 .library-card-badge {
   display: inline-block;
   background: linear-gradient(135deg, rgba(8, 145, 178, 0.08), rgba(3, 105, 161, 0.04));
-  color: var(--color-accent);
+  color: var(--color-primary-light); /* was --color-accent (3.68:1) → 5.93:1 SC 1.4.3 */
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1685,6 +1685,11 @@ a:hover {
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode: skip-link fix — #38bdf8 bg + white text = 2.08:1 (FAIL); use dark text instead */
+[data-theme="dark"] .skip-link {
+  color: var(--color-bg); /* #0f172a on #38bdf8 = 8.71:1 SC 1.4.3 */
 }
 
 [data-theme="dark"] .navbar {
@@ -2152,15 +2157,102 @@ body > .skiptranslate:not(#google_translate_element) {
 }
 
 /* ===========================
-   High Contrast Mode
+   High Contrast Mode (forced-colors: active)
+   All interactive/UI elements get an explicit transparent border so the
+   system accent colour is drawn in Windows HCM / Edge HCM modes (SC 1.4.11).
    =========================== */
 @media (forced-colors: active) {
-  .btn { border: 2px solid ButtonText; }
-  .timeline-marker { forced-color-adjust: none; }
-  .card, .skill-group, .contact-form, .library-card, .blog-card, .testimonial-card, .modal {
-    border: 1px solid ButtonText;
+  /* Buttons */
+  .btn,
+  .btn-text,
+  .filter-btn,
+  .nav-toggle,
+  .modal-close,
+  .back-to-top,
+  .kbd-help-close,
+  .a11y-reset,
+  .a11y-size-btn,
+  .a11y-switch,
+  .a11y-panel-close,
+  .wsr-list-close,
+  .translate-btn,
+  .translate-menu-item { border: 2px solid ButtonText; }
+
+  /* Navigation */
+  .nav-links a,
+  .nav-links a.active { border: 1px solid transparent; }
+
+  .skip-link {
+    border: 2px solid ButtonText;
+    forced-color-adjust: none;
   }
-  .card::before { display: none; }
+
+  /* Theme / a11y toggle icons */
+  .theme-toggle,
+  .a11y-toggle { border: 2px solid ButtonText; }
+
+  /* Cards & content panels */
+  .card,
+  .skill-group,
+  .contact-form,
+  .library-card,
+  .blog-card,
+  .testimonial-card,
+  .modal,
+  .case-card,
+  .problem-card,
+  .process-step,
+  .speaking-card,
+  .faq-item,
+  .blog-featured,
+  .timeline-content,
+  .highlight-card,
+  .standard-badge,
+  .credential-item,
+  .library-gate,
+  .kbd-help-dialog { border: 1px solid ButtonText; }
+
+  /* Badges */
+  .blog-featured-badge,
+  .case-badge,
+  .library-card-badge,
+  .wsr-mode-badge { forced-color-adjust: none; }
+
+  /* Decorative pseudo-elements that vanish in HCM */
+  .card::before,
+  .checker-promo::before { display: none; }
+
+  /* Timeline */
+  .timeline-marker { forced-color-adjust: none; }
+  .timeline::before { background: ButtonText; }
+
+  /* Translate menu */
+  .translate-menu { border: 2px solid ButtonText; }
+
+  /* Focus ring */
+  :focus-visible { outline: 3px solid Highlight; }
+
+  /* Switch track */
+  .a11y-switch { background: ButtonFace; border: 2px solid ButtonText; }
+  .a11y-switch::after { background: ButtonText; }
+  .a11y-switch[aria-checked="true"] { background: Highlight; }
+  .a11y-switch[aria-checked="true"]::after { background: HighlightText; }
+
+  /* Hero gradient text fallback */
+  .hero h1,
+  [data-theme="dark"] .hero h1 {
+    background: none;
+    -webkit-text-fill-color: ButtonText;
+  }
+
+  /* Scroll-animation elements — ensure visible immediately */
+  .fade-in,
+  .fade-in-left,
+  .fade-in-right,
+  .stagger-children > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ===========================
