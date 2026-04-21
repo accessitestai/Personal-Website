@@ -151,6 +151,17 @@
     /* State Change Watchdog */
     } else if (message.type === 'state-watchdog-ui') {
       handleStateWatchdogUI(message);
+
+    /* Annotated Screenshot */
+    } else if (message.type === 'annotated-screenshot-ready') {
+      downloadFile(message.dataUrl, 'ama11y-annotated.png', 'image/png');
+      $('export-annotated').disabled = false;
+      $('export-annotated').textContent = '📸 Screenshot';
+      announce(`Annotated screenshot exported (${message.count} issues marked).`);
+    } else if (message.type === 'annotated-screenshot-error') {
+      $('export-annotated').disabled = false;
+      $('export-annotated').textContent = '📸 Screenshot';
+      announce('Screenshot failed: ' + message.message);
     }
   });
 
@@ -208,10 +219,14 @@
       $('filter-engine').appendChild(opt);
     });
 
-    $('export-json').disabled = false;
-    $('export-html').disabled = false;
-    $('export-csv').disabled  = false;
-    $('export-text').disabled = false;
+    $('export-json').disabled      = false;
+    $('export-html').disabled      = false;
+    $('export-csv').disabled       = false;
+    $('export-text').disabled      = false;
+    $('export-sarif').disabled     = false;
+    $('export-annotated').disabled = false;
+    $('save-baseline-btn').disabled = false;
+    baselineLoadAndCompare();
 
     $('filter-engine').value   = 'all';
     $('filter-verdict').value  = 'all';
@@ -258,6 +273,7 @@
     tbody.innerHTML = '';
     filteredFindings.forEach((f, idx) => {
       const tr = document.createElement('tr');
+      tr.dataset.findingId = f.id; // used by baseline diff colouring
 
       const tdId  = document.createElement('td'); tdId.textContent = f.id;
       const tdEng = document.createElement('td'); tdEng.textContent = f.engine;
@@ -298,7 +314,7 @@
   /* Export */
   $('export-json').addEventListener('click', () => {
     downloadFile(JSON.stringify({
-      tool: 'AMA11Y', version: '3.0.0', page: auditMeta.pageTitle,
+      tool: 'AMA11Y', version: '3.1.0', page: auditMeta.pageTitle,
       url: auditMeta.pageUrl, timestamp: auditMeta.timestamp,
       summary: { total: allFindings.length, fail: allFindings.filter(f=>f.verdict==='Fail').length,
         warning: allFindings.filter(f=>f.verdict==='Warning').length,
@@ -335,6 +351,197 @@
     });
     downloadFile(lines.join('\n'), 'ama11y-audit.txt', 'text/plain');
     announce('Text exported.');
+  });
+
+  /* ── SARIF 2.1.0 Export ── */
+  $('export-sarif').addEventListener('click', () => {
+    const rules = [];
+    const ruleIds = new Set();
+    const results = [];
+
+    filteredFindings.forEach(f => {
+      const ruleId = f.criterion
+        ? f.criterion.replace(/[^a-zA-Z0-9_\-.]/g, '_').slice(0, 64)
+        : f.engine.replace(/\s+/g, '_');
+
+      if (!ruleIds.has(ruleId)) {
+        ruleIds.add(ruleId);
+        rules.push({
+          id: ruleId,
+          name: f.engine.replace(/\s+/g, ''),
+          shortDescription: { text: f.criterion || f.engine },
+          helpUri: 'https://www.w3.org/TR/WCAG22/',
+          properties: { tags: ['accessibility', 'wcag'] }
+        });
+      }
+
+      const levelMap = {
+        Fail: f.severity === 'Critical' || f.severity === 'Serious' ? 'error' : 'warning',
+        Warning: 'warning',
+        Info: 'note',
+        Pass: 'none'
+      };
+
+      results.push({
+        ruleId,
+        level: levelMap[f.verdict] || 'note',
+        message: { text: `${f.issue} ${f.howToFix || ''}`.trim() },
+        locations: [{
+          physicalLocation: {
+            artifactLocation: { uri: auditMeta.pageUrl || 'unknown' },
+            region: { snippet: { text: f.element || '' } }
+          }
+        }],
+        properties: {
+          engine: f.engine,
+          computed: f.computed,
+          required: f.required,
+          severity: f.severity,
+          verdict: f.verdict
+        }
+      });
+    });
+
+    const sarif = {
+      version: '2.1.0',
+      $schema: 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
+      runs: [{
+        tool: {
+          driver: {
+            name: 'AMA11Y',
+            version: '3.1.0',
+            informationUri: 'https://ama11y.akhileshmalani.com',
+            rules
+          }
+        },
+        results,
+        artifacts: [{ location: { uri: auditMeta.pageUrl || 'unknown' } }],
+        invocations: [{
+          executionSuccessful: true,
+          startTimeUtc: auditMeta.timestamp
+        }]
+      }]
+    };
+
+    downloadFile(JSON.stringify(sarif, null, 2), 'ama11y-audit.sarif', 'application/json');
+    announce('SARIF exported.');
+  });
+
+  /* ── Annotated Screenshot ── */
+  $('export-annotated').addEventListener('click', () => {
+    const failFindings = filteredFindings
+      .filter(f => f.verdict === 'Fail' || f.verdict === 'Warning')
+      .slice(0, 50); // cap at 50 boxes for readability
+
+    if (!failFindings.length) {
+      announce('No failures or warnings to annotate.');
+      return;
+    }
+
+    // Attach CSS selector to each finding for background rect lookup
+    // Selectors were not stored — derive a rough one from the element description
+    const withSelectors = failFindings.map((f, i) => {
+      // Try to extract an id selector if the element description contains #id
+      const idMatch = f.element && f.element.match(/#([\w-]+)/);
+      const selector = idMatch ? `#${idMatch[1]}` : null;
+      return { ...f, selector, _localIndex: i };
+    });
+
+    $('export-annotated').disabled = true;
+    $('export-annotated').textContent = '⏳ Capturing…';
+    chrome.runtime.sendMessage({ type: 'annotated-screenshot-run', findings: withSelectors });
+    announce('Capturing annotated screenshot…');
+  });
+
+  /* ── Baseline Save / Clear / Compare ── */
+
+  function baselineKey() {
+    return 'ama11y_baseline_' + btoa(encodeURIComponent(auditMeta.pageUrl)).slice(0, 60);
+  }
+
+  function baselineFingerprint(f) {
+    // Stable identity: engine + criterion + first 80 chars of element description
+    return `${f.engine}|${f.criterion}|${(f.element || '').slice(0, 80)}`;
+  }
+
+  async function baselineLoadAndCompare() {
+    const key = baselineKey();
+    const stored = await chrome.storage.local.get(key);
+    const baseline = stored[key];
+
+    $('clear-baseline-btn').disabled = !baseline;
+
+    if (!baseline) {
+      $('baseline-status').textContent = 'No baseline saved for this URL.';
+      $('regression-banner').hidden = true;
+      // Reset any previous diff colouring
+      document.querySelectorAll('.finding-row-new, .finding-row-fixed').forEach(r => {
+        r.classList.remove('finding-row-new', 'finding-row-fixed');
+      });
+      return;
+    }
+
+    const baseDate = new Date(baseline.timestamp).toLocaleDateString();
+    $('baseline-status').textContent = `Baseline: ${baseline.summary.fail}F / ${baseline.summary.warn}W — saved ${baseDate}`;
+
+    // Build fingerprint sets
+    const baseSet = new Set((baseline.findings || []).map(baselineFingerprint));
+    const currSet = new Set(allFindings.map(baselineFingerprint));
+
+    const newCount   = allFindings.filter(f => f.verdict === 'Fail' && !baseSet.has(baselineFingerprint(f))).length;
+    const fixedCount = (baseline.findings || []).filter(f => f.verdict === 'Fail' && !currSet.has(baselineFingerprint(f))).length;
+
+    // Show regression banner
+    const banner = $('regression-banner');
+    banner.hidden = false;
+    banner.innerHTML =
+      `<span class="reg-new">▲ ${newCount} new failure${newCount !== 1 ? 's' : ''}</span> &nbsp;` +
+      `<span class="reg-fixed">✔ ${fixedCount} fixed</span> &nbsp;` +
+      `<span class="reg-same">${allFindings.filter(f=>f.verdict==='Fail').length - newCount} unchanged</span>`;
+
+    // Colour rows — wait for renderFindings to complete via setTimeout(0)
+    setTimeout(() => {
+      const rows = document.querySelectorAll('#findings-body tr[data-finding-id]');
+      rows.forEach(row => {
+        const fid = row.dataset.findingId;
+        const f   = allFindings.find(x => x.id === fid);
+        if (!f) return;
+        if (f.verdict === 'Fail' && !baseSet.has(baselineFingerprint(f))) {
+          row.classList.add('finding-row-new');
+        }
+      });
+    }, 0);
+  }
+
+  $('save-baseline-btn').addEventListener('click', async () => {
+    const key = baselineKey();
+    await chrome.storage.local.set({
+      [key]: {
+        url:       auditMeta.pageUrl,
+        pageTitle: auditMeta.pageTitle,
+        timestamp: new Date().toISOString(),
+        summary: {
+          fail: allFindings.filter(f => f.verdict === 'Fail').length,
+          warn: allFindings.filter(f => f.verdict === 'Warning').length,
+          pass: allFindings.filter(f => f.verdict === 'Pass').length
+        },
+        findings: allFindings
+      }
+    });
+    $('clear-baseline-btn').disabled = false;
+    $('baseline-status').textContent = `Baseline saved — ${new Date().toLocaleTimeString()}`;
+    announce('Baseline saved for this URL.');
+  });
+
+  $('clear-baseline-btn').addEventListener('click', async () => {
+    await chrome.storage.local.remove(baselineKey());
+    $('clear-baseline-btn').disabled = true;
+    $('baseline-status').textContent = 'Baseline cleared.';
+    $('regression-banner').hidden = true;
+    document.querySelectorAll('.finding-row-new, .finding-row-fixed').forEach(r => {
+      r.classList.remove('finding-row-new', 'finding-row-fixed');
+    });
+    announce('Baseline cleared.');
   });
 
   /* Export toolbar arrow-key navigation */

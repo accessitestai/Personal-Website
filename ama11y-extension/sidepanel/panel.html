@@ -124,11 +124,23 @@
     <section aria-labelledby="export-heading">
       <h2 id="export-heading">Export</h2>
       <div id="export-toolbar" role="toolbar" aria-label="Export formats" class="export-toolbar">
-        <button id="export-json"  type="button" class="btn" disabled>JSON</button>
-        <button id="export-html"  type="button" class="btn" disabled>HTML</button>
-        <button id="export-csv"   type="button" class="btn" disabled>CSV</button>
-        <button id="export-text"  type="button" class="btn" disabled>Text</button>
+        <button id="export-json"       type="button" class="btn" disabled>JSON</button>
+        <button id="export-html"       type="button" class="btn" disabled>HTML</button>
+        <button id="export-csv"        type="button" class="btn" disabled>CSV</button>
+        <button id="export-text"       type="button" class="btn" disabled>Text</button>
+        <button id="export-sarif"      type="button" class="btn" disabled title="SARIF 2.1.0 — for GitHub Code Scanning / CI">SARIF</button>
+        <button id="export-annotated"  type="button" class="btn btn-screenshot" disabled title="Annotated PNG screenshot with numbered issue boxes">📸 Screenshot</button>
       </div>
+    </section>
+
+    <section aria-labelledby="baseline-heading" class="baseline-section">
+      <h2 id="baseline-heading">Baseline</h2>
+      <div class="baseline-toolbar">
+        <button id="save-baseline-btn"    type="button" class="btn" disabled>💾 Save Baseline</button>
+        <button id="clear-baseline-btn"   type="button" class="btn btn-danger-sm" disabled title="Remove saved baseline for this URL">Clear</button>
+        <span   id="baseline-status"      class="baseline-status" aria-live="polite"></span>
+      </div>
+      <div id="regression-banner" class="regression-banner" hidden></div>
     </section>
 
     <div class="reaudit-section">

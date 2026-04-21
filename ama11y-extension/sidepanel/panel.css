@@ -742,3 +742,112 @@ main {
   .fn-summary-strip { gap: 4px; }
   .settings-actions { flex-direction: column; }
 }
+
+/* ================================================================
+   ANNOTATED SCREENSHOT BUTTON
+================================================================ */
+
+.btn-screenshot {
+  background: linear-gradient(135deg, #1a3a5c, #0e2340);
+  color: var(--ama-accent);
+  border-color: var(--ama-accent);
+}
+
+.btn-screenshot:hover:not(:disabled) {
+  background: var(--ama-accent);
+  color: var(--ama-navy);
+}
+
+.btn-screenshot:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ================================================================
+   BASELINE / REGRESSION
+================================================================ */
+
+.baseline-section {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--ama-surface);
+  border-radius: 6px;
+  border: 1px solid var(--ama-border);
+}
+
+.baseline-section h2 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ama-muted);
+  margin-bottom: 8px;
+}
+
+.baseline-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.baseline-status {
+  font-size: 0.75rem;
+  color: var(--ama-muted);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-danger-sm {
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  background: rgba(231, 76, 60, 0.15);
+  border-color: var(--ama-error);
+  color: var(--ama-error);
+  min-height: 28px;
+}
+
+.btn-danger-sm:hover:not(:disabled) {
+  background: var(--ama-error);
+  color: #fff;
+}
+
+/* Regression summary banner */
+.regression-banner {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(231, 76, 60, 0.12);
+  border-left: 3px solid var(--ama-error);
+  color: var(--ama-text);
+  line-height: 1.5;
+}
+
+.regression-banner .reg-new   { color: var(--ama-error); }
+.regression-banner .reg-fixed { color: var(--ama-success); }
+.regression-banner .reg-same  { color: var(--ama-muted); }
+
+.regression-banner[hidden] { display: none; }
+
+/* Row-level baseline diff colouring */
+.finding-row-new     { background: rgba(231, 76, 60, 0.10) !important; }
+.finding-row-fixed   { background: rgba(46, 204, 113, 0.10) !important; }
+.finding-row-new td:first-child::before {
+  content: '▲ NEW ';
+  color: var(--ama-error);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.finding-row-fixed td:first-child::before {
+  content: '✔ FIXED ';
+  color: var(--ama-success);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}

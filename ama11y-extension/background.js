@@ -77,6 +77,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return false;
   }
 
+  /* ── Annotated Screenshot ── */
+  if (message.type === 'annotated-screenshot-run') {
+    captureAnnotatedScreenshot(message.findings);
+    return false;
+  }
+
   if (message.type === 'state-watchdog-stop-request') {
     stopStateWatchdog();
     return false;
@@ -530,6 +536,105 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     }).catch(() => {});
   }
 });
+
+/* ════════════════════════════════════════════════════════
+   E. ANNOTATED SCREENSHOT EXPORT
+   Captures the visible viewport via CDP, then draws numbered
+   bounding-box overlays for every failing finding using
+   OffscreenCanvas. Returns a PNG data-URL to the panel.
+════════════════════════════════════════════════════════ */
+
+async function captureAnnotatedScreenshot(findings) {
+  let tab = null;
+  try {
+    [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) throw new Error('No active tab.');
+
+    /* 1 ─ Resolve bounding rects for each finding's element selector */
+    const selectors = findings.map(f => f.selector || '');
+    const rectsResult = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (sels) => {
+        const DPR = window.devicePixelRatio || 1;
+        return sels.map((sel, i) => {
+          if (!sel) return null;
+          try {
+            const el = document.querySelector(sel);
+            if (!el) return null;
+            const r = el.getBoundingClientRect();
+            return { index: i, x: r.left * DPR, y: r.top * DPR, w: r.width * DPR, h: r.height * DPR };
+          } catch (_) { return null; }
+        });
+      },
+      args: [selectors]
+    });
+    const rects = (rectsResult[0]?.result || []).filter(Boolean);
+
+    /* 2 ─ Capture viewport screenshot */
+    await chrome.debugger.attach({ tabId: tab.id }, '1.3');
+    const shot = await chrome.debugger.sendCommand(
+      { tabId: tab.id }, 'Page.captureScreenshot',
+      { format: 'png', quality: 90, fromSurface: true }
+    );
+    await chrome.debugger.detach({ tabId: tab.id });
+
+    const imgDataUrl = `data:image/png;base64,${shot.data}`;
+
+    /* 3 ─ Draw annotations on OffscreenCanvas */
+    const img = await createImageBitmap(await (await fetch(imgDataUrl)).blob());
+    const canvas = new OffscreenCanvas(img.width, img.height);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    /* Verdict → colour map */
+    const COLOURS = { Fail: '#e74c3c', Warning: '#f39c12', Pass: '#2ecc71', Info: '#3498db' };
+
+    rects.forEach(({ index, x, y, w, h }) => {
+      const f = findings[index];
+      const colour = COLOURS[f.verdict] || '#e74c3c';
+      const alpha = colour + '55'; // ~33% opacity fill
+
+      /* Box */
+      ctx.strokeStyle = colour;
+      ctx.lineWidth = 3;
+      ctx.fillStyle = alpha;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+
+      /* Number badge */
+      const badgeR = 14;
+      const bx = x + badgeR + 2, by = y - badgeR - 2 < 0 ? y + badgeR + 2 : y - badgeR - 2;
+      ctx.beginPath();
+      ctx.arc(bx, by, badgeR, 0, Math.PI * 2);
+      ctx.fillStyle = colour;
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${badgeR}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(index + 1), bx, by);
+    });
+
+    /* 4 ─ Convert to PNG blob and send back */
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = () => {
+      chrome.runtime.sendMessage({
+        type: 'annotated-screenshot-ready',
+        dataUrl: reader.result,
+        count: rects.length
+      }).catch(() => {});
+    };
+
+  } catch (err) {
+    if (tab) { try { await chrome.debugger.detach({ tabId: tab.id }); } catch (_) {} }
+    chrome.runtime.sendMessage({
+      type: 'annotated-screenshot-error',
+      message: err.message || String(err)
+    }).catch(() => {});
+  }
+}
 
 /* ════════════════════════════════════════════════════════
    WCAG PLATFORM BRIDGE (unchanged)

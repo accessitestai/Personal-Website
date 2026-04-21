@@ -15,7 +15,7 @@
      PHASE 1 ENGINES + UTILITIES (inlined from phase1-engines.js)
   ================================================================ */
 
-  const TOOL_VERSION = '2.0.0';
+  const TOOL_VERSION = '3.1.0';
   const CONTRAST = { NORMAL_AA: 4.5, LARGE_AA: 3.0, NORMAL_AAA: 7.0, LARGE_AAA: 4.5, NON_TEXT: 3.0 };
   const LARGE_TEXT_PT_BOLD = 14;
   const LARGE_TEXT_PT_NORMAL = 18;
@@ -384,6 +384,99 @@
   }
 
   /* ================================================================
+     ENGINE 14: TARGET SIZE (WCAG 2.2 SC 2.5.8 — NEW)
+     Every interactive target must be ≥ 24×24 CSS pixels.
+     Inline text links are exempt per the SC 2.5.8 exception.
+  ================================================================ */
+  function auditTargetSize() {
+    const findings = [];
+    const SELECTOR = 'a[href],button,input:not([type="hidden"]),select,textarea,summary,[role="button"],[role="link"],[role="checkbox"],[role="radio"],[role="switch"],[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"],[role="option"],[role="tab"],[role="slider"],[role="spinbutton"],[tabindex="0"]';
+    const MIN = 24;
+    const targets = Array.from(document.querySelectorAll(SELECTOR)).filter(el => {
+      if (el.disabled) return false;
+      const cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    targets.forEach(el => {
+      const cs = window.getComputedStyle(el);
+      // Inline text links are exempt (SC 2.5.8 exception 1 — inline)
+      if (el.tagName === 'A' && cs.display === 'inline') return;
+      const r = el.getBoundingClientRect();
+      const w = Math.round(r.width), h = Math.round(r.height);
+      if (w < MIN || h < MIN) {
+        findings.push({
+          id: generateId(), engine: 'Target Size',
+          element: describeEl(el),
+          criterion: 'WCAG 2.2 SC 2.5.8 Target Size Minimum (Level AA)',
+          issue: `Target ${w}×${h}px is below the 24×24 CSS px minimum.`,
+          computed: `${w}×${h}px`,
+          required: '24×24 CSS pixels',
+          verdict: 'Fail',
+          severity: (w < 16 || h < 16) ? SEV.SERIOUS : SEV.MODERATE,
+          howToFix: `Add min-width:24px; min-height:24px; or increase padding to reach 24×24px.`
+        });
+      }
+    });
+    if (findings.length === 0)
+      findings.push({ id: generateId(), engine: 'Target Size', element: 'Page', criterion: 'WCAG 2.2 SC 2.5.8 (Level AA)', issue: 'All interactive targets meet 24×24 CSS px minimum.', computed: `${targets.length} checked`, required: '24×24 CSS pixels', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action required.' });
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 15: LABEL IN NAME (WCAG 2.2 SC 2.5.3 — NEW)
+     For controls with visible text, the accessible name must CONTAIN
+     that visible text so speech-input users can activate by speaking it.
+  ================================================================ */
+  function auditLabelInName() {
+    const findings = [];
+    const SELECTOR = 'a[href],button,input,select,textarea,summary,[role="button"],[role="link"],[role="checkbox"],[role="radio"],[role="switch"],[role="menuitem"],[role="option"],[role="tab"]';
+    Array.from(document.querySelectorAll(SELECTOR)).filter(el => {
+      if (el.disabled) return false;
+      const cs = window.getComputedStyle(el);
+      return cs.display !== 'none' && cs.visibility !== 'hidden';
+    }).forEach(el => {
+      // Collect only direct visible text (not from aria-label override)
+      const visibleText = Array.from(el.childNodes)
+        .filter(n => n.nodeType === 3)
+        .map(n => n.textContent.trim())
+        .join(' ')
+        .trim()
+        || el.textContent.trim().slice(0, 100);
+      if (!visibleText || visibleText.length < 2) return; // no meaningful visible text
+
+      const accName = getAccessibleName(el);
+      if (!accName) return; // no accessible name to compare
+
+      // Case-insensitive substring check — normalise whitespace
+      const normVis = visibleText.toLowerCase().replace(/\s+/g, ' ');
+      const normAcc = accName.toLowerCase().replace(/\s+/g, ' ');
+      if (normAcc.includes(normVis)) return; // passes
+
+      // Ignore if difference is only punctuation / emoji (false-positive guard)
+      const alphaVis = normVis.replace(/[^a-z0-9]/g, '');
+      const alphaAcc = normAcc.replace(/[^a-z0-9]/g, '');
+      if (!alphaVis || alphaAcc.includes(alphaVis)) return;
+
+      findings.push({
+        id: generateId(), engine: 'Label in Name',
+        element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 2.5.3 Label in Name (Level A)',
+        issue: `Accessible name "${accName.slice(0, 60)}" does not contain visible label "${visibleText.slice(0, 60)}".`,
+        computed: `Accessible name: "${accName.slice(0, 60)}"`,
+        required: `Must contain: "${visibleText.slice(0, 60)}"`,
+        verdict: 'Fail',
+        severity: SEV.SERIOUS,
+        howToFix: 'Start the aria-label with the visible text, or remove aria-label and rely on visible text alone.'
+      });
+    });
+    if (findings.length === 0)
+      findings.push({ id: generateId(), engine: 'Label in Name', element: 'Page', criterion: 'WCAG 2.2 SC 2.5.3 (Level A)', issue: 'No Label in Name mismatches found.', computed: 'All checked', required: 'Accessible name contains visible text', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action required.' });
+    return findings;
+  }
+
+  /* ================================================================
      MAIN RUNNER
   ================================================================ */
   try {
@@ -401,7 +494,9 @@
       { name: 'Dark Mode', fn: auditDarkMode },
       { name: 'Text Spacing', fn: auditTextSpacing },
       { name: 'DOM Order', fn: auditDomOrder },
-      { name: 'ARIA Validation', fn: auditAriaValidation }
+      { name: 'ARIA Validation', fn: auditAriaValidation },
+      { name: 'Target Size', fn: auditTargetSize },
+      { name: 'Label in Name', fn: auditLabelInName }
     ];
 
     const findings = [];
