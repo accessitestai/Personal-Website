@@ -1159,6 +1159,11 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   #main-content { padding-bottom: 56px; }
 }
   </style>
+  <!-- Firebase Auth SDK (compat) — loaded before body script so firebase is available -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase-config.js"></script>
 </head>
 <body>
 
@@ -4287,7 +4292,42 @@ if ($('mob-export-txt')) {
 /* ── Initialise Phase 4 components on app load ── */
 
 
-init();
+/* ── Firebase auth guard — replaces PIN init() ── */
+(function () {
+  if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
+    // Firebase unavailable — fall back to PIN auth
+    init();
+    return;
+  }
+  var unsub = firebase.auth().onAuthStateChanged(function (user) {
+    unsub();
+    if (user) {
+      // Signed in — go straight to app, skip PIN views
+      showView('view-app');
+      var lbl = document.querySelector('.nav-pin-label');
+      if (lbl) lbl.textContent = user.displayName || user.email || 'Signed in';
+      // Override sign-out to use Firebase
+      var soBtn = document.getElementById('sign-out-btn');
+      if (soBtn) {
+        var newBtn = soBtn.cloneNode(true); // remove old PIN listener
+        soBtn.parentNode.replaceChild(newBtn, soBtn);
+        newBtn.addEventListener('click', function () {
+          firebase.auth().signOut().then(function () {
+            window.location.href = './auth.html';
+          });
+        });
+      }
+      // Initialise Phase-4 components that run post-auth
+      renderDashboard();
+      setTimeout(function () {
+        announce('AMA11Y platform ready. Welcome, ' + (user.displayName || user.email || '') + '.');
+      }, 300);
+    } else {
+      // Not authenticated — redirect to auth page
+      window.location.href = './auth.html';
+    }
+  });
+})();
 
 /* ================================================================
    AMA11Y v5.0.0 — MULTI-AI ENGINE
