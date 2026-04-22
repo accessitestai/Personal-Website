@@ -538,6 +538,24 @@ body {
   box-shadow: var(--focus-ring);
   border-radius: 2px;
 }
+.auth-footer a .new-tab-icon {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-left: 3px;
+  opacity: 0.8;
+}
+/* SR-only utility (only define if not already present elsewhere). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ════════════════════════════════════════════════
    FORGOT PASSWORD MODAL
