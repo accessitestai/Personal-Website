@@ -344,7 +344,7 @@ body {
   line-height: 1.5;
 }
 .password-checklist li::before {
-  content: "\2717"; /* heavy ballot X */
+  content: "\2717" / ""; /* heavy ballot X — empty SR alt text */
   position: absolute;
   left: 4px;
   top: 2px;
@@ -357,7 +357,7 @@ body {
   color: var(--success, #0a7d2c);
 }
 .password-checklist li[data-passed="true"]::before {
-  content: "\2713"; /* check mark */
+  content: "\2713" / ""; /* check mark — empty SR alt text */
   color: var(--success, #0a7d2c);
 }
 /* Visually hide the "Met: / Not met: " prefix — it's only for SR users.
