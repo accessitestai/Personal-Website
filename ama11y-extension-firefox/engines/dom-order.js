@@ -1,5 +1,5 @@
-/**
- * AMA11Y Phase 2 Engine: DOM Order Audit
+﻿/**
+ * AMASAMYA Phase 2 Engine: DOM Order Audit
  * Compares visual rendering order with DOM source order.
  * WCAG: SC 1.3.2 (Meaningful Sequence)
  */

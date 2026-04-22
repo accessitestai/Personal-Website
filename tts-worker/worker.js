@@ -1,4 +1,4 @@
-/* Azure Speech TTS proxy — Cloudflare Worker
+﻿/* Azure Speech TTS proxy — Cloudflare Worker
    Endpoints:
      GET /version          → which build is live
      GET /diag             → checks secret + Azure connectivity
@@ -67,7 +67,7 @@ async function synth(env, text, lang, rate) {
       'Ocp-Apim-Subscription-Key': env.AZURE_TTS_KEY,
       'Content-Type':              'application/ssml+xml; charset=utf-8',
       'X-Microsoft-OutputFormat':  'audio-24khz-48kbitrate-mono-mp3',
-      'User-Agent':                'ama11y-tts'
+      'User-Agent':                'AMASAMYA-tts'
     },
     body: ssml
   });

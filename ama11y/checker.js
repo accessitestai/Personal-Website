@@ -1,5 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════
-   AMA11Y Public Checker (checker.js)
+﻿/* ═══════════════════════════════════════════════════════════════
+   AMASAMYA Public Checker (checker.js)
    14 structural WCAG 2.2 checks, DOM-based, no getComputedStyle.
    Fetches pages via /.netlify/functions/fetch-page (CORS proxy).
    No login required.
@@ -125,7 +125,7 @@
         hideProgress();
         runBtn.disabled = false;
         setStatus('\u26A0 Could not audit this page: ' + err.message +
-          '. The page may block server-side fetching (CSP / bot protection). Try the AMA11Y Chrome Extension instead.', true);
+          '. The page may block server-side fetching (CSP / bot protection). Try the AMASAMYA Chrome Extension instead.', true);
       });
   }
 

@@ -1,5 +1,5 @@
-/**
- * AMA11Y Phase 2 Engine: ARIA Validation
+﻿/**
+ * AMASAMYA Phase 2 Engine: ARIA Validation
  * Full WAI-ARIA 1.2 attribute and role validation.
  * WCAG: SC 4.1.2 (Name, Role, Value)
  */

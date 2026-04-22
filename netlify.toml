@@ -1,4 +1,4 @@
-[build]
+﻿[build]
   command = "npm install && node build.js"
   publish = "."
 
@@ -11,16 +11,16 @@
   to = "/library-admin.html"
   status = 301
 
-# AMA11Y subdomain rewrite — serve /ama11y/ content at ama11y.akhileshmalani.com
+# AMASAMYA subdomain rewrite — serve /ama11y/ content at amasamya.akhileshmalani.com
 [[redirects]]
-  from = "https://ama11y.akhileshmalani.com/*"
+  from = "https://amasamya.akhileshmalani.com/*"
   to = "/ama11y/:splat"
   status = 200
   force = true
 
 # Redirect old orphaned bookmarklet installer to new location
 [[redirects]]
-  from = "/AMA11Y_Bookmarklet_Installer.html"
+  from = "/AMASAMYA_Bookmarklet_Installer.html"
   to = "/ama11y/install.html"
   status = 301
 

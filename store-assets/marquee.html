@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  width:1400px;height:560px;overflow:hidden;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:#07111f;color:#e8f0f8;
+  display:flex;align-items:stretch;
+}
+/* ── Background grid lines ── */
+body::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(126,200,227,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(126,200,227,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+/* ── Left panel ── */
+.left{
+  width:600px;flex-shrink:0;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:56px 48px;
+  position:relative;z-index:1;
+}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.logo{font-size:52px;font-weight:900;color:#7ec8e3;letter-spacing:-0.02em;line-height:1;}
+.v-badge{
+  font-size:13px;font-weight:700;color:#7ec8e3;
+  background:rgba(126,200,227,0.12);border:1px solid rgba(126,200,227,0.35);
+  padding:4px 10px;border-radius:4px;letter-spacing:0.06em;
+  align-self:flex-end;margin-bottom:8px;
+}
+.tagline{
+  font-size:26px;font-weight:700;color:#fff;
+  line-height:1.25;margin-bottom:20px;
+}
+.tagline em{color:#7ec8e3;font-style:normal;}
+.desc{font-size:15px;color:#b8d4e8;line-height:1.7;margin-bottom:32px;max-width:460px;}
+.pills{display:flex;gap:10px;flex-wrap:wrap;}
+.pill{
+  font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;
+  background:rgba(126,200,227,0.1);border:1px solid rgba(126,200,227,0.3);
+  color:#7ec8e3;letter-spacing:0.02em;
+}
+/* ── Right panel ── */
+.right{
+  flex:1;
+  display:flex;flex-direction:column;justify-content:center;gap:14px;
+  padding:40px 48px 40px 32px;
+  position:relative;z-index:1;
+}
+.right::before{
+  content:'';position:absolute;left:0;top:40px;bottom:40px;
+  width:1px;background:linear-gradient(to bottom,transparent,rgba(126,200,227,0.25),transparent);
+}
+.feature-card{
+  background:rgba(14,31,47,0.9);
+  border:1px solid rgba(30,58,90,0.8);
+  border-radius:10px;padding:18px 22px;
+  display:flex;align-items:flex-start;gap:16px;
+  transition:border-color .2s;
+}
+.feature-card.hi{border-color:rgba(126,200,227,0.35);background:rgba(0,51,102,0.4);}
+.icon{
+  font-size:26px;width:44px;height:44px;
+  background:rgba(126,200,227,0.12);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.card-body{}
+.card-title{font-size:15px;font-weight:700;color:#e8f0f8;margin-bottom:4px;}
+.card-desc{font-size:13px;color:#8899aa;line-height:1.5;}
+.card-badge{
+  display:inline-block;margin-top:6px;
+  font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;
+}
+.badge-ai{background:rgba(52,152,219,0.2);color:#3498db;border:1px solid rgba(52,152,219,0.3);}
+.badge-wcag{background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3);}
+.badge-rt{background:rgba(243,156,18,0.15);color:#f39c12;border:1px solid rgba(243,156,18,0.3);}
+</style>
+</head>
+<body>
+<div class="left">
+  <div class="logo-row">
+    <div class="logo">AMASAMYA</div>
+    <div class="v-badge">v3.0</div>
+  </div>
+  <div class="tagline">The <em>Blind-First</em><br>Accessibility Audit Tool</div>
+  <p class="desc">
+    Full WCAG 2.2 audit engine with three Vision AI modules that let blind testers independently verify visual accessibility — no sighted colleague required.
+  </p>
+  <div class="pills">
+    <span class="pill">WCAG 2.2 AA/AAA</span>
+    <span class="pill">Vision AI</span>
+    <span class="pill">Screen Reader First</span>
+    <span class="pill">Chrome Extension</span>
+  </div>
+</div>
+<div class="right">
+  <div class="feature-card hi">
+    <div class="icon">🔍</div>
+    <div class="card-body">
+      <div class="card-title">WCAG Audit Engine</div>
+      <div class="card-desc">13 specialist engines covering contrast, ARIA, focus order, landmarks, forms, headings, reflow, and more. Press Ctrl+Shift+U on any page.</div>
+      <span class="card-badge badge-wcag">WCAG 2.2 · AA · AAA</span>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="icon">👁</div>
+    <div class="card-body">
+      <div class="card-title">Focus Narrator &amp; Visual Layout Auditor</div>
+      <div class="card-desc">Vision AI analyses focus indicators at every element and detects layout failures across 4 viewport breakpoints — giving blind testers full independence.</div>
+      <span class="card-badge badge-ai">Vision AI · SC 2.4.7 · 1.4.10 · 2.5.5</span>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🎯</div>
+    <div class="card-body">
+      <div class="card-title">State Change Watchdog</div>
+      <div class="card-desc">Monitors the page in real time. Detects dynamic content additions, dialog focus failures, and ARIA state changes that screen readers would miss.</div>
+      <span class="card-badge badge-rt">Real-time · SC 4.1.3 · 2.4.3</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

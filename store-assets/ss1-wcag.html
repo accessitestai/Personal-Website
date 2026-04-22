@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{width:1280px;height:800px;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;background:#202124;}
+
+/* Chrome chrome */
+.chrome-toolbar{height:72px;background:#35363a;display:flex;align-items:center;padding:10px 14px;gap:8px;flex-shrink:0;}
+.chrome-dots{display:flex;gap:6px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+.tab-bar{display:flex;align-items:flex-end;gap:2px;margin-left:6px;}
+.chrome-tab{background:#fff;border-radius:8px 8px 0 0;padding:6px 16px;font-size:12px;color:#333;display:flex;align-items:center;gap:8px;height:32px;}
+.chrome-tab .favicon{width:14px;height:14px;background:#4285f4;border-radius:2px;}
+.chrome-tab-txt{max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.url-bar{flex:1;height:32px;background:#fff;border-radius:16px;padding:0 16px;display:flex;align-items:center;font-size:13px;color:#555;margin:0 8px;}
+.lock{color:#188038;margin-right:6px;font-size:12px;}
+
+/* Content row */
+.content-row{display:flex;flex:1;overflow:hidden;}
+
+/* Webpage */
+.webpage{flex:1;background:#f8f9fa;overflow:hidden;display:flex;flex-direction:column;}
+.page-hero{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:28px 32px;}
+.page-hero h1{font-size:22px;margin-bottom:6px;}
+.page-hero p{font-size:13px;opacity:.8;}
+.page-nav{background:#fff;border-bottom:1px solid #e0e0e0;padding:0 24px;display:flex;gap:0;height:40px;align-items:center;}
+.page-nav a{font-size:12px;color:#1a237e;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;}
+.page-nav a.active{border-bottom-color:#1a237e;font-weight:600;}
+.page-body{padding:20px 24px;display:flex;gap:16px;flex:1;}
+.page-col{flex:1;}
+.widget{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:14px;margin-bottom:12px;}
+.widget-title{font-size:13px;font-weight:600;color:#333;margin-bottom:8px;}
+.img-placeholder{width:100%;height:80px;background:#e8eaf6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9fa8da;margin-bottom:8px;}
+.btn-bad{background:#1a237e;color:#fff;border:none;padding:7px 16px;border-radius:4px;font-size:12px;cursor:pointer;}
+.form-row{display:flex;flex-direction:column;gap:6px;}
+.form-row input{border:1px solid #e0e0e0;border-radius:4px;padding:7px 10px;font-size:12px;}
+.low-contrast{color:#aaa;font-size:12px;}
+
+/* Side panel */
+.panel{width:420px;flex-shrink:0;background:#0a1628;display:flex;flex-direction:column;border-left:1px solid #1e3a5a;}
+.panel-header{background:#003366;padding:10px 14px;border-bottom:3px solid #7ec8e3;flex-shrink:0;}
+.panel-h-row{display:flex;align-items:center;gap:8px;}
+.panel-logo{font-size:16px;font-weight:900;color:#7ec8e3;letter-spacing:.04em;}
+.panel-ver{font-size:10px;color:#8899aa;background:rgba(126,200,227,.15);padding:2px 6px;border-radius:3px;}
+.panel-url{font-size:10px;color:#b8d4e8;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Panel tabs */
+.ptabs{background:#0e1f2f;border-bottom:2px solid #1e3a5a;display:flex;flex-shrink:0;}
+.ptab{flex:1;padding:9px 6px;font-size:11px;font-weight:600;color:#8899aa;text-align:center;letter-spacing:.03em;border-bottom:3px solid transparent;}
+.ptab.active{color:#7ec8e3;border-bottom-color:#7ec8e3;background:rgba(126,200,227,.06);}
+
+.panel-body{flex:1;overflow:hidden;padding:10px 14px;display:flex;flex-direction:column;gap:8px;}
+
+/* Summary cards */
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.card{background:#0e1f2f;border:1px solid #1e3a5a;border-radius:5px;padding:7px 4px;text-align:center;}
+.cn{display:block;font-size:20px;font-weight:700;line-height:1;}
+.cl{display:block;font-size:9px;color:#8899aa;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.c-fail{color:#e74c3c;}.c-warn{color:#f39c12;}.c-pass{color:#2ecc71;}.c-info{color:#3498db;}.c-tot{color:#e8f0f8;}
+
+/* Severity */
+.sev-row{display:flex;gap:5px;flex-wrap:wrap;}
+.sev{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;}
+.s-crit{background:rgba(231,76,60,.2);color:#e74c3c;border:1px solid #e74c3c;}
+.s-ser{background:rgba(211,84,0,.2);color:#e67e22;border:1px solid #e67e22;}
+.s-mod{background:rgba(243,156,18,.2);color:#f39c12;border:1px solid #f39c12;}
+.s-min{background:rgba(126,200,227,.15);color:#7ec8e3;border:1px solid #1e3a5a;}
+
+/* Table */
+.findings-h{font-size:11px;font-weight:700;color:#7ec8e3;margin:4px 0 3px;border-bottom:1px solid #1e3a5a;padding-bottom:4px;}
+.ftable{width:100%;border-collapse:collapse;font-size:10px;}
+.ftable th{background:#0e1f2f;color:#7ec8e3;padding:5px 6px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #1e3a5a;}
+.ftable td{padding:5px 6px;border-bottom:1px solid rgba(30,58,90,.5);color:#b8d4e8;vertical-align:top;}
+.ftable tr:hover td{background:rgba(126,200,227,.04);}
+.vf{color:#e74c3c;font-weight:700;}.vw{color:#f39c12;font-weight:600;}.vp{color:#2ecc71;}.vi{color:#3498db;}
+.sc{color:#e74c3c;}.ss{color:#e67e22;}.sm{color:#f39c12;}.sn{color:#8899aa;}
+</style>
+</head>
+<body>
+<div class="chrome-toolbar">
+  <div class="chrome-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <div class="tab-bar">
+    <div class="chrome-tab"><div class="favicon"></div><div class="chrome-tab-txt">GlobalBank — Secure Online Banking</div></div>
+  </div>
+  <div class="url-bar"><span class="lock">🔒</span>globalbank.example.com/dashboard</div>
+</div>
+<div class="content-row">
+  <div class="webpage">
+    <div class="page-hero"><h1>Welcome back, Alex</h1><p>Your accounts are secure and up to date.</p></div>
+    <div class="page-nav">
+      <a href="#" class="active">Dashboard</a><a href="#">Accounts</a><a href="#">Transfer</a><a href="#">Payments</a>
+    </div>
+    <div class="page-body">
+      <div class="page-col">
+        <div class="widget">
+          <div class="widget-title">Account Summary</div>
+          <div class="img-placeholder">Chart placeholder — no alt text</div>
+          <p class="low-contrast">Last updated: today</p>
+          <button class="btn-bad">View Details</button>
+        </div>
+        <div class="widget">
+          <div class="widget-title">Quick Transfer</div>
+          <div class="form-row">
+            <input type="text" placeholder="Amount">
+            <input type="text" placeholder="Account number">
+          </div>
+        </div>
+      </div>
+      <div class="page-col">
+        <div class="widget">
+          <div class="widget-title">Recent Transactions</div>
+          <div class="low-contrast">No transactions this week</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-h-row"><div class="panel-logo">AMASAMYA</div><div class="panel-ver">v3.0</div></div>
+      <div class="panel-url">globalbank.example.com/dashboard</div>
+    </div>
+    <div class="ptabs">
+      <div class="ptab active">WCAG Audit</div>
+      <div class="ptab">Visual Audit</div>
+      <div class="ptab">Settings</div>
+    </div>
+    <div class="panel-body">
+      <div class="cards">
+        <div class="card"><span class="cn c-fail">12</span><span class="cl">Failures</span></div>
+        <div class="card"><span class="cn c-warn">8</span><span class="cl">Warnings</span></div>
+        <div class="card"><span class="cn c-pass">45</span><span class="cl">Passes</span></div>
+        <div class="card"><span class="cn c-info">3</span><span class="cl">Info</span></div>
+        <div class="card"><span class="cn c-tot">68</span><span class="cl">Total</span></div>
+      </div>
+      <div class="sev-row">
+        <span class="sev s-crit">3 Critical</span>
+        <span class="sev s-ser">5 Serious</span>
+        <span class="sev s-mod">8 Moderate</span>
+        <span class="sev s-min">4 Minor</span>
+      </div>
+      <div class="findings-h">Findings (12 failures shown)</div>
+      <table class="ftable">
+        <thead><tr><th>Engine</th><th>Verdict</th><th>Sev</th><th>Issue</th></tr></thead>
+        <tbody>
+          <tr><td>Contrast</td><td class="vf">Fail</td><td class="sc">Critical</td><td>Text contrast 2.1:1 — requires 4.5:1</td></tr>
+          <tr><td>ARIA</td><td class="vf">Fail</td><td class="sc">Critical</td><td>Image missing alt attribute</td></tr>
+          <tr><td>Forms</td><td class="vf">Fail</td><td class="ss">Serious</td><td>Input has no associated label</td></tr>
+          <tr><td>Focus</td><td class="vf">Fail</td><td class="ss">Serious</td><td>Focus indicator not visible</td></tr>
+          <tr><td>ARIA</td><td class="vf">Fail</td><td class="ss">Serious</td><td>Button has no accessible name</td></tr>
+          <tr><td>Landmarks</td><td class="vw">Warn</td><td class="sm">Moderate</td><td>Page has no main landmark</td></tr>
+          <tr><td>Headings</td><td class="vw">Warn</td><td class="sm">Moderate</td><td>Heading levels skipped (h1→h3)</td></tr>
+          <tr><td>Contrast</td><td class="vw">Warn</td><td class="sm">Moderate</td><td>Link contrast 3.8:1 — AA requires 4.5:1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{width:1280px;height:800px;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;background:#202124;}
+.chrome-toolbar{height:72px;background:#35363a;display:flex;align-items:center;padding:10px 14px;gap:8px;flex-shrink:0;}
+.chrome-dots{display:flex;gap:6px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+.chrome-tab{background:#fff;border-radius:8px 8px 0 0;padding:6px 16px;font-size:12px;color:#333;display:flex;align-items:center;gap:8px;height:32px;margin-left:14px;}
+.chrome-tab .favicon{width:14px;height:14px;background:#7b1fa2;border-radius:2px;}
+.url-bar{flex:1;height:32px;background:#fff;border-radius:16px;padding:0 16px;display:flex;align-items:center;font-size:13px;color:#555;margin:0 8px;}
+.lock{color:#188038;margin-right:6px;font-size:12px;}
+.content-row{display:flex;flex:1;overflow:hidden;}
+/* Webpage */
+.webpage{flex:1;background:#fafafa;overflow:hidden;padding:24px 28px;}
+.wp-h{font-size:18px;font-weight:700;color:#4a148c;margin-bottom:10px;}
+.wp-p{font-size:12px;color:#555;line-height:1.6;margin-bottom:20px;max-width:520px;}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;}
+.feat-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:14px;}
+.feat-icon{font-size:20px;margin-bottom:6px;}
+.feat-title{font-size:12px;font-weight:700;color:#333;margin-bottom:4px;}
+.feat-desc{font-size:11px;color:#666;line-height:1.5;}
+
+/* Panel */
+.panel{width:460px;flex-shrink:0;background:#0a1628;display:flex;flex-direction:column;border-left:1px solid #1e3a5a;}
+.panel-header{background:#003366;padding:10px 14px;border-bottom:3px solid #7ec8e3;flex-shrink:0;}
+.panel-h-row{display:flex;align-items:center;gap:8px;}
+.panel-logo{font-size:16px;font-weight:900;color:#7ec8e3;}
+.panel-ver{font-size:10px;color:#8899aa;background:rgba(126,200,227,.15);padding:2px 6px;border-radius:3px;}
+.panel-url{font-size:10px;color:#b8d4e8;margin-top:4px;}
+.ptabs{background:#0e1f2f;border-bottom:2px solid #1e3a5a;display:flex;flex-shrink:0;}
+.ptab{flex:1;padding:9px 6px;font-size:11px;font-weight:600;color:#8899aa;text-align:center;border-bottom:3px solid transparent;}
+.ptab.active{color:#7ec8e3;border-bottom-color:#7ec8e3;background:rgba(126,200,227,.06);}
+.panel-body{flex:1;overflow:hidden;padding:12px 14px;display:flex;flex-direction:column;gap:14px;}
+.sec-title{font-size:13px;font-weight:700;color:#7ec8e3;padding-bottom:4px;border-bottom:1px solid #1e3a5a;}
+.sec-sub{font-size:10px;color:#8899aa;line-height:1.6;}
+.fieldset{border:1px solid #1e3a5a;border-radius:6px;padding:12px 14px;position:relative;}
+.legend{font-size:9px;font-weight:700;color:#7ec8e3;text-transform:uppercase;letter-spacing:.06em;position:absolute;top:-7px;left:10px;background:#0a1628;padding:0 6px;}
+.radio-row{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+.radio-label{display:flex;align-items:center;gap:10px;font-size:12px;color:#e8f0f8;cursor:pointer;}
+.radio-label input{accent-color:#7ec8e3;width:15px;height:15px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:9px;font-weight:700;color:#7ec8e3;text-transform:uppercase;letter-spacing:.05em;}
+.key-input{background:#0e1f2f;color:#e8f0f8;border:1px solid #1e3a5a;border-radius:4px;padding:8px 10px;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;width:100%;}
+.key-hint{font-size:10px;color:#8899aa;}
+.btn-row{display:flex;gap:8px;}
+.btn{padding:7px 16px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid;min-height:36px;}
+.btn-primary{background:#003366;color:#fff;border-color:#7ec8e3;}
+.btn-danger{background:rgba(231,76,60,.12);color:#e74c3c;border-color:rgba(231,76,60,.4);}
+.saved-msg{font-size:11px;color:#2ecc71;}
+.about{font-size:11px;color:#8899aa;line-height:1.6;}
+.about a{color:#7ec8e3;}
+</style>
+</head>
+<body>
+<div class="chrome-toolbar">
+  <div class="chrome-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <div class="chrome-tab"><div class="favicon"></div><span style="font-size:12px;color:#333">AMASAMYA — Accessibility Audit Tool</span></div>
+  <div class="url-bar"><span class="lock">🔒</span>AMASAMYA.akhileshmalani.com</div>
+</div>
+<div class="content-row">
+  <div class="webpage">
+    <div class="wp-h">AMASAMYA Settings</div>
+    <p class="wp-p">Configure your Vision AI provider to enable Focus Indicator Narrator and Visual Layout Auditor. Your API key is stored locally and never shared.</p>
+    <div class="feature-grid">
+      <div class="feat-card"><div class="feat-icon">🔍</div><div class="feat-title">WCAG Audit Engine</div><div class="feat-desc">No API key needed. Runs locally in the browser.</div></div>
+      <div class="feat-card"><div class="feat-icon">👁</div><div class="feat-title">Focus Narrator</div><div class="feat-desc">Requires Vision AI key for screenshot analysis.</div></div>
+      <div class="feat-card"><div class="feat-icon">📐</div><div class="feat-title">Layout Auditor</div><div class="feat-desc">Requires Vision AI key for breakpoint analysis.</div></div>
+      <div class="feat-card"><div class="feat-icon">🎯</div><div class="feat-title">State Watchdog</div><div class="feat-desc">No API key needed. Runs locally via MutationObserver.</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-h-row"><div class="panel-logo">AMASAMYA</div><div class="panel-ver">v3.0</div></div>
+      <div class="panel-url">AMASAMYA.akhileshmalani.com</div>
+    </div>
+    <div class="ptabs">
+      <div class="ptab">WCAG Audit</div>
+      <div class="ptab">Visual Audit</div>
+      <div class="ptab active">Settings</div>
+    </div>
+    <div class="panel-body">
+      <div class="sec-title">Vision AI Settings</div>
+      <div class="sec-sub">Add your API key to enable Focus Narrator and Visual Layout Auditor. Keys are stored locally — never transmitted except to the chosen provider.</div>
+      <div class="fieldset">
+        <div class="legend">AI Provider</div>
+        <div class="radio-row">
+          <label class="radio-label"><input type="radio" name="p" checked> Anthropic (Claude — recommended)</label>
+          <label class="radio-label"><input type="radio" name="p"> OpenAI (GPT-4o)</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Anthropic API Key</label>
+        <input class="key-input" type="password" value="sk-ant-api03-••••••••••••••••••••••">
+        <span class="key-hint">Get your key at console.anthropic.com</span>
+      </div>
+      <div class="field">
+        <label>OpenAI API Key</label>
+        <input class="key-input" type="password" placeholder="sk-…">
+        <span class="key-hint">Get your key at platform.openai.com</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary">Save Settings</button>
+        <button class="btn btn-danger">Clear Keys</button>
+      </div>
+      <div class="saved-msg">✓ Settings saved successfully</div>
+      <div class="about">AMASAMYA v3.0 — Built by Akhilesh Malani<br>Accessibility Architect &amp; Digital Inclusion Strategist<br><a href="#">AMASAMYA.akhileshmalani.com</a></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

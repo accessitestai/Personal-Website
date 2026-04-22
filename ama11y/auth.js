@@ -1,5 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════
-   AMA11Y — Firebase Authentication (auth.js)
+﻿/* ═══════════════════════════════════════════════════════════════
+   AMASAMYA — Firebase Authentication (auth.js)
    Providers: Google · Apple · Microsoft · Yahoo · GitHub · Twitter/X
               LinkedIn (via Netlify function) · Email / Password
    Post-login destination: ./index.html (main audit platform)
@@ -119,9 +119,9 @@
     var sub = document.getElementById('auth-sub');
     if (activeTab.id === 'tab-signup') {
       if (h1)  h1.textContent  = 'Create Your Account';
-      if (sub) sub.textContent = 'Sign up to access the AMA11Y accessibility audit platform.';
+      if (sub) sub.textContent = 'Sign up to access the AMASAMYA accessibility audit platform.';
     } else {
-      if (h1)  h1.textContent  = 'Sign in to AMA11Y';
+      if (h1)  h1.textContent  = 'Sign in to AMASAMYA';
       if (sub) sub.textContent = 'Continue to your accessibility audit platform.';
     }
     setStatus('', false);

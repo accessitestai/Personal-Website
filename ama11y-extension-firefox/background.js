@@ -1,18 +1,18 @@
-/**
- * AMA11Y Extension (Firefox) — Background Script
+﻿/**
+ * AMASAMYA Extension (Firefox) — Background Script
  * Orchestrates audit injection, sidebar, message passing,
- * and automatic AMA11Y Platform integration.
+ * and automatic AMASAMYA Platform integration.
  *
  * Flow:
  *  1. User presses Ctrl+Shift+U on any page.
  *  2. Content script runs all 13 audit engines (bypasses CSP).
  *  3. Results go to the sidebar (existing behaviour — unchanged).
- *  4. Results ALSO go to the AMA11Y Platform tab automatically (new).
+ *  4. Results ALSO go to the AMASAMYA Platform tab automatically (new).
  *     The platform tab is opened/focused and the findings appear in
  *     the Web Audit section, ready for AI enhancement.
  */
 
-const PLATFORM_URL = 'https://ama11y.akhileshmalani.com';
+const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
 
 // When the extension icon is clicked or Ctrl+Shift+U is pressed
 browser.browserAction.onClicked.addListener(async (tab) => {
@@ -25,7 +25,7 @@ browser.browserAction.onClicked.addListener(async (tab) => {
       file: 'content-script.js'
     });
   } catch (err) {
-    console.error('AMA11Y injection error:', err);
+    console.error('AMASAMYA injection error:', err);
   }
 });
 
@@ -39,7 +39,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
       browser.storage.local.set({ lastAudit: message }).catch(() => {});
     });
 
-    // ── 2. Send results to AMA11Y Platform tab (new) ──
+    // ── 2. Send results to AMASAMYA Platform tab (new) ──
     if (message.type === 'audit-results') {
       sendResultsToPlatform(message);
     }
@@ -47,14 +47,14 @@ browser.runtime.onMessage.addListener((message, sender) => {
 });
 
 /**
- * Find or open the AMA11Y Platform tab, then post the findings
+ * Find or open the AMASAMYA Platform tab, then post the findings
  * into it via the platform bridge content script.
  *
  * Fails silently — the sidebar always has the results as fallback.
  */
 async function sendResultsToPlatform(message) {
   const payload = {
-    type:      'ama11y_platform_results',
+    type:      'AMASAMYA_platform_results',
     findings:  message.findings  || [],
     pageTitle: message.title     || message.pageTitle || 'Untitled Page',
     pageUrl:   message.url       || message.pageUrl   || '',
@@ -93,7 +93,7 @@ async function sendResultsToPlatform(message) {
 
   } catch (err) {
     // Non-fatal — the sidebar still shows results
-    console.warn('AMA11Y platform bridge:', err.message);
+    console.warn('AMASAMYA platform bridge:', err.message);
   }
 }
 

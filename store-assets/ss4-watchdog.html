@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{width:1280px;height:800px;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;background:#202124;}
+.chrome-toolbar{height:72px;background:#35363a;display:flex;align-items:center;padding:10px 14px;gap:8px;flex-shrink:0;}
+.chrome-dots{display:flex;gap:6px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+.chrome-tab{background:#fff;border-radius:8px 8px 0 0;padding:6px 16px;font-size:12px;color:#333;display:flex;align-items:center;gap:8px;height:32px;margin-left:14px;}
+.chrome-tab .favicon{width:14px;height:14px;background:#2e7d32;border-radius:2px;}
+.url-bar{flex:1;height:32px;background:#fff;border-radius:16px;padding:0 16px;display:flex;align-items:center;font-size:13px;color:#555;margin:0 8px;}
+.lock{color:#188038;margin-right:6px;font-size:12px;}
+.content-row{display:flex;flex:1;overflow:hidden;}
+/* Webpage with dynamic dialog */
+.webpage{flex:1;background:#f5f5f5;overflow:hidden;position:relative;}
+.wp-app{padding:20px 24px;}
+.wp-h{font-size:17px;font-weight:700;color:#1b5e20;margin-bottom:12px;}
+.wp-actions{display:flex;gap:10px;margin-bottom:16px;}
+.wp-btn{background:#2e7d32;color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:12px;cursor:pointer;}
+.wp-btn.sec{background:#fff;color:#2e7d32;border:1px solid #2e7d32;}
+.toast{position:absolute;bottom:20px;right:20px;background:#323232;color:#fff;padding:12px 20px;border-radius:6px;font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:8px;padding:24px;width:300px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.modal-h{font-size:14px;font-weight:700;color:#333;margin-bottom:8px;}
+.modal-p{font-size:12px;color:#555;margin-bottom:16px;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.modal-btn{padding:7px 16px;border-radius:4px;font-size:12px;cursor:pointer;}
+.modal-btn.cancel{background:#f5f5f5;border:1px solid #ccc;color:#333;}
+.modal-btn.confirm{background:#2e7d32;color:#fff;border:none;}
+.items-list{display:flex;flex-direction:column;gap:8px;}
+.item-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;}
+.item-name{font-size:12px;font-weight:600;color:#333;}
+.item-status{font-size:11px;padding:3px 8px;border-radius:3px;}
+.s-active{background:#e8f5e9;color:#2e7d32;}
+.s-pending{background:#fff3e0;color:#e65100;}
+
+.panel{width:520px;flex-shrink:0;background:#0a1628;display:flex;flex-direction:column;border-left:1px solid #1e3a5a;}
+.panel-header{background:#003366;padding:10px 14px;border-bottom:3px solid #7ec8e3;flex-shrink:0;}
+.panel-h-row{display:flex;align-items:center;gap:8px;}
+.panel-logo{font-size:16px;font-weight:900;color:#7ec8e3;}
+.panel-ver{font-size:10px;color:#8899aa;background:rgba(126,200,227,.15);padding:2px 6px;border-radius:3px;}
+.panel-url{font-size:10px;color:#b8d4e8;margin-top:4px;}
+.ptabs{background:#0e1f2f;border-bottom:2px solid #1e3a5a;display:flex;flex-shrink:0;}
+.ptab{flex:1;padding:9px 6px;font-size:11px;font-weight:600;color:#8899aa;text-align:center;border-bottom:3px solid transparent;}
+.ptab.active{color:#7ec8e3;border-bottom-color:#7ec8e3;background:rgba(126,200,227,.06);}
+.panel-body{flex:1;overflow:hidden;padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
+.sec-title{font-size:13px;font-weight:700;color:#7ec8e3;padding-bottom:4px;border-bottom:1px solid #1e3a5a;}
+.status-line{font-size:10px;color:#2ecc71;font-style:normal;font-weight:600;margin-bottom:2px;}
+.badges{display:flex;gap:6px;margin-bottom:4px;}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:3px;}
+.b-fail{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid rgba(231,76,60,.4);}
+.b-warn{background:rgba(243,156,18,.15);color:#f39c12;border:1px solid rgba(243,156,18,.4);}
+.b-info{background:rgba(126,200,227,.1);color:#7ec8e3;border:1px solid #1e3a5a;}
+.ftable{width:100%;border-collapse:collapse;font-size:10px;}
+.ftable th{background:#0e1f2f;color:#7ec8e3;padding:5px 5px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid #1e3a5a;}
+.ftable td{padding:5px 5px;border-bottom:1px solid rgba(30,58,90,.5);color:#b8d4e8;vertical-align:top;font-size:10px;}
+.vf{color:#e74c3c;font-weight:700;}.vi{color:#7ec8e3;}.vw{color:#f39c12;font-weight:600;}
+.ev-type{font-size:9px;color:#8899aa;}
+</style>
+</head>
+<body>
+<div class="chrome-toolbar">
+  <div class="chrome-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <div class="chrome-tab"><div class="favicon"></div><span style="font-size:12px;color:#333">GreenDash — Project Management</span></div>
+  <div class="url-bar"><span class="lock">🔒</span>greendash.example.com/projects</div>
+</div>
+<div class="content-row">
+  <div class="webpage">
+    <div class="wp-app">
+      <div class="wp-h">Active Projects</div>
+      <div class="wp-actions">
+        <button class="wp-btn">+ New Project</button>
+        <button class="wp-btn sec">Export</button>
+      </div>
+      <div class="items-list">
+        <div class="item-card"><span class="item-name">Website Redesign</span><span class="item-status s-active">Active</span></div>
+        <div class="item-card"><span class="item-name">Mobile App v2.0</span><span class="item-status s-active">Active</span></div>
+        <div class="item-card"><span class="item-name">API Integration</span><span class="item-status s-pending">Pending</span></div>
+      </div>
+    </div>
+    <div class="modal-overlay">
+      <div class="modal">
+        <div class="modal-h">Delete Project?</div>
+        <p class="modal-p">This will permanently delete "Website Redesign" and all its tasks. This cannot be undone.</p>
+        <div class="modal-btns">
+          <button class="modal-btn cancel">Cancel</button>
+          <button class="modal-btn confirm">Delete</button>
+        </div>
+      </div>
+    </div>
+    <div class="toast">Project saved successfully</div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-h-row"><div class="panel-logo">AMASAMYA</div><div class="panel-ver">v3.0</div></div>
+      <div class="panel-url">greendash.example.com/projects</div>
+    </div>
+    <div class="ptabs">
+      <div class="ptab">WCAG Audit</div>
+      <div class="ptab active">Visual Audit</div>
+      <div class="ptab">Settings</div>
+    </div>
+    <div class="panel-body">
+      <div class="sec-title">State Change Watchdog</div>
+      <div class="status-line">● Monitoring greendash.example.com…</div>
+      <div class="badges">
+        <span class="badge b-fail">2 Fail</span>
+        <span class="badge b-warn">1 Warning</span>
+        <span class="badge b-info">4 Info</span>
+      </div>
+      <table class="ftable">
+        <thead>
+          <tr><th>#</th><th>Time</th><th>Verdict</th><th>Type</th><th>Element</th><th>SC</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>7</td><td>14:23:41</td><td class="vf">Fail</td><td>Dialog: focus not moved inside</td><td>#confirm-modal</td><td>2.4.3</td></tr>
+          <tr><td>6</td><td>14:23:41</td><td class="vi">Info</td><td>aria-expanded → true</td><td>button.menu-toggle</td><td>4.1.2</td></tr>
+          <tr><td>5</td><td>14:23:39</td><td class="vf">Fail</td><td>Dynamic content, no live region</td><td>div.toast</td><td>4.1.3</td></tr>
+          <tr><td>4</td><td>14:23:36</td><td class="vw">Warn</td><td>hidden removed — no live region</td><td>#project-panel</td><td>4.1.3</td></tr>
+          <tr><td>3</td><td>14:23:30</td><td class="vi">Info</td><td>aria-expanded → false</td><td>button#filter-btn</td><td>4.1.2</td></tr>
+          <tr><td>2</td><td>14:23:22</td><td class="vi">Info</td><td>Dynamic content in live region</td><td>div[role=status]</td><td>4.1.3</td></tr>
+          <tr><td>1</td><td>14:23:18</td><td class="vi">Info</td><td>Dialog: focus correctly managed</td><td>#save-dialog</td><td>2.4.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

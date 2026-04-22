@@ -1,5 +1,5 @@
-/**
- * AMA11Y — Focus Indicator Narrator
+﻿/**
+ * AMASAMYA — Focus Indicator Narrator
  * Module 2: Visual-to-Audio Engine
  *
  * Injected into the target page. Enumerates every focusable element,

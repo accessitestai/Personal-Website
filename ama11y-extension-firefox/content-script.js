@@ -1,5 +1,5 @@
-/**
- * AMA11Y Extension — Content Script
+﻿/**
+ * AMASAMYA Extension — Content Script
  * Injected into the active tab to run all 13 audit engines.
  * Results are sent to the service worker via browser.runtime.sendMessage.
  */
@@ -8,8 +8,8 @@
   'use strict';
 
   // Prevent double-injection
-  if (window.__ama11yAuditRunning) return;
-  window.__ama11yAuditRunning = true;
+  if (window.__AMASAMYAAuditRunning) return;
+  window.__AMASAMYAAuditRunning = true;
 
   /* ================================================================
      PHASE 1 ENGINES + UTILITIES (inlined from phase1-engines.js)
@@ -25,7 +25,7 @@
   const IMPLICIT_LANDMARKS = { header: 'banner', footer: 'contentinfo', main: 'main', nav: 'navigation', aside: 'complementary', section: 'region', form: 'form' };
 
   let findingCounter = 0;
-  function generateId() { return `AMA11Y-${String(++findingCounter).padStart(4, '0')}`; }
+  function generateId() { return `AMASAMYA-${String(++findingCounter).padStart(4, '0')}`; }
 
   function parseColour(str) {
     if (!str || str === 'transparent' || str === 'rgba(0, 0, 0, 0)') return { r: 255, g: 255, b: 255, a: 0 };
@@ -305,7 +305,7 @@
     const findings = [];
     const overflows = Array.from(document.querySelectorAll('*')).filter(el => { const cs = window.getComputedStyle(el); return (cs.overflow === 'hidden' || cs.overflowX === 'hidden' || cs.overflowY === 'hidden') && cs.display !== 'none'; }).slice(0, 100);
     const textEls = Array.from(document.querySelectorAll('*')).filter(el => { if (['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','SVG','PATH','BR','HR','IMG'].includes(el.tagName)) return false; if (!Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim())) return false; const cs = window.getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden'; }).slice(0, 150);
-    const sid = 'ama11y-ts-test';
+    const sid = 'AMASAMYA-ts-test';
     let old = document.getElementById(sid); if (old) old.remove();
     const ts = document.createElement('style'); ts.id = sid;
     ts.textContent = '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p,div,li,td,th,dd,dt,blockquote,figcaption,label,span { margin-bottom: 2em !important; }';
@@ -411,7 +411,7 @@
       } catch (err) {
         findings.push({
           id: generateId(), engine: engine.name, element: 'Audit Engine',
-          criterion: 'AMA11Y Internal',
+          criterion: 'AMASAMYA Internal',
           issue: `${engine.name} engine error: ${err && err.message ? err.message : String(err)}`,
           computed: String(err), required: 'Engine should complete without errors',
           verdict: 'Info', severity: SEV.MINOR,
@@ -434,6 +434,6 @@
       error: err && err.message ? err.message : String(err)
     });
   } finally {
-    window.__ama11yAuditRunning = false;
+    window.__AMASAMYAAuditRunning = false;
   }
 })();

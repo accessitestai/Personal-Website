@@ -1,5 +1,5 @@
-/**
- * AMA11Y — State Change Watchdog
+﻿/**
+ * AMASAMYA — State Change Watchdog
  * Module 3: Dynamic Content & AT Notification Checker
  *
  * Injected into the target page on demand. Sets up a MutationObserver
@@ -24,8 +24,8 @@
   'use strict';
 
   /* ── Prevent double-injection ── */
-  if (window.__ama11y_watchdog_active) return;
-  window.__ama11y_watchdog_active = true;
+  if (window.__AMASAMYA_watchdog_active) return;
+  window.__AMASAMYA_watchdog_active = true;
 
   /* ── Live region roles & attributes ── */
   const LIVE_ROLES  = new Set(['alert', 'status', 'log', 'marquee', 'timer', 'alertdialog']);
@@ -322,7 +322,7 @@
     if (msg.type === 'state-watchdog-stop') {
       running = false;
       observer.disconnect();
-      window.__ama11y_watchdog_active = false;
+      window.__AMASAMYA_watchdog_active = false;
       try {
         chrome.runtime.sendMessage({ type: 'state-watchdog-stopped' });
       } catch (_) {}

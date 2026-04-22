@@ -1,5 +1,5 @@
-/**
- * AMA11Y Phase 2 Engine: High Contrast Simulation
+﻿/**
+ * AMASAMYA Phase 2 Engine: High Contrast Simulation
  * Tests how pages render under Windows High Contrast / forced-colors mode.
  * WCAG: SC 1.4.3, SC 2.4.11
  */

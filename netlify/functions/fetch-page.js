@@ -1,5 +1,5 @@
-/**
- * fetch-page.js — AMA11Y URL Proxy
+﻿/**
+ * fetch-page.js — AMASAMYA URL Proxy
  *
  * Fetches a remote URL on behalf of the browser-side checker,
  * bypassing CORS restrictions that would otherwise block the request.
@@ -71,7 +71,7 @@ exports.handler = async function (event) {
     const upstream = await fetch(rawUrl, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'AMA11Y-Checker/3.1.0 (Accessibility Auditor; +https://ama11y.akhileshmalani.com)',
+        'User-Agent': 'AMASAMYA-Checker/3.1.0 (Accessibility Auditor; +https://amasamya.akhileshmalani.com)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en',
       },

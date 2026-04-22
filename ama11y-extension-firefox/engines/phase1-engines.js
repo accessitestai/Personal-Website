@@ -1,5 +1,5 @@
-/**
- * AMA11Y Phase 1 Engines — Extracted from bookmarklet for extension use
+﻿/**
+ * AMASAMYA Phase 1 Engines — Extracted from bookmarklet for extension use
  * 8 audit engines + utility functions
  */
 
@@ -46,7 +46,7 @@ const IMPLICIT_LANDMARKS = {
 
 let findingCounter = 0;
 function generateId() {
-  return `AMA11Y-${String(++findingCounter).padStart(4, '0')}`;
+  return `AMASAMYA-${String(++findingCounter).padStart(4, '0')}`;
 }
 function resetCounter() {
   findingCounter = 0;

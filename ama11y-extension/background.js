@@ -1,5 +1,5 @@
-/**
- * AMA11Y Extension — Background Service Worker v3.0
+﻿/**
+ * AMASAMYA Extension — Background Service Worker v3.0
  *
  * Orchestrates:
  *   A. WCAG Audit  — injects content-script.js, relays findings to side panel + platform
@@ -10,7 +10,7 @@
 
 'use strict';
 
-const PLATFORM_URL = 'https://ama11y.akhileshmalani.com';
+const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
 
 /* ════════════════════════════════════════════════════════
    A. WCAG AUDIT — existing behaviour (unchanged)
@@ -21,7 +21,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   try {
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content-script.js'] });
   } catch (err) {
-    console.error('AMA11Y injection error:', err);
+    console.error('AMASAMYA injection error:', err);
   }
 });
 
@@ -150,17 +150,17 @@ async function handleFocusElement(elementInfo, tabId) {
 
     /* 2. Get API credentials from extension storage */
     const store = await chrome.storage.local.get([
-      'ama11y_vision_provider',
-      'ama11y_anthropic_key',
-      'ama11y_openai_key'
+      'AMASAMYA_vision_provider',
+      'AMASAMYA_anthropic_key',
+      'AMASAMYA_openai_key'
     ]);
 
-    const provider = store.ama11y_vision_provider || 'anthropic';
+    const provider = store.AMASAMYA_vision_provider || 'anthropic';
 
-    if (provider === 'openai' && store.ama11y_openai_key) {
-      finding = await callOpenAIVision(dataUrl, elementInfo, store.ama11y_openai_key);
-    } else if (store.ama11y_anthropic_key) {
-      finding = await callAnthropicVision(dataUrl, elementInfo, store.ama11y_anthropic_key);
+    if (provider === 'openai' && store.AMASAMYA_openai_key) {
+      finding = await callOpenAIVision(dataUrl, elementInfo, store.AMASAMYA_openai_key);
+    } else if (store.AMASAMYA_anthropic_key) {
+      finding = await callAnthropicVision(dataUrl, elementInfo, store.AMASAMYA_anthropic_key);
     } else {
       finding = {
         hasIndicator: null,
@@ -316,7 +316,7 @@ async function startVisualLayoutAudit() {
     await chrome.debugger.attach({ tabId: tab.id }, '1.3');
 
     const store = await chrome.storage.local.get([
-      'ama11y_vision_provider', 'ama11y_anthropic_key', 'ama11y_openai_key'
+      'AMASAMYA_vision_provider', 'AMASAMYA_anthropic_key', 'AMASAMYA_openai_key'
     ]);
 
     for (let i = 0; i < BREAKPOINTS.length; i++) {
@@ -356,11 +356,11 @@ async function startVisualLayoutAudit() {
       /* Send to Vision LLM */
       let finding;
       try {
-        const provider = store.ama11y_vision_provider || 'anthropic';
-        if (provider === 'openai' && store.ama11y_openai_key) {
-          finding = await callOpenAILayoutVision(dataUrl, bp, store.ama11y_openai_key);
-        } else if (store.ama11y_anthropic_key) {
-          finding = await callAnthropicLayoutVision(dataUrl, bp, store.ama11y_anthropic_key);
+        const provider = store.AMASAMYA_vision_provider || 'anthropic';
+        if (provider === 'openai' && store.AMASAMYA_openai_key) {
+          finding = await callOpenAILayoutVision(dataUrl, bp, store.AMASAMYA_openai_key);
+        } else if (store.AMASAMYA_anthropic_key) {
+          finding = await callAnthropicLayoutVision(dataUrl, bp, store.AMASAMYA_anthropic_key);
         } else {
           finding = { issues: [], note: 'No Vision AI key configured.', error: true };
         }
@@ -642,7 +642,7 @@ async function captureAnnotatedScreenshot(findings) {
 
 async function sendResultsToPlatform(message) {
   const payload = {
-    type:      'ama11y_platform_results',
+    type:      'AMASAMYA_platform_results',
     findings:  message.findings  || [],
     pageTitle: message.title     || message.pageTitle || 'Untitled Page',
     pageUrl:   message.url       || message.pageUrl   || '',
@@ -664,7 +664,7 @@ async function sendResultsToPlatform(message) {
       await chrome.tabs.sendMessage(newTab.id, payload);
     }
   } catch (err) {
-    console.warn('AMA11Y platform bridge:', err.message);
+    console.warn('AMASAMYA platform bridge:', err.message);
   }
 }
 

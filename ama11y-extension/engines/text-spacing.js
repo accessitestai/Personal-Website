@@ -1,5 +1,5 @@
-/**
- * AMA11Y Phase 2 Engine: Text Spacing Audit
+﻿/**
+ * AMASAMYA Phase 2 Engine: Text Spacing Audit
  * Applies WCAG 1.4.12 text spacing overrides and detects content clipping.
  * WCAG: SC 1.4.12
  */
@@ -46,7 +46,7 @@ function auditTextSpacing() {
   }).slice(0, 100);
 
   // Apply WCAG 1.4.12 text spacing overrides temporarily
-  const styleId = 'ama11y-text-spacing-test';
+  const styleId = 'AMASAMYA-text-spacing-test';
   let existingTestStyle = document.getElementById(styleId);
   if (existingTestStyle) existingTestStyle.remove();
 

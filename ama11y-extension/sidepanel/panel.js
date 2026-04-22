@@ -1,5 +1,5 @@
-/**
- * AMA11Y Extension — Side Panel v3.0
+﻿/**
+ * AMASAMYA Extension — Side Panel v3.0
  *
  * Panels:
  *   1. WCAG Audit      — existing 13-engine results
@@ -86,11 +86,11 @@
 
   /* Load saved keys on open */
   chrome.storage.local.get(
-    ['ama11y_anthropic_key', 'ama11y_openai_key', 'ama11y_vision_provider'],
+    ['AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_vision_provider'],
     (data) => {
-      if (data.ama11y_anthropic_key) anthropicKeyInput.value = data.ama11y_anthropic_key;
-      if (data.ama11y_openai_key)    openaiKeyInput.value    = data.ama11y_openai_key;
-      const provider = data.ama11y_vision_provider || 'anthropic';
+      if (data.AMASAMYA_anthropic_key) anthropicKeyInput.value = data.AMASAMYA_anthropic_key;
+      if (data.AMASAMYA_openai_key)    openaiKeyInput.value    = data.AMASAMYA_openai_key;
+      const provider = data.AMASAMYA_vision_provider || 'anthropic';
       const radio = document.querySelector(`input[name="vision-provider"][value="${provider}"]`);
       if (radio) radio.checked = true;
     }
@@ -99,9 +99,9 @@
   $('save-settings-btn').addEventListener('click', () => {
     const provider = document.querySelector('input[name="vision-provider"]:checked')?.value || 'anthropic';
     chrome.storage.local.set({
-      ama11y_anthropic_key:   anthropicKeyInput.value.trim(),
-      ama11y_openai_key:      openaiKeyInput.value.trim(),
-      ama11y_vision_provider: provider
+      AMASAMYA_anthropic_key:   anthropicKeyInput.value.trim(),
+      AMASAMYA_openai_key:      openaiKeyInput.value.trim(),
+      AMASAMYA_vision_provider: provider
     }, () => {
       settingsStatus.textContent = 'Settings saved.';
       announce('Settings saved successfully.');
@@ -111,7 +111,7 @@
 
   $('clear-settings-btn').addEventListener('click', () => {
     chrome.storage.local.remove(
-      ['ama11y_anthropic_key', 'ama11y_openai_key', 'ama11y_vision_provider'],
+      ['AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_vision_provider'],
       () => {
         anthropicKeyInput.value = '';
         openaiKeyInput.value    = '';
@@ -137,7 +137,7 @@
       };
       onAuditComplete();
     } else if (message.type === 'audit-error') {
-      announce(`AMA11Y audit error: ${message.error}`);
+      announce(`AMASAMYA audit error: ${message.error}`);
       $('page-info').textContent = 'Error: ' + message.error;
 
     /* Focus Narrator */
@@ -154,7 +154,7 @@
 
     /* Annotated Screenshot */
     } else if (message.type === 'annotated-screenshot-ready') {
-      downloadFile(message.dataUrl, 'ama11y-annotated.png', 'image/png');
+      downloadFile(message.dataUrl, 'AMASAMYA-annotated.png', 'image/png');
       $('export-annotated').disabled = false;
       $('export-annotated').textContent = '📸 Screenshot';
       announce(`Annotated screenshot exported (${message.count} issues marked).`);
@@ -314,19 +314,19 @@
   /* Export */
   $('export-json').addEventListener('click', () => {
     downloadFile(JSON.stringify({
-      tool: 'AMA11Y', version: '3.1.0', page: auditMeta.pageTitle,
+      tool: 'AMASAMYA', version: '3.1.0', page: auditMeta.pageTitle,
       url: auditMeta.pageUrl, timestamp: auditMeta.timestamp,
       summary: { total: allFindings.length, fail: allFindings.filter(f=>f.verdict==='Fail').length,
         warning: allFindings.filter(f=>f.verdict==='Warning').length,
         pass: allFindings.filter(f=>f.verdict==='Pass').length,
         info: allFindings.filter(f=>f.verdict==='Info').length },
       findings: filteredFindings
-    }, null, 2), 'ama11y-audit.json', 'application/json');
+    }, null, 2), 'AMASAMYA-audit.json', 'application/json');
     announce('JSON exported.');
   });
 
   $('export-html').addEventListener('click', () => {
-    downloadFile(generateHtmlReport(), 'ama11y-report.html', 'text/html');
+    downloadFile(generateHtmlReport(), 'AMASAMYA-report.html', 'text/html');
     announce('HTML report exported.');
   });
 
@@ -334,13 +334,13 @@
     const headers = ['ID','Engine','Element','Criterion','Issue','Computed','Required','Verdict','Severity','How to Fix'];
     const rows    = filteredFindings.map(f =>
       [f.id, f.engine, f.element, f.criterion, f.issue, f.computed, f.required, f.verdict, f.severity, f.howToFix].map(csvEscape));
-    downloadFile([headers.join(','), ...rows.map(r => r.join(','))].join('\r\n'), 'ama11y-audit.csv', 'text/csv');
+    downloadFile([headers.join(','), ...rows.map(r => r.join(','))].join('\r\n'), 'AMASAMYA-audit.csv', 'text/csv');
     announce('CSV exported.');
   });
 
   $('export-text').addEventListener('click', () => {
     const lines = [
-      'AMA11Y Accessibility Audit Report', '='.repeat(40),
+      'AMASAMYA Accessibility Audit Report', '='.repeat(40),
       `Page: ${auditMeta.pageTitle}`, `URL: ${auditMeta.pageUrl}`, `Date: ${auditMeta.timestamp}`, '',
       `Summary: ${allFindings.filter(f=>f.verdict==='Fail').length} Failures, ${allFindings.filter(f=>f.verdict==='Warning').length} Warnings, ${allFindings.length} Total`, '', '-'.repeat(40), ''
     ];
@@ -349,7 +349,7 @@
       lines.push(`  Issue: ${f.issue}`); lines.push(`  Element: ${f.element}`);
       lines.push(`  Criterion: ${f.criterion}`); lines.push(`  Fix: ${f.howToFix}`); lines.push('');
     });
-    downloadFile(lines.join('\n'), 'ama11y-audit.txt', 'text/plain');
+    downloadFile(lines.join('\n'), 'AMASAMYA-audit.txt', 'text/plain');
     announce('Text exported.');
   });
 
@@ -408,9 +408,9 @@
       runs: [{
         tool: {
           driver: {
-            name: 'AMA11Y',
+            name: 'AMASAMYA',
             version: '3.1.0',
-            informationUri: 'https://ama11y.akhileshmalani.com',
+            informationUri: 'https://amasamya.akhileshmalani.com',
             rules
           }
         },
@@ -423,7 +423,7 @@
       }]
     };
 
-    downloadFile(JSON.stringify(sarif, null, 2), 'ama11y-audit.sarif', 'application/json');
+    downloadFile(JSON.stringify(sarif, null, 2), 'AMASAMYA-audit.sarif', 'application/json');
     announce('SARIF exported.');
   });
 
@@ -456,7 +456,7 @@
   /* ── Baseline Save / Clear / Compare ── */
 
   function baselineKey() {
-    return 'ama11y_baseline_' + btoa(encodeURIComponent(auditMeta.pageUrl)).slice(0, 60);
+    return 'AMASAMYA_baseline_' + btoa(encodeURIComponent(auditMeta.pageUrl)).slice(0, 60);
   }
 
   function baselineFingerprint(f) {
@@ -576,7 +576,7 @@
           <p><strong>Fix:</strong> ${escHtml(f.howToFix)}</p></td></tr>`).join('');
     return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AMA11Y Audit — ${escHtml(auditMeta.pageTitle)}</title>
+<title>AMASAMYA Audit — ${escHtml(auditMeta.pageTitle)}</title>
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:system-ui,sans-serif;color:#111;background:#fff;}
 .skip{position:absolute;top:-999px;left:-999px;background:#003366;color:#fff;padding:8px 16px;}.skip:focus{top:0;left:0;}
 header{background:#003366;color:#fff;padding:24px 32px;}header h1{font-size:1.5rem;margin-bottom:4px;}
@@ -591,7 +591,7 @@ td{padding:10px 12px;border-bottom:1px solid #e8eef5;vertical-align:top;line-hei
 tr:nth-child(even)td{background:#f8fafc;}code{font-family:monospace;background:#eef2f7;padding:1px 5px;border-radius:2px;}
 footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-top:1px solid #dde;}</style>
 </head><body><a class="skip" href="#main">Skip to main content</a>
-<header><h1>AMA11Y Accessibility Audit</h1>
+<header><h1>AMASAMYA Accessibility Audit</h1>
 <p>Page: ${escHtml(auditMeta.pageTitle)} | URL: ${escHtml(auditMeta.pageUrl)} | Date: ${escHtml(auditMeta.timestamp)}</p></header>
 <main id="main"><h2>Summary</h2>
 <div class="summary">
@@ -604,7 +604,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 <div style="overflow-x:auto;"><table aria-label="Findings">
 <thead><tr><th>ID</th><th>Engine</th><th>Element</th><th>Criterion</th><th>Severity</th><th>Verdict</th><th>Detail</th></tr></thead>
 <tbody>${rows}</tbody></table></div></main>
-<footer>Generated by AMA11Y v3.0.0 — ama11y.akhileshmalani.com — Akhilesh Malani</footer>
+<footer>Generated by AMASAMYA v3.0.0 — AMASAMYA.akhileshmalani.com — Akhilesh Malani</footer>
 </body></html>`;
   }
 
@@ -731,7 +731,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       r.finding?.description || ''
     ].map(csvEscape));
     downloadFile([headers.join(','), ...rows.map(r => r.join(','))].join('\r\n'),
-      'ama11y-focus-narrator.csv', 'text/csv');
+      'AMASAMYA-focus-narrator.csv', 'text/csv');
     announce('Focus Narrator CSV exported.');
   });
 
@@ -845,7 +845,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
   }
 
   $('vla-export-btn').addEventListener('click', () => {
-    const lines = ['AMA11Y Visual Layout Audit Report', '='.repeat(50), ''];
+    const lines = ['AMASAMYA Visual Layout Audit Report', '='.repeat(50), ''];
     vlaFindings.forEach(r => {
       lines.push(`Breakpoint: ${r.breakpoint.label}`);
       lines.push(`Summary: ${r.finding?.summary || 'N/A'}`);
@@ -855,7 +855,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       });
       lines.push('');
     });
-    downloadFile(lines.join('\n'), 'ama11y-visual-layout.txt', 'text/plain');
+    downloadFile(lines.join('\n'), 'AMASAMYA-visual-layout.txt', 'text/plain');
     announce('Visual Layout report exported.');
   });
 
@@ -902,7 +902,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     ].map(csvEscape));
     downloadFile(
       [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n'),
-      'ama11y-state-watchdog.csv', 'text/csv'
+      'AMASAMYA-state-watchdog.csv', 'text/csv'
     );
     announce('State Change Watchdog CSV exported.');
   });

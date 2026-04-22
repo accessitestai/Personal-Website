@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  width:440px;height:280px;overflow:hidden;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:#07111f;color:#e8f0f8;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;
+}
+body::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(126,200,227,0.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(126,200,227,0.05) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;
+}
+.glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);
+  width:300px;height:200px;
+  background:radial-gradient(ellipse,rgba(0,51,102,0.6) 0%,transparent 70%);
+  pointer-events:none;
+}
+.logo{
+  font-size:54px;font-weight:900;color:#7ec8e3;
+  letter-spacing:-0.02em;line-height:1;
+  position:relative;z-index:1;
+  text-shadow:0 0 40px rgba(126,200,227,0.3);
+}
+.v-badge{
+  font-size:11px;font-weight:700;color:#7ec8e3;
+  background:rgba(126,200,227,0.12);border:1px solid rgba(126,200,227,0.35);
+  padding:3px 9px;border-radius:3px;letter-spacing:0.06em;
+  position:relative;z-index:1;margin-top:8px;
+}
+.tagline{
+  font-size:14px;font-weight:600;color:#b8d4e8;
+  letter-spacing:0.02em;margin-top:12px;
+  position:relative;z-index:1;text-align:center;
+}
+.divider{
+  width:60px;height:1px;background:rgba(126,200,227,0.3);
+  margin:14px auto;position:relative;z-index:1;
+}
+.pills{
+  display:flex;gap:8px;position:relative;z-index:1;
+}
+.pill{
+  font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;
+  background:rgba(126,200,227,0.1);border:1px solid rgba(126,200,227,0.25);
+  color:#7ec8e3;letter-spacing:0.04em;white-space:nowrap;
+}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="logo">AMASAMYA</div>
+<div class="v-badge">VERSION 3.0</div>
+<div class="tagline">Blind-First Accessibility Audit Tool</div>
+<div class="divider"></div>
+<div class="pills">
+  <span class="pill">WCAG 2.2</span>
+  <span class="pill">Vision AI</span>
+  <span class="pill">Real-Time</span>
+</div>
+</body>
+</html>

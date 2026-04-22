@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{width:1280px;height:800px;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;background:#202124;}
+.chrome-toolbar{height:72px;background:#35363a;display:flex;align-items:center;padding:10px 14px;gap:8px;flex-shrink:0;}
+.chrome-dots{display:flex;gap:6px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+.chrome-tab{background:#fff;border-radius:8px 8px 0 0;padding:6px 16px;font-size:12px;color:#333;display:flex;align-items:center;gap:8px;height:32px;margin-left:14px;}
+.chrome-tab .favicon{width:14px;height:14px;background:#1565c0;border-radius:2px;}
+.url-bar{flex:1;height:32px;background:#fff;border-radius:16px;padding:0 16px;display:flex;align-items:center;font-size:13px;color:#555;margin:0 8px;}
+.lock{color:#188038;margin-right:6px;font-size:12px;}
+.content-row{display:flex;flex:1;overflow:hidden;}
+.webpage{flex:1;background:#fff;overflow:hidden;padding:20px 24px;}
+.wp-h{font-size:18px;font-weight:700;color:#0d47a1;margin-bottom:12px;}
+.wp-p{font-size:12px;color:#444;line-height:1.6;margin-bottom:16px;}
+.wp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.wp-card{border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;}
+.wp-card-img{height:60px;background:linear-gradient(135deg,#1565c0,#283593);}
+.wp-card-body{padding:10px;font-size:11px;color:#444;}
+.panel{width:520px;flex-shrink:0;background:#0a1628;display:flex;flex-direction:column;border-left:1px solid #1e3a5a;}
+.panel-header{background:#003366;padding:10px 14px;border-bottom:3px solid #7ec8e3;flex-shrink:0;}
+.panel-h-row{display:flex;align-items:center;gap:8px;}
+.panel-logo{font-size:16px;font-weight:900;color:#7ec8e3;letter-spacing:.04em;}
+.panel-ver{font-size:10px;color:#8899aa;background:rgba(126,200,227,.15);padding:2px 6px;border-radius:3px;}
+.panel-url{font-size:10px;color:#b8d4e8;margin-top:4px;}
+.ptabs{background:#0e1f2f;border-bottom:2px solid #1e3a5a;display:flex;flex-shrink:0;}
+.ptab{flex:1;padding:9px 6px;font-size:11px;font-weight:600;color:#8899aa;text-align:center;letter-spacing:.03em;border-bottom:3px solid transparent;}
+.ptab.active{color:#7ec8e3;border-bottom-color:#7ec8e3;background:rgba(126,200,227,.06);}
+.panel-body{flex:1;overflow:hidden;padding:10px 14px;display:flex;flex-direction:column;gap:8px;}
+.sec-title{font-size:13px;font-weight:700;color:#7ec8e3;padding-bottom:4px;border-bottom:1px solid #1e3a5a;}
+.sec-sub{font-size:10px;color:#8899aa;line-height:1.5;}
+
+.bp-cards{display:flex;flex-direction:column;gap:8px;}
+.bp-card{background:#0e1f2f;border:1px solid #1e3a5a;border-radius:6px;padding:10px 12px;}
+.bp-card.has-issues{border-color:rgba(231,76,60,.4);}
+.bp-card.ok{border-color:rgba(46,204,113,.3);}
+.bp-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.bp-label{font-size:12px;font-weight:700;color:#e8f0f8;}
+.bp-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;}
+.bp-fail-badge{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid rgba(231,76,60,.35);}
+.bp-ok-badge{background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.35);}
+.bp-summary{font-size:10px;color:#8899aa;line-height:1.5;margin-bottom:5px;}
+.issue-row{display:flex;gap:6px;align-items:baseline;font-size:10px;color:#b8d4e8;margin-bottom:3px;}
+.iss-sev{font-weight:700;font-size:9px;padding:1px 5px;border-radius:2px;}
+.i-crit{background:rgba(231,76,60,.2);color:#e74c3c;}
+.i-ser{background:rgba(230,126,34,.2);color:#e67e22;}
+.i-mod{background:rgba(243,156,18,.2);color:#f39c12;}
+</style>
+</head>
+<body>
+<div class="chrome-toolbar">
+  <div class="chrome-dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <div class="chrome-tab"><div class="favicon"></div><span style="font-size:12px;color:#333">ShopNow — Online Store</span></div>
+  <div class="url-bar"><span class="lock">🔒</span>shopnow.example.com</div>
+</div>
+<div class="content-row">
+  <div class="webpage">
+    <div class="wp-h">Featured Products</div>
+    <p class="wp-p">Discover our latest collection. Free shipping on orders over $50.</p>
+    <div class="wp-grid">
+      <div class="wp-card"><div class="wp-card-img"></div><div class="wp-card-body"><strong>Product A</strong><br>$29.99</div></div>
+      <div class="wp-card"><div class="wp-card-img"></div><div class="wp-card-body"><strong>Product B</strong><br>$49.99</div></div>
+      <div class="wp-card"><div class="wp-card-img"></div><div class="wp-card-body"><strong>Product C</strong><br>$19.99</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-h-row"><div class="panel-logo">AMASAMYA</div><div class="panel-ver">v3.0</div></div>
+      <div class="panel-url">shopnow.example.com</div>
+    </div>
+    <div class="ptabs">
+      <div class="ptab">WCAG Audit</div>
+      <div class="ptab active">Visual Audit</div>
+      <div class="ptab">Settings</div>
+    </div>
+    <div class="panel-body">
+      <div class="sec-title">Visual Layout Auditor</div>
+      <div class="sec-sub">Vision AI analysed 4 viewport breakpoints for layout failures.</div>
+      <div class="bp-cards">
+        <div class="bp-card has-issues">
+          <div class="bp-head">
+            <span class="bp-label">320px — Mobile S</span>
+            <span class="bp-badge bp-fail-badge">3 issues</span>
+          </div>
+          <div class="bp-summary">Severe layout breakage at smallest mobile width. Horizontal scroll detected.</div>
+          <div class="issue-row"><span class="iss-sev i-crit">Critical</span>Horizontal scrollbar present — WCAG 1.4.10 Reflow failure</div>
+          <div class="issue-row"><span class="iss-sev i-ser">Serious</span>Product cards overlap at 320px, text clipped</div>
+          <div class="issue-row"><span class="iss-sev i-mod">Moderate</span>CTA buttons below 44×44px touch target — WCAG 2.5.5</div>
+        </div>
+        <div class="bp-card has-issues">
+          <div class="bp-head">
+            <span class="bp-label">375px — Mobile M</span>
+            <span class="bp-badge bp-fail-badge">1 issue</span>
+          </div>
+          <div class="bp-summary">Generally usable but touch targets remain undersized.</div>
+          <div class="issue-row"><span class="iss-sev i-mod">Moderate</span>Add-to-cart buttons 32×28px — below 44×44px minimum</div>
+        </div>
+        <div class="bp-card ok">
+          <div class="bp-head">
+            <span class="bp-label">768px — Tablet</span>
+            <span class="bp-badge bp-ok-badge">✓ No issues</span>
+          </div>
+          <div class="bp-summary">Layout renders correctly at tablet breakpoint. All targets adequate.</div>
+        </div>
+        <div class="bp-card ok">
+          <div class="bp-head">
+            <span class="bp-label">1280px — Desktop</span>
+            <span class="bp-badge bp-ok-badge">✓ No issues</span>
+          </div>
+          <div class="bp-summary">Full-width layout correct. No overlaps or clipping detected.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
