@@ -330,6 +330,54 @@ body {
   margin-top: 5px;
 }
 
+/* ── Password requirements live checklist ── */
+.password-checklist {
+  list-style: none;
+  padding: 6px 0 0 0;
+  margin: 2px 0 0 0;
+  font-size: 12px;
+}
+.password-checklist li {
+  color: var(--text-3);
+  padding: 2px 0 2px 22px;
+  position: relative;
+  line-height: 1.5;
+}
+.password-checklist li::before {
+  content: "\2717"; /* heavy ballot X */
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  color: var(--critical, #b00020);
+  font-weight: 700;
+  width: 14px;
+  text-align: center;
+}
+.password-checklist li[data-passed="true"] {
+  color: var(--success, #0a7d2c);
+}
+.password-checklist li[data-passed="true"]::before {
+  content: "\2713"; /* check mark */
+  color: var(--success, #0a7d2c);
+}
+/* Visually hide the "Met: / Not met: " prefix — it's only for SR users.
+   The ::before icon conveys state visually. */
+.password-checklist .rule-state {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (prefers-contrast: more), (forced-colors: active) {
+  .password-checklist li[data-passed="true"]::before { color: CanvasText; }
+  .password-checklist li[data-passed="false"]::before { color: CanvasText; }
+}
+
 /* ── Password field + show toggle ── */
 .password-wrap { position: relative; }
 .password-wrap .field-input { padding-right: 50px; }

@@ -20,6 +20,23 @@
     window.requestAnimationFrame(function () { el.textContent = msg; });
   }
 
+  /* Ask the browser to save the email/password so it can autofill next time.
+     Uses the Credential Management API where supported; silently resolves
+     otherwise so the login flow is never blocked. */
+  function storePasswordCredential(email, password, name) {
+    try {
+      if (window.PasswordCredential && navigator.credentials && navigator.credentials.store) {
+        var cred = new window.PasswordCredential({
+          id:       email,
+          password: password,
+          name:     name || email
+        });
+        return navigator.credentials.store(cred).catch(function () { /* user declined or unsupported */ });
+      }
+    } catch (e) { /* ignore and fall through */ }
+    return Promise.resolve();
+  }
+
   function setStatus(msg, isError) {
     var el = document.getElementById('auth-status');
     if (!el) return;
@@ -233,6 +250,9 @@
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then(function () {
           announce('Signed in. Redirecting to your dashboard.');
+          return storePasswordCredential(email, password);
+        })
+        .then(function () {
           window.location.href = REDIRECT_AFTER_AUTH;
         })
         .catch(function (err) {
@@ -256,6 +276,72 @@
   /* ════════════════════════════════════════════════════
      EMAIL / PASSWORD — CREATE ACCOUNT
   ════════════════════════════════════════════════════ */
+  /* ────────────────────────────────────────────────────
+     Live password-policy validation.
+     Checks the 5 Firebase requirements on every keystroke
+     and updates the visible checklist + aria-live summary
+     so users know instantly what is missing.
+  ──────────────────────────────────────────────────── */
+  var PASSWORD_RULES = [
+    { id: 'rule-length', label: 'At least 8 characters',        test: function (v) { return v.length >= 8; } },
+    { id: 'rule-upper',  label: 'One upper case letter (A\u2013Z)', test: function (v) { return /[A-Z]/.test(v); } },
+    { id: 'rule-lower',  label: 'One lower case letter (a\u2013z)', test: function (v) { return /[a-z]/.test(v); } },
+    { id: 'rule-number', label: 'One number (0\u20139)',            test: function (v) { return /[0-9]/.test(v); } },
+    { id: 'rule-symbol', label: 'One symbol (e.g. ! @ # $ %)',      test: function (v) { return /[^A-Za-z0-9]/.test(v); } }
+  ];
+  function passwordAllValid(v) {
+    for (var i = 0; i < PASSWORD_RULES.length; i++) {
+      if (!PASSWORD_RULES[i].test(v)) return false;
+    }
+    return true;
+  }
+  function updatePasswordChecklist(value) {
+    var listEl = document.getElementById('signup-pass-checklist');
+    if (!listEl) return;
+    PASSWORD_RULES.forEach(function (rule) {
+      var li = document.getElementById(rule.id);
+      if (!li) return;
+      var passed = rule.test(value);
+      li.setAttribute('data-passed', passed ? 'true' : 'false');
+      /* Icon is decorative; the text is what SR reads. Prefix the
+         state word so SR users hear "Met" / "Not met" unambiguously. */
+      var state = li.querySelector('.rule-state');
+      if (state) state.textContent = passed ? 'Met: ' : 'Not met: ';
+    });
+  }
+  var signupPassInput = document.getElementById('signup-password');
+  if (signupPassInput) {
+    /* Initialize checklist as unmet on load. */
+    updatePasswordChecklist('');
+    var announceTimer = null;
+    var lastAnnounced = '';
+    signupPassInput.addEventListener('input', function () {
+      var v = signupPassInput.value;
+      updatePasswordChecklist(v);
+      /* Clear any stale server error once the user starts typing again. */
+      var errEl = document.getElementById('signup-pass-err');
+      if (errEl && errEl.textContent) errEl.textContent = '';
+      /* Debounced live summary for screen readers — announces only
+         when the user pauses typing, to avoid per-keystroke spam. */
+      if (announceTimer) clearTimeout(announceTimer);
+      announceTimer = setTimeout(function () {
+        var metCount = PASSWORD_RULES.filter(function (r) { return r.test(v); }).length;
+        var summary;
+        if (!v) { summary = ''; }
+        else if (metCount === PASSWORD_RULES.length) { summary = 'All password requirements met.'; }
+        else {
+          var missing = PASSWORD_RULES.filter(function (r) { return !r.test(v); })
+                                      .map(function (r) { return r.label.toLowerCase(); });
+          summary = metCount + ' of ' + PASSWORD_RULES.length + ' requirements met. Still needed: ' + missing.join(', ') + '.';
+        }
+        if (summary && summary !== lastAnnounced) {
+          lastAnnounced = summary;
+          announce(summary);
+        }
+      }, 700);
+    });
+  }
+
   var signupForm = document.getElementById('signup-form');
   if (signupForm) {
     signupForm.addEventListener('submit', function (e) {
@@ -271,8 +357,16 @@
       var ok = true;
       if (!name)              { showFieldError('signup-name-err',  'Full name is required.'); ok = false; }
       if (!email)             { showFieldError('signup-email-err', 'Email address is required.'); ok = false; }
-      if (!password)          { showFieldError('signup-pass-err',  'Password is required.'); ok = false; }
-      else if (password.length < 8) { showFieldError('signup-pass-err', 'Password must be at least 8 characters.'); ok = false; }
+      if (!password) {
+        showFieldError('signup-pass-err', 'Password is required.'); ok = false;
+      } else if (!passwordAllValid(password)) {
+        /* Build a specific message listing the unmet requirements so SR users hear exactly what's missing. */
+        var missing = PASSWORD_RULES.filter(function (r) { return !r.test(password); })
+                                    .map(function (r) { return r.label.toLowerCase(); });
+        showFieldError('signup-pass-err', 'Password is missing: ' + missing.join(', ') + '.');
+        document.getElementById('signup-password').focus();
+        ok = false;
+      }
       if (!ok) { announce('Please fix the errors highlighted on screen.'); return; }
 
       btn.disabled    = true;
@@ -282,6 +376,9 @@
       firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(function (cred) {
           return cred.user.updateProfile({ displayName: name });
+        })
+        .then(function () {
+          return storePasswordCredential(email, password, name);
         })
         .then(function () {
           announce('Account created. Redirecting to your dashboard.');

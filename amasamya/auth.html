@@ -172,7 +172,14 @@
                 </svg>
               </button>
             </div>
-            <p class="field-hint" id="signup-pass-hint">At least 8 characters, including an upper case letter, a lower case letter, a number, and a symbol.</p>
+            <p class="field-hint" id="signup-pass-hint">Your password must include all of the following:</p>
+            <ul class="password-checklist" id="signup-pass-checklist" aria-label="Password requirements">
+              <li id="rule-length" data-passed="false"><span class="rule-state">Not met: </span>At least 8 characters</li>
+              <li id="rule-upper"  data-passed="false"><span class="rule-state">Not met: </span>One upper case letter (A&ndash;Z)</li>
+              <li id="rule-lower"  data-passed="false"><span class="rule-state">Not met: </span>One lower case letter (a&ndash;z)</li>
+              <li id="rule-number" data-passed="false"><span class="rule-state">Not met: </span>One number (0&ndash;9)</li>
+              <li id="rule-symbol" data-passed="false"><span class="rule-state">Not met: </span>One symbol (e.g. ! @ # $ %)</li>
+            </ul>
             <p class="field-error" id="signup-pass-err" role="alert" aria-live="polite"></p>
           </div>
 
