@@ -11,17 +11,28 @@
   to = "/library-admin.html"
   status = 301
 
-# AMASAMYA subdomain rewrite — serve /ama11y/ content at amasamya.akhileshmalani.com
+# AMASAMYA subdomain rewrite — serve /amasamya/ content at amasamya.akhileshmalani.com
 [[redirects]]
   from = "https://amasamya.akhileshmalani.com/*"
-  to = "/ama11y/:splat"
+  to = "/amasamya/:splat"
   status = 200
   force = true
+
+# Redirect old /ama11y/ paths on apex domain to new /amasamya/ paths (backward compat)
+[[redirects]]
+  from = "/ama11y/*"
+  to = "/amasamya/:splat"
+  status = 301
 
 # Redirect old orphaned bookmarklet installer to new location
 [[redirects]]
   from = "/AMASAMYA_Bookmarklet_Installer.html"
-  to = "/ama11y/install.html"
+  to = "/amasamya/install.html"
+  status = 301
+
+[[redirects]]
+  from = "/AMA11Y_Bookmarklet_Installer.html"
+  to = "/amasamya/install.html"
   status = 301
 
 # Security headers
