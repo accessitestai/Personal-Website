@@ -406,6 +406,28 @@
   }
 
   /* ════════════════════════════════════════════════════
+     CANCEL BUTTONS — leave the auth flow
+  ════════════════════════════════════════════════════ */
+  var CANCEL_DEST = 'https://akhileshmalani.com';
+  function cancelAuth() {
+    /* Prefer history.back() when the user arrived from another page
+       on our own sites (so "Cancel" feels like "go back"), otherwise
+       send them to the public home page. */
+    try {
+      var ref = document.referrer || '';
+      if (ref && (ref.indexOf('akhileshmalani.com') !== -1) && window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+    } catch (e) { /* ignore */ }
+    window.location.href = CANCEL_DEST;
+  }
+  ['signin-cancel-btn', 'signup-cancel-btn'].forEach(function (id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', cancelAuth);
+  });
+
+  /* ════════════════════════════════════════════════════
      SHOW / HIDE PASSWORD TOGGLE
   ════════════════════════════════════════════════════ */
   [['toggle-signin-pass', 'signin-password'], ['toggle-signup-pass', 'signup-password']].forEach(function (pair) {

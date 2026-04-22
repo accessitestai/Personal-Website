@@ -406,6 +406,22 @@ body {
 }
 .show-pass-btn svg { width: 18px; height: 18px; }
 
+/* ── Button row (primary + cancel) ── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: 6px;
+}
+.btn-row .btn-primary,
+.btn-row .btn-secondary {
+  flex: 1 1 auto;
+  width: auto;
+}
+@media (max-width: 420px) {
+  .btn-row { flex-direction: column; }
+}
+
 /* ── Primary button ── */
 .btn-primary {
   display: flex;
