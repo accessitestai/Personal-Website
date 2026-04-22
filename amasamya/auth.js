@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    AMASAMYA — Firebase Authentication (auth.js)
-   Providers: Google · Apple · Microsoft · Yahoo · GitHub · Twitter/X
-              LinkedIn (via Netlify function) · Email / Password
+   Providers: Google · Email / Password
    Post-login destination: ./index.html (main audit platform)
    WCAG 2.2 AA compliant interactions.
 ═══════════════════════════════════════════════════════════════ */
@@ -10,7 +9,6 @@
 
   /* ── Config ── */
   var REDIRECT_AFTER_AUTH = './index.html';
-  var LINKEDIN_AUTH_URL   = '/.netlify/functions/linkedin-auth';
 
   /* ════════════════════════════════════════════════════
      ACCESSIBILITY HELPERS
@@ -155,42 +153,15 @@
       return;
     }
 
-    /* LinkedIn — custom Netlify function (Firebase doesn't support LinkedIn natively) */
-    if (providerKey === 'linkedin') {
-      window.location.href = LINKEDIN_AUTH_URL;
-      return;
-    }
-
     var provider;
     try {
-      switch (providerKey) {
-        case 'google':
-          provider = new firebase.auth.GoogleAuthProvider();
-          provider.addScope('email');
-          provider.addScope('profile');
-          break;
-        case 'apple':
-          provider = new firebase.auth.OAuthProvider('apple.com');
-          provider.addScope('email');
-          provider.addScope('name');
-          break;
-        case 'microsoft':
-          provider = new firebase.auth.OAuthProvider('microsoft.com');
-          provider.setCustomParameters({ prompt: 'select_account' });
-          break;
-        case 'yahoo':
-          provider = new firebase.auth.OAuthProvider('yahoo.com');
-          break;
-        case 'github':
-          provider = new firebase.auth.GithubAuthProvider();
-          provider.addScope('user:email');
-          break;
-        case 'twitter':
-          provider = new firebase.auth.TwitterAuthProvider();
-          break;
-        default:
-          setStatus('Unknown provider. Please choose a different sign-in method.', true);
-          return;
+      if (providerKey === 'google') {
+        provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+      } else {
+        setStatus('Unknown provider. Please use Google or email sign-in.', true);
+        return;
       }
     } catch (err) {
       setStatus('Could not start sign-in: ' + err.message, true);
