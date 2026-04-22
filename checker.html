@@ -259,6 +259,62 @@
       .checker-page h1 { font-size: 1.5rem; }
       .results-summary { grid-template-columns: repeat(2, 1fr); }
     }
+
+    /* ── PDF purchase + email capture CTAs ── */
+    .pdf-report-cta, .email-capture {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-bg-alt);
+    }
+    .pdf-report-cta h3, .email-capture h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+      color: var(--color-primary-dark);
+    }
+    .pdf-report-cta p, .email-capture p {
+      margin: 0 0 0.9rem;
+      color: var(--color-text-light);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .pdf-report-cta .field-hint {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .checker-btn.is-disabled,
+    .checker-btn[aria-disabled="true"] {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .email-capture-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: stretch;
+    }
+    .email-capture-row input[type="email"] {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+    .email-capture-row input[type="email"]:focus {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 1px;
+    }
+    .email-capture-row .checker-btn { flex: 0 0 auto; }
+    .subscribe-status { margin-top: 0.6rem; font-size: 0.9rem; min-height: 1.2em; }
+    .subscribe-status.is-error   { color: var(--color-critical, #b00020); }
+    .subscribe-status.is-success { color: var(--color-success, #0a7d2c); }
+    @media (max-width: 480px) {
+      .email-capture-row { flex-direction: column; }
+    }
   </style>
   <!-- Prevent flash of wrong theme/preferences -->
   <script>
@@ -383,6 +439,44 @@
           <a href="index.html#contact">Get in touch with me</a>
         </div>
 
+        <!-- ─────────── PDF REPORT PURCHASE ─────────── -->
+        <aside class="pdf-report-cta" id="pdf-report-cta" aria-labelledby="pdf-report-heading">
+          <h3 id="pdf-report-heading">Want a shareable PDF report?</h3>
+          <p>Get a branded, WCAG-mapped PDF of this scan with remediation guidance &mdash; perfect for sharing with your team, client, or compliance reviewer.</p>
+          <a
+            id="pdf-report-buy-btn"
+            class="checker-btn"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-describedby="pdf-new-tab-hint">
+            Buy full PDF report &mdash; $12
+            <span class="sr-only"> (opens Stripe checkout in a new tab)</span>
+          </a>
+          <p id="pdf-new-tab-hint" class="field-hint">Secure checkout via Stripe. Opens in a new tab.</p>
+        </aside>
+
+        <!-- ─────────── EMAIL CAPTURE ─────────── -->
+        <aside class="email-capture" aria-labelledby="email-capture-heading">
+          <h3 id="email-capture-heading">Get accessibility tips in your inbox</h3>
+          <p>One short email a week from a blind accessibility architect with 16+ years&rsquo; experience. Real issues, real fixes, no fluff. Unsubscribe anytime.</p>
+          <form id="email-capture-form" novalidate>
+            <label for="subscribe-email" class="sr-only">Your email address</label>
+            <div class="email-capture-row">
+              <input
+                type="email"
+                id="subscribe-email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="you@example.com"
+                aria-describedby="subscribe-status">
+              <button type="submit" class="checker-btn" id="subscribe-btn">Subscribe</button>
+            </div>
+            <p id="subscribe-status" class="subscribe-status" role="status" aria-live="polite"></p>
+          </form>
+        </aside>
+
         <!-- Scan History -->
         <details class="scan-history" id="scan-history">
           <summary>Scan History</summary>
@@ -406,6 +500,83 @@
   <script src="https://squizlabs.github.io/HTML_CodeSniffer/build/HTMLCS.js"></script>
 
   <script src="script.js"></script>
+
+  <!-- ─────────── Config: set your real Stripe Payment Link here ─────────── -->
+  <script>
+    /* Create a Payment Link in Stripe Dashboard → Payment Links,
+       then paste the full URL here (starts with https://buy.stripe.com/...).
+       Until you set this, the Buy button is disabled and explains why. */
+    window.AMASAMYA_CONFIG = {
+      stripePdfPaymentLink: '' /* e.g. 'https://buy.stripe.com/test_abc123' */
+    };
+  </script>
+
+  <!-- ─────────── PDF purchase + email capture wire-up ─────────── -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* PDF Buy button — point at the Stripe Payment Link or disable. */
+    var pdfBtn = document.getElementById('pdf-report-buy-btn');
+    var pdfHint = document.getElementById('pdf-new-tab-hint');
+    var link = (window.AMASAMYA_CONFIG && window.AMASAMYA_CONFIG.stripePdfPaymentLink) || '';
+    if (pdfBtn && link) {
+      pdfBtn.href = link;
+    } else if (pdfBtn) {
+      /* No link configured yet — don't send users nowhere. */
+      pdfBtn.setAttribute('aria-disabled', 'true');
+      pdfBtn.classList.add('is-disabled');
+      pdfBtn.addEventListener('click', function (e) { e.preventDefault(); });
+      if (pdfHint) pdfHint.textContent = 'PDF reports are coming soon. Subscribe below and I\u2019ll email you when they go live.';
+    }
+
+    /* Email capture form → POST to /.netlify/functions/subscribe. */
+    var form    = document.getElementById('email-capture-form');
+    var input   = document.getElementById('subscribe-email');
+    var btn     = document.getElementById('subscribe-btn');
+    var statusEl = document.getElementById('subscribe-status');
+    if (!form || !input || !btn || !statusEl) return;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      statusEl.textContent = '';
+      statusEl.classList.remove('is-error', 'is-success');
+      var email = (input.value || '').trim();
+      if (!email || email.indexOf('@') === -1) {
+        statusEl.textContent = 'Please enter a valid email address.';
+        statusEl.classList.add('is-error');
+        input.focus();
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Subscribing\u2026';
+      fetch('/.netlify/functions/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, source: 'checker' })
+      }).then(function (res) {
+        return res.json().catch(function () { return { ok: res.ok }; });
+      }).then(function (data) {
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+        if (data && data.ok) {
+          statusEl.textContent = 'Thanks \u2014 you\u2019re on the list. Check your inbox for a confirmation.';
+          statusEl.classList.add('is-success');
+          input.value = '';
+        } else {
+          statusEl.textContent = (data && data.error) || 'Something went wrong. Please try again.';
+          statusEl.classList.add('is-error');
+        }
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+        statusEl.textContent = 'Network error. Please try again in a moment.';
+        statusEl.classList.add('is-error');
+      });
+    });
+  })();
+  </script>
+
   <script>
   (function () {
     'use strict';
