@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA — Focus Indicator Narrator
  * Module 2: Visual-to-Audio Engine
  *

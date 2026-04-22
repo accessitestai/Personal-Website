@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Phase 2 Engine: Text Spacing Audit
  * Applies WCAG 1.4.12 text spacing overrides and detects content clipping.
  * WCAG: SC 1.4.12

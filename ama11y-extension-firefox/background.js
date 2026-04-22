@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Extension (Firefox) — Background Script
  * Orchestrates audit injection, sidebar, message passing,
  * and automatic AMASAMYA Platform integration.

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Extension — Side Panel Logic
  * Receives audit results, renders accessible UI, handles filtering and export.
  */

@@ -1,4 +1,4 @@
-﻿/* Azure Speech TTS proxy — Cloudflare Worker
+/* Azure Speech TTS proxy — Cloudflare Worker
    Endpoints:
      GET /version          → which build is live
      GET /diag             → checks secret + Azure connectivity

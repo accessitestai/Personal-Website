@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Extension — Side Panel v3.0
  *
  * Panels:

@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    AMASAMYA Public Checker (checker.js)
    14 structural WCAG 2.2 checks, DOM-based, no getComputedStyle.
    Fetches pages via /.netlify/functions/fetch-page (CORS proxy).

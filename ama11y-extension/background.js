@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Extension — Background Service Worker v3.0
  *
  * Orchestrates:

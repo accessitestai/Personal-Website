@@ -1,4 +1,4 @@
-﻿/**
+/**
  * fetch-page.js — AMASAMYA URL Proxy
  *
  * Fetches a remote URL on behalf of the browser-side checker,

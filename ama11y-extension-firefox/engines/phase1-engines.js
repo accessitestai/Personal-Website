@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Phase 1 Engines — Extracted from bookmarklet for extension use
  * 8 audit engines + utility functions
  */

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA — State Change Watchdog
  * Module 3: Dynamic Content & AT Notification Checker
  *

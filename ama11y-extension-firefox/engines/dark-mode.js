@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Phase 2 Engine: Dark Mode Simulation
  * Emulates prefers-color-scheme: dark and detects contrast failures.
  * WCAG: SC 1.4.3, SC 1.4.11

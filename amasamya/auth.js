@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    AMASAMYA — Firebase Authentication (auth.js)
    Providers: Google · Apple · Microsoft · Yahoo · GitHub · Twitter/X
               LinkedIn (via Netlify function) · Email / Password

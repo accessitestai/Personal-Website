@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Extension — Content Script
  * Injected into the active tab to run all 13 audit engines.
  * Results are sent to the service worker via browser.runtime.sendMessage.

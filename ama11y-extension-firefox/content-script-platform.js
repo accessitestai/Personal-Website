@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AMASAMYA Extension (Firefox) — Platform Bridge Content Script
  *
  * Runs on the AMASAMYA Platform page (https://amasamya.akhileshmalani.com).
