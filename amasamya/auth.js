@@ -298,15 +298,18 @@
   function updatePasswordChecklist(value) {
     var listEl = document.getElementById('signup-pass-checklist');
     if (!listEl) return;
+    var hasInput = value && value.length > 0;
     PASSWORD_RULES.forEach(function (rule) {
       var li = document.getElementById(rule.id);
       if (!li) return;
       var passed = rule.test(value);
       li.setAttribute('data-passed', passed ? 'true' : 'false');
-      /* Icon is decorative; the text is what SR reads. Prefix the
-         state word so SR users hear "Met" / "Not met" unambiguously. */
+      /* Icon is decorative; the text is what SR reads. Only add the
+         "Met: / Not met: " prefix once the user has started typing —
+         before that every rule is trivially unmet, and prefixing all
+         5 with "Not met" just adds noise on initial focus. */
       var state = li.querySelector('.rule-state');
-      if (state) state.textContent = passed ? 'Met: ' : 'Not met: ';
+      if (state) state.textContent = hasInput ? (passed ? 'Met: ' : 'Not met: ') : '';
     });
   }
   var signupPassInput = document.getElementById('signup-password');
