@@ -67,3 +67,8 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Reference material — not deployed
+Accessibility Library/
+Screenshots/
+*.zip
