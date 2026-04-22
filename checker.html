@@ -260,6 +260,81 @@
       .results-summary { grid-template-columns: repeat(2, 1fr); }
     }
 
+    /* ── AI Explain button + output panel ── */
+    .ai-explain-wrap { margin-top: 1rem; }
+    .ai-explain-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background: var(--color-bg, #fff);
+      color: var(--color-primary, #2471a3);
+      border: 1.5px solid var(--color-primary, #2471a3);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .ai-explain-btn:hover:not(:disabled),
+    .ai-explain-btn:focus:not(:disabled) {
+      background: var(--color-primary, #2471a3);
+      color: #fff;
+    }
+    .ai-explain-btn:focus-visible {
+      outline: 3px solid var(--color-focus, #2471a3);
+      outline-offset: 2px;
+    }
+    .ai-explain-btn:disabled { opacity: 0.6; cursor: wait; }
+    .ai-explain-btn svg { flex-shrink: 0; }
+    .ai-explain-out { margin-top: 0.75rem; }
+    .ai-explain-panel {
+      padding: 1rem 1.2rem;
+      border-left: 3px solid var(--color-primary, #2471a3);
+      background: var(--color-bg-alt, #f4f6f9);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .ai-explain-panel h4 {
+      margin: 0 0 0.4rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-light, #5a6570);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .ai-explain-panel h4:not(:first-child) { margin-top: 0.9rem; }
+    .ai-explain-panel p { margin: 0; color: var(--color-text, #1a1a2e); }
+    .ai-explain-panel .ai-explain-foot {
+      margin-top: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--color-text-light, #5a6570);
+      font-style: italic;
+    }
+    .ai-source-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--color-primary, #2471a3);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .ai-explain-panel--loading { border-left-color: var(--color-text-light, #5a6570); font-style: italic; color: var(--color-text-light, #5a6570); }
+    .ai-explain-panel--error   { border-left-color: var(--color-critical, #b00020); }
+    .ai-explain-panel--error p { color: var(--color-critical, #b00020); }
+    @media (forced-colors: active) {
+      .ai-explain-btn { border-color: ButtonText; color: ButtonText; }
+      .ai-explain-panel { border-left-color: CanvasText; }
+      .ai-source-badge { background: Highlight; color: HighlightText; }
+    }
+
     /* ── PDF purchase + email capture CTAs ── */
     .pdf-report-cta, .email-capture {
       margin-top: 2rem;
@@ -1072,7 +1147,26 @@
         if (failureSummary) { html += '<dt>How to Fix</dt><dd>' + escapeHtml(failureSummary) + '</dd>'; }
         if (violation.helpUrl) { html += '<dt>Learn More</dt><dd><a href="' + escapeHtml(violation.helpUrl) + '" target="_blank" rel="noopener">Documentation on ' + escapeHtml(violation.id) + '</a></dd>'; }
         if (nodeCount > 1) { html += '<dt>Total Affected</dt><dd>' + nodeCount + ' elements</dd>'; }
-        html += '</dl></div></li>';
+        html += '</dl>';
+
+        /* AI-explain slot — button triggers a call to /.netlify/functions/ai-explain
+           and renders the result inline. The button and output panel are keyboard-
+           and screen-reader accessible. */
+        html += '<div class="ai-explain-wrap">';
+        html += '<button type="button" class="ai-explain-btn" '
+              + 'data-rule-id="' + escapeHtml(violation.id) + '" '
+              + 'data-wcag="' + escapeHtml(wcagTags) + '" '
+              + 'data-message="' + escapeHtml(violation.description || violation.help || '') + '" '
+              + 'data-node-html="' + escapeHtml(htmlSnippet) + '" '
+              + 'aria-controls="ai-out-' + index + '" '
+              + 'aria-expanded="false">'
+              + '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9.5 8.5 3 11l6.5 2.5L12 20l2.5-6.5L21 11l-6.5-2.5L12 2z"/></svg>'
+              + 'Explain this with AI'
+              + '</button>';
+        html += '<div class="ai-explain-out" id="ai-out-' + index + '" role="region" aria-live="polite" hidden></div>';
+        html += '</div>';
+
+        html += '</div></li>';
       });
 
       html += '</ul>';
@@ -1088,6 +1182,95 @@
         header.addEventListener('keydown', function (e) {
           if (e.key === ' ') { e.preventDefault(); header.click(); }
         });
+      });
+
+      /* Wire up the "Explain this with AI" buttons. */
+      resultsList.querySelectorAll('.ai-explain-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () { handleAiExplain(btn); });
+      });
+    }
+
+    /* ════════════════════════════════════════════════════
+       AI-EXPLAIN — call /.netlify/functions/ai-explain
+       ════════════════════════════════════════════════════ */
+    var aiExplainCache = {}; /* in-memory per-session cache keyed by payload hash */
+    function aiCacheKey(p) {
+      return (p.ruleId || '') + '|' + (p.wcag || '') + '|' + (p.message || '').slice(0, 100) + '|' + (p.nodeHtml || '').slice(0, 100);
+    }
+    function escapeForHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function renderAiOut(outEl, data, opts) {
+      opts = opts || {};
+      var sourceBadge = '';
+      if (data && data.source) {
+        var label = {
+          rule:     'Instant answer',
+          cache:    'Cached',
+          gemini:   'Gemini 1.5 Flash',
+          groq:     'Groq Llama 3.1',
+          fallback: 'Generic guidance'
+        }[data.source] || data.source;
+        sourceBadge = '<span class="ai-source-badge" title="Response source">' + escapeForHtml(label) + '</span>';
+      }
+      outEl.innerHTML =
+        '<div class="ai-explain-panel">' +
+          '<h4>AI explanation ' + sourceBadge + '</h4>' +
+          '<p class="ai-explain-text">' + escapeForHtml(data.explanation) + '</p>' +
+          '<h4>Suggested fix</h4>' +
+          '<p class="ai-explain-fix">' + escapeForHtml(data.fix) + '</p>' +
+          (opts.fromCache ? '' : '<p class="ai-explain-foot">Generated for this issue. Always double-check against WCAG.</p>') +
+        '</div>';
+    }
+    function renderAiError(outEl, msg) {
+      outEl.innerHTML = '<div class="ai-explain-panel ai-explain-panel--error" role="alert"><p>' + escapeForHtml(msg) + '</p></div>';
+    }
+    function handleAiExplain(btn) {
+      var outId = btn.getAttribute('aria-controls');
+      var outEl = document.getElementById(outId);
+      if (!outEl) return;
+      /* Toggle: if already open, close it. */
+      if (btn.getAttribute('aria-expanded') === 'true') {
+        btn.setAttribute('aria-expanded', 'false');
+        outEl.hidden = true;
+        return;
+      }
+      var payload = {
+        ruleId:   btn.dataset.ruleId || '',
+        wcag:     btn.dataset.wcag || '',
+        message:  btn.dataset.message || '',
+        nodeHtml: btn.dataset.nodeHtml || ''
+      };
+      btn.setAttribute('aria-expanded', 'true');
+      outEl.hidden = false;
+
+      var key = aiCacheKey(payload);
+      if (aiExplainCache[key]) {
+        renderAiOut(outEl, aiExplainCache[key], { fromCache: true });
+        return;
+      }
+
+      outEl.innerHTML = '<div class="ai-explain-panel ai-explain-panel--loading"><p>Generating explanation\u2026</p></div>';
+      btn.disabled = true;
+
+      fetch('/.netlify/functions/ai-explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+        return res.json();
+      }).then(function (data) {
+        if (!data || !data.explanation) throw new Error('Empty response');
+        aiExplainCache[key] = data;
+        renderAiOut(outEl, data);
+        if (window.srAnnounce) window.srAnnounce('AI explanation loaded.');
+      }).catch(function (err) {
+        renderAiError(outEl, 'Could not load AI explanation. ' + (err && err.message ? err.message : 'Please try again.'));
+      }).finally(function () {
+        btn.disabled = false;
       });
     }
 
