@@ -58,7 +58,7 @@
   /* ════════════════════════════════════════════════════
      FIREBASE ERROR → FRIENDLY MESSAGE
   ════════════════════════════════════════════════════ */
-  function friendlyError(code) {
+  function friendlyError(code, rawMessage) {
     var MAP = {
       'auth/email-already-in-use':     'An account with that email already exists. Try signing in instead.',
       'auth/invalid-email':            'Please enter a valid email address.',
@@ -77,6 +77,18 @@
       'auth/expired-action-code':      'This link has expired. Please request a new one.',
       'auth/invalid-action-code':      'This link is invalid. It may have already been used.',
     };
+
+    /* Firebase Password Policy — extract the specific requirements from the raw message.
+       Firebase returns messages like:
+         "Firebase: Password does not meet requirements [Password must contain an upper case character, Password must contain a numeric character]. (auth/password-does-not-meet-requirements)." */
+    if (code === 'auth/password-does-not-meet-requirements') {
+      var match = rawMessage && rawMessage.match(/\[([^\]]+)\]/);
+      if (match && match[1]) {
+        return 'Your password doesn\u2019t meet the requirements: ' + match[1] + '.';
+      }
+      return 'Your password doesn\u2019t meet the security requirements. It must include upper case, lower case, a number, and a symbol.';
+    }
+
     return MAP[code] || 'Sign-in failed (' + (code || 'unknown') + '). Please try again.';
   }
 
@@ -178,7 +190,7 @@
       })
       .catch(function (err) {
         setBtnLoading(btn, false);
-        setStatus(friendlyError(err.code), true);
+        setStatus(friendlyError(err.code, err.message), true);
       });
   }
 
@@ -226,7 +238,7 @@
         .catch(function (err) {
           btn.disabled    = false;
           btn.textContent = 'Sign In';
-          var msg = friendlyError(err.code);
+          var msg = friendlyError(err.code, err.message);
           if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-email') {
             showFieldError('signin-email-err', msg);
             document.getElementById('signin-email').focus();
@@ -278,11 +290,11 @@
         .catch(function (err) {
           btn.disabled    = false;
           btn.textContent = 'Create Account';
-          var msg = friendlyError(err.code);
+          var msg = friendlyError(err.code, err.message);
           if (err.code === 'auth/email-already-in-use' || err.code === 'auth/invalid-email') {
             showFieldError('signup-email-err', msg);
             document.getElementById('signup-email').focus();
-          } else if (err.code === 'auth/weak-password') {
+          } else if (err.code === 'auth/weak-password' || err.code === 'auth/password-does-not-meet-requirements') {
             showFieldError('signup-pass-err', msg);
             document.getElementById('signup-password').focus();
           } else {
@@ -373,7 +385,7 @@
         .catch(function (err) {
           btn.disabled    = false;
           btn.textContent = 'Send Reset Link';
-          var msg = friendlyError(err.code);
+          var msg = friendlyError(err.code, err.message);
           genErr.textContent = msg;
           announce(msg);
         });
