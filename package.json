@@ -8,11 +8,7 @@
   },
   "dependencies": {
     "firebase": "^12.10.0",
-    "@netlify/blobs": "^8.1.0",
-    "@siteimprove/alfa-act": "^0.104.0",
-    "@siteimprove/alfa-rules": "^0.104.0",
-    "@siteimprove/alfa-dom": "^0.104.0",
-    "jsdom": "^25.0.1"
+    "@netlify/blobs": "^8.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0"

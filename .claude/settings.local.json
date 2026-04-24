@@ -186,7 +186,29 @@
       "WebFetch(domain:rdap.org)",
       "WebFetch(domain:iprsearch.ipindia.gov.in)",
       "WebFetch(domain:opencorporates.com)",
-      "Bash(powershell -Command ' *)"
+      "Bash(powershell -Command ' *)",
+      "Bash(curl -I -L --max-time 15 https://amasamya.akhileshmalani.com)",
+      "Bash(curl -I -L --max-time 15 https://akhileshmalani.com)",
+      "Bash(curl -sL --max-time 15 https://amasamya.akhileshmalani.com/)",
+      "Bash(curl -sL --max-time 15 https://akhileshmalani.com/ama11y/)",
+      "Bash(curl -sL --max-time 15 https://amasamya.akhileshmalani.com/checker)",
+      "mcp__18bdd116-8e78-46f2-b7e1-15aa19e3360c__netlify-deploy-services-updater",
+      "Bash(npx -y @netlify/mcp@latest --site-id 81e2e490-2c20-4f9b-94f6-c79588ada1eb --proxy-path \"https://netlify-mcp.netlify.app/proxy/eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..i2mETmKhI3MhnJ_k.5dGBsrEnfze6GUDAPNvPqoz-5f8tAim-4ijeuTD4ZboHmHaz6Dp9ZECf_LAupJYa4lSD4reFoj5uy73ufxAARG08jP6aol_AX1JtF9gSJgdVoY2-dKPO_p6uV9P421hKzRggh4o8_m5arwkYbGFd6oIhCQj9o3yqQUMBKjC8dHDF6lxJxtwj8nBv1I6gN1Nvo6hRRU8r4rtGqKFKKGxAZ57mKouGbpfqyjMoNx9zRlokNpFEiT9uTf5AMxOEnE00bRSziOGW2XFdPu7tKGpkrIfAAcRlw7-peWkBc0uANfS4b00pzQknWYwNuGffLKHJ3BnYCWz8XxIJiKztGxVaHERxayk419TNgVif-26Domc80vUREQ.PnC4kXL85GzEPiHlDD-w_A\" --no-wait)",
+      "Bash(curl -sI --max-time 10 https://amasamya.akhileshmalani.com/firebase-config.js)",
+      "Bash(curl -sI --max-time 10 https://akhileshmalani.com/firebase-config.js)",
+      "Bash(curl -sI \"https://amasamya.akhileshmalani.com/checker.html\")",
+      "Bash(curl -sI \"https://amasamya.akhileshmalani.com/checker\")",
+      "Bash(curl -s \"https://amasamya.akhileshmalani.com/checker.html\")",
+      "Bash(curl -s \"https://amasamya.akhileshmalani.com/checker.html?v=$\\(date +%s\\)\")",
+      "Bash(curl -s \"https://amasamya.akhileshmalani.com/checker.html?bust=$\\(date +%s%N\\)\" -H \"Cache-Control: no-cache\" -H \"Pragma: no-cache\")",
+      "Bash(curl -sI \"https://amasamya.akhileshmalani.com/auth\")",
+      "Bash(curl -sI \"https://amasamya.akhileshmalani.com/.netlify/functions/fetch-page?url=https://example.com\")",
+      "Bash(git rm *)",
+      "Bash(curl -sI \"https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.3/axe.min.js\")",
+      "Bash(curl -sI \"https://squizlabs.github.io/HTML_CodeSniffer/build/HTMLCS.js\")",
+      "Bash(npm view *)",
+      "Bash(npm install *)",
+      "Bash(node tmp-alfa-smoke.mjs)"
     ]
   }
 }
