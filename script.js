@@ -185,9 +185,15 @@
   var registerError = document.getElementById('register-error');
   var userNameEl = document.getElementById('library-user-name');
 
-  // Check if Firebase is configured
+  // Library UI only exists on index.html — bail out on other pages that share script.js
+  // (checker.html, etc.) so bare references to the Firebase globals below never throw.
+  if (!guestView || !pendingView || !contentView) return;
+
+  // Check if Firebase is configured. Uses typeof so an undefined global
+  // (e.g. Firebase CDN failed to load) doesn't throw a ReferenceError.
   function isFirebaseConfigured() {
-    return auth !== null && db !== null;
+    return typeof auth !== 'undefined' && auth !== null
+        && typeof db !== 'undefined' && db !== null;
   }
 
   // Modal management
