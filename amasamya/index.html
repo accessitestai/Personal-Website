@@ -3736,6 +3736,60 @@ async function auditDOCX(buffer, filename) {
       detail:'Built-in heading styles detected. Verify the heading hierarchy is logical and levels are not skipped.' });
   }
 
+  /* 1b. HEADING HIERARCHY — walk the document in order and flag level skips.
+     We extract the sequence of heading levels as they appear in the XML
+     (document order) and check for H1→H3 style jumps. Missing H1 is also
+     called out — every Word document should start with a single H1. */
+  const headingSeq = [];
+  const headingRe = /w:val="Heading (\d)"/g;
+  let hm;
+  while ((hm = headingRe.exec(docXML)) !== null) {
+    headingSeq.push(parseInt(hm[1], 10));
+  }
+  if (headingSeq.length > 0) {
+    const skips = [];
+    for (let i = 1; i < headingSeq.length; i++) {
+      if (headingSeq[i] > headingSeq[i - 1] + 1) {
+        skips.push('Heading ' + headingSeq[i - 1] + ' -> Heading ' + headingSeq[i]);
+      }
+    }
+    if (skips.length > 0) {
+      findings.push({ status:'FAIL',
+        title: skips.length + ' heading-level skip' + (skips.length === 1 ? '' : 's') + ' in document order',
+        detail:'Detected: ' + skips.slice(0, 5).join('; ') + (skips.length > 5 ? '; \u2026' : '') + '. Screen reader users navigate by heading level — skipping levels breaks the mental outline. WCAG SC 1.3.1 / 2.4.6.' });
+    } else {
+      findings.push({ status:'PASS', title:'Heading hierarchy has no level skips',
+        detail:'Heading levels flow in order through the document.' });
+    }
+    const h1Count = headingSeq.filter(n => n === 1).length;
+    if (h1Count === 0) {
+      findings.push({ status:'WARN', title:'No Heading 1 in document',
+        detail:'Best practice: every document should open with exactly one Heading 1 describing the document title. WCAG SC 2.4.6.' });
+    } else if (h1Count > 1) {
+      findings.push({ status:'WARN', title: h1Count + ' Heading 1 paragraphs in document',
+        detail:'Usually exactly one Heading 1 is expected — it represents the document title. Multiple H1s confuse screen reader navigation.' });
+    }
+  }
+
+  /* 1c. HYPERLINK TEXT QUALITY — flag "click here", "read more", bare URLs,
+     and truncated (...) link text. Word stores hyperlinks as
+     <w:hyperlink>...<w:t>visible text</w:t></w:hyperlink>. */
+  const linkTextRe = /<w:hyperlink[^>]*>[\s\S]*?<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>[\s\S]*?<\/w:hyperlink>/g;
+  const vagueLinks = [];
+  let lm;
+  while ((lm = linkTextRe.exec(docXML)) !== null) {
+    const txt = (lm[1] || '').trim().toLowerCase();
+    if (!txt) continue;
+    const isBareUrl = /^https?:\/\//.test(txt) || /^www\./.test(txt);
+    const isVague = ['click here', 'here', 'read more', 'more', 'learn more', 'link', 'this link', 'this'].includes(txt);
+    if (isBareUrl || isVague) vagueLinks.push(txt);
+  }
+  if (vagueLinks.length > 0) {
+    findings.push({ status:'FAIL',
+      title: vagueLinks.length + ' hyperlink' + (vagueLinks.length === 1 ? '' : 's') + ' with non-descriptive text',
+      detail:'Examples: "' + vagueLinks.slice(0, 3).join('", "') + '". Screen reader users often scan a link list out of context — "click here" and bare URLs tell them nothing about the destination. WCAG SC 2.4.4 / 2.4.9.' });
+  }
+
   // 2. ALT TEXT on images and objects
   const drawingCount = (docXML.match(/<w:drawing>/g)||[]).length;
   const altTextCount = (docXML.match(/a:hlinkClick|wp:docPr[^>]+descr=|wp:docPr[^>]+title=/g)||[]).length;
