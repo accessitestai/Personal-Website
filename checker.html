@@ -285,7 +285,8 @@
       outline: 3px solid var(--color-focus, #2471a3);
       outline-offset: 2px;
     }
-    .ai-explain-btn:disabled { opacity: 0.6; cursor: wait; }
+    .ai-explain-btn:disabled,
+    .ai-explain-btn.is-loading { opacity: 0.6; cursor: wait; }
     .ai-explain-btn svg { flex-shrink: 0; }
     .ai-explain-out { margin-top: 0.75rem; }
     .ai-explain-panel {
@@ -1112,7 +1113,17 @@
     var allViolationsUnfiltered = [];
     var lastScore = null;
 
+    /* Lookup of per-issue payloads for the AI explainer, keyed by the
+       index used in ai-out-<index>. Populated on each renderIssueList
+       so the button handler can read a clean, un-truncated payload
+       instead of pulling HTML out of DOM attributes (which mangles
+       anything containing double quotes). */
+    var aiPayloadByIndex = {};
+
     function renderIssueList(violations) {
+      /* Reset the payload lookup on every render so stale entries from a
+         previous scan don't bleed into this one. */
+      aiPayloadByIndex = {};
       if (violations.length === 0) {
         resultsList.innerHTML = '<div class="no-issues" role="status"><p>No issues match the current filters.</p></div>';
         return;
@@ -1151,13 +1162,22 @@
 
         /* AI-explain slot — button triggers a call to /.netlify/functions/ai-explain
            and renders the result inline. The button and output panel are keyboard-
-           and screen-reader accessible. */
+           and screen-reader accessible.
+
+           IMPORTANT: we store the payload in the aiPayloadByIndex map and reference
+           it from the button via a simple numeric data-idx, because escapeHtml()
+           below does not escape quote characters. An HTML snippet like
+           <img src="photo.jpg"> would otherwise break the data-node-html attribute
+           and truncate the payload sent to the AI, producing a generic answer. */
+        aiPayloadByIndex[index] = {
+          ruleId:   violation.id || '',
+          wcag:     wcagTags || '',
+          message:  violation.description || violation.help || '',
+          nodeHtml: htmlSnippet || ''
+        };
         html += '<div class="ai-explain-wrap">';
         html += '<button type="button" class="ai-explain-btn" '
-              + 'data-rule-id="' + escapeHtml(violation.id) + '" '
-              + 'data-wcag="' + escapeHtml(wcagTags) + '" '
-              + 'data-message="' + escapeHtml(violation.description || violation.help || '') + '" '
-              + 'data-node-html="' + escapeHtml(htmlSnippet) + '" '
+              + 'data-idx="' + index + '" '
               + 'aria-controls="ai-out-' + index + '" '
               + 'aria-expanded="false">'
               + '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9.5 8.5 3 11l6.5 2.5L12 20l2.5-6.5L21 11l-6.5-2.5L12 2z"/></svg>'
@@ -1184,9 +1204,15 @@
         });
       });
 
-      /* Wire up the "Explain this with AI" buttons. */
+      /* Wire up the "Explain this with AI" buttons. We stop propagation so the
+         click never bubbles to a parent interactive region, and prevent default
+         so the browser can't treat it as a form-submit and scroll the page. */
       resultsList.querySelectorAll('.ai-explain-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () { handleAiExplain(btn); });
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleAiExplain(btn);
+        });
       });
     }
 
@@ -1237,12 +1263,12 @@
         outEl.hidden = true;
         return;
       }
-      var payload = {
-        ruleId:   btn.dataset.ruleId || '',
-        wcag:     btn.dataset.wcag || '',
-        message:  btn.dataset.message || '',
-        nodeHtml: btn.dataset.nodeHtml || ''
-      };
+      /* Pull the clean payload from our in-memory map keyed by index. This
+         avoids the HTML-attribute-truncation bug that caused the AI to see
+         only a tiny fragment of the offending element and respond generically. */
+      var idx = btn.getAttribute('data-idx');
+      var payload = aiPayloadByIndex[idx] || { ruleId: '', wcag: '', message: '', nodeHtml: '' };
+
       btn.setAttribute('aria-expanded', 'true');
       outEl.hidden = false;
 
@@ -1253,7 +1279,12 @@
       }
 
       outEl.innerHTML = '<div class="ai-explain-panel ai-explain-panel--loading"><p>Generating explanation\u2026</p></div>';
-      btn.disabled = true;
+      /* Do NOT use btn.disabled — disabling a focused element drops focus
+         to <body>, which scrolls the page to the top. Signal busy state via
+         aria-busy + a CSS hook so the button stays keyboard-reachable and
+         focus doesn't jump. */
+      btn.setAttribute('aria-busy', 'true');
+      btn.classList.add('is-loading');
 
       fetch('/.netlify/functions/ai-explain', {
         method: 'POST',
@@ -1270,7 +1301,8 @@
       }).catch(function (err) {
         renderAiError(outEl, 'Could not load AI explanation. ' + (err && err.message ? err.message : 'Please try again.'));
       }).finally(function () {
-        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
+        btn.classList.remove('is-loading');
       });
     }
 
