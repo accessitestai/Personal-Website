@@ -252,8 +252,12 @@
     }
     .engine-tag--axe { background: #eaf2f8; color: #1a5276; border: 1px solid #aed6f1; }
     .engine-tag--htmlcs { background: #f5eef8; color: #6c3483; border: 1px solid #d2b4de; }
+    .engine-tag--ibm { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+    .engine-tag--manual { background: #fef9e7; color: #9a7d0a; border: 1px solid #f9e79f; }
     [data-theme="dark"] .engine-tag--axe { background: rgba(26, 82, 118, 0.3); color: #aed6f1; }
     [data-theme="dark"] .engine-tag--htmlcs { background: rgba(108, 52, 131, 0.3); color: #d2b4de; }
+    [data-theme="dark"] .engine-tag--ibm { background: rgba(30, 132, 73, 0.3); color: #a9dfbf; }
+    [data-theme="dark"] .engine-tag--manual { background: rgba(154, 125, 10, 0.3); color: #f9e79f; }
 
     @media (max-width: 600px) {
       .checker-page h1 { font-size: 1.5rem; }
@@ -453,6 +457,10 @@
             <input type="checkbox" id="engine-htmlcs" checked>
             <span><strong>HTML_CodeSniffer</strong> — Catches additional issues, includes warnings and advisories</span>
           </label>
+          <label class="engine-option">
+            <input type="checkbox" id="engine-ibm" checked>
+            <span><strong>IBM Equal Access</strong> — Open-source engine from IBM with rules for WCAG 2.1 AAA, ARIA patterns and mobile a11y</span>
+          </label>
         </fieldset>
         <div class="checker-actions">
           <button type="button" class="checker-btn" id="run-check" aria-describedby="checker-status">
@@ -494,6 +502,7 @@
             <div class="filter-options">
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="axe" checked> axe-core</label>
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="htmlcs" checked> HTML_CodeSniffer</label>
+              <label class="filter-option"><input type="checkbox" class="filter-engine" value="ibm" checked> IBM Equal Access</label>
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="manual" checked> Manual checks</label>
             </div>
           </fieldset>
@@ -566,7 +575,7 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a> + <a href="https://squizlabs.github.io/HTML_CodeSniffer/" target="_blank" rel="noopener">HTML_CodeSniffer</a> and 16+ years of lived accessibility experience.</p>
+      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a>, <a href="https://squizlabs.github.io/HTML_CodeSniffer/" target="_blank" rel="noopener">HTML_CodeSniffer</a>, <a href="https://github.com/IBMa/equal-access" target="_blank" rel="noopener">IBM Equal Access</a> and 16+ years of lived accessibility experience.</p>
       <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
     </div>
   </footer>
@@ -574,6 +583,9 @@
   <!-- Accessibility testing engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.3/axe.min.js"></script>
   <script src="https://squizlabs.github.io/HTML_CodeSniffer/build/HTMLCS.js"></script>
+  <!-- IBM Equal Access Accessibility Checker (Apache-2.0) — extra open-source rule engine.
+       Exposes window.ace with a browser-compatible Checker. -->
+  <script src="https://unpkg.com/accessibility-checker-engine@3.1.77/ace.js" crossorigin="anonymous"></script>
 
   <script src="script.js"></script>
 
@@ -667,6 +679,7 @@
     var resultsHeading = document.getElementById('results-heading');
     var engineAxeCheckbox = document.getElementById('engine-axe');
     var engineHtmlcsCheckbox = document.getElementById('engine-htmlcs');
+    var engineIbmCheckbox = document.getElementById('engine-ibm');
 
     // Store latest results for report download
     var lastResults = null;
@@ -1107,6 +1120,83 @@
     }
 
     // =============================================
+    // IBM Equal Access Accessibility Checker integration
+    // =============================================
+    /* Maps IBM's result "level" field to the same four-step severity the rest
+       of the UI uses. IBM uses VIOLATION (must fix), RECOMMENDATION (should fix),
+       POTENTIAL (needs review). We degrade POTENTIAL to "minor" so it doesn't
+       drown out confirmed failures. */
+    function ibmLevelToImpact(level) {
+      if (level === 'violation') return 'serious';
+      if (level === 'recommendation') return 'moderate';
+      if (level === 'potentialviolation') return 'minor';
+      if (level === 'potentialrecommendation') return 'minor';
+      return 'minor';
+    }
+
+    function runIbmEqualAccess(testContainer) {
+      return new Promise(function (resolve) {
+        if (typeof ace === 'undefined' || !ace.Checker) {
+          console.warn('[Checker] IBM Equal Access engine not loaded.');
+          resolve({ violations: [], passes: [] });
+          return;
+        }
+        try {
+          var checker = new ace.Checker();
+          /* IBM_Accessibility is the default ruleset that covers WCAG 2.1 AA + IBM
+             best practices. The engine also ships WCAG_2_1, WCAG_2_0 and
+             IBM_Accessibility_next — we stick with the default for stable output. */
+          checker.check(testContainer, ['IBM_Accessibility']).then(function (report) {
+            var violations = [];
+            var passCount = 0;
+            var results = (report && report.results) || [];
+            results.forEach(function (r) {
+              var level = (r.value && r.value[1] ? String(r.value[1]) : '').toLowerCase()
+                        + (r.value && r.value[0] ? '' : '');
+              // r.value is [type, level] in IBM's schema: ["INFORMATION"|"VIOLATION"|"RECOMMENDATION", "FAIL"|"PASS"|"POTENTIAL"|"MANUAL"]
+              var vType = r.value && r.value[0] ? String(r.value[0]).toLowerCase() : '';
+              var vLevel = r.value && r.value[1] ? String(r.value[1]).toLowerCase() : '';
+              if (vLevel === 'pass') { passCount++; return; }
+              if (vLevel === 'manual' || vType === 'information') { return; } /* skip pure advisories */
+
+              var combined = (vType === 'violation' ? 'violation'
+                            : vType === 'recommendation' ? 'recommendation'
+                            : 'potentialviolation');
+              if (vLevel === 'potential') combined = 'potential' + combined;
+
+              var snippet = r.snippet || (r.node && r.node.snippet) || '';
+              var msg = r.message || '';
+              var helpUrl = r.help || '';
+
+              /* IBM ruleIds are stable strings like "img_alt_valid", "aria_role_valid" —
+                 good as our rule id. */
+              violations.push({
+                id: r.ruleId || 'ibm-rule',
+                engine: 'ibm',
+                impact: ibmLevelToImpact(combined),
+                help: msg,
+                description: msg,
+                tags: r.ruleId ? ['ibm-equal-access'] : ['ibm-equal-access'],
+                helpUrl: helpUrl,
+                nodes: snippet ? [{ html: snippet.substring(0, 400), failureSummary: msg }] : []
+              });
+            });
+            resolve({
+              violations: violations,
+              passes: new Array(passCount).fill({ id: 'ibm-pass', description: 'IBM Equal Access check passed' })
+            });
+          }).catch(function (err) {
+            console.error('[Checker] IBM Equal Access error:', err);
+            resolve({ violations: [], passes: [] });
+          });
+        } catch (err) {
+          console.error('[Checker] IBM Equal Access error:', err);
+          resolve({ violations: [], passes: [] });
+        }
+      });
+    }
+
+    // =============================================
     // Render results
     // =============================================
     // Store all violations for filtering
@@ -1137,8 +1227,14 @@
         var htmlSnippet = firstNode.html || '';
         var failureSummary = firstNode.failureSummary || '';
         var wcagTags = (violation.tags || []).filter(function (t) { return t.indexOf('wcag') === 0 || t.indexOf('best-practice') === 0; }).join(', ');
-        var engineName = violation.engine === 'htmlcs' ? 'HTML_CodeSniffer' : violation.engine === 'manual' ? 'Document Check' : 'axe-core';
-        var engineClass = violation.engine === 'htmlcs' ? 'htmlcs' : violation.engine === 'manual' ? 'manual' : 'axe';
+        var engineName = violation.engine === 'htmlcs' ? 'HTML_CodeSniffer'
+                       : violation.engine === 'ibm' ? 'IBM Equal Access'
+                       : violation.engine === 'manual' ? 'Document Check'
+                       : 'axe-core';
+        var engineClass = violation.engine === 'htmlcs' ? 'htmlcs'
+                        : violation.engine === 'ibm' ? 'ibm'
+                        : violation.engine === 'manual' ? 'manual'
+                        : 'axe';
 
         html += '<li class="issue-item" data-severity="' + violation.impact + '" data-engine="' + violation.engine + '">';
         html += '<button class="issue-header" aria-expanded="false" aria-controls="issue-detail-' + index + '" id="issue-btn-' + index + '">';
@@ -1429,11 +1525,13 @@
 
       var useAxe = engineAxeCheckbox.checked;
       var useHtmlcs = engineHtmlcsCheckbox.checked;
-      if (!useAxe && !useHtmlcs) { setStatus('Please select at least one testing engine.'); return; }
+      var useIbm = engineIbmCheckbox && engineIbmCheckbox.checked;
+      if (!useAxe && !useHtmlcs && !useIbm) { setStatus('Please select at least one testing engine.'); return; }
 
       lastEngines = [];
       if (useAxe) lastEngines.push('axe-core');
       if (useHtmlcs) lastEngines.push('HTML_CodeSniffer');
+      if (useIbm) lastEngines.push('IBM Equal Access');
 
       runBtn.disabled = true;
       document.getElementById('export-group').style.display = 'none';
@@ -1466,6 +1564,7 @@
       opts = opts || {};
       var useAxe = engineAxeCheckbox.checked;
       var useHtmlcs = engineHtmlcsCheckbox.checked;
+      var useIbm = engineIbmCheckbox && engineIbmCheckbox.checked;
 
       setStatus((opts.sourceLabel ? ('Scanning ' + opts.sourceLabel + ' with ') : 'Running accessibility analysis with ') + lastEngines.join(' + ') + ', please wait\u2026');
 
@@ -1511,6 +1610,10 @@
 
       if (useHtmlcs) {
         promises.push(runHtmlCodeSniffer(testContainer));
+      }
+
+      if (useIbm) {
+        promises.push(runIbmEqualAccess(testContainer));
       }
 
       Promise.all(promises).then(function (engineResults) {
@@ -1561,7 +1664,7 @@
       r += '.summary-table td:first-child{font-weight:700;width:140px;}.issue{border:2px solid #d5dbe3;border-radius:8px;margin:1rem 0;padding:1.25rem;}';
       r += '.issue-critical{border-left:5px solid #c0392b;}.issue-serious{border-left:5px solid #e67e22;}.issue-moderate{border-left:5px solid #f39c12;}.issue-minor{border-left:5px solid #27ae60;}';
       r += 'code{background:#f4f6f9;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.88em;}pre{background:#f4f6f9;padding:1rem;border-radius:8px;overflow-x:auto;border:1px solid #d5dbe3;}pre code{background:none;padding:0;}';
-      r += '.engine{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.75rem;font-weight:700;}.engine-axe{background:#eaf2f8;color:#1a5276;}.engine-htmlcs{background:#f5eef8;color:#6c3483;}.engine-manual{background:#eafaf1;color:#1e8449;}';
+      r += '.engine{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.75rem;font-weight:700;}.engine-axe{background:#eaf2f8;color:#1a5276;}.engine-htmlcs{background:#f5eef8;color:#6c3483;}.engine-ibm{background:#eafaf1;color:#1e8449;}.engine-manual{background:#fef9e7;color:#9a7d0a;}';
       r += '@media print{body{font-size:11pt;}.issue{break-inside:avoid;}}</style></head><body>';
       r += '<h1>Web Accessibility Report</h1>';
       r += '<table class="summary-table" role="presentation"><tbody>';
@@ -1581,8 +1684,14 @@
       if (violations.length > 0) {
         r += '<h2>Detailed Findings</h2>';
         violations.forEach(function (v, i) {
-          var eName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer' : v.engine === 'manual' ? 'Document Check' : 'axe-core';
-          var eClass = v.engine === 'htmlcs' ? 'htmlcs' : v.engine === 'manual' ? 'manual' : 'axe';
+          var eName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer'
+                    : v.engine === 'ibm' ? 'IBM Equal Access'
+                    : v.engine === 'manual' ? 'Document Check'
+                    : 'axe-core';
+          var eClass = v.engine === 'htmlcs' ? 'htmlcs'
+                     : v.engine === 'ibm' ? 'ibm'
+                     : v.engine === 'manual' ? 'manual'
+                     : 'axe';
           var fn = v.nodes && v.nodes[0] ? v.nodes[0] : {};
           r += '<div class="issue issue-' + v.impact + '" role="region" aria-label="Issue ' + (i + 1) + '">';
           r += '<h3>' + (i + 1) + '. <span class="' + v.impact + '">[' + v.impact.toUpperCase() + ']</span> ' + escapeHtml(v.help) + ' <span class="engine engine-' + eClass + '">' + eName + '</span></h3>';
@@ -1647,7 +1756,10 @@
       function csvEscape(str) { str = String(str || ''); if (str.indexOf('"') !== -1 || str.indexOf(',') !== -1 || str.indexOf('\n') !== -1) return '"' + str.replace(/"/g, '""') + '"'; return str; }
       var rows = ['\uFEFF#,Severity,Rule ID,Engine,WCAG Criteria,Description,Affected Element,How to Fix'];
       (lastResults.violations || []).forEach(function (v, i) {
-        var engineName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer' : v.engine === 'manual' ? 'Document Check' : 'axe-core';
+        var engineName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer'
+                       : v.engine === 'ibm' ? 'IBM Equal Access'
+                       : v.engine === 'manual' ? 'Document Check'
+                       : 'axe-core';
         var wcagTags = (v.tags || []).filter(function (t) { return t.indexOf('wcag') === 0; }).join(' ');
         var fn = v.nodes && v.nodes[0] ? v.nodes[0] : {};
         rows.push([i + 1, v.impact, v.id, engineName, wcagTags || 'Best practice', v.help, fn.html || '', fn.failureSummary || ''].map(csvEscape).join(','));
