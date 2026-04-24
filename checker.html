@@ -429,7 +429,7 @@
 
     <div class="checker-page">
       <h1>Web Accessibility Checker</h1>
-      <p class="checker-intro">Paste your HTML code below and I will analyse it for WCAG 2.2 Level AA compliance using industry-standard engines. This tool runs entirely in your browser. No data is sent to any server.</p>
+      <p class="checker-intro">Paste a <strong>URL</strong> or <strong>HTML code</strong> below and I will analyse it for WCAG 2.2 Level AA compliance using industry-standard engines. URLs are fetched through a CORS proxy; pasted HTML is analysed entirely in your browser.</p>
 
       <nav aria-label="Checker tools" class="checker-nav">
         <a href="checker.html" aria-current="page">Web Checker</a>
@@ -438,10 +438,10 @@
 
       <form class="checker-form" id="checker-form" onsubmit="return false;">
         <label for="html-input">
-          Paste your HTML code
-          <span class="label-hint">Paste a complete HTML page or a code snippet. The tool will wrap snippets in a basic HTML structure automatically.</span>
+          Paste a URL or HTML code
+          <span class="label-hint">Paste a full URL (e.g. https://example.com) to scan a live page, or paste complete HTML source / a snippet to analyse it in place. Snippets are auto-wrapped in a minimal HTML shell.</span>
         </label>
-        <textarea id="html-input" class="checker-textarea" placeholder="<!DOCTYPE html>&#10;<html lang=&quot;en&quot;>&#10;<head>&#10;  <title>My Page</title>&#10;</head>&#10;<body>&#10;  <h1>Hello World</h1>&#10;  <img src=&quot;photo.jpg&quot;>&#10;</body>&#10;</html>" spellcheck="false" aria-required="true"></textarea>
+        <textarea id="html-input" class="checker-textarea" placeholder="https://example.com&#10;&#10;-- or --&#10;&#10;<!DOCTYPE html>&#10;<html lang=&quot;en&quot;>&#10;<head><title>My Page</title></head>&#10;<body>&#10;  <h1>Hello World</h1>&#10;  <img src=&quot;photo.jpg&quot;>&#10;</body>&#10;</html>" spellcheck="false" aria-required="true"></textarea>
         <fieldset class="engine-selection">
           <legend>Select testing engine(s)</legend>
           <label class="engine-option">
@@ -1357,9 +1357,43 @@
     // =============================================
     // Run accessibility check (both engines)
     // =============================================
+    /* Detect whether the user pasted a URL (so we can auto-fetch the
+       live page) or raw HTML code. Rules:
+        - Starts with http:// or https:// → definitely URL
+        - Single line, no angle brackets, contains a dot and no spaces →
+          bare-domain URL (e.g. "example.com")
+        - Otherwise → treat as HTML. */
+    function looksLikeUrl(input) {
+      var s = input.trim();
+      if (!s) return false;
+      if (/^https?:\/\//i.test(s)) return true;
+      if (s.indexOf('<') === -1 && s.indexOf('\n') === -1 &&
+          s.indexOf(' ') === -1 && s.indexOf('.') !== -1 &&
+          s.length < 300) return true;
+      return false;
+    }
+    function normalizeUrl(input) {
+      var s = input.trim();
+      if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+      return s;
+    }
+    function fetchLiveUrl(url) {
+      var endpoint = '/.netlify/functions/fetch-page?url=' + encodeURIComponent(url);
+      return fetch(endpoint).then(function (res) {
+        if (!res.ok) {
+          return res.json().then(function (j) {
+            throw new Error((j && j.error) || ('Fetch failed: HTTP ' + res.status));
+          }).catch(function () {
+            throw new Error('Fetch failed: HTTP ' + res.status);
+          });
+        }
+        return res.text();
+      });
+    }
+
     runBtn.addEventListener('click', function () {
       var code = htmlInput.value.trim();
-      if (!code) { setStatus('Please paste some HTML code first.'); htmlInput.focus(); return; }
+      if (!code) { setStatus('Please paste some HTML code or a URL first.'); htmlInput.focus(); return; }
 
       var useAxe = engineAxeCheckbox.checked;
       var useHtmlcs = engineHtmlcsCheckbox.checked;
@@ -1369,10 +1403,39 @@
       if (useAxe) lastEngines.push('axe-core');
       if (useHtmlcs) lastEngines.push('HTML_CodeSniffer');
 
-      setStatus('Running accessibility analysis with ' + lastEngines.join(' + ') + ', please wait...');
       runBtn.disabled = true;
       document.getElementById('export-group').style.display = 'none';
       resultsSection.classList.remove('visible');
+
+      /* If the input is a URL, fetch the live HTML first via the
+         Netlify proxy (it bypasses CORS). On success, continue with
+         the normal analysis pipeline. */
+      if (looksLikeUrl(code)) {
+        var target = normalizeUrl(code);
+        setStatus('Fetching ' + target + ' \u2014 this can take a few seconds\u2026');
+        fetchLiveUrl(target).then(function (html) {
+          if (!html || html.trim().length < 40) {
+            throw new Error('The fetched page was empty or blocked. Try pasting the page source instead.');
+          }
+          runAnalysis(html, { sourceLabel: target });
+        }).catch(function (err) {
+          setStatus('Could not fetch the URL: ' + (err.message || 'unknown error') + '. Try pasting the page HTML instead.');
+          runBtn.disabled = false;
+        });
+        return;
+      }
+
+      runAnalysis(code);
+    });
+
+    /* Extracted so both the URL path and the paste-HTML path share the
+       same analysis pipeline. */
+    function runAnalysis(code, opts) {
+      opts = opts || {};
+      var useAxe = engineAxeCheckbox.checked;
+      var useHtmlcs = engineHtmlcsCheckbox.checked;
+
+      setStatus((opts.sourceLabel ? ('Scanning ' + opts.sourceLabel + ' with ') : 'Running accessibility analysis with ') + lastEngines.join(' + ') + ', please wait\u2026');
 
       var fullHtml = wrapSnippet(code);
       var parser = new DOMParser();
@@ -1437,11 +1500,11 @@
 
         if (testContainer.parentNode) document.body.removeChild(testContainer);
 
-        setStatus('Analysis complete with ' + lastEngines.join(' + ') + '. Found ' + allViolations.length + ' issue' + (allViolations.length !== 1 ? 's' : '') + '.');
+        setStatus('Analysis complete with ' + lastEngines.join(' + ') + (opts.sourceLabel ? ' on ' + opts.sourceLabel : '') + '. Found ' + allViolations.length + ' issue' + (allViolations.length !== 1 ? 's' : '') + '.');
         runBtn.disabled = false;
         renderResults({ violations: allViolations, passes: allPasses });
       });
-    });
+    }
 
     // =============================================
     // Export: HTML Report
