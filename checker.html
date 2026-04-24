@@ -253,10 +253,12 @@
     .engine-tag--axe { background: #eaf2f8; color: #1a5276; border: 1px solid #aed6f1; }
     .engine-tag--htmlcs { background: #f5eef8; color: #6c3483; border: 1px solid #d2b4de; }
     .engine-tag--ibm { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+    .engine-tag--alfa { background: #fdedec; color: #922b21; border: 1px solid #f5b7b1; }
     .engine-tag--manual { background: #fef9e7; color: #9a7d0a; border: 1px solid #f9e79f; }
     [data-theme="dark"] .engine-tag--axe { background: rgba(26, 82, 118, 0.3); color: #aed6f1; }
     [data-theme="dark"] .engine-tag--htmlcs { background: rgba(108, 52, 131, 0.3); color: #d2b4de; }
     [data-theme="dark"] .engine-tag--ibm { background: rgba(30, 132, 73, 0.3); color: #a9dfbf; }
+    [data-theme="dark"] .engine-tag--alfa { background: rgba(146, 43, 33, 0.3); color: #f5b7b1; }
     [data-theme="dark"] .engine-tag--manual { background: rgba(154, 125, 10, 0.3); color: #f9e79f; }
 
     @media (max-width: 600px) {
@@ -461,6 +463,10 @@
             <input type="checkbox" id="engine-ibm" checked>
             <span><strong>IBM Equal Access</strong> — Open-source engine from IBM with rules for WCAG 2.1 AAA, ARIA patterns and mobile a11y</span>
           </label>
+          <label class="engine-option">
+            <input type="checkbox" id="engine-alfa">
+            <span><strong>Alfa (Siteimprove)</strong> — Formally-verified ACT rule engine, WCAG 2.2; runs on the server, adds a few seconds per scan</span>
+          </label>
         </fieldset>
         <div class="checker-actions">
           <button type="button" class="checker-btn" id="run-check" aria-describedby="checker-status">
@@ -503,6 +509,7 @@
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="axe" checked> axe-core</label>
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="htmlcs" checked> HTML_CodeSniffer</label>
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="ibm" checked> IBM Equal Access</label>
+              <label class="filter-option"><input type="checkbox" class="filter-engine" value="alfa" checked> Alfa (Siteimprove)</label>
               <label class="filter-option"><input type="checkbox" class="filter-engine" value="manual" checked> Manual checks</label>
             </div>
           </fieldset>
@@ -575,7 +582,7 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a>, <a href="https://squizlabs.github.io/HTML_CodeSniffer/" target="_blank" rel="noopener">HTML_CodeSniffer</a>, <a href="https://github.com/IBMa/equal-access" target="_blank" rel="noopener">IBM Equal Access</a> and 16+ years of lived accessibility experience.</p>
+      <p>Powered by <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noopener">axe-core</a>, <a href="https://squizlabs.github.io/HTML_CodeSniffer/" target="_blank" rel="noopener">HTML_CodeSniffer</a>, <a href="https://github.com/IBMa/equal-access" target="_blank" rel="noopener">IBM Equal Access</a>, <a href="https://github.com/Siteimprove/alfa" target="_blank" rel="noopener">Alfa (Siteimprove)</a> and 16+ years of lived accessibility experience.</p>
       <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
     </div>
   </footer>
@@ -680,6 +687,7 @@
     var engineAxeCheckbox = document.getElementById('engine-axe');
     var engineHtmlcsCheckbox = document.getElementById('engine-htmlcs');
     var engineIbmCheckbox = document.getElementById('engine-ibm');
+    var engineAlfaCheckbox = document.getElementById('engine-alfa');
 
     // Store latest results for report download
     var lastResults = null;
@@ -1197,6 +1205,50 @@
     }
 
     // =============================================
+    // Alfa (Siteimprove) — server-side engine
+    // =============================================
+    /* Alfa is ESM-only and needs a real DOM, so instead of bundling it
+       for the browser we POST the HTML to a Netlify Function that runs
+       Alfa in Node. The function returns issue objects already shaped
+       like the rest of the pipeline expects, so we just forward them. */
+    function runAlfaRemote(html) {
+      return new Promise(function (resolve) {
+        /* 25s ceiling — Netlify functions on the free tier time out at 26s,
+           and Alfa's first run is the slow one (cold start + rule init). */
+        var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timer = setTimeout(function () { if (controller) controller.abort(); }, 25000);
+
+        fetch('/.netlify/functions/alfa-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: html }),
+          signal: controller ? controller.signal : undefined
+        }).then(function (res) {
+          clearTimeout(timer);
+          if (!res.ok) throw new Error('Alfa function returned ' + res.status);
+          return res.json();
+        }).then(function (data) {
+          var violations = (data && data.violations ? data.violations : []).map(function (v) {
+            v.engine = 'alfa';
+            return v;
+          });
+          var passes = (data && data.passes) ? data.passes : [];
+          resolve({ violations: violations, passes: passes });
+        }).catch(function (err) {
+          clearTimeout(timer);
+          console.warn('[Checker] Alfa remote failed:', err && err.message ? err.message : err);
+          /* Soft-fail: show a single informational marker so the user knows
+             Alfa was requested but didn't run, without breaking the report. */
+          resolve({
+            violations: [],
+            passes: [],
+            alfaNote: 'Alfa engine unavailable — ' + (err && err.message ? err.message : 'unknown error')
+          });
+        });
+      });
+    }
+
+    // =============================================
     // Render results
     // =============================================
     // Store all violations for filtering
@@ -1229,10 +1281,12 @@
         var wcagTags = (violation.tags || []).filter(function (t) { return t.indexOf('wcag') === 0 || t.indexOf('best-practice') === 0; }).join(', ');
         var engineName = violation.engine === 'htmlcs' ? 'HTML_CodeSniffer'
                        : violation.engine === 'ibm' ? 'IBM Equal Access'
+                       : violation.engine === 'alfa' ? 'Alfa (Siteimprove)'
                        : violation.engine === 'manual' ? 'Document Check'
                        : 'axe-core';
         var engineClass = violation.engine === 'htmlcs' ? 'htmlcs'
                         : violation.engine === 'ibm' ? 'ibm'
+                        : violation.engine === 'alfa' ? 'alfa'
                         : violation.engine === 'manual' ? 'manual'
                         : 'axe';
 
@@ -1526,12 +1580,14 @@
       var useAxe = engineAxeCheckbox.checked;
       var useHtmlcs = engineHtmlcsCheckbox.checked;
       var useIbm = engineIbmCheckbox && engineIbmCheckbox.checked;
-      if (!useAxe && !useHtmlcs && !useIbm) { setStatus('Please select at least one testing engine.'); return; }
+      var useAlfa = engineAlfaCheckbox && engineAlfaCheckbox.checked;
+      if (!useAxe && !useHtmlcs && !useIbm && !useAlfa) { setStatus('Please select at least one testing engine.'); return; }
 
       lastEngines = [];
       if (useAxe) lastEngines.push('axe-core');
       if (useHtmlcs) lastEngines.push('HTML_CodeSniffer');
       if (useIbm) lastEngines.push('IBM Equal Access');
+      if (useAlfa) lastEngines.push('Alfa (Siteimprove)');
 
       runBtn.disabled = true;
       document.getElementById('export-group').style.display = 'none';
@@ -1565,6 +1621,7 @@
       var useAxe = engineAxeCheckbox.checked;
       var useHtmlcs = engineHtmlcsCheckbox.checked;
       var useIbm = engineIbmCheckbox && engineIbmCheckbox.checked;
+      var useAlfa = engineAlfaCheckbox && engineAlfaCheckbox.checked;
 
       setStatus((opts.sourceLabel ? ('Scanning ' + opts.sourceLabel + ' with ') : 'Running accessibility analysis with ') + lastEngines.join(' + ') + ', please wait\u2026');
 
@@ -1616,6 +1673,12 @@
         promises.push(runIbmEqualAccess(testContainer));
       }
 
+      if (useAlfa) {
+        /* Alfa runs server-side because it's ESM-only and wants a real DOM.
+           We send the full wrapped HTML — the function bounds the payload. */
+        promises.push(runAlfaRemote(fullHtml));
+      }
+
       Promise.all(promises).then(function (engineResults) {
         var allViolations = manualResults.violations.slice();
         var allPasses = manualResults.passes.slice();
@@ -1664,7 +1727,7 @@
       r += '.summary-table td:first-child{font-weight:700;width:140px;}.issue{border:2px solid #d5dbe3;border-radius:8px;margin:1rem 0;padding:1.25rem;}';
       r += '.issue-critical{border-left:5px solid #c0392b;}.issue-serious{border-left:5px solid #e67e22;}.issue-moderate{border-left:5px solid #f39c12;}.issue-minor{border-left:5px solid #27ae60;}';
       r += 'code{background:#f4f6f9;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.88em;}pre{background:#f4f6f9;padding:1rem;border-radius:8px;overflow-x:auto;border:1px solid #d5dbe3;}pre code{background:none;padding:0;}';
-      r += '.engine{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.75rem;font-weight:700;}.engine-axe{background:#eaf2f8;color:#1a5276;}.engine-htmlcs{background:#f5eef8;color:#6c3483;}.engine-ibm{background:#eafaf1;color:#1e8449;}.engine-manual{background:#fef9e7;color:#9a7d0a;}';
+      r += '.engine{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.75rem;font-weight:700;}.engine-axe{background:#eaf2f8;color:#1a5276;}.engine-htmlcs{background:#f5eef8;color:#6c3483;}.engine-ibm{background:#eafaf1;color:#1e8449;}.engine-alfa{background:#fdedec;color:#922b21;}.engine-manual{background:#fef9e7;color:#9a7d0a;}';
       r += '@media print{body{font-size:11pt;}.issue{break-inside:avoid;}}</style></head><body>';
       r += '<h1>Web Accessibility Report</h1>';
       r += '<table class="summary-table" role="presentation"><tbody>';
@@ -1686,10 +1749,12 @@
         violations.forEach(function (v, i) {
           var eName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer'
                     : v.engine === 'ibm' ? 'IBM Equal Access'
+                    : v.engine === 'alfa' ? 'Alfa (Siteimprove)'
                     : v.engine === 'manual' ? 'Document Check'
                     : 'axe-core';
           var eClass = v.engine === 'htmlcs' ? 'htmlcs'
                      : v.engine === 'ibm' ? 'ibm'
+                     : v.engine === 'alfa' ? 'alfa'
                      : v.engine === 'manual' ? 'manual'
                      : 'axe';
           var fn = v.nodes && v.nodes[0] ? v.nodes[0] : {};
@@ -1758,6 +1823,7 @@
       (lastResults.violations || []).forEach(function (v, i) {
         var engineName = v.engine === 'htmlcs' ? 'HTML_CodeSniffer'
                        : v.engine === 'ibm' ? 'IBM Equal Access'
+                       : v.engine === 'alfa' ? 'Alfa (Siteimprove)'
                        : v.engine === 'manual' ? 'Document Check'
                        : 'axe-core';
         var wcagTags = (v.tags || []).filter(function (t) { return t.indexOf('wcag') === 0; }).join(' ');
