@@ -1181,6 +1181,11 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="./firebase-config.js"></script>
+  <!-- PDF.js — used by the Document Audit tab to walk the real PDF
+       structure tree (tagged-PDF roles, alt text, outlines, permissions)
+       instead of regex-scanning raw bytes. Pinned to 3.11.174 UMD so it
+       works as a classic <script> tag; v4 ships ESM-only. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -2870,10 +2875,8 @@ $('doc-file-input').addEventListener('change', async e => {
   $('loading-overlay').classList.add('active');
 
   try {
-    const buf  = await file.arrayBuffer();
-    const bytes = new Uint8Array(buf);
-    const text  = new TextDecoder('latin1').decode(bytes);
-    const results = auditPDF(text, file.name);
+    const buf     = await file.arrayBuffer();
+    const results = await auditPDF(buf, file.name);
     renderDocResults(results, file.name);
     announce('PDF audit complete. ' + results.length + ' findings. Navigate to results below.');
   } catch(err) {
@@ -2883,96 +2886,200 @@ $('doc-file-input').addEventListener('change', async e => {
   }
 });
 
-function auditPDF(text, filename) {
+/* Real PDF accessibility audit using PDF.js.
+   Walks the structure tree, metadata, outline and permissions instead
+   of regex-scanning raw bytes. Returns the same {status,title,detail}
+   shape renderDocResults already knows how to render. */
+async function auditPDF(arrayBuffer, filename) {
   const findings = [];
 
-  // 1. Check if PDF is tagged
-  const isTagged = text.includes('/MarkInfo') && text.includes('/Marked true');
-  if (!isTagged) {
-    findings.push({ status:'FAIL', title:'Document is not tagged',
-      detail:'No MarkInfo dictionary with Marked true found. This PDF has no tag structure and is not accessible to screen readers. WCAG SC 1.3.1 / PDF/UA-1 requirement.' });
-  } else {
-    findings.push({ status:'PASS', title:'Document is tagged',
-      detail:'MarkInfo dictionary present with Marked true. The document has a tag structure.' });
+  if (typeof pdfjsLib === 'undefined') {
+    findings.push({ status:'FAIL', title:'PDF.js failed to load',
+      detail:'The PDF parser library did not load — check your network and try again.' });
+    return findings;
   }
 
-  // 2. Check for document language
-  const hasLang = text.includes('/Lang (') || text.includes('/Lang<');
-  if (!hasLang) {
-    findings.push({ status:'FAIL', title:'Document language not declared',
-      detail:'No /Lang entry found in the document catalog. Screen readers cannot determine the document language. WCAG SC 3.1.1 / PDF/UA-1 requirement.' });
-  } else {
-    findings.push({ status:'PASS', title:'Document language declared',
-      detail:'Language entry found in document catalog.' });
+  /* Pin the worker to the same CDN build as the main library. */
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  } catch (e) { /* setter may throw once already configured — ignore */ }
+
+  let pdf;
+  try {
+    pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
+  } catch (err) {
+    findings.push({ status:'FAIL', title:'PDF could not be parsed',
+      detail:'PDF.js error: ' + (err && err.message ? err.message : String(err)) + '. The file may be corrupt or password-protected.' });
+    return findings;
   }
 
-  // 3. Check for document title
-  const hasTitle = text.includes('/Title (') || text.includes('/Title<');
-  if (!hasTitle) {
-    findings.push({ status:'FAIL', title:'Document title not set',
-      detail:'No /Title entry found in the document info dictionary. Screen readers announce the document title when the file opens. WCAG SC 2.4.2.' });
-  } else {
-    findings.push({ status:'PASS', title:'Document title is set',
-      detail:'Title entry found in document info dictionary.' });
+  /* 1. Metadata — title, language, author, producer. */
+  let info = {}, metadata = null;
+  try {
+    const meta = await pdf.getMetadata();
+    info = (meta && meta.info) || {};
+    metadata = meta && meta.metadata;
+  } catch (e) { /* non-fatal */ }
+
+  findings.push(info.Title
+    ? { status:'PASS', title:'Document title set',
+        detail:'"' + info.Title + '" found in document info. Screen readers will announce this on open.' }
+    : { status:'FAIL', title:'Document title missing',
+        detail:'No /Title in the document info dictionary. Screen readers fall back to the file name. WCAG SC 2.4.2.' });
+
+  /* Language can live in the catalog Lang key or in XMP metadata dc:language. */
+  let lang = info.Language || '';
+  if (!lang && metadata) {
+    try { lang = metadata.get('dc:language') || ''; } catch (e) {}
+  }
+  findings.push(lang
+    ? { status:'PASS', title:'Document language set',
+        detail:'Language: ' + lang + '. Screen readers can select the correct speech synthesiser.' }
+    : { status:'FAIL', title:'Document language missing',
+        detail:'No /Lang in catalog or dc:language in XMP. Screen readers will mispronounce content. WCAG SC 3.1.1 / PDF/UA-1.' });
+
+  /* 2. Tagged PDF — probe the structure tree on page 1. PDF.js returns
+     null when the document has no StructTreeRoot. */
+  let hasStructTree = false;
+  let rootTree = null;
+  try {
+    const firstPage = await pdf.getPage(1);
+    rootTree = await firstPage.getStructTree();
+    hasStructTree = !!rootTree;
+  } catch (e) { /* older PDFs can throw — treat as untagged */ }
+
+  findings.push(hasStructTree
+    ? { status:'PASS', title:'Document is tagged',
+        detail:'Structure tree present. Reading order, headings and semantics are exposed to assistive technology.' }
+    : { status:'FAIL', title:'Document is not tagged',
+        detail:'No structure tree detected. Untagged PDFs fail PDF/UA-1 and are effectively unreadable by screen readers. WCAG SC 1.3.1 / 4.1.2.' });
+
+  /* 3. Walk the structure tree across up to the first 50 pages to count
+     roles we care about. 50 keeps cold-start memory bounded on big PDFs
+     while still giving a statistically meaningful picture. */
+  const stats = {
+    headings: 0, h1: 0, figures: 0, figuresWithAlt: 0,
+    tables: 0, tableHeaders: 0, lists: 0, links: 0, formFields: 0
+  };
+
+  function walk(node) {
+    if (!node || typeof node !== 'object') return;
+    const role = node.role;
+    if (role) {
+      if (/^H([1-6])$/.test(role)) {
+        stats.headings++;
+        if (role === 'H1') stats.h1++;
+      } else if (role === 'Figure') {
+        stats.figures++;
+        if (node.alt && String(node.alt).trim().length > 0) stats.figuresWithAlt++;
+      } else if (role === 'Table')   stats.tables++;
+      else if (role === 'TH')        stats.tableHeaders++;
+      else if (role === 'L')         stats.lists++;
+      else if (role === 'Link')      stats.links++;
+      else if (role === 'Form')      stats.formFields++;
+    }
+    const children = node.children || [];
+    for (let i = 0; i < children.length; i++) walk(children[i]);
   }
 
-  // 4. Check for headings
-  const headingCount = (text.match(/<H\d/g) || []).length;
-  if (headingCount === 0) {
-    findings.push({ status:'FAIL', title:'No heading tags found',
-      detail:'No H1 through H6 heading tags detected in the tag tree. Documents without headings cannot be navigated by heading in screen readers. WCAG SC 1.3.1 / PDF/UA-1.' });
-  } else {
-    findings.push({ status:'PASS', title: headingCount + ' heading tags found',
-      detail:'Heading tags H1 through H6 detected. Verify the heading hierarchy is logical and no levels are skipped.' });
+  if (hasStructTree) {
+    const pageLimit = Math.min(pdf.numPages, 50);
+    for (let p = 1; p <= pageLimit; p++) {
+      try {
+        const page = await pdf.getPage(p);
+        const tree = await page.getStructTree();
+        if (tree) walk(tree);
+      } catch (e) { /* skip unreadable pages */ }
+    }
+
+    findings.push(stats.headings === 0
+      ? { status:'FAIL', title:'No heading tags in structure tree',
+          detail:'Documents without H1–H6 tags cannot be navigated by heading in a screen reader. WCAG SC 1.3.1 / 2.4.6.' }
+      : { status: stats.h1 === 1 ? 'PASS' : 'WARN',
+          title: stats.headings + ' heading tag' + (stats.headings === 1 ? '' : 's') + ' (' + stats.h1 + ' H1)',
+          detail: stats.h1 === 1
+            ? 'Heading structure looks sensible. Still verify the hierarchy skips no levels.'
+            : stats.h1 === 0
+              ? 'No H1 found. Every document should have exactly one H1.'
+              : stats.h1 + ' H1 tags found — exactly one is expected.' });
+
+    if (stats.figures > 0) {
+      const missing = stats.figures - stats.figuresWithAlt;
+      findings.push(missing === 0
+        ? { status:'PASS',
+            title: stats.figures + ' figure' + (stats.figures === 1 ? '' : 's') + ' — all have alt text',
+            detail:'Every Figure tag carries an /Alt attribute.' }
+        : { status:'FAIL',
+            title: missing + ' of ' + stats.figures + ' figures missing alt text',
+            detail:'Add an /Alt entry on each Figure tag, or mark decorative images as /Artifact. WCAG SC 1.1.1 / PDF/UA-1.' });
+    } else {
+      findings.push({ status:'INFO', title:'No figure tags in structure tree',
+        detail:'If the document has images, they may be untagged artifacts — confirm they are decorative, otherwise tag them as Figure.' });
+    }
+
+    if (stats.tables > 0) {
+      findings.push(stats.tableHeaders === 0
+        ? { status:'FAIL',
+            title: stats.tables + ' table' + (stats.tables === 1 ? '' : 's') + ' with 0 TH cells',
+            detail:'Data tables must expose header cells via TH tags with appropriate Scope. WCAG SC 1.3.1 / PDF/UA-1.' }
+        : { status:'PASS',
+            title: stats.tables + ' table' + (stats.tables === 1 ? '' : 's') + ' with ' + stats.tableHeaders + ' TH cell' + (stats.tableHeaders === 1 ? '' : 's'),
+            detail:'Header cells present. Verify Scope attributes are set correctly for complex tables.' });
+    }
+
+    if (stats.links > 0) {
+      findings.push({ status:'INFO',
+        title: stats.links + ' tagged link' + (stats.links === 1 ? '' : 's'),
+        detail:'Verify each link has descriptive text — avoid bare "click here" or raw URLs. WCAG SC 2.4.4.' });
+    }
+    if (stats.formFields > 0) {
+      findings.push({ status:'INFO',
+        title: stats.formFields + ' form element' + (stats.formFields === 1 ? '' : 's'),
+        detail:'Verify every form field has a /TU tooltip exposed to screen readers. WCAG SC 3.3.2 / 4.1.2.' });
+    }
   }
 
-  // 5. Check for figures with alt text
-  const figureCount = (text.match(/<Figure/g) || []).length;
-  const altCount    = (text.match(/\/Alt \(/g) || []).length;
-  if (figureCount > 0 && altCount === 0) {
-    findings.push({ status:'FAIL', title: figureCount + ' figure tags found with no alt text',
-      detail: figureCount + ' Figure tags detected but no /Alt attribute entries found. All figures must have alternative text. WCAG SC 1.1.1 / PDF/UA-1.' });
-  } else if (figureCount > 0) {
-    findings.push({ status: altCount >= figureCount ? 'PASS' : 'WARN',
-      title: altCount + ' of ' + figureCount + ' figures have alt text',
-      detail: altCount < figureCount ?
-        (figureCount - altCount) + ' figures are missing alternative text. Check each figure tag for an /Alt attribute.' :
-        'All figure tags have alternative text entries.' });
-  } else {
-    findings.push({ status:'INFO', title:'No figure tags found',
-      detail:'No Figure tags detected. If the document contains images, they may be untagged artifacts.' });
-  }
+  /* 4. Outline (bookmarks). */
+  try {
+    const outline = await pdf.getOutline();
+    const count = outline ? outline.length : 0;
+    findings.push(count > 0
+      ? { status:'PASS',
+          title: count + ' top-level bookmark' + (count === 1 ? '' : 's'),
+          detail:'Outline defined. Assistive tech users can jump between sections.' }
+      : (stats.headings > 0
+          ? { status:'WARN', title:'No bookmark outline',
+              detail:'Headings exist but no outline — PDF/UA recommends bookmarks for any document longer than a few pages.' }
+          : { status:'INFO', title:'No bookmark outline', detail:'Short document — bookmarks may not be necessary.' }));
+  } catch (e) { /* getOutline can throw on weird PDFs — skip silently */ }
 
-  // 6. Check for table headers
-  const tableCount  = (text.match(/<Table/g) || []).length;
-  const thCount     = (text.match(/<TH/g) || []).length;
-  if (tableCount > 0 && thCount === 0) {
-    findings.push({ status:'FAIL', title: tableCount + ' table tags found with no TH header cells',
-      detail:'Tables detected but no TH header cells found. All tables must have header cells tagged as TH with appropriate Scope attributes. WCAG SC 1.3.1 / PDF/UA-1.' });
-  } else if (tableCount > 0) {
-    findings.push({ status:'PASS', title: tableCount + ' tables with ' + thCount + ' TH header cells',
-      detail:'Table header cells detected. Verify that Scope attributes are correctly set for all TH cells in complex tables.' });
-  }
+  /* 5. Permissions — copy/extract must stay allowed for assistive tech. */
+  try {
+    const perms = await pdf.getPermissions();
+    /* PDF.js returns null when all permissions are granted (encrypted-without-owner).
+       If perms is an array, check for COPY specifically. */
+    if (Array.isArray(perms)) {
+      const COPY = (pdfjsLib.PermissionFlag && pdfjsLib.PermissionFlag.COPY) || 5;
+      if (!perms.includes(COPY)) {
+        findings.push({ status:'FAIL', title:'PDF disallows content extraction',
+          detail:'The "copy text" permission is disabled. Assistive technology relies on content extraction to read the document. WCAG SC 1.1.1 / Section 508 §1194.22(m).' });
+      } else {
+        findings.push({ status:'PASS', title:'No blocking permissions',
+          detail:'Assistive technology can extract content for speech and braille.' });
+      }
+    } else {
+      findings.push({ status:'PASS', title:'No permission restrictions',
+        detail:'PDF is not encrypted with restrictive permissions.' });
+    }
+  } catch (e) { /* non-fatal */ }
 
-  // 7. Check for bookmarks
-  const hasOutlines = text.includes('/Outlines') || text.includes('/Outline');
-  if (!hasOutlines && headingCount > 0) {
-    findings.push({ status:'WARN', title:'No bookmark outline found',
-      detail:'The document has headings but no bookmark panel (Outlines dictionary). Screen reader users rely on bookmarks to navigate long documents. PDF/UA-1 recommendation.' });
-  } else if (hasOutlines) {
-    findings.push({ status:'PASS', title:'Bookmark outline present',
-      detail:'Outlines dictionary found. Bookmarks are available for navigation.' });
-  }
-
-  // 8. Check reading order (presence of structure)
-  const hasStructTree = text.includes('/StructTreeRoot');
-  if (!hasStructTree) {
-    findings.push({ status:'FAIL', title:'No structure tree found',
-      detail:'No StructTreeRoot detected. Without a structure tree, reading order cannot be defined and screen readers will read content in an undefined sequence. PDF/UA-1 requirement.' });
-  } else {
-    findings.push({ status:'PASS', title:'Structure tree present',
-      detail:'StructTreeRoot found. Reading order is defined by the tag tree structure.' });
-  }
+  /* 6. Size summary at the end. */
+  findings.push({ status:'INFO',
+    title: pdf.numPages + ' page' + (pdf.numPages === 1 ? '' : 's') + ' — audited ' + Math.min(pdf.numPages, 50),
+    detail: pdf.numPages > 50
+      ? 'Structure walk capped at the first 50 pages to keep the audit fast. Large documents should also be manually sampled.'
+      : 'Full structure tree walked.' });
 
   return findings;
 }
