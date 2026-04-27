@@ -1626,46 +1626,36 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       aria-labelledby="tab-document" tabindex="-1">
       <h1 class="panel-title">Document Audit</h1>
       <p class="panel-desc">
-        Upload a PDF or Word document to check its accessibility structure. Covers tags,
-        language, headings, alt text, table headers, bookmarks, and reading order.
+        Upload a document to check its accessibility structure. The audit detects the file
+        type automatically and runs the appropriate checks — tagging, language, headings,
+        alt text, table headers, reading order, bookmarks, contrast, and more.
       </p>
 
-      <div class="method-tabs" role="tablist" aria-label="Document type">
-        <button class="method-tab" role="tab" id="dtab-pdf" aria-selected="true"
-          aria-controls="dpanel-pdf" tabindex="0" type="button">PDF Document</button>
-        <button class="method-tab" role="tab" id="dtab-docx" aria-selected="false"
-          aria-controls="dpanel-docx" tabindex="-1" type="button">Word Document (DOCX)</button>
-      </div>
-
-      <div id="dpanel-pdf" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:24px;margin-bottom:16px;background:var(--card);box-shadow:var(--shadow);">
-        <div class="upload-zone" role="region" aria-label="PDF upload area">
-          <div class="upload-icon" aria-hidden="true">PDF</div>
-          <p class="upload-label">Upload PDF for Accessibility Audit</p>
-          <p class="upload-hint">Checks: tagged structure · language · title · headings · alt text · table headers · bookmarks</p>
-          <div class="file-input-wrapper">
-            <input type="file" id="doc-file-input" accept=".pdf"
-              aria-label="Select PDF document to audit">
-            <label class="file-input-label" for="doc-file-input">Select PDF</label>
-          </div>
+      <div class="upload-zone" role="region" aria-label="Document upload area">
+        <div class="upload-icon" aria-hidden="true">DOC</div>
+        <p class="upload-label">Upload a Document for Accessibility Audit</p>
+        <p class="upload-hint" id="doc-supported-hint">
+          Supported formats: <strong>PDF</strong> · <strong>Word</strong> (.docx, .doc) ·
+          <strong>PowerPoint</strong> (.pptx) · <strong>Excel</strong> (.xlsx) ·
+          <strong>EPUB</strong> · <strong>OpenDocument</strong> (.odt, .ods, .odp)
+        </p>
+        <div class="file-input-wrapper">
+          <input type="file" id="doc-file-input"
+            accept=".pdf,.docx,.doc,.pptx,.xlsx,.epub,.odt,.ods,.odp"
+            aria-label="Select document to audit"
+            aria-describedby="doc-supported-hint doc-size-hint">
+          <label class="file-input-label" for="doc-file-input">Select Document</label>
         </div>
+        <p id="doc-size-hint" style="font-size:12px;color:var(--text-3);font-family:var(--mono);margin-top:10px;">
+          Maximum file size: 20 MB
+        </p>
       </div>
 
-      <div id="dpanel-docx" hidden style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:24px;margin-bottom:16px;background:var(--card);box-shadow:var(--shadow);">
-        <div class="upload-zone" role="region" aria-label="DOCX upload area">
-          <div class="upload-icon" aria-hidden="true">DOC</div>
-          <p class="upload-label">Upload Word Document for Accessibility Audit</p>
-          <p class="upload-hint">Checks: heading styles · alt text · table headers · language · lists · text boxes · bookmarks · colour contrast</p>
-          <div class="file-input-wrapper">
-            <input type="file" id="docx-file-input" accept=".docx"
-              aria-label="Select Word document to audit">
-            <label class="file-input-label" for="docx-file-input">Select DOCX</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="notice warn">
+      <div class="notice warn" style="margin-top:16px;">
         <strong>Note:</strong> Scanned PDFs with no machine-readable text will report no tag structure.
-        Password-protected documents cannot be audited.
+        Password-protected documents cannot be audited. Legacy <code>.doc</code> (binary Word 97–2003)
+        is detected but cannot be deeply parsed in the browser — convert to <code>.docx</code> for the
+        full audit.
       </div>
 
       <div id="doc-results" style="display:none;">
@@ -2886,8 +2876,23 @@ function downloadFile(content, mime, filename) {
 }
 
 /* ══════════════════════════════════════════════
-   DOCUMENT AUDIT (PDF structural analysis)
+   DOCUMENT AUDIT — unified dispatcher
+   Routes the uploaded file to the right audit engine based on its
+   extension. All engines return the same { status, title, detail }
+   shape and are enriched + rendered by renderDocResults().
 ══════════════════════════════════════════════ */
+const DOC_AUDIT_DISPATCH = {
+  pdf : { label:'PDF',                      run: (buf, name) => auditPDF(buf, name) },
+  docx: { label:'Word document (DOCX)',     run: (buf, name) => auditDOCX(buf, name) },
+  doc : { label:'legacy Word document',     run: (buf, name) => auditDOC(buf, name) },
+  pptx: { label:'PowerPoint presentation',  run: (buf, name) => auditPPTX(buf, name) },
+  xlsx: { label:'Excel workbook',           run: (buf, name) => auditXLSX(buf, name) },
+  epub: { label:'EPUB book',                run: (buf, name) => auditEPUB(buf, name) },
+  odt : { label:'OpenDocument Text',        run: (buf, name) => auditODF(buf, name, 'text') },
+  ods : { label:'OpenDocument Spreadsheet', run: (buf, name) => auditODF(buf, name, 'spreadsheet') },
+  odp : { label:'OpenDocument Presentation',run: (buf, name) => auditODF(buf, name, 'presentation') }
+};
+
 $('doc-file-input').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -2896,18 +2901,37 @@ $('doc-file-input').addEventListener('change', async e => {
     return;
   }
 
-  announce('Reading PDF file. Please wait.');
+  const ext = (file.name.match(/\.([^.]+)$/) || [,''])[1].toLowerCase();
+  const handler = DOC_AUDIT_DISPATCH[ext];
+  if (!handler) {
+    announce('Unsupported file type: .' + ext + '. Supported: PDF, DOCX, DOC, PPTX, XLSX, EPUB, ODT, ODS, ODP.');
+    renderDocResults([{
+      status:'FAIL',
+      title:'Unsupported file type: .' + ext,
+      detail:'AMASAMYA Document Audit currently supports PDF, DOCX, DOC, PPTX, XLSX, EPUB, ODT, ODS, and ODP. Re-save your file as one of these formats and try again.'
+    }], file.name);
+    e.target.value = '';
+    return;
+  }
+
+  announce('Reading ' + handler.label + '. Please wait.');
   $('loading-overlay').classList.add('active');
 
   try {
     const buf     = await file.arrayBuffer();
-    const results = await auditPDF(buf, file.name);
+    const results = await handler.run(buf, file.name);
     renderDocResults(results, file.name);
-    announce('PDF audit complete. ' + results.length + ' findings. Navigate to results below.');
+    announce(handler.label + ' audit complete. ' + results.length + ' findings. Navigate to results below.');
   } catch(err) {
-    announce('Error reading PDF: ' + err.message);
+    announce('Error reading ' + handler.label + ': ' + err.message);
+    renderDocResults([{
+      status:'FAIL',
+      title:'Could not parse ' + handler.label,
+      detail:'Parser error: ' + (err && err.message ? err.message : String(err)) + '. The file may be corrupt or password-protected.'
+    }], file.name);
   } finally {
     $('loading-overlay').classList.remove('active');
+    e.target.value = '';   /* allow re-uploading the same file */
   }
 });
 
@@ -3233,9 +3257,61 @@ const DOC_KB = [
     refs:[
       ['WCAG 1.4.1 Use of Color','https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html']
     ]},
+  /* ─── PPTX-specific ─── */
+  { match:/title placeholder|presentation title|slides have a title|slides have no title/i,
+    fix:'In PowerPoint open View > Outline View — every slide should show a title on the left. For each blank one, switch back to Normal View, click the slide layout > Reset, then type the title into the placeholder. If you need a "title-less" look, keep the title placeholder but move it off-slide (Selection Pane > untick visibility).',
+    refs:[
+      ['WCAG 2.4.6 Headings & Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html'],
+      ['Microsoft — Make presentations accessible','https://support.microsoft.com/office/make-your-powerpoint-presentations-accessible-to-people-with-disabilities-6f7772b2-2f33-4bd2-8ca7-dae3b2b3ef25']
+    ]},
+  { match:/picture|reading order on each slide/i,
+    fix:'In PowerPoint right-click each picture > "View Alt Text" > add a description, or tick "Mark as decorative" for purely decorative images. For reading order, use Home > Arrange > Selection Pane and reorder shapes bottom-to-top in the order you want screen readers to announce them.',
+    refs:[
+      ['WCAG 1.1.1 Non-text Content','https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html'],
+      ['WCAG 1.3.2 Meaningful Sequence','https://www.w3.org/WAI/WCAG22/Understanding/meaningful-sequence.html']
+    ]},
+  /* ─── XLSX-specific ─── */
+  { match:/sheet.*default names|workbook title/i,
+    fix:'Right-click each sheet tab in Excel > Rename, and give it a name that describes the data on that sheet (e.g. "2026 Sales by Region"). For the workbook title, File > Info > Properties > Title.',
+    refs:[
+      ['WCAG 2.4.6 Headings & Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html'],
+      ['Microsoft — Make Excel accessible','https://support.microsoft.com/office/make-your-excel-documents-accessible-to-people-with-disabilities-6cc05fc5-1314-48b5-8eb3-683e49b3e593']
+    ]},
+  { match:/hidden sheet|merged-cell|defined Table|images? \/ chart/i,
+    fix:'For hidden sheets: right-click the tab strip > Unhide and either delete or document them. For merged cells: select the range > Home > Merge & Center > Unmerge. For defined Tables: select the data range > Insert > Table > tick "My table has headers". For chart/image alt text: right-click the object > "View Alt Text" and add a description.',
+    refs:[
+      ['WCAG 1.3.1 Info & Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['WebAIM — Excel accessibility','https://webaim.org/techniques/excel/']
+    ]},
+  /* ─── EPUB-specific ─── */
+  { match:/EPUB title|EPUB language|EPUB unique identifier/i,
+    fix:'Open the OPF file in your EPUB authoring tool (Sigil, Calibre, Vellum) and ensure <metadata> contains <dc:title>, <dc:language>, and <dc:identifier>. These are mandatory for EPUB 3 and required by accessibility-supporting reading systems.',
+    refs:[
+      ['EPUB Accessibility 1.1','https://www.w3.org/TR/epub-a11y-11/'],
+      ['DAISY — Accessible EPUB','https://daisy.org/activities/standards/epub/']
+    ]},
+  { match:/navigation document|spine item|sampled content document/i,
+    fix:'In Sigil: Tools > Add Cover / Tools > Generate Table of Contents. Make sure one item in the manifest has properties="nav" and links to a nav.xhtml that lists all chapters. For sampled content issues, open the offending XHTML and add lang on <html>, an <h1> at the start, and alt attributes on every <img>.',
+    refs:[
+      ['EPUB 3 Navigation Document','https://www.w3.org/publishing/epub3/epub-packages.html#sec-package-nav'],
+      ['Ace by DAISY (EPUB checker)','https://daisy.org/activities/software/ace/']
+    ]},
+  /* ─── ODF-specific ─── */
+  { match:/OpenDocument content|description present|description in LibreOffice/i,
+    fix:'In LibreOffice Writer/Calc/Impress: right-click the image > Description… > fill the Title and Description fields. For document title, File > Properties > Description > Title. For language, Tools > Options > Language Settings > Languages > set the document language explicitly rather than relying on system defaults.',
+    refs:[
+      ['LibreOffice — Accessibility help','https://help.libreoffice.org/latest/en-US/text/shared/guide/accessibility.html'],
+      ['ODF Accessibility (OASIS)','https://www.oasis-open.org/standard/opendocumentv1-3/']
+    ]},
+  /* ─── Legacy .doc ─── */
+  { match:/Convert to \.docx|legacy Word|OLE compound-document/i,
+    fix:'Open the .doc file in Microsoft Word or LibreOffice Writer, then File > Save As > choose "Word Document (.docx)". Re-upload the new .docx file here for the full structural audit.',
+    refs:[
+      ['Microsoft — Save in .docx','https://support.microsoft.com/office/save-a-document-3e4cf5f2-9d4f-4c3a-9cb5-2593cd6cda8c']
+    ]},
   /* ─── Failure / parser ─── */
-  { match:/PDF.js failed|could not be parsed|Could not read document XML/i,
-    fix:'If the file is password-protected, remove the password (Acrobat: File > Properties > Security > "No Security"). If it is corrupt, re-export from the source application. If your network is restricted, allow cdnjs.cloudflare.com so PDF.js can load.',
+  { match:/PDF.js failed|could not be parsed|Could not read document XML|Could not read document content|Could not read presentation slides|Could not read workbook|Could not locate OPF|Could not parse|Unsupported file type/i,
+    fix:'If the file is password-protected, remove the password in the source application first. If it is corrupt, re-export it from the source application. For PDFs specifically, if your network is restricted, allow cdnjs.cloudflare.com so PDF.js can load.',
     refs:[
       ['Adobe — Open password-protected PDFs','https://helpx.adobe.com/acrobat/using/securing-pdfs-passwords.html']
     ]}
@@ -3854,15 +3930,17 @@ window.addEventListener('message', function (e) {
    4.6 NVDA Keyboard Guidance (integrated into panel descriptions)
 ══════════════════════════════════════════════════════════════ */
 
-/* ── Document type tab switching (horizontal tablist) ──
-   WAI-ARIA Tabs Pattern:
-   • ArrowRight / ArrowLeft navigate between tabs
-   • Roving tabindex: selected = tabindex="0", others = tabindex="-1"
-────────────────────────────────────────────── */
+/* ── Document type tab switching ──
+   The PDF/DOCX method-tab UI was retired in favour of a single unified
+   upload zone that auto-detects the format by file extension (see
+   DOC_AUDIT_DISPATCH above). The selectors below are guarded so the
+   handlers no-op on the current single-input layout, and the code is
+   kept around in case we re-introduce per-format tabs later. */
 const dtabs   = document.querySelectorAll('[id^="dtab-"]');
 const dpanels = document.querySelectorAll('[id^="dpanel-"]');
 
 function switchDTab(activeTab) {
+  if (!activeTab) return;
   dtabs.forEach(t => {
     const isActive = (t === activeTab);
     t.setAttribute('aria-selected', String(isActive));
@@ -3871,7 +3949,6 @@ function switchDTab(activeTab) {
   dpanels.forEach(p => { p.hidden = true; });
   const panel = document.getElementById(activeTab.getAttribute('aria-controls'));
   if (panel) panel.hidden = false;
-  /* No announce() — SR announces tab name + selected state naturally on focus */
 }
 
 dtabs.forEach(tab => {
@@ -3895,25 +3972,9 @@ dtabs.forEach(tab => {
 
 /* ══════════════════════════════════════════════
    4.2 DOCX DOCUMENT AUDIT
+   The DOCX file input handler has been folded into the unified
+   DOC_AUDIT_DISPATCH above. Only the audit function remains here.
 ══════════════════════════════════════════════ */
-
-$('docx-file-input') && $('docx-file-input').addEventListener('change', async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 20 * 1024 * 1024) { announce('File is too large. Maximum 20 megabytes.'); return; }
-  announce('Reading Word document. Please wait.');
-  $('loading-overlay').classList.add('active');
-  try {
-    const buf   = await file.arrayBuffer();
-    const results = await auditDOCX(buf, file.name);
-    renderDocResults(results, file.name);
-    announce('DOCX audit complete. ' + results.length + ' findings. Navigate to results below.');
-  } catch(err) {
-    announce('Error reading document: ' + err.message);
-  } finally {
-    $('loading-overlay').classList.remove('active');
-  }
-});
 
 async function auditDOCX(buffer, filename) {
   const findings = [];
@@ -4108,8 +4169,12 @@ async function auditDOCX(buffer, filename) {
   return findings;
 }
 
-/* Simple ZIP reader for DOCX — extracts XML file contents from the ZIP archive */
-async function readZip(buffer) {
+/* Generic ZIP reader for any container-format document (DOCX, PPTX,
+   XLSX, EPUB, ODT, ODS, ODP). Walks every local-file-header in the
+   archive and returns a { filename: textContent } map. The optional
+   `accept` predicate lets callers cheaply skip large binary entries
+   such as embedded images or fonts. */
+async function readZip(buffer, accept) {
   const result = {};
   const view   = new DataView(buffer);
   const bytes  = new Uint8Array(buffer);
@@ -4129,7 +4194,14 @@ async function readZip(buffer) {
 
     const dataOffset = offset + 30 + fnLen + extraLen;
 
-    if (['word/document.xml','word/styles.xml','word/settings.xml','word/_rels/document.xml.rels'].includes(filename)) {
+    /* Default predicate: keep only XML / XHTML / RELS / OPF / mimetype
+       files — anything containing structural metadata. Skips embedded
+       images, fonts and binary blobs to keep memory bounded. */
+    const want = typeof accept === 'function'
+      ? accept(filename)
+      : /\.(xml|rels|xhtml|html|opf|ncx)$/i.test(filename) || filename === 'mimetype';
+
+    if (want) {
       try {
         const compressed = bytes.slice(dataOffset, dataOffset + compSize);
         if (compMethod === 0) {
@@ -4161,6 +4233,486 @@ async function readZip(buffer) {
     offset = dataOffset + compSize;
   }
   return result;
+}
+
+/* ══════════════════════════════════════════════
+   4.2b PPTX (PowerPoint) AUDIT
+   PPTX is OOXML in a ZIP. Each slide is its own
+   ppt/slides/slide{n}.xml. We probe slide titles,
+   alt text on shapes/pictures, table headers, the
+   default language and core metadata.
+══════════════════════════════════════════════ */
+async function auditPPTX(buffer, filename) {
+  const findings = [];
+  const zip = await readZip(buffer);
+  const slideKeys = Object.keys(zip).filter(k => /^ppt\/slides\/slide\d+\.xml$/i.test(k))
+    .sort((a, b) => {
+      const na = parseInt(a.match(/(\d+)\.xml$/)[1], 10);
+      const nb = parseInt(b.match(/(\d+)\.xml$/)[1], 10);
+      return na - nb;
+    });
+  const presXML = zip['ppt/presentation.xml']            || '';
+  const coreXML = zip['docProps/core.xml']               || '';
+  const appXML  = zip['docProps/app.xml']                || '';
+
+  if (slideKeys.length === 0) {
+    findings.push({ status:'FAIL', title:'Could not read presentation slides',
+      detail:'No slide XML files were found inside the package. The file may be corrupt or password-protected.' });
+    return findings;
+  }
+
+  /* 1. CORE METADATA — title and language */
+  const titleMatch = coreXML.match(/<dc:title>([^<]*)<\/dc:title>/);
+  const dcTitle    = titleMatch ? titleMatch[1].trim() : '';
+  findings.push(dcTitle
+    ? { status:'PASS', title:'Presentation title set',
+        detail:'"' + dcTitle + '" found in core properties.' }
+    : { status:'FAIL', title:'Presentation title missing',
+        detail:'No <dc:title> in docProps/core.xml. Screen readers and assistive tech rely on the title to identify the file. WCAG SC 2.4.2.' });
+
+  const dcLang = (coreXML.match(/<dc:language>([^<]*)<\/dc:language>/) || [,''])[1].trim();
+  const presLang = (presXML.match(/lang="([^"]+)"/) || [,''])[1];
+  const lang = dcLang || presLang;
+  findings.push(lang
+    ? { status:'PASS', title:'Presentation language declared',
+        detail:'Language: ' + lang + '. Screen readers can pick the correct voice.' }
+    : { status:'FAIL', title:'Presentation language not declared',
+        detail:'No language attribute in core or presentation properties. WCAG SC 3.1.1.' });
+
+  /* 2. SLIDE TITLES — every slide should have a title placeholder. */
+  let slidesWithTitle = 0;
+  const noTitleNumbers = [];
+  slideKeys.forEach((k, idx) => {
+    const xml = zip[k] || '';
+    /* A title placeholder is a shape with <p:ph type="title"/> or "ctrTitle". */
+    if (/<p:ph[^>]*type="(title|ctrTitle)"/.test(xml)) {
+      slidesWithTitle++;
+    } else {
+      noTitleNumbers.push(idx + 1);
+    }
+  });
+  if (noTitleNumbers.length === 0) {
+    findings.push({ status:'PASS', title:'All ' + slideKeys.length + ' slides have a title placeholder',
+      detail:'Screen reader users can navigate slide-by-slide and hear each title.' });
+  } else {
+    findings.push({ status:'FAIL',
+      title: noTitleNumbers.length + ' of ' + slideKeys.length + ' slides have no title placeholder',
+      detail:'Slides without titles: ' + noTitleNumbers.slice(0, 10).join(', ') +
+        (noTitleNumbers.length > 10 ? ', \u2026' : '') + '. Screen reader users navigate decks by slide title — untitled slides are announced as "Slide N", giving no context. WCAG SC 2.4.6.' });
+  }
+
+  /* 3. ALT TEXT — pictures and shapes use p:cNvPr (or pic:cNvPr) with descr= */
+  let pictureCount = 0, picturesWithAlt = 0;
+  slideKeys.forEach(k => {
+    const xml = zip[k] || '';
+    const cnv = xml.match(/<p:cNvPr [^>]*\/?>/g) || [];
+    const picCnv = xml.match(/<pic:cNvPr [^>]*\/?>/g) || [];
+    /* Heuristic: count picture frames specifically (p:pic / a:blip references). */
+    const picFrames = (xml.match(/<p:pic>/g) || []).length;
+    pictureCount += picFrames;
+    /* For each pic, look for descr or title on its cNvPr. */
+    [...cnv, ...picCnv].forEach(tag => {
+      if (/descr="[^"]+"/.test(tag) || /title="[^"]+"/.test(tag)) picturesWithAlt++;
+    });
+  });
+  if (pictureCount > 0) {
+    /* picturesWithAlt counts every cNvPr with a descr — may exceed pictureCount in
+       complex shape groups, so cap it. */
+    const counted = Math.min(picturesWithAlt, pictureCount);
+    const missing = pictureCount - counted;
+    findings.push(missing === 0
+      ? { status:'PASS', title: pictureCount + ' picture' + (pictureCount === 1 ? '' : 's') + ' — all have alt text',
+          detail:'Every picture frame carries a description attribute.' }
+      : { status:'FAIL', title: missing + ' of ' + pictureCount + ' pictures missing alt text',
+          detail:'Right-click the picture in PowerPoint > "View Alt Text" > add a description, or tick "Mark as decorative". WCAG SC 1.1.1.' });
+  } else {
+    findings.push({ status:'INFO', title:'No pictures detected in slides',
+      detail:'No <p:pic> elements found. If the deck has images they may be embedded as background or in master slides and could not be inspected.' });
+  }
+
+  /* 4. TABLES — PowerPoint table header row */
+  let tableCount = 0, tablesWithHeader = 0;
+  slideKeys.forEach(k => {
+    const xml = zip[k] || '';
+    const tbls = (xml.match(/<a:tbl>/g) || []).length;
+    tableCount += tbls;
+    /* PowerPoint's table-properties firstRow attribute marks the header row. */
+    const headers = (xml.match(/firstRow="1"/g) || []).length;
+    tablesWithHeader += headers;
+  });
+  if (tableCount > 0) {
+    const missingHeader = tableCount - Math.min(tablesWithHeader, tableCount);
+    findings.push(missingHeader === 0
+      ? { status:'PASS', title: tableCount + ' table' + (tableCount === 1 ? '' : 's') + ' with a header row',
+          detail:'Every table has firstRow="1" set.' }
+      : { status:'FAIL', title: missingHeader + ' of ' + tableCount + ' tables missing a header row',
+          detail:'Click inside the table > Table Tools > Design > tick "Header Row". Screen readers announce headers as cell context. WCAG SC 1.3.1.' });
+  }
+
+  /* 5. READING ORDER — PowerPoint reads in z-order; tab order should be set explicitly. */
+  findings.push({ status:'INFO', title:'Verify reading order on each slide',
+    detail:'Open Home > Arrange > Selection Pane on every slide and confirm shapes are listed bottom-to-top in the order you want them announced. There is no programmatic check for this. WCAG SC 1.3.2.' });
+
+  /* 6. SIZE summary */
+  findings.push({ status:'INFO', title: slideKeys.length + ' slide' + (slideKeys.length === 1 ? '' : 's') + ' inspected',
+    detail: slideKeys.length + ' slide XML files found in the package.' });
+
+  return findings;
+}
+
+/* ══════════════════════════════════════════════
+   4.2c XLSX (Excel) AUDIT
+══════════════════════════════════════════════ */
+async function auditXLSX(buffer, filename) {
+  const findings = [];
+  const zip = await readZip(buffer);
+  const wbXML  = zip['xl/workbook.xml']    || '';
+  const coreXML= zip['docProps/core.xml']  || '';
+  const sheetKeys = Object.keys(zip).filter(k => /^xl\/worksheets\/sheet\d+\.xml$/i.test(k));
+  const tableKeys = Object.keys(zip).filter(k => /^xl\/tables\/table\d+\.xml$/i.test(k));
+
+  if (!wbXML) {
+    findings.push({ status:'FAIL', title:'Could not read workbook',
+      detail:'No xl/workbook.xml in the archive. The file may be corrupt or password-protected.' });
+    return findings;
+  }
+
+  /* 1. Title */
+  const dcTitle = (coreXML.match(/<dc:title>([^<]*)<\/dc:title>/) || [,''])[1].trim();
+  findings.push(dcTitle
+    ? { status:'PASS', title:'Workbook title set', detail:'"' + dcTitle + '" found in core properties.' }
+    : { status:'FAIL', title:'Workbook title missing',
+        detail:'No <dc:title> in docProps/core.xml. Set it via File > Info > Properties > Title. WCAG SC 2.4.2.' });
+
+  /* 2. Sheet names — flag generic defaults */
+  const sheetNames = [...wbXML.matchAll(/<sheet [^>]*name="([^"]+)"/g)].map(m => m[1]);
+  const generic = sheetNames.filter(n => /^Sheet\d+$/i.test(n) || /^Tabelle\d+$/i.test(n));
+  if (sheetNames.length === 0) {
+    findings.push({ status:'WARN', title:'No sheet name metadata found',
+      detail:'Could not extract any sheet names from workbook.xml.' });
+  } else if (generic.length > 0) {
+    findings.push({ status:'WARN',
+      title: generic.length + ' sheet' + (generic.length === 1 ? '' : 's') + ' still using default names',
+      detail:'Generic names: ' + generic.join(', ') + '. Rename each tab to describe its contents — screen readers announce the active sheet name. WCAG SC 2.4.6.' });
+  } else {
+    findings.push({ status:'PASS', title: sheetNames.length + ' sheets — all have descriptive names',
+      detail:'No "Sheet1"-style defaults remain.' });
+  }
+
+  /* 3. Hidden sheets */
+  const hidden = (wbXML.match(/state="hidden"/g) || []).length;
+  if (hidden > 0) {
+    findings.push({ status:'WARN', title: hidden + ' hidden sheet' + (hidden === 1 ? '' : 's'),
+      detail:'Hidden sheets can confuse assistive tech users — they may be announced when navigating defined names. Either delete them or document their purpose. WCAG SC 1.3.1.' });
+  }
+
+  /* 4. Defined Tables — formal Table objects expose headers to screen readers */
+  if (tableKeys.length > 0) {
+    findings.push({ status:'PASS', title: tableKeys.length + ' defined Table object' + (tableKeys.length === 1 ? '' : 's'),
+      detail:'Defined tables expose header rows to assistive tech. Verify each table has descriptive Header Row labels.' });
+  } else {
+    findings.push({ status:'WARN', title:'No defined Table objects',
+      detail:'Data ranges are plain cells. Convert each data range to a formal Table (Insert > Table) so screen readers can announce column headers. WCAG SC 1.3.1.' });
+  }
+
+  /* 5. Merged cells across all sheets */
+  let mergedTotal = 0;
+  sheetKeys.forEach(k => {
+    const xml = zip[k] || '';
+    const m = xml.match(/<mergeCells [^>]*count="(\d+)"/);
+    if (m) mergedTotal += parseInt(m[1], 10);
+  });
+  if (mergedTotal > 0) {
+    findings.push({ status:'WARN', title: mergedTotal + ' merged-cell range' + (mergedTotal === 1 ? '' : 's'),
+      detail:'Merged cells break screen-reader navigation across rows and columns. Avoid merging in data ranges. Reserve merged cells for titles outside data tables. WCAG SC 1.3.1 / 1.3.2.' });
+  } else {
+    findings.push({ status:'PASS', title:'No merged cells detected',
+      detail:'Cell navigation will be predictable for assistive tech.' });
+  }
+
+  /* 6. Image alt text in drawings */
+  const drawKeys = Object.keys(zip).filter(k => /^xl\/drawings\/drawing\d+\.xml$/i.test(k));
+  let xPics = 0, xPicsWithAlt = 0;
+  drawKeys.forEach(k => {
+    const xml = zip[k] || '';
+    const cnvs = xml.match(/<xdr:cNvPr [^>]*\/?>/g) || [];
+    cnvs.forEach(tag => {
+      xPics++;
+      if (/descr="[^"]+"/.test(tag) || /title="[^"]+"/.test(tag)) xPicsWithAlt++;
+    });
+  });
+  if (xPics > 0) {
+    const missing = xPics - xPicsWithAlt;
+    findings.push(missing === 0
+      ? { status:'PASS', title: xPics + ' image' + (xPics === 1 ? '' : 's') + ' / chart' + (xPics === 1 ? '' : 's') + ' — all have alt text',
+          detail:'Every drawing object has a description attribute.' }
+      : { status:'FAIL', title: missing + ' of ' + xPics + ' images / charts missing alt text',
+          detail:'Right-click each chart or image > "View Alt Text" > add a description. WCAG SC 1.1.1.' });
+  }
+
+  /* 7. Language */
+  const lang = (coreXML.match(/<dc:language>([^<]*)<\/dc:language>/) || [,''])[1].trim();
+  findings.push(lang
+    ? { status:'PASS', title:'Workbook language declared', detail:'Language: ' + lang + '.' }
+    : { status:'WARN', title:'Workbook language not declared',
+        detail:'Set the editing language in File > Options > Language. WCAG SC 3.1.1.' });
+
+  findings.push({ status:'INFO', title: sheetKeys.length + ' worksheet' + (sheetKeys.length === 1 ? '' : 's') + ' inspected',
+    detail:'Plus ' + tableKeys.length + ' defined tables and ' + drawKeys.length + ' drawing files.' });
+
+  return findings;
+}
+
+/* ══════════════════════════════════════════════
+   4.2d EPUB AUDIT
+   EPUB is a ZIP containing XHTML content + an OPF
+   manifest. We parse the OPF for metadata and the
+   nav document to confirm a navigable TOC exists.
+══════════════════════════════════════════════ */
+async function auditEPUB(buffer, filename) {
+  const findings = [];
+  const zip = await readZip(buffer);
+
+  const containerXML = zip['META-INF/container.xml'] || '';
+  const opfPath = (containerXML.match(/full-path="([^"]+\.opf)"/) || [,''])[1];
+  const opfXML = opfPath ? (zip[opfPath] || '') : '';
+
+  if (!opfXML) {
+    findings.push({ status:'FAIL', title:'Could not locate OPF package document',
+      detail:'No META-INF/container.xml or referenced OPF found. The EPUB may be malformed.' });
+    return findings;
+  }
+
+  /* 1. Metadata: title, language, identifier */
+  const title = (opfXML.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/) || [,''])[1].trim();
+  const lang  = (opfXML.match(/<dc:language[^>]*>([^<]+)<\/dc:language>/) || [,''])[1].trim();
+  const ident = (opfXML.match(/<dc:identifier[^>]*>([^<]+)<\/dc:identifier>/) || [,''])[1].trim();
+
+  findings.push(title
+    ? { status:'PASS', title:'EPUB title set', detail:'"' + title + '" found in package metadata.' }
+    : { status:'FAIL', title:'EPUB title missing',
+        detail:'No <dc:title> in the OPF metadata. WCAG SC 2.4.2.' });
+  findings.push(lang
+    ? { status:'PASS', title:'EPUB language declared', detail:'Language: ' + lang + '.' }
+    : { status:'FAIL', title:'EPUB language not declared',
+        detail:'No <dc:language> in the OPF metadata. WCAG SC 3.1.1.' });
+  findings.push(ident
+    ? { status:'PASS', title:'EPUB unique identifier set', detail:'Identifier present in metadata.' }
+    : { status:'WARN', title:'EPUB unique identifier missing',
+        detail:'Best practice for accessibility-supporting reading systems and citation.' });
+
+  /* 2. Navigation document — EPUB 3 requires a nav.xhtml in the manifest. */
+  const hasNav = /properties="[^"]*\bnav\b[^"]*"/.test(opfXML);
+  findings.push(hasNav
+    ? { status:'PASS', title:'EPUB navigation document declared',
+        detail:'A nav document is exposed via properties="nav" in the manifest. Verify it lists all top-level chapters.' }
+    : { status:'FAIL', title:'No EPUB navigation document found',
+        detail:'EPUB 3 requires an item with properties="nav" in the manifest. Without it, table-of-contents navigation breaks for assistive tech. WCAG SC 2.4.5.' });
+
+  /* 3. Spine size */
+  const spineCount = (opfXML.match(/<itemref/g) || []).length;
+  findings.push({ status:'INFO',
+    title: spineCount + ' spine item' + (spineCount === 1 ? '' : 's'),
+    detail:'Reading order contains ' + spineCount + ' content documents.' });
+
+  /* 4. Sample first content document for HTML lang and h1 */
+  const firstHtmlKey = Object.keys(zip).find(k => /\.x?html$/i.test(k) && !/nav\.x?html$/i.test(k));
+  if (firstHtmlKey) {
+    const xhtml = zip[firstHtmlKey] || '';
+    const htmlLang = /<html[^>]*\s(?:xml:)?lang="[^"]+"/i.test(xhtml);
+    findings.push(htmlLang
+      ? { status:'PASS', title:'Sampled content document has lang on <html>',
+          detail:'Sampled file: ' + firstHtmlKey + '.' }
+      : { status:'WARN', title:'Sampled content document missing lang on <html>',
+          detail:'Sampled file: ' + firstHtmlKey + '. Each XHTML content document should declare a language. WCAG SC 3.1.1 / 3.1.2.' });
+    const hasH1 = /<h1[\s>]/i.test(xhtml);
+    findings.push(hasH1
+      ? { status:'PASS', title:'Sampled content document contains an <h1>',
+          detail:'Provides a navigable top-level heading.' }
+      : { status:'WARN', title:'Sampled content document has no <h1>',
+          detail:'Each chapter should begin with an <h1>. WCAG SC 2.4.6.' });
+    /* Quick alt-text scan in the sampled document */
+    const imgs = (xhtml.match(/<img[^>]*>/gi) || []);
+    const imgsNoAlt = imgs.filter(t => !/\salt=("[^"]*"|'[^']*')/i.test(t));
+    if (imgs.length > 0) {
+      findings.push(imgsNoAlt.length === 0
+        ? { status:'PASS', title:'All <img> in sampled doc have an alt attribute',
+            detail:imgs.length + ' image element(s) in ' + firstHtmlKey + '.' }
+        : { status:'FAIL', title: imgsNoAlt.length + ' of ' + imgs.length + ' images in sampled doc missing alt',
+            detail:'Sampled file: ' + firstHtmlKey + '. WCAG SC 1.1.1.' });
+    }
+  }
+
+  return findings;
+}
+
+/* ══════════════════════════════════════════════
+   4.2e OPENDOCUMENT AUDIT (ODT, ODS, ODP)
+   ODF stores everything in content.xml + meta.xml +
+   styles.xml. The schema differs from OOXML but the
+   audit shape mirrors what we do for DOCX/XLSX/PPTX
+   so users get consistent guidance.
+══════════════════════════════════════════════ */
+async function auditODF(buffer, filename, kind) {
+  const findings = [];
+  const zip = await readZip(buffer);
+  const contentXML = zip['content.xml'] || '';
+  const metaXML    = zip['meta.xml']    || '';
+  const stylesXML  = zip['styles.xml']  || '';
+
+  if (!contentXML) {
+    findings.push({ status:'FAIL', title:'Could not read OpenDocument content',
+      detail:'No content.xml inside the archive. The file may be corrupt or password-protected.' });
+    return findings;
+  }
+
+  /* 1. Metadata: title and language */
+  const title = (metaXML.match(/<dc:title>([^<]*)<\/dc:title>/) || [,''])[1].trim();
+  findings.push(title
+    ? { status:'PASS', title:'Document title set', detail:'"' + title + '" found in meta.xml.' }
+    : { status:'FAIL', title:'Document title missing',
+        detail:'No <dc:title> in meta.xml. In LibreOffice: File > Properties > Description > Title. WCAG SC 2.4.2.' });
+
+  const lang = (metaXML.match(/<dc:language>([^<]*)<\/dc:language>/) || [,''])[1].trim()
+            || (stylesXML.match(/fo:language="([^"]+)"/) || [,''])[1]
+            || (contentXML.match(/fo:language="([^"]+)"/) || [,''])[1];
+  findings.push(lang
+    ? { status:'PASS', title:'Document language declared', detail:'Language: ' + lang + '.' }
+    : { status:'FAIL', title:'Document language not declared',
+        detail:'No language attribute in meta.xml or styles.xml. In LibreOffice: Tools > Options > Language Settings > Languages. WCAG SC 3.1.1.' });
+
+  /* 2. Format-specific checks */
+  if (kind === 'text') {
+    /* ODT — headings, images, tables, lists */
+    const headings = [...contentXML.matchAll(/<text:h[^>]*text:outline-level="(\d+)"/g)].map(m => parseInt(m[1], 10));
+    if (headings.length === 0) {
+      findings.push({ status:'FAIL', title:'No headings found in document',
+        detail:'No <text:h> elements detected. Use Heading 1 / Heading 2 styles in LibreOffice Writer instead of bold formatting. WCAG SC 1.3.1 / 2.4.6.' });
+    } else {
+      const skips = [];
+      for (let i = 1; i < headings.length; i++) {
+        if (headings[i] > headings[i-1] + 1) {
+          skips.push('Heading ' + headings[i-1] + ' -> Heading ' + headings[i]);
+        }
+      }
+      findings.push(skips.length === 0
+        ? { status:'PASS', title: headings.length + ' headings — hierarchy has no level skips',
+            detail:'Heading levels flow in order through the document.' }
+        : { status:'FAIL', title: skips.length + ' heading-level skip' + (skips.length === 1 ? '' : 's') + ' in document order',
+            detail:'Detected: ' + skips.slice(0, 5).join('; ') + (skips.length > 5 ? '; \u2026' : '') + '. WCAG SC 1.3.1 / 2.4.6.' });
+      const h1Count = headings.filter(n => n === 1).length;
+      if (h1Count !== 1) {
+        findings.push({ status:'WARN', title: h1Count === 0 ? 'No Heading 1 in document' : h1Count + ' Heading 1 paragraphs',
+          detail: h1Count === 0
+            ? 'Each document should open with exactly one Heading 1. WCAG SC 2.4.6.'
+            : 'Multiple Heading 1 paragraphs confuse screen reader navigation.' });
+      }
+    }
+    const images = (contentXML.match(/<draw:image\b/g) || []).length;
+    const imagesWithDesc = (contentXML.match(/<svg:desc>[^<]+<\/svg:desc>/g) || []).length
+                        + (contentXML.match(/<svg:title>[^<]+<\/svg:title>/g) || []).length;
+    if (images > 0) {
+      findings.push(imagesWithDesc >= images
+        ? { status:'PASS', title: images + ' image' + (images === 1 ? '' : 's') + ' — descriptions present',
+            detail:'<svg:title> / <svg:desc> elements found alongside drawings.' }
+        : { status:'FAIL', title: (images - imagesWithDesc) + ' of ' + images + ' images missing description',
+            detail:'In LibreOffice: right-click image > Description > fill Title and/or Description. WCAG SC 1.1.1.' });
+    }
+    const tables = (contentXML.match(/<table:table\b/g) || []).length;
+    const tableHeaderRows = (contentXML.match(/<table:table-header-rows\b/g) || []).length;
+    if (tables > 0) {
+      findings.push(tableHeaderRows === 0
+        ? { status:'FAIL', title: tables + ' table' + (tables === 1 ? '' : 's') + ' with no header rows',
+            detail:'Use Table > Header Rows in LibreOffice to mark the first row as a header. WCAG SC 1.3.1.' }
+        : { status:'PASS', title: tables + ' table' + (tables === 1 ? '' : 's') + ' with ' + tableHeaderRows + ' header row block' + (tableHeaderRows === 1 ? '' : 's'),
+            detail:'Header rows are declared. Verify they cover all data tables.' });
+    }
+    const lists = (contentXML.match(/<text:list\b/g) || []).length;
+    findings.push(lists > 0
+      ? { status:'PASS', title: lists + ' list block' + (lists === 1 ? '' : 's'),
+          detail:'Proper list structures detected.' }
+      : { status:'INFO', title:'No list structures detected',
+          detail:'If the document has bulleted or numbered content, ensure you used the list buttons rather than typing dashes.' });
+  } else if (kind === 'spreadsheet') {
+    /* ODS — sheets, images, defined ranges */
+    const sheetNames = [...contentXML.matchAll(/<table:table[^>]*table:name="([^"]+)"/g)].map(m => m[1]);
+    const generic = sheetNames.filter(n => /^Sheet\d+$/i.test(n) || /^Tabelle\d+$/i.test(n) || /^Tabella\d+$/i.test(n));
+    findings.push(sheetNames.length === 0
+      ? { status:'WARN', title:'No sheet name metadata found', detail:'Could not extract any sheet names.' }
+      : (generic.length > 0
+          ? { status:'WARN', title: generic.length + ' sheet' + (generic.length === 1 ? '' : 's') + ' still using default names',
+              detail:'Generic names: ' + generic.join(', ') + '. Rename each tab to describe its contents. WCAG SC 2.4.6.' }
+          : { status:'PASS', title: sheetNames.length + ' sheets — all have descriptive names',
+              detail:'No default-style names remain.' }));
+    const hidden = (contentXML.match(/table:visibility="hidden"/g) || []).length;
+    if (hidden > 0) {
+      findings.push({ status:'WARN', title: hidden + ' hidden sheet' + (hidden === 1 ? '' : 's'),
+        detail:'Hidden sheets can be exposed by assistive tech via defined names. Document or remove them. WCAG SC 1.3.1.' });
+    }
+    const images = (contentXML.match(/<draw:image\b/g) || []).length;
+    if (images > 0) {
+      const imagesWithDesc = (contentXML.match(/<svg:desc>[^<]+<\/svg:desc>/g) || []).length
+                          + (contentXML.match(/<svg:title>[^<]+<\/svg:title>/g) || []).length;
+      findings.push(imagesWithDesc >= images
+        ? { status:'PASS', title: images + ' image' + (images === 1 ? '' : 's') + ' — descriptions present', detail:'svg:title / svg:desc found.' }
+        : { status:'FAIL', title: (images - imagesWithDesc) + ' of ' + images + ' images missing description',
+            detail:'Right-click image > Description in LibreOffice Calc. WCAG SC 1.1.1.' });
+    }
+  } else if (kind === 'presentation') {
+    /* ODP — slides, titles, images */
+    const slides = (contentXML.match(/<draw:page\b/g) || []).length;
+    const slideNames = [...contentXML.matchAll(/<draw:page[^>]*draw:name="([^"]+)"/g)].map(m => m[1]);
+    const generic = slideNames.filter(n => /^page\d+$/i.test(n) || /^Slide\d+$/i.test(n));
+    findings.push(slides === 0
+      ? { status:'FAIL', title:'No slides detected', detail:'No <draw:page> elements in content.xml.' }
+      : (generic.length === slides
+          ? { status:'WARN', title: slides + ' slide' + (slides === 1 ? '' : 's') + ' — names look auto-generated',
+              detail:'Slide names: ' + generic.slice(0, 5).join(', ') + (generic.length > 5 ? ', \u2026' : '') + '. Rename each slide to describe its content. WCAG SC 2.4.6.' }
+          : { status:'PASS', title: slides + ' slide' + (slides === 1 ? '' : 's'),
+              detail:'Slide naming detected — verify each slide also has an on-slide title placeholder.' }));
+    const images = (contentXML.match(/<draw:image\b/g) || []).length;
+    if (images > 0) {
+      const imagesWithDesc = (contentXML.match(/<svg:desc>[^<]+<\/svg:desc>/g) || []).length
+                          + (contentXML.match(/<svg:title>[^<]+<\/svg:title>/g) || []).length;
+      findings.push(imagesWithDesc >= images
+        ? { status:'PASS', title: images + ' image' + (images === 1 ? '' : 's') + ' — descriptions present', detail:'svg:title / svg:desc found.' }
+        : { status:'FAIL', title: (images - imagesWithDesc) + ' of ' + images + ' images missing description',
+            detail:'Right-click image > Description in LibreOffice Impress. WCAG SC 1.1.1.' });
+    }
+    findings.push({ status:'INFO', title:'Verify reading order on each slide',
+      detail:'Open View > Navigator and confirm objects are listed in the order you want them announced. There is no programmatic check for this. WCAG SC 1.3.2.' });
+  }
+
+  return findings;
+}
+
+/* ══════════════════════════════════════════════
+   4.2f LEGACY .DOC (Word 97–2003 binary) AUDIT
+   The compound-document binary format cannot be
+   parsed in the browser without a heavy library
+   and rich machine resources. We confirm the file
+   is .doc and instruct the user to convert to
+   .docx for the full audit.
+══════════════════════════════════════════════ */
+async function auditDOC(buffer, filename) {
+  const findings = [];
+  const bytes = new Uint8Array(buffer);
+  /* OLE compound-document magic: D0 CF 11 E0 A1 B1 1A E1 */
+  const isOLE = bytes.length >= 8
+    && bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0
+    && bytes[4] === 0xA1 && bytes[5] === 0xB1 && bytes[6] === 0x1A && bytes[7] === 0xE1;
+  if (!isOLE) {
+    findings.push({ status:'WARN', title:'File extension is .doc but content is not OLE compound-document binary',
+      detail:'It may be a misnamed RTF, HTML or DOCX. Try renaming the extension to match the actual format and re-running the audit.' });
+  } else {
+    findings.push({ status:'INFO', title:'Legacy Word 97–2003 (.doc) binary format detected',
+      detail:'AMASAMYA cannot deeply inspect this format in the browser — the OLE compound-document layout requires a heavy parser. The accessibility status of the file cannot be determined from its bytes alone.' });
+  }
+  findings.push({ status:'FAIL', title:'Convert to .docx for a full audit',
+    detail:'Open the file in Word or LibreOffice Writer and Save As Word Document (.docx). Then re-upload the .docx for the complete heading, alt-text, language, table-header, and hyperlink audit.' });
+  findings.push({ status:'INFO', title:'Manual checks while you convert',
+    detail:'Confirm the document uses Heading styles, every image has alt text, every link has descriptive text, the language is set, and tables have a marked header row.' });
+  return findings;
 }
 
 /* ══════════════════════════════════════════════
