@@ -842,9 +842,34 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 .doc-result-status {
   font-family: var(--mono); font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
 }
-.doc-result-body { flex: 1; }
+.doc-result-body { flex: 1; min-width: 0; }
 .doc-result-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
 .doc-result-detail { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+.doc-result-fix {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(0, 102, 204, 0.06);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.55;
+}
+.doc-result-fix-label {
+  font-weight: 700; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--accent); margin-right: 6px;
+}
+.doc-result-refs {
+  margin-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+.doc-result-refs-label {
+  font-weight: 700; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-2); margin-right: 6px;
+}
+.doc-result-refs a { color: var(--accent); text-decoration: underline; margin-right: 10px; }
+.doc-result-refs a:hover, .doc-result-refs a:focus { text-decoration: none; outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ════════════════════════════════════════════════════════
    SETTINGS
@@ -3084,9 +3109,156 @@ async function auditPDF(arrayBuffer, filename) {
   return findings;
 }
 
+/* ──────────────────────────────────────────────────────────────
+   DOCUMENT-AUDIT KNOWLEDGE BASE
+   Maps each finding to actionable fix guidance + reference links.
+   Patterns are matched against the finding title (case-insensitive
+   substring) — first match wins, so list more-specific patterns first.
+   This keeps the audit functions clean — they only declare what's
+   wrong; the renderer attaches "how to fix" + sources from one place.
+   ────────────────────────────────────────────────────────────── */
+const DOC_KB = [
+  /* ─── PDF & DOCX shared ─── */
+  { match:/title (missing|set)/i,
+    fix:'PDF: in Acrobat, File > Document Properties > Description tab, fill the Title field, then File > Properties > Initial View, set "Show: Document Title". Word: File > Info > Properties > Title; on save, ensure "Document properties and personal information" is included.',
+    refs:[
+      ['WCAG 2.4.2 Page Titled','https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html'],
+      ['Adobe — Set PDF document properties','https://helpx.adobe.com/acrobat/using/pdf-properties-metadata.html']
+    ]},
+  { match:/(language (missing|declared|set|in settings|not declared))/i,
+    fix:'PDF: Acrobat Tools > Accessibility > Set Reading Language. Word: Review > Language > Set Proofing Language and tick "Detect language automatically" off; then File > Options > Language to set the editing language.',
+    refs:[
+      ['WCAG 3.1.1 Language of Page','https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html'],
+      ['Microsoft — Make Word documents accessible','https://support.microsoft.com/office/make-your-word-documents-accessible-d9bf3683-87ac-47ea-b91a-78dcacb3c66d']
+    ]},
+  /* ─── PDF-specific ─── */
+  { match:/document is (not )?tagged|structure tree/i,
+    fix:'PDF: Acrobat Pro > Tools > Accessibility > Autotag Document, then manually correct tags in the Tags panel. Better: regenerate the PDF from the source (Word > Save As PDF with "Document structure tags for accessibility" enabled, or InDesign > Export with tagged PDF on).',
+    refs:[
+      ['WCAG 1.3.1 Info & Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['PDF/UA-1 (ISO 14289-1)','https://www.iso.org/standard/64599.html'],
+      ['Adobe — Create accessible PDFs','https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html']
+    ]},
+  { match:/heading tag|no heading tags/i,
+    fix:'PDF: open the Tags panel, change visually-large paragraphs to <H1>…<H6> tags. Source-first: rebuild the PDF from a Word document that uses Heading 1/2/3 styles, not just bold text.',
+    refs:[
+      ['WCAG 2.4.6 Headings & Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html'],
+      ['WebAIM — Semantic structure','https://webaim.org/techniques/semanticstructure/']
+    ]},
+  { match:/figures? missing alt|figure tags/i,
+    fix:'PDF: Acrobat Tags panel > right-click each <Figure> > Properties > Alternate Text. Decorative images: change the tag to <Artifact> so screen readers skip them. Source-first: add alt text in Word (right-click image > View Alt Text) before exporting.',
+    refs:[
+      ['WCAG 1.1.1 Non-text Content','https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html'],
+      ['Adobe — Add alt text to images','https://helpx.adobe.com/acrobat/using/edit-document-structure-content-tags.html']
+    ]},
+  { match:/(tables? with 0 TH|TH cell)/i,
+    fix:'PDF: in the Tags tree, change header data cells from <TD> to <TH> and set Scope (Row/Column) via Properties. Source-first: in Word, Table Design > tick "Header Row", then Table Properties > Row > "Repeat as header row at the top of each page".',
+    refs:[
+      ['WCAG 1.3.1 Info & Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['WebAIM — Creating accessible tables','https://webaim.org/techniques/tables/data']
+    ]},
+  { match:/bookmark|outline/i,
+    fix:'PDF: Acrobat View > Show/Hide > Navigation Panes > Bookmarks; right-click > New Bookmarks From Structure. Source-first: in Word, use heading styles, then on Save As PDF tick Options > "Create bookmarks using: Headings".',
+    refs:[
+      ['PDF/UA-1 §7.17 Navigation','https://www.iso.org/standard/64599.html'],
+      ['Adobe — Bookmarks in PDFs','https://helpx.adobe.com/acrobat/using/page-thumbnails-bookmarks-pdfs.html']
+    ]},
+  { match:/permissions|content extraction/i,
+    fix:'PDF: Acrobat File > Properties > Security tab. If a Security Method is set, either remove it (Security Method = "No Security") or, when password-protected, edit the permissions password and tick "Enable copying of text, images and other content" plus "Enable text access for screen reader devices for the visually impaired".',
+    refs:[
+      ['Section 508 §1194.22(m)','https://www.access-board.gov/ict/'],
+      ['Adobe — PDF security permissions','https://helpx.adobe.com/acrobat/using/securing-pdfs-passwords.html']
+    ]},
+  { match:/tagged link|form element/i,
+    fix:'PDF links: select link text in the Content panel > right-click > Create Link, then set Tag = <Link> with descriptive Alt. Form fields: Tools > Prepare Form > right-click each field > Properties > General tab > fill Tooltip — that becomes the screen reader label.',
+    refs:[
+      ['WCAG 2.4.4 Link Purpose','https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context.html'],
+      ['WCAG 3.3.2 Labels or Instructions','https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html']
+    ]},
+  /* ─── DOCX-specific ─── */
+  { match:/word heading styles|heading style paragraphs/i,
+    fix:'In Word, select each section heading and apply the correct style from Home > Styles (Heading 1, Heading 2, …). Use the Navigation Pane (View > Navigation Pane) to verify the resulting outline before saving.',
+    refs:[
+      ['WCAG 1.3.1 Info & Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['Microsoft — Apply styles in Word','https://support.microsoft.com/office/customize-or-create-new-styles-d38d6e47-f6fc-48eb-a607-1eb120dec563']
+    ]},
+  { match:/heading-level skip|heading hierarchy|heading 1 in document|heading 1 paragraphs/i,
+    fix:'Open View > Navigation Pane in Word. Demote/promote headings (Tab / Shift+Tab inside the pane, or change the style) so levels never skip — H1 → H2 → H3 only. Use exactly one Heading 1 per document.',
+    refs:[
+      ['WCAG 2.4.6 Headings & Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html'],
+      ['WebAIM — Document accessibility','https://webaim.org/techniques/word/']
+    ]},
+  { match:/non-descriptive|hyperlink/i,
+    fix:'Right-click each link in Word > Edit Hyperlink > set "Text to display" to a phrase that describes the destination (e.g. "WCAG 2.2 quick reference") instead of "click here", "more", or a bare URL.',
+    refs:[
+      ['WCAG 2.4.4 Link Purpose','https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context.html'],
+      ['WCAG 2.4.9 Link Purpose (Link Only)','https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-link-only.html']
+    ]},
+  { match:/image|alt text/i,
+    fix:'In Word, right-click each image > "View Alt Text" (or Picture Format > Alt Text). Either type a meaningful description, or tick "Mark as decorative" if the image carries no information.',
+    refs:[
+      ['WCAG 1.1.1 Non-text Content','https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html'],
+      ['Microsoft — Add alt text','https://support.microsoft.com/office/add-alternative-text-to-a-shape-picture-chart-smartart-graphic-or-other-object-44989b2a-903c-4d9a-b742-6a75b451c669']
+    ]},
+  { match:/header row|tables/i,
+    fix:'Click inside the table in Word > Table Design > tick "Header Row" and "First Column" if applicable; then Layout > Properties > Row > "Repeat as header row at the top of each page". Avoid merged cells in data tables.',
+    refs:[
+      ['WCAG 1.3.1 Info & Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['Microsoft — Make tables accessible','https://support.microsoft.com/office/video-create-accessible-tables-in-word-cb464015-59dc-46a0-ac01-6217c62210e5']
+    ]},
+  { match:/manual bullet|list style references/i,
+    fix:'Select the bullet/numbered text in Word and apply Home > Bullets or Numbering (or the List Paragraph style). Delete any typed •, ‐, –, — characters used as bullets.',
+    refs:[
+      ['WCAG 1.3.1 Info & Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html']
+    ]},
+  { match:/text box/i,
+    fix:'Cut the text out of the text box and paste it inline into the main document body. Then delete the empty text box. If you need a callout look, apply paragraph borders/shading instead.',
+    refs:[
+      ['WCAG 1.3.2 Meaningful Sequence','https://www.w3.org/WAI/WCAG22/Understanding/meaningful-sequence.html'],
+      ['Microsoft — Reading order in Word','https://support.microsoft.com/office/improve-accessibility-with-the-accessibility-checker-a16f6de0-2f39-4a2b-8bd8-5ad801426c7f']
+    ]},
+  { match:/bookmark|navigation pane/i,
+    fix:'In Word, References > Table of Contents > Automatic Table; this generates navigable bookmarks from your heading styles. Or Insert > Bookmark to add a named anchor at the cursor.',
+    refs:[
+      ['WCAG 2.4.5 Multiple Ways','https://www.w3.org/WAI/WCAG22/Understanding/multiple-ways.html']
+    ]},
+  { match:/text colour|colour|color/i,
+    fix:'Use a contrast checker (e.g. WebAIM Contrast Checker) on every custom colour against its background. Aim for ≥ 4.5:1 for body text and ≥ 3:1 for large text (≥ 18pt regular / 14pt bold). Reset to "Automatic" colour where possible.',
+    refs:[
+      ['WCAG 1.4.3 Contrast (Minimum)','https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html'],
+      ['WebAIM Contrast Checker','https://webaim.org/resources/contrastchecker/']
+    ]},
+  { match:/highlight/i,
+    fix:'For every highlighted run, ensure the same meaning is also expressed in text (e.g. add the word "important" or wrap in **bold**). Or remove the highlight if it is purely decorative.',
+    refs:[
+      ['WCAG 1.4.1 Use of Color','https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html']
+    ]},
+  /* ─── Failure / parser ─── */
+  { match:/PDF.js failed|could not be parsed|Could not read document XML/i,
+    fix:'If the file is password-protected, remove the password (Acrobat: File > Properties > Security > "No Security"). If it is corrupt, re-export from the source application. If your network is restricted, allow cdnjs.cloudflare.com so PDF.js can load.',
+    refs:[
+      ['Adobe — Open password-protected PDFs','https://helpx.adobe.com/acrobat/using/securing-pdfs-passwords.html']
+    ]}
+];
+
+function enrichFinding(f) {
+  if (f.fix || f.refs) return f;            /* respect explicit values */
+  for (const entry of DOC_KB) {
+    if (entry.match.test(f.title)) {
+      f.fix  = entry.fix;
+      f.refs = entry.refs;
+      return f;
+    }
+  }
+  return f;
+}
+
 function renderDocResults(results, filename) {
   const list = $('doc-results-list');
   list.innerHTML = '';
+
+  /* Augment with fix + refs from the knowledge base. */
+  results.forEach(enrichFinding);
 
   const fail = results.filter(r=>r.status==='FAIL').length;
   const warn = results.filter(r=>r.status==='WARN').length;
@@ -3094,7 +3266,8 @@ function renderDocResults(results, filename) {
   const summary = document.createElement('div');
   summary.className = 'notice';
   summary.innerHTML = '<strong>' + escHtml(filename) + '</strong> — ' +
-    fail + ' failures, ' + warn + ' warnings, ' + results.length + ' total checks.';
+    fail + ' failures, ' + warn + ' warnings, ' + results.length + ' total checks. ' +
+    'Each failure or warning includes a "How to fix" hint and reference links.';
   list.appendChild(summary);
 
   results.forEach(r => {
@@ -3102,11 +3275,25 @@ function renderDocResults(results, filename) {
     item.className = 'doc-result-item';
     item.setAttribute('role','listitem');
     const colour = {FAIL:'var(--red)',WARN:'var(--amber)',PASS:'var(--green)',INFO:'var(--accent)'}[r.status]||'var(--text-dim)';
+
+    /* Show fix + refs only when present (skips PASS rows that have no KB entry). */
+    const fixHtml = r.fix
+      ? '<div class="doc-result-fix"><span class="doc-result-fix-label">How to fix</span>' + escHtml(r.fix) + '</div>'
+      : '';
+    const refsHtml = (r.refs && r.refs.length)
+      ? '<div class="doc-result-refs"><span class="doc-result-refs-label">References</span>' +
+        r.refs.map(([label, url]) =>
+          '<a href="' + escHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escHtml(label) + ' &#8599;</a>'
+        ).join('') +
+        '</div>'
+      : '';
+
     item.innerHTML =
       '<div class="doc-result-status" style="color:' + colour + ';">' + escHtml(r.status) + '</div>' +
       '<div class="doc-result-body">' +
         '<div class="doc-result-title">' + escHtml(r.title) + '</div>' +
         '<div class="doc-result-detail">' + escHtml(r.detail) + '</div>' +
+        fixHtml + refsHtml +
       '</div>';
     list.appendChild(item);
   });
@@ -3124,19 +3311,34 @@ function exportDocReport(results, filename, format) {
   const warn    = results.filter(r=>r.status==='WARN').length;
   let content, mime, ext;
 
+  /* Make sure exported rows carry the same fix + refs that on-screen ones do. */
+  results.forEach(enrichFinding);
+
   if (format === 'html') {
-    const rows = results.map(r =>
-      '<tr><td>' + escHtml(r.status) + '</td>' +
-      '<td>' + escHtml(r.title) + '</td>' +
-      '<td>' + escHtml(r.detail) + '</td></tr>'
-    ).join('');
+    const rows = results.map(r => {
+      const refsHtml = (r.refs && r.refs.length)
+        ? '<div style="margin-top:6px;font-size:.78rem;">' +
+          '<strong>References:</strong> ' +
+          r.refs.map(([label, url]) =>
+            '<a href="' + escHtml(url) + '" style="color:#003366;margin-right:10px;">' + escHtml(label) + '</a>'
+          ).join('') +
+          '</div>'
+        : '';
+      const fixHtml = r.fix
+        ? '<div style="margin-top:6px;padding:6px 8px;background:#eef4fa;border-left:3px solid #003366;font-size:.82rem;">' +
+          '<strong>How to fix:</strong> ' + escHtml(r.fix) + '</div>'
+        : '';
+      return '<tr><td>' + escHtml(r.status) + '</td>' +
+        '<td>' + escHtml(r.title) + '</td>' +
+        '<td>' + escHtml(r.detail) + fixHtml + refsHtml + '</td></tr>';
+    }).join('');
     content = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
       '<title>Document Audit — ' + escHtml(filename) + '</title>' +
-      '<style>body{font-family:Arial,sans-serif;padding:24px;}table{border-collapse:collapse;width:100%;font-size:.85rem;}th{background:#003366;color:#fff;padding:8px;}td{padding:8px;border-bottom:1px solid #dde;}</style>' +
+      '<style>body{font-family:Arial,sans-serif;padding:24px;color:#1a1a1a;}table{border-collapse:collapse;width:100%;font-size:.85rem;}th{background:#003366;color:#fff;padding:8px;text-align:left;}td{padding:10px 8px;border-bottom:1px solid #dde;vertical-align:top;}a{color:#003366;}</style>' +
       '</head><body><h1>Document Accessibility Audit Report</h1>' +
       '<p><strong>File:</strong> ' + escHtml(filename) + ' &nbsp; <strong>Date:</strong> ' + escHtml(dateStr) + '</p>' +
       '<p>Failures: ' + fail + ' &nbsp; Warnings: ' + warn + ' &nbsp; Total: ' + results.length + '</p>' +
-      '<table><thead><tr><th scope="col">Status</th><th scope="col">Check</th><th scope="col">Detail</th></tr></thead><tbody>' +
+      '<table><thead><tr><th scope="col">Status</th><th scope="col">Check</th><th scope="col">Detail, Fix &amp; References</th></tr></thead><tbody>' +
       rows + '</tbody></table>' +
       '<p style="margin-top:24px;font-size:.75rem;color:#666;">AMASAMYA v5.0.0 — AMASAMYA.akhileshmalani.com — Akhilesh Malani</p>' +
       '</body></html>';
@@ -3149,6 +3351,11 @@ function exportDocReport(results, filename, format) {
     results.forEach(r => {
       L.push(r.status + ': ' + r.title);
       L.push('  ' + r.detail);
+      if (r.fix)  L.push('  HOW TO FIX: ' + r.fix);
+      if (r.refs && r.refs.length) {
+        L.push('  REFERENCES:');
+        r.refs.forEach(([label, url]) => L.push('    - ' + label + ': ' + url));
+      }
       L.push('');
     });
     L.push('AMASAMYA v5.0.0 — AMASAMYA.akhileshmalani.com — Akhilesh Malani');
