@@ -24,6 +24,27 @@
   to = "/amasamya/:splat"
   status = 301
 
+# Privacy-policy aliases — Chrome Web Store / Firefox / Edge reviewers (and
+# anyone else) get a direct 200 from any sensible URL. Avoids the "policy
+# link broken/unavailable" enforcement (Purple Nickel) when a stale listing
+# URL targets one of these paths.
+[[redirects]]
+  from = "/privacy"
+  to = "/amasamya/privacy.html"
+  status = 200
+[[redirects]]
+  from = "/privacy.html"
+  to = "/amasamya/privacy.html"
+  status = 200
+[[redirects]]
+  from = "/ama11y/privacy"
+  to = "/amasamya/privacy.html"
+  status = 200
+[[redirects]]
+  from = "/amasamya/privacy"
+  to = "/amasamya/privacy.html"
+  status = 200
+
 # Redirect old orphaned bookmarklet installer to new location
 [[redirects]]
   from = "/AMASAMYA_Bookmarklet_Installer.html"
