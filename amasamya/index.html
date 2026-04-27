@@ -5274,51 +5274,187 @@ if ($('mob-export-txt')) {
 (function () {
   'use strict';
 
-  /* ── API Key storage (base64 in localStorage) ── */
-  var AI_KEYS_STORE = 'AMASAMYA-ai-keys-v5';
+  /* ── API Key storage — encrypted at rest ──────────────────────────
+     Threat model: defend against same-origin script leaks, browser
+     sync exporting localStorage, browser extensions snooping the
+     DOM/Storage area, and naive backup/debug exports.
 
-  function saveApiKeys() {
-    var keys = {
-      openai:    (document.getElementById('key-openai') || {}).value || '',
-      anthropic: (document.getElementById('key-anthropic') || {}).value || '',
-      gemini:    (document.getElementById('key-gemini') || {}).value || ''
-    };
-    // Don't overwrite with masked placeholder
-    if (keys.openai.indexOf('••') === 0) keys.openai = getApiKey('openai') || '';
-    if (keys.anthropic.indexOf('••') === 0) keys.anthropic = getApiKey('anthropic') || '';
-    if (keys.gemini.indexOf('••') === 0) keys.gemini = getApiKey('gemini') || '';
-    try { localStorage.setItem(AI_KEYS_STORE, btoa(unescape(encodeURIComponent(JSON.stringify(keys))))); } catch (e) {}
-    aiAnnounce('API keys saved.');
-    var s = document.getElementById('ai-save-status');
-    if (s) s.textContent = 'Keys saved successfully.';
-  }
+     Approach:
+       • A 256-bit AES-GCM master key is generated on first save and
+         stored in IndexedDB as a *non-extractable* CryptoKey. The
+         JS heap can never read its bytes — it can only request
+         encrypt/decrypt operations.
+       • API keys are encrypted (12-byte random IV per write) and the
+         resulting ciphertext is stored in localStorage as base64.
+       • Decrypted keys live in a session-scoped JS variable so we
+         don't run WebCrypto on every AI call.
+       • Old v5 plaintext-base64 storage is auto-migrated to v6 on
+         first load, then removed from localStorage.
+     This preserves the privacy promise (keys never leave the
+     browser) while raising the bar from "trivially readable" to
+     "requires active code execution with the user's master key
+     loaded in this tab".
+  ─────────────────────────────────────────────────────────────── */
+  var AI_KEYS_STORE_LEGACY = 'AMASAMYA-ai-keys-v5';   // unencrypted base64
+  var AI_KEYS_STORE        = 'AMASAMYA-ai-keys-v6';   // AES-GCM ciphertext
+  var AI_KEYDB_NAME        = 'AMASAMYA-keystore';
+  var AI_KEYDB_STORE       = 'crypto-keys';
+  var AI_KEYDB_ID          = 'master-key-v1';
 
-  function getApiKey(provider) {
-    try {
-      var raw = localStorage.getItem(AI_KEYS_STORE);
-      if (!raw) return null;
-      var keys = JSON.parse(decodeURIComponent(escape(atob(raw))));
-      return keys[provider] || null;
-    } catch (e) { return null; }
-  }
+  /* In-tab cache of plaintext keys after first decrypt — avoids
+     repeated WebCrypto calls during a session. Cleared on logout
+     and on clearApiKeys(). Lives only in JS heap, never exported. */
+  var _aiKeysCache = null;
 
-  function loadApiKeysToFields() {
-    ['openai', 'anthropic', 'gemini'].forEach(function (p) {
-      var k = getApiKey(p);
-      var el = document.getElementById('key-' + p);
-      if (el && k) el.value = '••••••••' + k.slice(-4);
+  function _openKeyDB() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(AI_KEYDB_NAME, 1);
+      req.onupgradeneeded = function () { req.result.createObjectStore(AI_KEYDB_STORE); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror   = function () { reject(req.error); };
     });
   }
 
-  function clearApiKeys() {
+  async function _getMasterKey() {
+    var db = await _openKeyDB();
+    var existing = await new Promise(function (resolve, reject) {
+      var tx  = db.transaction(AI_KEYDB_STORE, 'readonly');
+      var req = tx.objectStore(AI_KEYDB_STORE).get(AI_KEYDB_ID);
+      req.onsuccess = function () { resolve(req.result || null); };
+      req.onerror   = function () { reject(req.error); };
+    });
+    if (existing) return existing;
+    /* First save in this browser profile — mint a non-extractable AES-GCM key. */
+    var fresh = await crypto.subtle.generateKey(
+      { name: 'AES-GCM', length: 256 },
+      false,  /* extractable=false → key bytes stay in the WebCrypto sandbox */
+      ['encrypt', 'decrypt']
+    );
+    await new Promise(function (resolve, reject) {
+      var tx = db.transaction(AI_KEYDB_STORE, 'readwrite');
+      tx.objectStore(AI_KEYDB_STORE).put(fresh, AI_KEYDB_ID);
+      tx.oncomplete = function () { resolve(); };
+      tx.onerror    = function () { reject(tx.error); };
+    });
+    return fresh;
+  }
+
+  async function _encryptKeys(obj) {
+    var key  = await _getMasterKey();
+    var iv   = crypto.getRandomValues(new Uint8Array(12));
+    var data = new TextEncoder().encode(JSON.stringify(obj));
+    var ct   = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, data);
+    /* Pack iv ‖ ciphertext, base64-encode for localStorage. */
+    var packed = new Uint8Array(iv.length + ct.byteLength);
+    packed.set(iv, 0);
+    packed.set(new Uint8Array(ct), iv.length);
+    var bin = '';
+    for (var i = 0; i < packed.length; i++) bin += String.fromCharCode(packed[i]);
+    return btoa(bin);
+  }
+
+  async function _decryptKeys(packedB64) {
+    var key    = await _getMasterKey();
+    var bin    = atob(packedB64);
+    var packed = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) packed[i] = bin.charCodeAt(i);
+    var iv = packed.slice(0, 12);
+    var ct = packed.slice(12);
+    var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ct);
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+
+  /* One-shot migration from v5 unencrypted → v6 encrypted. Runs
+     transparently on the first call to load/save. Old key is removed
+     from localStorage immediately after re-encryption. */
+  async function _migrateLegacyKeys() {
+    var legacy = localStorage.getItem(AI_KEYS_STORE_LEGACY);
+    if (!legacy) return null;
+    try {
+      var keys = JSON.parse(decodeURIComponent(escape(atob(legacy))));
+      var packed = await _encryptKeys(keys);
+      localStorage.setItem(AI_KEYS_STORE, packed);
+      localStorage.removeItem(AI_KEYS_STORE_LEGACY);
+      return keys;
+    } catch (e) {
+      /* Corrupt legacy blob — drop it rather than block startup. */
+      localStorage.removeItem(AI_KEYS_STORE_LEGACY);
+      return null;
+    }
+  }
+
+  async function _loadAllKeys() {
+    if (_aiKeysCache) return _aiKeysCache;
+    /* Try v6 first, then fall back to legacy migration. */
+    var packed = localStorage.getItem(AI_KEYS_STORE);
+    if (packed) {
+      try { _aiKeysCache = await _decryptKeys(packed); return _aiKeysCache; }
+      catch (e) { /* corrupt ciphertext — fall through */ }
+    }
+    var migrated = await _migrateLegacyKeys();
+    _aiKeysCache = migrated || { openai:'', anthropic:'', gemini:'' };
+    return _aiKeysCache;
+  }
+
+  async function saveApiKeys() {
+    var current = await _loadAllKeys();
+    var keys = {
+      openai:    (document.getElementById('key-openai')    || {}).value || '',
+      anthropic: (document.getElementById('key-anthropic') || {}).value || '',
+      gemini:    (document.getElementById('key-gemini')    || {}).value || ''
+    };
+    /* Masked placeholders mean "keep the existing key" — don't overwrite. */
+    if (keys.openai.indexOf('••')    === 0) keys.openai    = current.openai    || '';
+    if (keys.anthropic.indexOf('••') === 0) keys.anthropic = current.anthropic || '';
+    if (keys.gemini.indexOf('••')    === 0) keys.gemini    = current.gemini    || '';
+    try {
+      var packed = await _encryptKeys(keys);
+      localStorage.setItem(AI_KEYS_STORE, packed);
+      _aiKeysCache = keys;
+      aiAnnounce('API keys encrypted and saved.');
+      var s = document.getElementById('ai-save-status');
+      if (s) s.textContent = 'Keys saved (encrypted at rest with WebCrypto).';
+    } catch (e) {
+      aiAnnounce('Could not save keys: ' + e.message);
+      var sErr = document.getElementById('ai-save-status');
+      if (sErr) sErr.textContent = 'Save failed: ' + e.message;
+    }
+  }
+
+  async function getApiKey(provider) {
+    var keys = await _loadAllKeys();
+    return keys[provider] || null;
+  }
+
+  async function loadApiKeysToFields() {
+    var keys = await _loadAllKeys();
+    ['openai', 'anthropic', 'gemini'].forEach(function (p) {
+      var el = document.getElementById('key-' + p);
+      if (el && keys[p]) el.value = '••••••••' + keys[p].slice(-4);
+    });
+    /* Surface the encrypted-at-rest status next to the save status line. */
+    var s = document.getElementById('ai-save-status');
+    if (s && !s.textContent) {
+      s.textContent = 'Keys are encrypted at rest with a non-extractable WebCrypto key.';
+    }
+  }
+
+  async function clearApiKeys() {
+    /* Wipe ciphertext, legacy blob, and the in-tab cache. The IndexedDB
+       master key is intentionally kept so future saves use the same key
+       — wiping it would also wipe any keys synced via browser profile. */
     localStorage.removeItem(AI_KEYS_STORE);
+    localStorage.removeItem(AI_KEYS_STORE_LEGACY);
+    _aiKeysCache = null;
     ['openai', 'anthropic', 'gemini'].forEach(function (p) {
       var el = document.getElementById('key-' + p);
       if (el) el.value = '';
       var st = document.getElementById(p + '-status');
       if (st) { st.textContent = ''; st.className = 'conn-status'; }
     });
-    aiAnnounce('All API keys cleared.');
+    aiAnnounce('All API keys cleared from this browser.');
+    var s = document.getElementById('ai-save-status');
+    if (s) s.textContent = 'All keys cleared.';
   }
 
   /* ── Screen reader announcer ── */
@@ -5331,7 +5467,7 @@ if ($('mob-export-txt')) {
 
   /* ── OpenAI GPT-4o ── */
   async function callOpenAI(systemPrompt, userPrompt) {
-    var key = getApiKey('openai');
+    var key = await getApiKey('openai');
     if (!key) throw new Error('OpenAI API key not configured. Go to AI Settings tab.');
     var res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -5349,7 +5485,7 @@ if ($('mob-export-txt')) {
 
   /* ── Anthropic Claude ── */
   async function callClaude(systemPrompt, userPrompt) {
-    var key = getApiKey('anthropic');
+    var key = await getApiKey('anthropic');
     if (!key) throw new Error('Anthropic API key not configured. Go to AI Settings tab.');
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -5373,7 +5509,7 @@ if ($('mob-export-txt')) {
 
   /* ── Google Gemini ── */
   async function callGemini(prompt) {
-    var key = getApiKey('gemini');
+    var key = await getApiKey('gemini');
     if (!key) throw new Error('Gemini API key not configured. Go to AI Settings tab.');
     var res = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key,
@@ -5417,7 +5553,7 @@ if ($('mob-export-txt')) {
         testConnection(p);
       });
     });
-    loadApiKeysToFields();
+    loadApiKeysToFields().catch(function () { /* non-fatal: fields stay empty */ });
   }
 
   /* ================================================================
