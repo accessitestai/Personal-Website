@@ -18,9 +18,20 @@
   status = 200
   force = true
 
-# Redirect old /ama11y/ paths on apex domain to new /amasamya/ paths (backward compat)
+# Redirect old /ama11y/ paths on apex domain to new /amasamya/ paths (backward compat).
+# Netlify path matching is case-sensitive, so add the common uppercase variants
+# explicitly — Chrome Web Store listings created during the AMA11Y branding era
+# may reference /AMA11Y/ with capitals and would otherwise 404.
 [[redirects]]
   from = "/ama11y/*"
+  to = "/amasamya/:splat"
+  status = 301
+[[redirects]]
+  from = "/AMA11Y/*"
+  to = "/amasamya/:splat"
+  status = 301
+[[redirects]]
+  from = "/Ama11y/*"
   to = "/amasamya/:splat"
   status = 301
 
