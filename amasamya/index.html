@@ -111,6 +111,25 @@ body {
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
 }
 
+/* ── Error toast (used by global unhandledrejection / onerror) ── */
+#err-toast {
+  position: fixed; right: 16px; bottom: 16px; z-index: 10000;
+  max-width: 420px; padding: 12px 16px;
+  background: #7a1f1f; color: #fff;
+  border-left: 4px solid #ffb4b4;
+  border-radius: var(--r);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+  font-size: 14px; line-height: 1.45;
+  display: none;
+}
+#err-toast.show { display: block; }
+#err-toast button {
+  background: transparent; color: #fff; border: 1px solid #fff;
+  border-radius: 4px; padding: 2px 8px; margin-left: 12px;
+  cursor: pointer; font-size: 12px;
+}
+#err-toast button:focus { outline: 2px solid #fff; outline-offset: 2px; }
+
 /* ════════════════════════════════════════════════════════
    VIEWS
 ════════════════════════════════════════════════════════ */
@@ -948,6 +967,18 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   font-family: var(--mono); font-size: 14px;
   color: var(--primary-text); letter-spacing: 0.06em;
 }
+.loading-detail {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--muted-text, #555); letter-spacing: 0.04em;
+  max-width: 480px; text-align: center; min-height: 1em;
+}
+#loading-cancel {
+  margin-top: 4px; padding: 6px 18px;
+  background: var(--primary, #003366); color: #fff;
+  border: 0; border-radius: var(--r);
+  font-family: var(--mono); font-size: 13px; cursor: pointer;
+}
+#loading-cancel:focus { outline: 2px solid var(--accent, #7ec8e3); outline-offset: 2px; }
 .loading-dots::after {
   content: ''; animation: dots 1.4s infinite;
 }
@@ -1216,8 +1247,14 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 
 <a class="skip" href="#main-content">Skip to main content</a>
 <div id="sr-live" aria-live="assertive" aria-atomic="true"></div>
-<div id="loading-overlay" role="status" aria-label="Loading">
-  <div class="loading-text loading-dots">Processing</div>
+<div id="err-toast" role="alert" aria-live="assertive">
+  <span id="err-toast-msg"></span>
+  <button type="button" id="err-toast-dismiss" aria-label="Dismiss error">Dismiss</button>
+</div>
+<div id="loading-overlay" role="status" aria-label="Loading" aria-live="polite">
+  <div class="loading-text loading-dots" id="loading-text">Processing</div>
+  <div class="loading-detail" id="loading-detail"></div>
+  <button type="button" id="loading-cancel" hidden>Cancel</button>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -2194,15 +2231,142 @@ const announce = msg => { const l=$('sr-live'); if(l){l.textContent='';setTimeou
 const show = id => { const el=$(id); if(el) el.style.display='block'; };
 const hide = id => { const el=$(id); if(el) el.style.display='none'; };
 
-/* ── SHA-256 for PIN hashing ── */
+/* ── Global error surface ──────────────────────────────────────────
+   Catches anything that escapes a try/catch — async rejections,
+   uncaught throws, parser blow-ups inside requestAnimationFrame
+   callbacks, etc. Shows a dismissable toast + announces to AT.
+   Without this, users hit "Analyze" and the tab silently dead-ends. */
+let __errToastTimer = null;
+function showErrorToast(message) {
+  const t = $('err-toast'), m = $('err-toast-msg');
+  if (!t || !m) { console.error('[AMASAMYA error]', message); return; }
+  m.textContent = message;
+  t.classList.add('show');
+  announce('Error: ' + message);
+  clearTimeout(__errToastTimer);
+  __errToastTimer = setTimeout(() => t.classList.remove('show'), 8000);
+}
+function __dismissErrToast() {
+  const t = $('err-toast');
+  if (t) t.classList.remove('show');
+  clearTimeout(__errToastTimer);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = $('err-toast-dismiss');
+  if (btn) btn.addEventListener('click', __dismissErrToast);
+});
+/* Escape dismisses the error toast for keyboard users. Doesn't move focus
+   into the toast on appearance (would be hostile mid-task) — Tab still
+   reaches the Dismiss button when the user is ready. */
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') {
+    const t = $('err-toast');
+    if (t && t.classList.contains('show')) {
+      __dismissErrToast();
+      ev.stopPropagation();
+    }
+  }
+});
+window.addEventListener('unhandledrejection', ev => {
+  const reason = ev.reason;
+  const msg = (reason && (reason.message || reason.toString())) || 'Unknown async error';
+  /* Filter aborts — those are intentional (e.g. audit timeout). */
+  if (reason && (reason.name === 'AbortError' || /aborted/i.test(msg))) return;
+  showErrorToast(msg);
+  console.error('[AMASAMYA unhandledrejection]', reason);
+});
+window.addEventListener('error', ev => {
+  /* Resource load errors (img/script 404) bubble here as ErrorEvent
+     with no .error — skip those, they have their own UX. */
+  if (!ev.error && !ev.message) return;
+  if (ev.target && ev.target !== window) return;
+  showErrorToast(ev.message || (ev.error && ev.error.message) || 'Unexpected error');
+  console.error('[AMASAMYA error]', ev.error || ev.message);
+});
+
+/* ── SHA-256 (legacy — kept for backward-compat reads only) ── */
 async function sha256(str) {
   const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
+/* ── PIN hashing — PBKDF2-SHA256 with a 16-byte per-install salt ──
+   Bare SHA-256 of an 8-digit PIN is brute-forceable in milliseconds.
+   PBKDF2 with 200k iterations + a per-install salt makes an offline
+   attack on a stolen localStorage dump take meaningful time, and
+   makes precomputed rainbow tables useless (the salt is unique per
+   install).
+
+   Storage format (KEY_PIN_V2):  "v2:<base64-salt>:<base64-hash>"  */
+const PIN_PBKDF2_ITERS = 200000;
+const PIN_SALT_BYTES   = 16;
+const PIN_HASH_BYTES   = 32;
+
+function _b64FromBytes(u8) {
+  let s = ''; for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+  return btoa(s);
+}
+function _bytesFromB64(b64) {
+  const bin = atob(b64); const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+async function _pbkdf2Pin(pin, saltBytes) {
+  const baseKey = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin),
+    { name: 'PBKDF2' }, false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: saltBytes, iterations: PIN_PBKDF2_ITERS, hash: 'SHA-256' },
+    baseKey, PIN_HASH_BYTES * 8
+  );
+  return new Uint8Array(bits);
+}
+async function hashPin(pin) {
+  const salt = crypto.getRandomValues(new Uint8Array(PIN_SALT_BYTES));
+  const hash = await _pbkdf2Pin(pin, salt);
+  return 'v2:' + _b64FromBytes(salt) + ':' + _b64FromBytes(hash);
+}
+/* Best-effort constant-time byte comparison — keeps a remote timing
+   probe from learning hash bytes one at a time. */
+function _ctEquals(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+async function verifyPin(pin, stored) {
+  if (!stored) return false;
+  if (stored.indexOf('v2:') === 0) {
+    const parts = stored.split(':');
+    if (parts.length !== 3) return false;
+    const salt  = _bytesFromB64(parts[1]);
+    const hash  = _bytesFromB64(parts[2]);
+    const probe = await _pbkdf2Pin(pin, salt);
+    return _ctEquals(hash, probe);
+  }
+  /* Legacy v1 — bare hex-encoded SHA-256. Verify against the old
+     algorithm so existing users can still sign in; submitPin will
+     transparently re-hash with PBKDF2 on success. */
+  const legacy = await sha256(pin);
+  return legacy === stored;
+}
+
 /* ── Storage keys ── */
-const KEY_PIN      = 'AMASAMYA_pin_hash';
+const KEY_PIN      = 'AMASAMYA_pin_hash';     /* legacy v1 — read-only */
+const KEY_PIN_V2   = 'AMASAMYA_pin_hash_v2';
 const KEY_SESSIONS = 'AMASAMYA_sessions';
+
+function getStoredPin() {
+  return localStorage.getItem(KEY_PIN_V2) || localStorage.getItem(KEY_PIN) || null;
+}
+async function savePin(pin) {
+  const stored = await hashPin(pin);
+  localStorage.setItem(KEY_PIN_V2, stored);
+  /* Wipe the legacy unsalted hash so a stolen-disk attacker can't
+     attack the weaker representation. */
+  localStorage.removeItem(KEY_PIN);
+}
 
 /* ── Session management ── */
 function getSessions() {
@@ -2404,8 +2568,7 @@ $('setup-btn').addEventListener('click', async () => {
     return;
   }
 
-  const hash = await sha256(p1);
-  localStorage.setItem(KEY_PIN, hash);
+  await savePin(p1);
   $('setup-pin-1').value = '';
   $('setup-pin-2').value = '';
   announce('PIN set successfully. Signing you in.');
@@ -2451,11 +2614,20 @@ async function submitPin() {
     announce('PIN must be at least 4 digits.');
     return;
   }
-  const hash    = await sha256(pinBuffer);
-  const stored  = localStorage.getItem(KEY_PIN);
+  const stored  = getStoredPin();
+  const isLegacy = stored && stored.indexOf('v2:') !== 0;
+  const ok = await verifyPin(pinBuffer, stored);
+  const enteredPin = pinBuffer;
   pinBuffer = '';
   updateDots();
-  if (hash === stored) {
+  if (ok) {
+    /* Transparent upgrade: if we just verified against the legacy
+       unsalted SHA-256, re-hash with PBKDF2 + salt and replace the
+       stored value. User notices nothing. */
+    if (isLegacy) {
+      try { await savePin(enteredPin); }
+      catch (e) { console.warn('[AMASAMYA] PIN upgrade failed', e); }
+    }
     $('login-status').textContent = '';
     announce('PIN accepted. Entering AMASAMYA platform.');
     enterApp();
@@ -2504,7 +2676,13 @@ function enterApp() {
 $('sign-out-btn').addEventListener('click', () => {
   announce('Signed out.');
   showView('view-login');
-  setTimeout(() => { clearPin(); }, 100);
+  setTimeout(() => {
+    clearPin();
+    /* Restore focus to the PIN input so keyboard users can immediately
+       re-authenticate without hunting for a new entry point. */
+    const pin = $('sr-pin-input');
+    if (pin) pin.focus();
+  }, 100);
 });
 
 /* ══════════════════════════════════════════════
@@ -2893,6 +3071,29 @@ const DOC_AUDIT_DISPATCH = {
   odp : { label:'OpenDocument Presentation',run: (buf, name) => auditODF(buf, name, 'presentation') }
 };
 
+/* ── Document audit timeout ──────────────────────────────────────
+   Absolute ceiling for ANY parser to finish. Beyond this we assume
+   the file is pathological (zip-bomb, malformed PDF that walks the
+   xref forever, etc.) and abort rather than freeze the tab. The
+   per-format engines are pure-JS and synchronous between awaits, so
+   this can't actually pre-empt a tight loop — but it covers the
+   common case where a parser is awaiting on something (DecompressionStream,
+   PDF.js worker) that never resolves. */
+const DOC_AUDIT_TIMEOUT_MS = 60000;
+
+let __docAuditCancelled = false;
+function __setLoadingProgress(label, detail, cancellable) {
+  const t = $('loading-text'), d = $('loading-detail'), c = $('loading-cancel');
+  if (t) t.textContent = label || 'Processing';
+  if (d) d.textContent = detail || '';
+  if (c) c.hidden = !cancellable;
+}
+function docAuditProgress(detail) {
+  const d = $('loading-detail');
+  if (d) d.textContent = detail;
+}
+window.docAuditProgress = docAuditProgress;   /* parsers can call this */
+
 $('doc-file-input').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -2915,21 +3116,69 @@ $('doc-file-input').addEventListener('change', async e => {
   }
 
   announce('Reading ' + handler.label + '. Please wait.');
+  __docAuditCancelled = false;
+  __setLoadingProgress(
+    'Auditing ' + handler.label,
+    'Reading ' + (file.size / 1024 / 1024).toFixed(1) + ' MB…',
+    /* cancellable */ true
+  );
   $('loading-overlay').classList.add('active');
 
+  /* Wire up cancel — replaces the old listener each time so the closure
+     only sees the current file. */
+  const cancelBtn = $('loading-cancel');
+  const onCancel = () => { __docAuditCancelled = true; };
+  if (cancelBtn) cancelBtn.addEventListener('click', onCancel, { once: true });
+
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      __docAuditCancelled = true;
+      const err = new Error('Audit timed out after ' + (DOC_AUDIT_TIMEOUT_MS / 1000) + ' s. The file may be too complex or corrupt.');
+      err.name = 'TimeoutError';
+      reject(err);
+    }, DOC_AUDIT_TIMEOUT_MS);
+  });
+  const cancelPromise = new Promise((_, reject) => {
+    /* Polled — checked between parser awaits via __docAuditCancelled flag.
+       Also wired here so explicit Cancel rejects the race immediately. */
+    const tick = setInterval(() => {
+      if (__docAuditCancelled) {
+        clearInterval(tick);
+        const err = new Error('Audit cancelled.');
+        err.name = 'AbortError';
+        reject(err);
+      }
+    }, 100);
+    /* Cleanup when the race settles. */
+    timeoutPromise.catch(() => clearInterval(tick));
+  });
+
   try {
-    const buf     = await file.arrayBuffer();
-    const results = await handler.run(buf, file.name);
+    const buf = await file.arrayBuffer();
+    docAuditProgress('Parsing…');
+    const results = await Promise.race([
+      handler.run(buf, file.name),
+      timeoutPromise,
+      cancelPromise
+    ]);
     renderDocResults(results, file.name);
     announce(handler.label + ' audit complete. ' + results.length + ' findings. Navigate to results below.');
   } catch(err) {
-    announce('Error reading ' + handler.label + ': ' + err.message);
+    const isAbort = err && (err.name === 'AbortError' || err.name === 'TimeoutError');
+    announce((isAbort ? '' : 'Error reading ') + handler.label + ': ' + err.message);
     renderDocResults([{
-      status:'FAIL',
-      title:'Could not parse ' + handler.label,
-      detail:'Parser error: ' + (err && err.message ? err.message : String(err)) + '. The file may be corrupt or password-protected.'
+      status: 'FAIL',
+      title: isAbort ? handler.label + ' audit ' + (err.name === 'TimeoutError' ? 'timed out' : 'cancelled')
+                     : 'Could not parse ' + handler.label,
+      detail: isAbort
+        ? err.message + ' Try a smaller or simpler file, or split the document into sections.'
+        : 'Parser error: ' + (err && err.message ? err.message : String(err)) + '. The file may be corrupt or password-protected.'
     }], file.name);
   } finally {
+    clearTimeout(timeoutId);
+    if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
+    __setLoadingProgress('Processing', '', false);
     $('loading-overlay').classList.remove('active');
     e.target.value = '';   /* allow re-uploading the same file */
   }
@@ -3464,8 +3713,7 @@ $('save-pin-btn').addEventListener('click', async () => {
   err.textContent = '';
   if (!/^\d{4,8}$/.test(p1)) { err.textContent='PIN must be 4 to 8 digits.'; return; }
   if (p1 !== p2) { err.textContent='PINs do not match.'; $('new-pin-2').value=''; return; }
-  const hash = await sha256(p1);
-  localStorage.setItem(KEY_PIN, hash);
+  await savePin(p1);
   $('new-pin-1').value=''; $('new-pin-2').value='';
   $('change-pin-form').style.display = 'none';
   announce('PIN changed successfully.');
@@ -3500,13 +3748,17 @@ function escHtml(s) {
    INITIALISATION
 ══════════════════════════════════════════════ */
 function init() {
-  const hasPin = !!localStorage.getItem(KEY_PIN);
+  const hasPin = !!getStoredPin();
   if (!hasPin) {
     showView('view-setup');
     setTimeout(() => { $('setup-pin-1').focus(); announce('AMASAMYA first run. Create your PIN to begin.'); }, 200);
   } else {
     showView('view-login');
-    setTimeout(() => { announce('AMASAMYA. Enter your PIN to sign in. Use the number keys or the keypad on screen.'); }, 200);
+    setTimeout(() => {
+      const pin = $('sr-pin-input');
+      if (pin) pin.focus();
+      announce('AMASAMYA. Enter your PIN to sign in. Use the number keys or the keypad on screen.');
+    }, 200);
   }
 }
 
@@ -3592,9 +3844,14 @@ function webAuditEngine() {
       try { findings = findings.concat(engine.fn()); }
       catch(err) { findings.push({id:generateId(),engine:engine.name,element:'Audit Engine',criterion:'AMASAMYA Internal',issue:engine.name+' engine error: '+(err&&err.message?err.message:String(err)),computed:String(err),required:'Engine should complete without errors',verdict:'Info',severity:SEV.MINOR,howToFix:'Report this page URL.'}); }
     });
-    window.opener.postMessage({type:'AMASAMYA_findings',findings:findings,title:document.title,url:location.href},'*');
+    /* Origin is substituted at injection time (see waAuditWindow.eval below).
+       Default '*' is only kept for the legacy bookmarklet that loads
+       this engine source standalone with no opener-origin context. */
+    var __TARGET_ORIGIN = '__AMASAMYA_OPENER_ORIGIN__';
+    window.opener.postMessage({type:'AMASAMYA_findings',findings:findings,title:document.title,url:location.href}, __TARGET_ORIGIN);
   } catch(err) {
-    window.opener.postMessage({type:'AMASAMYA_error',message:err&&err.message?err.message:String(err)},'*');
+    var __TARGET_ORIGIN_ERR = '__AMASAMYA_OPENER_ORIGIN__';
+    window.opener.postMessage({type:'AMASAMYA_error',message:err&&err.message?err.message:String(err)}, __TARGET_ORIGIN_ERR);
   }
 }
 /* Legacy minified engine kept for bookmarklet reference only — web audit uses webAuditEngine() above */
@@ -3683,8 +3940,11 @@ $('wa-run-btn').addEventListener('click', () => {
         $('wa-progress-label').textContent = 'Page loaded. Running audit engines...';
         announce('Page loaded. Audit running. Please wait for results.');
 
-        // Build injection script — runs all 13 engines and posts findings back
-        const injection = '(' + webAuditEngine.toString() + ')()';
+        // Build injection script — runs all 13 engines and posts findings back.
+        // Substitute the AMASAMYA origin into the engine so the postMessage
+        // back to window.opener is targeted ('*' would let any tab in the
+        // user's browser eavesdrop on findings via window.open chains).
+        const injection = '(' + webAuditEngine.toString().replace(/__AMASAMYA_OPENER_ORIGIN__/g, window.location.origin) + ')()';
 
         try {
           waAuditWindow.eval(injection);
@@ -3711,10 +3971,19 @@ $('wa-run-btn').addEventListener('click', () => {
     }
   }, 500);
 
-  // Listen for findings posted back from the audit window
+  // Listen for findings posted back from the audit window.
+  // Origin check: the auditee can be any URL the user typed, but the
+  // message has to come from the window we just opened. Reject messages
+  // from any other window (covers the case where another tab spams
+  // AMASAMYA_findings to spoof results). Same-origin self-posts (the
+  // CSP-blocked branch above) are allowed because they come from
+  // window === event.source with our own origin.
   waMessageHandler = function(event) {
     if (!event.data || !event.data.type) return;
     if (!event.data.type.startsWith('AMASAMYA_')) return;
+    const fromAuditee = waAuditWindow && event.source === waAuditWindow;
+    const fromSelf    = event.source === window && event.origin === window.location.origin;
+    if (!fromAuditee && !fromSelf) return;
 
     if (event.data.type === 'AMASAMYA_findings') {
       window.removeEventListener('message', waMessageHandler);
@@ -3874,6 +4143,12 @@ function waRenderTable(findings) {
 ══════════════════════════════════════════════════════════════ */
 window.addEventListener('message', function (e) {
   if (!e.data || e.data.type !== 'AMASAMYA_extension_results') return;
+  /* Extension forwards via the page's window object, so e.origin matches
+     window.location.origin (chrome-extension://… can't postMessage cross-
+     origin into a page without the content-script bridge). Reject any
+     other source so a malicious iframe or window.open child can't fake
+     extension results. */
+  if (e.origin !== window.location.origin) return;
 
   const findings  = e.data.findings  || [];
   const pageTitle = e.data.pageTitle || 'Extension Audit';
@@ -4174,7 +4449,40 @@ async function auditDOCX(buffer, filename) {
    archive and returns a { filename: textContent } map. The optional
    `accept` predicate lets callers cheaply skip large binary entries
    such as embedded images or fonts. */
+/* Browser feature gate: DecompressionStream('deflate-raw') is required
+   for all ZIP-based formats (DOCX, PPTX, XLSX, EPUB, ODT/ODS/ODP).
+   Safari ≥17.2 and Firefox ≥125 (May 2024) ship it; older browsers
+   would silently fail on compMethod === 8 entries with a confusing
+   "skipped" parse result. Throw a clean, user-readable error instead. */
+let __dsSupportChecked = false;
+let __dsSupported = true;
+function ensureDecompressionStream() {
+  if (__dsSupportChecked) {
+    if (!__dsSupported) throw new Error(
+      'Your browser does not support the DecompressionStream API required to read ZIP-based ' +
+      'documents (DOCX, PPTX, XLSX, EPUB, ODT/ODS/ODP). Please update to a recent version of ' +
+      'Chrome, Edge, Firefox 125+, or Safari 17.2+.'
+    );
+    return;
+  }
+  __dsSupportChecked = true;
+  try {
+    /* deflate-raw is the variant we need; some older builds shipped
+       DecompressionStream with only 'gzip'/'deflate' support. */
+    new DecompressionStream('deflate-raw');
+    __dsSupported = true;
+  } catch (e) {
+    __dsSupported = false;
+    throw new Error(
+      'Your browser does not support the DecompressionStream(\'deflate-raw\') API required to ' +
+      'read ZIP-based documents. Please update to a recent version of Chrome, Edge, Firefox 125+, ' +
+      'or Safari 17.2+.'
+    );
+  }
+}
+
 async function readZip(buffer, accept) {
+  ensureDecompressionStream();
   const result = {};
   const view   = new DataView(buffer);
   const bytes  = new Uint8Array(buffer);
@@ -5889,6 +6197,11 @@ if ($('mob-export-txt')) {
 
   window.addEventListener('message', async function (e) {
     if (!e.data || e.data.type !== 'AMASAMYA_live_event') return;
+    /* Live Co-pilot events come from the bookmarklet/extension running
+       in the audited page, which is bridged through this same origin
+       (extension content script) or posts back via window.opener with
+       our origin substituted. Reject foreign origins to stop spoofing. */
+    if (e.origin !== window.location.origin) return;
     var element = e.data.element || 'Unknown element';
     var context = e.data.context || '';
     var eventType = e.data.eventType || 'focus';

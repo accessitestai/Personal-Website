@@ -102,6 +102,18 @@
       and are never transmitted to anyone other than the API provider you select.
     </li>
     <li>
+      <strong>Threat model — what at-rest encryption does and doesn't protect against</strong> —
+      The non-extractable master key blocks <em>passive</em> exfiltration: a malicious
+      browser extension that reads localStorage, a stolen disk image, or a backup
+      that captures profile data sees only opaque ciphertext rather than usable
+      keys. It does <em>not</em> protect against an active attacker who can run
+      JavaScript inside the AMASAMYA origin (for example, a successful XSS exploit
+      against the page itself), because that attacker can ask the WebCrypto sandbox
+      to decrypt on their behalf. Treat the encryption as defence-in-depth, not as
+      a substitute for revoking and rotating any API key you suspect has been
+      exposed.
+    </li>
+    <li>
       <strong>AI provider preference</strong> — Which Vision AI provider you have
       selected (Anthropic or OpenAI).
     </li>
