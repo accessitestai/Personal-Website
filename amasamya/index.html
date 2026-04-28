@@ -1260,7 +1260,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 <!-- ═══════════════════════════════════════════
      VIEW 1: PIN SETUP (first run only)
 ═══════════════════════════════════════════ -->
-<div id="view-setup" class="view" role="region" aria-label="Account setup">
+<div id="view-setup" class="view" role="main" aria-label="Account setup">
   <div class="setup-card">
     <span class="brand-mark">AMASAMYA</span>
     <span class="brand-sub">True Equality in Accessibility</span>
@@ -1293,7 +1293,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 <!-- ═══════════════════════════════════════════
      VIEW 2: PIN LOGIN
 ═══════════════════════════════════════════ -->
-<div id="view-login" class="view" role="region" aria-label="Sign in">
+<div id="view-login" class="view" role="main" aria-label="Sign in">
   <div class="login-card">
     <span class="brand-mark">AMASAMYA</span>
     <p class="brand-sub">AMASAMYA.akhileshmalani.com</p>
@@ -5639,7 +5639,9 @@ function mob_renderChecklist() {
     const catDiv    = document.createElement('div');
     catDiv.style.cssText = 'margin-bottom:20px;';
 
-    const catH = document.createElement('h3');
+    /* WCAG 1.3.1 — panel-title is an h1, so category headings must be
+       h2 (no level skips). Was h3, which axe correctly flagged. */
+    const catH = document.createElement('h2');
     catH.className   = 'section-heading';
     catH.textContent = cat;
     catDiv.appendChild(catH);
