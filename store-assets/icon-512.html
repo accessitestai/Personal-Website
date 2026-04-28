@@ -47,14 +47,19 @@
   <!-- Glow behind text -->
   <ellipse cx="256" cy="240" rx="200" ry="80" fill="#0369a1" opacity="0.15"/>
 
-  <!-- Main wordmark -->
+  <!-- Main wordmark — sized so 8-char AMASAMYA fits the 512px canvas
+       with comfortable side padding. Was 108 + letter-spacing="-2"
+       when the brand was 6 chars (AMA11Y); the rebrand made the text
+       overflow on both sides. textLength + lengthAdjust forces the
+       glyphs to fit within 440px regardless of font metrics. -->
   <text x="256" y="272"
         font-family="Arial Black, Arial, sans-serif"
-        font-size="108"
+        font-size="84"
         font-weight="900"
         fill="#7ec8e3"
         text-anchor="middle"
-        letter-spacing="-2">AMASAMYA</text>
+        textLength="440"
+        lengthAdjust="spacingAndGlyphs">AMASAMYA</text>
 
   <!-- Subtitle -->
   <text x="256" y="332"

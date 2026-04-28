@@ -1,5 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="20" fill="#003366"/>
-  <text x="64" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="52" fill="#7ec8e3">A11</text>
-  <text x="64" y="92" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#b8d4e8">Y</text>
+  <defs>
+    <linearGradient id="bg128" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d2240"/>
+      <stop offset="100%" stop-color="#003366"/>
+    </linearGradient>
+    <linearGradient id="bar128" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#0369a1"/>
+      <stop offset="50%"  stop-color="#7ec8e3"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="20" fill="url(#bg128)"/>
+  <rect x="0" y="0" width="128" height="5" fill="url(#bar128)"/>
+  <!-- Wordmark — textLength forces 8-char AMASAMYA into the canvas
+       width regardless of font availability so the icon is identical
+       on every Chrome variant. -->
+  <text x="64" y="68"
+        text-anchor="middle"
+        font-family="Arial,sans-serif"
+        font-weight="900"
+        font-size="22"
+        fill="#7ec8e3"
+        textLength="112"
+        lengthAdjust="spacingAndGlyphs">AMASAMYA</text>
+  <text x="64" y="92"
+        text-anchor="middle"
+        font-family="Arial,sans-serif"
+        font-weight="700"
+        font-size="11"
+        fill="#4a8fa8"
+        letter-spacing="3">AUDIT</text>
+  <circle cx="64" cy="108" r="3" fill="#7ec8e3" opacity="0.4"/>
 </svg>

@@ -76,6 +76,12 @@ DOCS = [
     ("beta/README.md",
      "beta/README.docx",
      "AMASAMYA Beta — Document Index"),
+    ("beta/cws-resubmission-checklist.md",
+     "beta/cws-resubmission-checklist.docx",
+     "AMASAMYA — Chrome Web Store Resubmission Checklist"),
+    ("beta/cws-listing-description.md",
+     "beta/cws-listing-description.docx",
+     "AMASAMYA — CWS Listing Description (paste-ready)"),
 ]
 
 
