@@ -2405,7 +2405,28 @@ function renderDashboard() {
 
   const list = $('session-list');
   if (!sessions.length) {
-    list.innerHTML = '<li style="padding:16px 0;font-size:13px;color:var(--text-muted);font-family:var(--mono);">No sessions yet. Import a JSON findings file to create your first session.</li>';
+    /* Empty state with concrete next-action CTAs so first-run users
+       know what to do — without these, the dashboard is just a wall
+       of zeros and a confused "what now". */
+    list.innerHTML =
+      '<li style="padding:16px 0;font-size:13px;color:var(--text-muted);font-family:var(--mono);">' +
+        '<strong style="display:block;color:var(--primary-text);font-size:14px;margin-bottom:8px;">No sessions yet — start your first audit.</strong>' +
+        'Pick one of:' +
+        '<ul style="margin:8px 0 0 18px;padding:0;list-style:disc;">' +
+          '<li><button type="button" class="link-btn" data-go-tab="webaudit" style="background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;">Run a Web Audit</button> on any URL.</li>' +
+          '<li><button type="button" class="link-btn" data-go-tab="document" style="background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;">Audit a Document</button> (PDF, DOCX, PPTX, XLSX, EPUB, ODT/ODS/ODP).</li>' +
+          '<li><button type="button" class="link-btn" data-go-tab="import" style="background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;">Import findings JSON</button> exported from the AMASAMYA bookmarklet or Chrome extension.</li>' +
+        '</ul>' +
+      '</li>';
+    /* Wire the data-go-tab buttons after innerHTML is committed. */
+    list.querySelectorAll('[data-go-tab]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.getAttribute('data-go-tab');
+        switchTab(t);
+        var btn = $('tab-' + t);
+        if (btn) btn.focus();
+      });
+    });
     return;
   }
   list.innerHTML = '';
@@ -3558,6 +3579,171 @@ const DOC_KB = [
     refs:[
       ['Microsoft — Save in .docx','https://support.microsoft.com/office/save-a-document-3e4cf5f2-9d4f-4c3a-9cb5-2593cd6cda8c']
     ]},
+  /* ─── PPTX (PowerPoint) specific ─── */
+  { match:/Presentation title (missing|set)/i,
+    fix:'PowerPoint: File > Info > Properties > Title (or click "Add a title" beside the thumbnail). Ensure "Document properties and personal information" stays included on Save As. Keynote/Slides exports: re-export with the document title field populated.',
+    refs:[
+      ['WCAG 2.4.2 Page Titled','https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html'],
+      ['Microsoft — Make PowerPoint accessible','https://support.microsoft.com/office/make-your-powerpoint-presentations-accessible-6f7772b2-2f33-4bd2-8ca7-dae3b2b3ef25']
+    ]},
+  { match:/slides? (have no title placeholder|missing.*title)/i,
+    fix:'Use a layout that includes a Title placeholder (Home > Layout > Title and Content). If a slide must remain visually untitled, add a title in Outline View and set its position off-slide via the Selection pane — assistive tech still hears it. Avoid drawing a text box and calling it a title; only the actual placeholder is recognised.',
+    refs:[
+      ['WCAG 2.4.6 Headings and Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html'],
+      ['Microsoft — Add titles to PowerPoint slides','https://support.microsoft.com/office/title-a-slide-13d24aef-c44c-475e-b7ed-cd1f31e2fab1']
+    ]},
+  { match:/pictures? missing alt text|images?.*missing alt/i,
+    fix:'Right-click the image > View Alt Text (PowerPoint) / Format Picture > Alt Text (Excel). Write what the image conveys, not "image of". Mark purely decorative shapes via the "Mark as decorative" checkbox so screen readers skip them.',
+    refs:[
+      ['WCAG 1.1.1 Non-text Content','https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html'],
+      ['Microsoft — Add alt text','https://support.microsoft.com/office/add-alternative-text-to-a-shape-picture-chart-smartart-graphic-or-other-object-44989b2a-903c-4d9a-b742-6a75b451c669']
+    ]},
+  { match:/tables? missing a header row/i,
+    fix:'PowerPoint/Excel/Word: select the table, then Table Design > tick "Header Row". Excel additionally: select the data range, Insert > Table, ensure "My table has headers" is ticked — this creates a real Defined Table object that screen readers can navigate.',
+    refs:[
+      ['WCAG 1.3.1 Info and Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['WebAIM — Creating accessible tables','https://webaim.org/techniques/tables/']
+    ]},
+  { match:/Verify reading order on each slide/i,
+    fix:'PowerPoint: Home > Arrange > Selection Pane. Items are read bottom-up by default. Drag to reorder so the first item read is at the bottom of the list, the last item at the top. Verify by Tabbing through the slide in Slide Show mode.',
+    refs:[
+      ['WCAG 1.3.2 Meaningful Sequence','https://www.w3.org/WAI/WCAG22/Understanding/meaningful-sequence.html'],
+      ['Microsoft — Set the reading order','https://support.microsoft.com/office/set-the-reading-order-of-content-in-a-slide-863b5c1c-4f19-45ec-96e4-1ce30966a89f']
+    ]},
+  { match:/Presentation language not declared/i,
+    fix:'PowerPoint: File > Options > Language > Office authoring languages. Then Review > Language > Set Proofing Language for any slide whose text differs from the default. The XML stores this on each text run; setting it once for the file is not enough if individual slides use other languages.',
+    refs:[
+      ['WCAG 3.1.1 Language of Page','https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html']
+    ]},
+
+  /* ─── XLSX (Excel) specific ─── */
+  { match:/Workbook title (missing|set)/i,
+    fix:'Excel: File > Info > Properties > Title. The title appears in screen-reader announcements when the workbook opens and in many enterprise document indexes. Do not rely on the filename.',
+    refs:[
+      ['WCAG 2.4.2 Page Titled','https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html']
+    ]},
+  { match:/sheets? still using default names/i,
+    fix:'Right-click the sheet tab > Rename (or double-click the tab). Use names that say what the sheet contains ("Q3 Forecasts", not "Sheet1"). Screen readers read the sheet tab name when navigating between sheets.',
+    refs:[
+      ['WCAG 2.4.6 Headings and Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html']
+    ]},
+  { match:/hidden sheets?/i,
+    fix:'Right-click any sheet tab > Unhide to confirm the hidden sheets are not load-bearing. Hidden sheets are still read by some assistive tools and may contain stale or sensitive data. Either delete them or document why they are hidden in the workbook README.',
+    refs:[
+      ['Microsoft — Hide or unhide worksheets','https://support.microsoft.com/office/hide-or-unhide-worksheets-69f2701a-21f5-4186-87d9-c7a45cc7f8c0']
+    ]},
+  { match:/No defined Table objects/i,
+    fix:'Select your data range > Insert > Table > tick "My table has headers". A real Defined Table gives screen readers row and column relationships, lets users navigate by table cell, and enables structured-references in formulas. A range styled to look like a table does not.',
+    refs:[
+      ['WCAG 1.3.1 Info and Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html'],
+      ['Microsoft — Format an Excel table','https://support.microsoft.com/office/format-an-excel-table-6789619f-c889-495c-99c2-2f971c0e2370']
+    ]},
+  { match:/merged-cell range/i,
+    fix:'Avoid merging cells in data tables — assistive tech announces merged cells inconsistently and they break keyboard navigation. Use Center Across Selection (Format Cells > Alignment > Horizontal) to get the visual without the structural penalty. If merging is unavoidable for layout, mark the sheet as a presentation-only sheet in the workbook README.',
+    refs:[
+      ['WebAIM — Spreadsheet accessibility','https://webaim.org/techniques/excel/']
+    ]},
+  { match:/Workbook language not declared/i,
+    fix:'Excel: File > Options > Language > Office display language. The workbook default propagates into the XML when you save. For multi-language workbooks, use sheet-level naming conventions to flag which sheet is in which language.',
+    refs:[
+      ['WCAG 3.1.1 Language of Page','https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html']
+    ]},
+
+  /* ─── EPUB specific ─── */
+  { match:/EPUB title (missing|set)/i,
+    fix:'Edit the OPF package document\'s <metadata><dc:title> element. Most EPUB editors (Calibre, Sigil, Pages) expose this as "Document title" in their metadata panel. The title is what reading apps display in their library and what screen readers announce on open.',
+    refs:[
+      ['EPUB Accessibility 1.1','https://www.w3.org/TR/epub-a11y-11/'],
+      ['DAISY — Top tips for accessible EPUB','https://daisy.org/activities/projects/inclusive-publishing/']
+    ]},
+  { match:/EPUB language (not declared|declared)/i,
+    fix:'Edit the OPF\'s <metadata><dc:language> element (e.g. <dc:language>en</dc:language>). Also set xml:lang on the root <html> of every XHTML content document. Use BCP-47 language tags (en, en-US, fr-CA).',
+    refs:[
+      ['WCAG 3.1.1 Language of Page','https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html'],
+      ['BCP 47 — Language tags','https://www.rfc-editor.org/info/bcp47']
+    ]},
+  { match:/EPUB unique identifier missing/i,
+    fix:'Add a <dc:identifier id="bookid">urn:uuid:...</dc:identifier> to the OPF metadata, and reference it from <package unique-identifier="bookid">. A UUID is fine if you do not have an ISBN. Without it, reading systems cannot reliably sync bookmarks or sideload updates.',
+    refs:[
+      ['EPUB 3.3 Package Document','https://www.w3.org/TR/epub-33/#sec-package-doc']
+    ]},
+  { match:/No EPUB navigation document/i,
+    fix:'Add an XHTML navigation document with <nav epub:type="toc"> containing the table of contents, and reference it from the OPF manifest with properties="nav". Without it, reading systems fall back to the spine order, which makes long books unreadable.',
+    refs:[
+      ['EPUB 3.3 Navigation Document','https://www.w3.org/TR/epub-33/#sec-nav']
+    ]},
+  { match:/Sampled content document missing lang/i,
+    fix:'Every XHTML content document needs xml:lang and lang on its root <html> element. If you have many files, run a search-and-replace across the EPUB\'s OEBPS/ folder. Calibre and Sigil both support batch metadata editing.',
+    refs:[
+      ['WCAG 3.1.1 Language of Page','https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html']
+    ]},
+  { match:/Sampled content document has no <h1>/i,
+    fix:'Each chapter / content document should start with an <h1>. Reading systems use heading levels for in-book navigation and screen readers use them for the H key. If a chapter title is purely decorative, mark the chapter file appropriately and use <h2>+ for sub-sections.',
+    refs:[
+      ['WCAG 2.4.6 Headings and Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html']
+    ]},
+  { match:/images? in sampled doc missing alt/i,
+    fix:'Every <img> needs an alt attribute. For decorative images, use alt="". For meaningful images, describe what the image contributes to the surrounding text. Long descriptions can use <figure>/<figcaption> or aria-describedby.',
+    refs:[
+      ['WCAG 1.1.1 Non-text Content','https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html'],
+      ['DIAGRAM Center — Image description guidelines','https://diagramcenter.org/making-images-accessible.html']
+    ]},
+
+  /* ─── OpenDocument (ODT/ODS/ODP) specific ─── */
+  { match:/Document title (missing|set).*meta\.xml/i,
+    fix:'LibreOffice: File > Properties > Description tab > Title. AbiWord/Calligra: similar Properties dialog. The meta.xml inside the OpenDocument ZIP stores this — it is what screen readers announce on open and what document indexes use.',
+    refs:[
+      ['WCAG 2.4.2 Page Titled','https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html'],
+      ['ODF 1.3 — meta:document-meta','https://docs.oasis-open.org/office/OpenDocument/v1.3/']
+    ]},
+  { match:/Document language (not declared|declared)/i,
+    fix:'LibreOffice: Tools > Options > Language Settings > Languages. Set the default for documents and apply via Format > Character > Language for any text run in a different language. The setting is stored on style:default-page-layout / text:p in styles.xml.',
+    refs:[
+      ['WCAG 3.1.1 Language of Page','https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html']
+    ]},
+  { match:/No headings found in document/i,
+    fix:'LibreOffice Writer: apply the Heading 1 / Heading 2 / Heading 3 paragraph styles from the Styles sidebar (F11). Avoid manually formatted "headings" (just bigger bold text) — they have no structural meaning and are invisible to assistive tech and to the table-of-contents generator.',
+    refs:[
+      ['WCAG 2.4.6 Headings and Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html']
+    ]},
+  { match:/heading-level skip/i,
+    fix:'Open the Navigator (F5) to see your heading hierarchy. Promote or demote headings (Tab / Shift-Tab in the Navigator) so levels never jump from H1 directly to H3. Screen reader users navigate by heading and a skipped level reads as a missing chapter.',
+    refs:[
+      ['WCAG 1.3.1 Info and Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html']
+    ]},
+  { match:/images? missing description/i,
+    fix:'LibreOffice: right-click image > Properties > Options tab > fill the "Description" field (and "Title" for short labels). The values become svg:title and svg:desc inside content.xml, which assistive tech and exported PDFs honour.',
+    refs:[
+      ['WCAG 1.1.1 Non-text Content','https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html']
+    ]},
+  { match:/tables? with no header rows/i,
+    fix:'LibreOffice Writer: select the first row > Table > Properties > Text Flow > tick "Repeat heading rows". For Calc: select the data range > Data > Define Range, then Data > AutoFilter. ODP: avoid data tables on slides; use a real ODS sheet linked or screenshotted with a long description.',
+    refs:[
+      ['WCAG 1.3.1 Info and Relationships','https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html']
+    ]},
+  { match:/slides? — names look auto-generated/i,
+    fix:'LibreOffice Impress: View > Outline, then type a real title for each slide. Auto-generated names ("Slide 1", "page1") give screen readers nothing to navigate by and produce useless table-of-contents entries on PDF export.',
+    refs:[
+      ['WCAG 2.4.6 Headings and Labels','https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels.html']
+    ]},
+  { match:/No slides detected/i,
+    fix:'The presentation file appears to have no <draw:page> elements. Re-open in LibreOffice Impress and confirm the file is not corrupt. If the file came from another tool (Keynote, Google Slides), re-export to ODP using a current LibreOffice build.',
+    refs:[
+      ['ODF 1.3 — Presentation','https://docs.oasis-open.org/office/OpenDocument/v1.3/']
+    ]},
+
+  /* ─── Legacy .doc (Word 97–2003) ─── */
+  { match:/Convert to \.docx for a full audit|Legacy Word 97–2003/i,
+    fix:'Open the file in Word > File > Save As > Word Document (*.docx). The legacy binary format is opaque to web tooling and most accessibility checkers. After conversion, run this audit again on the .docx for tagged-document, heading, alt-text and table-header checks.',
+    refs:[
+      ['Microsoft — Convert old Word documents','https://support.microsoft.com/office/open-an-earlier-version-of-a-word-document-in-a-newer-version-of-word-72a50fe1-1c11-49da-832a-d10c46cda5e3']
+    ]},
+  { match:/File extension is \.doc but content is not OLE/i,
+    fix:'A legitimate Word 97–2003 file starts with the OLE compound-document magic bytes (D0 CF 11 E0 A1 B1 1A E1). The file may have the wrong extension — try renaming to .docx, .rtf, or .txt. If the file is corrupt, recover with Word\'s "Open and Repair" (Open dialog > arrow next to Open button > Open and Repair).',
+    refs:[
+      ['Microsoft — Recover a lost or corrupt file','https://support.microsoft.com/office/recover-text-from-a-damaged-document-in-word-65cc69bc-f4d0-4b81-8ed8-9e7c0d8dee66']
+    ]},
+
   /* ─── Failure / parser ─── */
   { match:/PDF.js failed|could not be parsed|Could not read document XML|Could not read document content|Could not read presentation slides|Could not read workbook|Could not locate OPF|Could not parse|Unsupported file type/i,
     fix:'If the file is password-protected, remove the password in the source application first. If it is corrupt, re-export it from the source application. For PDFs specifically, if your network is restricted, allow cdnjs.cloudflare.com so PDF.js can load.',
@@ -4481,24 +4667,68 @@ function ensureDecompressionStream() {
   }
 }
 
+/* Maximum total decompressed bytes we accept from any single ZIP.
+   A "ZIP bomb" can be a few KB on disk that decompresses to gigabytes
+   of XML — without a cap, the parser would OOM the tab. 64 MB is more
+   than 10× any real DOCX/PPTX/EPUB metadata we'd plausibly inspect. */
+const ZIP_MAX_DECOMPRESSED_BYTES = 64 * 1024 * 1024;
+const ZIP_MAX_ENTRY_BYTES        = 32 * 1024 * 1024;
+
 async function readZip(buffer, accept) {
   ensureDecompressionStream();
+  if (!buffer || buffer.byteLength < 22) {
+    /* A valid ZIP needs at least an end-of-central-directory record (22 bytes). */
+    throw new Error('File is too small to be a valid ZIP-based document.');
+  }
   const result = {};
   const view   = new DataView(buffer);
   const bytes  = new Uint8Array(buffer);
-  let offset   = 0;
+  /* Quick magic check — first signature in any well-formed ZIP is the
+     local file header (PK\x03\x04). Tolerate a few leading junk bytes
+     for self-extracting wrappers, but bail early if the file is clearly
+     not a ZIP (e.g. someone renamed a .doc to .docx). */
+  let signatureFound = false;
+  for (let probe = 0; probe < Math.min(64, bytes.length - 4); probe++) {
+    if (view.getUint32(probe, true) === 0x04034b50) { signatureFound = true; break; }
+  }
+  if (!signatureFound) {
+    throw new Error('File is not a valid ZIP-based document. It may be corrupt, a different format, or a legacy binary file renamed with a ZIP-format extension.');
+  }
+
+  let offset = 0;
+  let totalDecompressed = 0;
+  let entriesProcessed  = 0;
+  let entriesSkipped    = 0;
 
   while (offset < bytes.length - 4) {
     // Local file header signature
     if (view.getUint32(offset, true) !== 0x04034b50) { offset++; continue; }
+
+    /* Defensive: clamp lengths to remaining buffer to avoid reading past EOF
+       on a truncated ZIP (which can otherwise throw RangeError). */
+    if (offset + 30 > bytes.length) break;
 
     const fnLen    = view.getUint16(offset + 26, true);
     const extraLen = view.getUint16(offset + 28, true);
     const compSize = view.getUint32(offset + 18, true);
     const compMethod = view.getUint16(offset + 8, true);
 
-    const fnBytes  = bytes.slice(offset + 30, offset + 30 + fnLen);
-    const filename = new TextDecoder().decode(fnBytes);
+    if (offset + 30 + fnLen + extraLen + compSize > bytes.length) {
+      /* Truncated / corrupt entry header — stop walking instead of
+         crawling past the end one byte at a time. */
+      break;
+    }
+
+    let filename;
+    try {
+      const fnBytes = bytes.slice(offset + 30, offset + 30 + fnLen);
+      filename = new TextDecoder().decode(fnBytes);
+    } catch (e) {
+      /* Garbage filename bytes — skip this entry. */
+      offset++;
+      entriesSkipped++;
+      continue;
+    }
 
     const dataOffset = offset + 30 + fnLen + extraLen;
 
@@ -4509,11 +4739,15 @@ async function readZip(buffer, accept) {
       ? accept(filename)
       : /\.(xml|rels|xhtml|html|opf|ncx)$/i.test(filename) || filename === 'mimetype';
 
-    if (want) {
+    if (want && compSize <= ZIP_MAX_ENTRY_BYTES) {
       try {
         const compressed = bytes.slice(dataOffset, dataOffset + compSize);
         if (compMethod === 0) {
           // Stored — no compression
+          if (totalDecompressed + compSize > ZIP_MAX_DECOMPRESSED_BYTES) {
+            throw new Error('Document exceeds ' + (ZIP_MAX_DECOMPRESSED_BYTES / 1024 / 1024) + ' MB decompressed size limit.');
+          }
+          totalDecompressed += compSize;
           result[filename] = new TextDecoder().decode(compressed);
         } else if (compMethod === 8) {
           // Deflate
@@ -4523,22 +4757,48 @@ async function readZip(buffer, accept) {
           writer.write(compressed);
           writer.close();
           const chunks = [];
-          let done = false;
+          let done = false, runningTotal = 0;
           while (!done) {
             const { value, done: d } = await reader.read();
-            if (value) chunks.push(value);
+            if (value) {
+              runningTotal += value.length;
+              /* Streaming bomb-check — abort mid-decompress instead of
+                 buffering gigabytes before we discover the problem. */
+              if (runningTotal > ZIP_MAX_ENTRY_BYTES ||
+                  totalDecompressed + runningTotal > ZIP_MAX_DECOMPRESSED_BYTES) {
+                try { await reader.cancel(); } catch (_) {}
+                throw new Error('ZIP entry exceeds size limit during decompression.');
+              }
+              chunks.push(value);
+            }
             done = d;
           }
-          const total = chunks.reduce((acc, c) => acc + c.length, 0);
-          const out   = new Uint8Array(total);
+          totalDecompressed += runningTotal;
+          const out   = new Uint8Array(runningTotal);
           let pos = 0;
           chunks.forEach(c => { out.set(c, pos); pos += c.length; });
           result[filename] = new TextDecoder().decode(out);
+        } else {
+          /* Unknown compression method (LZMA, BZIP2, etc.) — skip. */
+          entriesSkipped++;
         }
-      } catch(e) { /* skip unreadable entries */ }
+        entriesProcessed++;
+      } catch(e) {
+        /* Skip unreadable entries; surface bomb errors to the caller. */
+        if (/exceeds.*size limit/i.test(e.message)) throw e;
+        entriesSkipped++;
+      }
     }
 
     offset = dataOffset + compSize;
+  }
+
+  if (entriesProcessed === 0) {
+    /* Walked the whole file and never decompressed anything matching the
+       predicate. Either the predicate rejected everything (legitimate)
+       or the file is junk pretending to be a ZIP. Caller's audit engine
+       will surface the empty-result case sensibly via missing-content
+       findings. */
   }
   return result;
 }
@@ -5773,11 +6033,58 @@ if ($('mob-export-txt')) {
     setTimeout(function () { el.textContent = text; }, 60);
   }
 
+  /* ── Retrying fetch wrapper ─────────────────────────────────────
+     LLM endpoints are flaky in two ways: rate limits (429) and
+     transient overload (500/502/503/504). Both are temporary and
+     deserve a retry with exponential backoff. Auth/quota errors
+     (401/403/404/422) are permanent — fail fast so the user sees
+     "go fix your key" instead of waiting through retries.
+
+     Honours the `Retry-After` header when the provider sets it
+     (most do for 429), otherwise uses 1s · 2^attempt jitter. */
+  async function fetchWithRetry(label, url, init) {
+    var maxRetries = 3;
+    var attempt = 0;
+    var lastErr;
+    while (attempt <= maxRetries) {
+      var res;
+      try {
+        res = await fetch(url, init);
+      } catch (netErr) {
+        /* Network error — retry up to limit. */
+        lastErr = netErr;
+        if (attempt === maxRetries) {
+          throw new Error(label + ' network error after ' + (attempt + 1) + ' attempts: ' + netErr.message);
+        }
+        await new Promise(function (r) { setTimeout(r, (1000 * Math.pow(2, attempt)) + Math.floor(Math.random() * 250)); });
+        attempt++;
+        continue;
+      }
+      if (res.ok) return res;
+
+      var retryable = res.status === 429 || (res.status >= 500 && res.status < 600);
+      if (!retryable || attempt === maxRetries) return res;
+
+      /* Backoff with Retry-After respect. Cap at 20s — beyond that
+         the user should be told something is wrong, not held hostage. */
+      var ra = parseInt(res.headers.get('Retry-After') || '0', 10);
+      var waitMs = ra > 0
+        ? Math.min(ra * 1000, 20000)
+        : Math.min(1000 * Math.pow(2, attempt), 8000) + Math.floor(Math.random() * 250);
+      try { aiAnnounce(label + ' rate-limited or overloaded; retrying in ' + Math.round(waitMs / 1000) + 's…'); } catch (_) {}
+      await new Promise(function (r) { setTimeout(r, waitMs); });
+      attempt++;
+    }
+    /* Unreachable but keeps the linter happy. */
+    if (lastErr) throw lastErr;
+    throw new Error(label + ' exhausted retries.');
+  }
+
   /* ── OpenAI GPT-4o ── */
   async function callOpenAI(systemPrompt, userPrompt) {
     var key = await getApiKey('openai');
     if (!key) throw new Error('OpenAI API key not configured. Go to AI Settings tab.');
-    var res = await fetch('https://api.openai.com/v1/chat/completions', {
+    var res = await fetchWithRetry('OpenAI', 'https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
@@ -5795,7 +6102,7 @@ if ($('mob-export-txt')) {
   async function callClaude(systemPrompt, userPrompt) {
     var key = await getApiKey('anthropic');
     if (!key) throw new Error('Anthropic API key not configured. Go to AI Settings tab.');
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
+    var res = await fetchWithRetry('Claude', 'https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -5819,7 +6126,7 @@ if ($('mob-export-txt')) {
   async function callGemini(prompt) {
     var key = await getApiKey('gemini');
     if (!key) throw new Error('Gemini API key not configured. Go to AI Settings tab.');
-    var res = await fetch(
+    var res = await fetchWithRetry('Gemini',
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key,
       { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }

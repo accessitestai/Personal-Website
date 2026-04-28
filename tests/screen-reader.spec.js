@@ -13,9 +13,15 @@ test.describe('Web Screen Reader', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(SITE);
     await page.waitForLoadState('networkidle');
-    // Activate the screen reader directly so the toggle state is deterministic
+    // Activate the screen reader directly so the toggle state is deterministic.
     await page.evaluate(() => window._wsrScreenReader.activate());
-    await page.waitForTimeout(1500); // let the activate() intro speak and auto-land
+    // Condition-based wait — the intro/auto-land sequence finishes when
+    // the tree has been built and the cursor is non-negative. Replaces a
+    // 1.5s timeout that flaked under CI load.
+    await page.waitForFunction(() => {
+      const w = window._wsrScreenReader;
+      return w && w.active && Array.isArray(w.nodes) && w.nodes.length > 0 && w.cursor >= 0;
+    }, null, { timeout: 5000 });
   });
 
   test('activates and builds an element tree', async ({ page }) => {
@@ -75,8 +81,15 @@ test.describe('Web Screen Reader', () => {
   });
 
   test('tree rebuilds after language change', async ({ page }) => {
+    const beforeCount = await page.evaluate(() => window._wsrScreenReader.nodes.length);
     await page.evaluate(() => localStorage.setItem('translateLang', 'hi'));
-    await page.waitForTimeout(2000);
+    /* The tree rebuild is debounced; wait for it to settle by polling
+       for either a node-count change or for the nodes array to refresh.
+       Cap at 5s so a regression fails loud rather than silently passing. */
+    await page.waitForFunction((before) => {
+      const w = window._wsrScreenReader;
+      return w && Array.isArray(w.nodes) && w.nodes.length > 0 && w.nodes.length !== before;
+    }, beforeCount, { timeout: 5000 }).catch(() => { /* fall through to assertion */ });
     const nodes = await page.evaluate(() => window._wsrScreenReader.nodes.length);
     expect(nodes).toBeGreaterThan(50);
   });

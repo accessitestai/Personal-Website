@@ -98,8 +98,13 @@
   [headers.values]
     Cache-Control = "public, max-age=604800"
 
-# HTML pages — no cache (always fresh on deploy)
+# HTML pages — revalidate on every request, but allow the browser to
+# serve from cache when the ETag matches (Netlify sets a strong ETag
+# automatically). `no-cache` does NOT mean "do not cache" — it means
+# "revalidate before reuse". This gives a fast 304-Not-Modified path
+# on unchanged deploys instead of always re-downloading the full page,
+# while still guaranteeing freshness when the deploy changes.
 [[headers]]
   for = "*.html"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, no-cache"
