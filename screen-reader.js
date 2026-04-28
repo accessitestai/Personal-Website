@@ -1391,10 +1391,15 @@
           case 'Escape':
             e.preventDefault();
             if (self._listDialog.style.display !== 'none') {
+              /* Inside the rotor / list dialog → close the dialog only. */
               self._hideListDialog();
-            } else if (VoiceEngine.isSpeaking()) {
-              VoiceEngine.stop();
-              self._continuousReading = false;
+            } else {
+              /* Otherwise Escape always fully exits the screen reader.
+                 Matches universal "Esc = exit" UX. deactivate() also
+                 stops any in-flight speech, so we don't need a separate
+                 stop-speech branch. (Use Ctrl to silence speech without
+                 deactivating — see the Ctrl handler above.) */
+              self.deactivate();
             }
             break;
         }
