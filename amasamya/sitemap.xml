@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap for the AMASAMYA subdomain (amasamya.akhileshmalani.com).
+  Lists every page on the subdomain that is intended to be indexable.
+
+  Excluded by design:
+    /index.html  — the auth-walled application; emits <meta robots="noindex,nofollow">.
+    /auth.html   — the sign-in page; same noindex policy.
+
+  When adding a new public page, list it here, push, and re-submit the
+  sitemap in Google Search Console (Sitemaps > Add a new sitemap).
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://amasamya.akhileshmalani.com/</loc>
+    <lastmod>2026-04-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://amasamya.akhileshmalani.com/privacy</loc>
+    <lastmod>2026-04-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://amasamya.akhileshmalani.com/credits</loc>
+    <lastmod>2026-04-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>

@@ -1,0 +1,13 @@
+# Robots.txt for the AMASAMYA subdomain (amasamya.akhileshmalani.com).
+# The auth-walled app at /index.html is intentionally noindex'd via meta tag;
+# this file mirrors that intent at the protocol level for crawlers that
+# respect Disallow but ignore meta robots (some specialised SEO crawlers,
+# archive.org, etc.).
+
+User-agent: *
+Allow: /
+Disallow: /index.html
+Disallow: /auth.html
+Disallow: /firebase-config.js
+
+Sitemap: https://amasamya.akhileshmalani.com/sitemap.xml

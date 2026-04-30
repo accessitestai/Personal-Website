@@ -11,7 +11,26 @@
   to = "/library-admin.html"
   status = 301
 
-# AMASAMYA subdomain rewrite — serve /amasamya/ content at amasamya.akhileshmalani.com
+# AMASAMYA subdomain — root path serves the public landing page so that
+# Google has something indexable to find. The auth-walled app at
+# /amasamya/index.html still emits <meta robots="noindex,nofollow"> and
+# is reachable directly via /index.html (preserved by the wildcard rewrite
+# below). Order matters: this specific match must come before the wildcard.
+[[redirects]]
+  from = "https://amasamya.akhileshmalani.com/"
+  to = "/amasamya/landing.html"
+  status = 200
+  force = true
+
+# AMASAMYA subdomain — clean URLs for the marketing-page links so they
+# don't 404 when Google or a Chrome Web Store reviewer follows them.
+[[redirects]]
+  from = "https://amasamya.akhileshmalani.com/credits"
+  to = "/amasamya/credits.html"
+  status = 200
+  force = true
+
+# AMASAMYA subdomain rewrite — every other path serves /amasamya/ content
 [[redirects]]
   from = "https://amasamya.akhileshmalani.com/*"
   to = "/amasamya/:splat"
@@ -56,15 +75,18 @@
   to = "/amasamya/privacy.html"
   status = 200
 
-# Redirect old orphaned bookmarklet installer to new location
+# Redirect old orphaned bookmarklet installer URLs to the AMASAMYA
+# landing page. The /amasamya/install.html target referenced previously
+# never existed on the live site, so these 301s would chain into 404s
+# and waste Google crawl budget.
 [[redirects]]
   from = "/AMASAMYA_Bookmarklet_Installer.html"
-  to = "/amasamya/install.html"
+  to = "/amasamya/landing.html"
   status = 301
 
 [[redirects]]
   from = "/AMA11Y_Bookmarklet_Installer.html"
-  to = "/amasamya/install.html"
+  to = "/amasamya/landing.html"
   status = 301
 
 # Security headers

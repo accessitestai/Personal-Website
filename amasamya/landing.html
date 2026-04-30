@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMASAMYA — Blind-First WCAG 2.2 Accessibility Audit Platform</title>
+  <meta name="description" content="AMASAMYA is a blind-first WCAG 2.2 accessibility audit platform for the web, documents, and mobile. Built and maintained by Akhilesh Malani.">
+  <meta name="author" content="Akhilesh Malani">
+  <link rel="canonical" href="https://amasamya.akhileshmalani.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AMASAMYA — Blind-First WCAG 2.2 Accessibility Audit Platform">
+  <meta property="og:description" content="WCAG 2.2 accessibility audits for live web pages, document files, and mobile apps. Designed for and by people who use screen readers.">
+  <meta property="og:url" content="https://amasamya.akhileshmalani.com/">
+  <meta property="og:site_name" content="AMASAMYA">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AMASAMYA — Blind-First Accessibility Audit Platform">
+  <meta name="twitter:description" content="WCAG 2.2 audits for the web, documents, and mobile. Designed blind-first.">
+
+  <!-- Preconnect for Firebase auto-redirect (signed-in users land in the app) -->
+  <link rel="preconnect" href="https://www.gstatic.com">
+
+  <style>
+    :root {
+      --primary:    #003366;
+      --primary-2:  #0d2240;
+      --accent:     #7ec8e3;
+      --accent-2:   #0369a1;
+      --text:       #1a2a3a;
+      --text-muted: #475569;
+      --bg:         #f8fafc;
+      --bg-2:       #ffffff;
+      --r:          8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    /* Skip link for keyboard users */
+    .skip-link {
+      position: absolute; top: -40px; left: 0;
+      background: var(--primary); color: #fff;
+      padding: 10px 18px; z-index: 9999;
+      text-decoration: none; font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    a { color: var(--accent-2); }
+    a:focus { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+    /* Header / hero */
+    header[role="banner"] {
+      background: linear-gradient(135deg, var(--primary-2) 0%, var(--primary) 100%);
+      color: #fff;
+      padding: 56px 20px 64px;
+      border-bottom: 4px solid var(--accent);
+    }
+    .container { max-width: 920px; margin: 0 auto; }
+    .brand-line {
+      display: flex; align-items: baseline; gap: 14px;
+      font-family: 'Segoe UI', sans-serif; font-weight: 800;
+      letter-spacing: 0.02em; margin-bottom: 16px;
+    }
+    .brand-line .brand    { color: var(--accent); font-size: 2rem; }
+    .brand-line .version  { color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 600; }
+    h1 {
+      font-size: 2.2rem; line-height: 1.25;
+      color: #fff; font-weight: 700;
+      max-width: 720px;
+    }
+    h1 .accent { color: var(--accent); }
+    .hero-desc {
+      margin-top: 18px; font-size: 1.05rem;
+      color: rgba(255,255,255,0.85); max-width: 640px;
+    }
+    .cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 12px 24px; border-radius: var(--r);
+      font-weight: 600; font-size: 0.98rem;
+      text-decoration: none; border: 2px solid transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: var(--primary-2); }
+    .btn-primary:hover, .btn-primary:focus { background: #fff; }
+    .btn-secondary { background: transparent; color: #fff; border-color: rgba(255,255,255,0.4); }
+    .btn-secondary:hover, .btn-secondary:focus { background: rgba(255,255,255,0.08); border-color: #fff; }
+    .btn:focus { outline: 2px solid #fff; outline-offset: 3px; }
+
+    /* Sections */
+    main { padding: 56px 20px 80px; }
+    section { margin-bottom: 56px; }
+    section:last-child { margin-bottom: 0; }
+    h2 {
+      font-size: 1.45rem; color: var(--primary);
+      margin-bottom: 14px; padding-bottom: 8px;
+      border-bottom: 2px solid #e2eaf4;
+    }
+    h3 { font-size: 1.1rem; color: var(--primary); margin: 0 0 8px; }
+    p { color: var(--text); margin-bottom: 14px; }
+    p.lead { font-size: 1.05rem; color: var(--text-muted); }
+
+    .features {
+      display: grid; gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .feature {
+      background: var(--bg-2); padding: 22px;
+      border-radius: var(--r);
+      border: 1px solid #e2eaf4;
+    }
+    .feature p { font-size: 0.95rem; color: var(--text-muted); margin: 0; }
+
+    .principles {
+      background: #e8f0fb;
+      border-radius: var(--r);
+      padding: 24px 28px;
+    }
+    .principles ul { margin: 0; padding-left: 22px; }
+    .principles li { margin-bottom: 8px; }
+
+    .start-paths { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .start-path {
+      padding: 18px 20px; background: var(--bg-2);
+      border: 1px solid #e2eaf4; border-radius: var(--r);
+    }
+    .start-path a { font-weight: 600; }
+
+    footer {
+      border-top: 1px solid #e2eaf4;
+      padding: 32px 20px 48px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+    footer .container { display: flex; flex-wrap: wrap; gap: 18px 32px; justify-content: space-between; }
+    footer a { color: var(--accent-2); text-decoration: underline; }
+    footer p { margin: 0; }
+
+    /* Honour reduced-motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    /* Small screens */
+    @media (max-width: 600px) {
+      header[role="banner"] { padding: 40px 16px 48px; }
+      h1 { font-size: 1.65rem; }
+      main { padding: 40px 16px 64px; }
+      h2 { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header role="banner">
+  <div class="container">
+    <div class="brand-line">
+      <span class="brand">AMASAMYA</span>
+      <span class="version" aria-label="Version 3.1">v3.1</span>
+    </div>
+    <h1>The <span class="accent">blind-first</span> WCAG 2.2 accessibility audit platform.</h1>
+    <p class="hero-desc">
+      Run accessibility audits on live web pages, on document files, and through a
+      structured mobile-app checklist. The whole interface is keyboard- and screen-reader-first;
+      every audit finding includes specific remediation guidance and a link to the relevant
+      WCAG technique.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/auth.html">Sign in to start auditing</a>
+      <a class="btn btn-secondary" href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif">Get the Chrome extension</a>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+  <div class="container">
+
+    <section aria-labelledby="what-it-does">
+      <h2 id="what-it-does">What AMASAMYA does</h2>
+      <p class="lead">
+        Three audit surfaces, one consistent experience, designed so a non-sighted developer
+        or content author can drive the entire workflow without sighted help.
+      </p>
+      <div class="features">
+        <article class="feature" aria-labelledby="feat-web">
+          <h3 id="feat-web">Web audits</h3>
+          <p>
+            Paste a URL or click the toolbar button on any tab. AMASAMYA runs a full WCAG 2.2
+            audit covering colour contrast, ARIA validation, focus management, and structural
+            semantics — across the interaction patterns the standard requires.
+          </p>
+        </article>
+        <article class="feature" aria-labelledby="feat-doc">
+          <h3 id="feat-doc">Document audits</h3>
+          <p>
+            Upload a file and AMASAMYA audits its accessibility. The supported formats include
+            PDFs, Microsoft Office files, EPUB books, and OpenDocument files. Findings are
+            format-specific because the underlying remediation differs from one format to the next.
+          </p>
+        </article>
+        <article class="feature" aria-labelledby="feat-mobile">
+          <h3 id="feat-mobile">Mobile checklist</h3>
+          <p>
+            A structured manual-test workflow for iOS, Android, and WearOS. Each item names the
+            WCAG criterion, the assistive technology to use, and the specific test method.
+            Reports can be exported.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="vision-ai">
+      <h2 id="vision-ai">Vision AI modules — optional, bring your own key</h2>
+      <p>
+        Three optional modules use a Vision AI provider you configure (OpenAI or Anthropic).
+        Your API key is encrypted at rest in your browser with a non-extractable WebCrypto
+        master key — keys never reach AMASAMYA servers, because there are none.
+      </p>
+      <div class="features">
+        <article class="feature" aria-labelledby="feat-narrator">
+          <h3 id="feat-narrator">Focus Indicator Narrator</h3>
+          <p>
+            Describes what the keyboard focus indicator looks like at every focusable element.
+            Lets a blind tester independently verify visual focus indicators without sighted help.
+          </p>
+        </article>
+        <article class="feature" aria-labelledby="feat-layout">
+          <h3 id="feat-layout">Visual Layout Auditor</h3>
+          <p>
+            Captures the page at four viewport widths and detects layout shifts and reflow
+            failures across breakpoints. Reports map to WCAG 1.4.10 Reflow and 1.4.4 Resize Text.
+          </p>
+        </article>
+        <article class="feature" aria-labelledby="feat-watchdog">
+          <h3 id="feat-watchdog">State Change Watchdog</h3>
+          <p>
+            Runs locally with no AI calls. Monitors the page in real time for dynamic content
+            additions, dialog focus failures, and ARIA state changes that screen readers would
+            otherwise miss.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="principles">
+      <h2 id="principles">Designed blind-first</h2>
+      <div class="principles">
+        <ul>
+          <li>Every screen is fully operable with major Windows, macOS, and Android screen readers.</li>
+          <li>Audit findings announce role, severity, and remediation in a logical reading order.</li>
+          <li>Exported reports are themselves accessible — semantic headings, labelled regions, navigable tables.</li>
+          <li>Audits run locally; no page content is ever sent to AMASAMYA servers.</li>
+          <li>The platform's own pages pass an axe-core 4.10 self-audit with zero violations.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section aria-labelledby="start">
+      <h2 id="start">Get started</h2>
+      <div class="start-paths">
+        <div class="start-path">
+          <h3>Open the platform</h3>
+          <p>Sign in with Google or set up a PIN. Once signed in, every audit you run is saved to your local session library.</p>
+          <p><a href="/auth.html">Sign in to AMASAMYA →</a></p>
+        </div>
+        <div class="start-path">
+          <h3>Install the Chrome extension</h3>
+          <p>Audit any page in your browser with one keystroke. Results open in the Chrome side panel.</p>
+          <p><a href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif">Chrome Web Store listing →</a></p>
+        </div>
+        <div class="start-path">
+          <h3>Read the policy</h3>
+          <p>Privacy policy, threat model, and the data-handling rules every audit follows.</p>
+          <p><a href="/privacy">Privacy policy →</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="who">
+      <h2 id="who">Who built AMASAMYA</h2>
+      <p>
+        AMASAMYA is built and maintained by <a href="https://akhileshmalani.com">Akhilesh Malani</a> —
+        accessibility architect and digital inclusion strategist. The platform is fully self-funded,
+        with no investor influence on the privacy or feature roadmap. Beta-tester credits are listed
+        on the <a href="/credits">Contributors page</a>.
+      </p>
+    </section>
+
+  </div>
+</main>
+
+<footer role="contentinfo">
+  <div class="container">
+    <p>
+      AMASAMYA v3.1 · Built by
+      <a href="https://akhileshmalani.com">Akhilesh Malani</a>
+    </p>
+    <p>
+      <a href="/privacy">Privacy</a> ·
+      <a href="/credits">Contributors</a> ·
+      <a href="/auth.html">Sign in</a>
+    </p>
+  </div>
+</footer>
+
+<!-- Auto-redirect already-authenticated users straight to the app.
+     Loaded async so it never blocks the marketing-page paint that
+     Google indexes. If Firebase fails to load (offline, blocked, or
+     bot crawler), the landing page is still fully usable. -->
+<script type="module">
+  /* Crawlers, screen readers, and prefers-reduced-data clients all
+     skip auth state checks — we only redirect humans who explicitly
+     have a Firebase session. */
+  if (navigator.userAgent && /bot|crawl|slurp|spider|googlebot|bingbot/i.test(navigator.userAgent)) {
+    /* Bot — show the static landing page, do not redirect. */
+  } else {
+    try {
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+      const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+      const cfg = await import('/firebase-config.js').then(m => m.firebaseConfig).catch(() => null);
+      if (cfg) {
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, user => {
+          if (user) {
+            /* Signed in — go straight to the app. URL preserves history
+               so back-button returns to the landing page. */
+            window.location.replace('/index.html');
+          }
+        });
+      }
+    } catch (_) {
+      /* Firebase couldn't load — landing page stays interactive,
+         user clicks "Sign in" manually if they want to. */
+    }
+  }
+</script>
+
+</body>
+</html>
