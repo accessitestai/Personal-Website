@@ -477,6 +477,347 @@
   }
 
   /* ================================================================
+     ENGINE 16: RESIZE TEXT (WCAG 2.2 SC 1.4.4)
+     Verifies that the page survives a 200% zoom — the criterion
+     allows reflow, but content must not be lost or clipped. We
+     temporarily scale the page via CSS zoom, sample the layout,
+     compare against the baseline, then revert. Sites that hard-code
+     pixel heights, use `overflow:hidden` over text, or set
+     `white-space:nowrap` on long copy fail this engine.
+  ================================================================ */
+  function auditResizeText() {
+    const findings = [];
+    const TEXT_SELECTOR = 'p, li, td, th, dt, dd, figcaption, h1, h2, h3, h4, h5, h6, blockquote, label, button, a, span, div';
+    /* Baseline: collect bounding boxes and clip status BEFORE zoom. */
+    const probes = Array.from(document.querySelectorAll(TEXT_SELECTOR))
+      .filter(el => {
+        const cs = window.getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+        /* Need actual text content, not nested element wrappers. */
+        const direct = Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim().length > 4);
+        return direct;
+      })
+      .slice(0, 250);
+
+    const before = probes.map(el => {
+      const r = el.getBoundingClientRect();
+      return { el, w: r.width, h: r.height, sw: el.scrollWidth, sh: el.scrollHeight };
+    });
+    const docBefore = document.documentElement.scrollWidth;
+
+    /* Apply 200% zoom. CSS zoom (Chromium-supported) reflows text and
+       grows pixel sizes proportionally — closest in-page approximation
+       of browser-zoom-to-200%. */
+    const original = document.documentElement.style.zoom || '';
+    document.documentElement.style.zoom = '2';
+    /* Force layout. */
+    void document.documentElement.offsetHeight;
+
+    const docAfter = document.documentElement.scrollWidth;
+    const horizScrollIntroduced = docAfter > docBefore * 2.05;   /* 5% slack for legitimate growth */
+
+    const after = probes.map(el => {
+      const r = el.getBoundingClientRect();
+      return { w: r.width, h: r.height, sw: el.scrollWidth, sh: el.scrollHeight };
+    });
+
+    /* Revert immediately so the user's view doesn't flicker. */
+    document.documentElement.style.zoom = original;
+    void document.documentElement.offsetHeight;
+
+    /* Diagnose: an element fails resize if its scrollHeight/Width
+       grew but its visible height/width didn't (= clipping). */
+    let clipped = 0;
+    after.forEach((a, i) => {
+      const b = before[i];
+      const grewContent = (a.sh > b.sh + 2) || (a.sw > b.sw + 2);
+      const containedVisually = (a.h <= b.h * 1.05) && (a.w <= b.w * 1.05);
+      if (grewContent && containedVisually) {
+        clipped++;
+        if (clipped <= 8) {
+          findings.push({
+            id: generateId(), engine: 'Resize Text',
+            element: describeEl(b.el),
+            criterion: 'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',
+            issue: 'Element clips its content at 200% zoom. Content overflows but the visible box stays the same — text becomes inaccessible.',
+            computed: `before ${Math.round(b.w)}×${Math.round(b.h)} (scroll ${b.sw}×${b.sh}), after ${Math.round(a.w)}×${Math.round(a.h)} (scroll ${a.sw}×${a.sh})`,
+            required: 'No clipping at 200% zoom',
+            verdict: 'Fail', severity: SEV.SERIOUS,
+            howToFix: 'Replace fixed pixel heights with min-height. Remove overflow:hidden on text containers. Use auto/min-content for wrapping containers.'
+          });
+        }
+      }
+    });
+
+    if (horizScrollIntroduced) {
+      findings.push({
+        id: generateId(), engine: 'Resize Text', element: 'Document',
+        criterion: 'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',
+        issue: 'Page introduces horizontal scrolling at 200% zoom beyond the expected proportional growth.',
+        computed: `document.scrollWidth: ${docBefore}px before, ${docAfter}px after`,
+        required: 'Reflow without two-dimensional scrolling',
+        verdict: 'Fail', severity: SEV.SERIOUS,
+        howToFix: 'Use responsive layout with relative units (rem, %, fr). Avoid fixed pixel widths on top-level layout containers.'
+      });
+    }
+
+    if (clipped > 8) {
+      findings.push({
+        id: generateId(), engine: 'Resize Text', element: 'Document',
+        criterion: 'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',
+        issue: `Additional ${clipped - 8} elements also clip at 200% zoom (only first 8 listed above).`,
+        computed: `${clipped} clipped of ${before.length} sampled`,
+        required: 'No clipping at 200% zoom',
+        verdict: 'Fail', severity: SEV.SERIOUS,
+        howToFix: 'See above. Pattern is widespread across the page.'
+      });
+    }
+
+    if (findings.length === 0)
+      findings.push({ id: generateId(), engine: 'Resize Text', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.4 (Level AA)', issue: 'Page survives 200% zoom without clipping.', computed: `${probes.length} text elements sampled`, required: 'No clipping at 200%', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'Verify manually with browser zoom (Ctrl/Cmd +).' });
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 17: DARK MODE CONTRAST (extends Engine 10)
+     Engine 10 detects whether the page declares dark-mode styles.
+     This engine goes further: parses every @media (prefers-color-scheme:
+     dark) rule, extracts the colour pairs the rule defines, and computes
+     contrast ratios for each pair. Catches dark themes that "support"
+     dark mode but ship low-contrast palettes — the most common pattern
+     in retrofitted dark themes.
+  ================================================================ */
+  function auditDarkModeContrast() {
+    const findings = [];
+    const darkRules = [];
+
+    /* Walk every reachable stylesheet collecting rules inside an
+       @media (prefers-color-scheme: dark) block. Cross-origin sheets
+       throw on access — skip silently. */
+    for (let i = 0; i < document.styleSheets.length; i++) {
+      let rules;
+      try { rules = document.styleSheets[i].cssRules || []; }
+      catch (e) { continue; }
+      for (let j = 0; j < rules.length; j++) {
+        const r = rules[j];
+        if (r.conditionText && /prefers-color-scheme\s*:\s*dark/i.test(r.conditionText)) {
+          for (let k = 0; k < (r.cssRules || []).length; k++) {
+            darkRules.push(r.cssRules[k]);
+          }
+        }
+      }
+    }
+
+    if (darkRules.length === 0) {
+      findings.push({
+        id: generateId(), engine: 'Dark Mode Contrast', element: 'Page',
+        criterion: 'WCAG 2.2 SC 1.4.3 (dark mode)',
+        issue: 'No dark-mode CSS rules found, so dark-mode contrast cannot be verified.',
+        computed: '0 @media (prefers-color-scheme: dark) rules',
+        required: 'Either no dark mode (covered by Dark Mode engine) or dark rules present',
+        verdict: 'Info', severity: SEV.MINOR,
+        howToFix: 'If you intend to support dark mode, add @media (prefers-color-scheme: dark) styles.'
+      });
+      return findings;
+    }
+
+    /* For each dark rule that pairs a foreground color with an
+       inferable background, compute contrast. */
+    let pairsChecked = 0, pairsFailed = 0;
+    darkRules.forEach(rule => {
+      if (!rule.style) return;
+      const fg = rule.style.color;
+      const bg = rule.style.backgroundColor || rule.style.background;
+      if (!fg || !bg) return;
+      const fgC = parseColour(fg), bgC = parseColour(bg);
+      if (!fgC || !bgC) return;
+      const fgFinal = blendColour(fgC, bgC.a >= 1 ? bgC : { r: 18, g: 18, b: 18, a: 1 });
+      const bgFinal = bgC.a >= 1 ? bgC : { r: 18, g: 18, b: 18, a: 1 };
+      const ratio = contrastRatio(fgFinal, bgFinal);
+      pairsChecked++;
+      if (ratio < 4.5) {
+        pairsFailed++;
+        if (pairsFailed <= 6) {
+          findings.push({
+            id: generateId(), engine: 'Dark Mode Contrast',
+            element: `selector: ${rule.selectorText || '(unknown)'}`,
+            criterion: 'WCAG 2.2 SC 1.4.3 (Level AA — dark mode palette)',
+            issue: `Dark-mode rule pairs foreground "${fg}" with background "${bg}" — contrast ratio ${ratio.toFixed(2)}:1 fails 4.5:1.`,
+            computed: `${ratio.toFixed(2)}:1`,
+            required: '4.5:1 for normal text',
+            verdict: 'Fail', severity: ratio < 3.0 ? SEV.CRITICAL : SEV.SERIOUS,
+            howToFix: 'Lighten the foreground or darken the background. Most dark themes work well around #e0e0e0 on #1a1a1a (12.6:1).'
+          });
+        }
+      }
+    });
+
+    if (pairsFailed > 6) {
+      findings.push({
+        id: generateId(), engine: 'Dark Mode Contrast', element: 'Page',
+        criterion: 'WCAG 2.2 SC 1.4.3 (dark mode palette)',
+        issue: `Additional ${pairsFailed - 6} dark-mode contrast failures not listed.`,
+        computed: `${pairsFailed} failures of ${pairsChecked} declared pairs`,
+        required: '4.5:1', verdict: 'Fail', severity: SEV.SERIOUS,
+        howToFix: 'Re-tune the dark palette holistically rather than fixing individual pairs.'
+      });
+    }
+
+    if (pairsFailed === 0 && pairsChecked > 0) {
+      findings.push({ id: generateId(), engine: 'Dark Mode Contrast', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 (dark mode)', issue: `${pairsChecked} dark-mode colour pairs all meet 4.5:1.`, computed: `${pairsChecked} pairs OK`, required: '4.5:1', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action required.' });
+    } else if (pairsChecked === 0) {
+      findings.push({ id: generateId(), engine: 'Dark Mode Contrast', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 (dark mode)', issue: 'Dark-mode rules present but no inline colour/background pairs found to verify. Many themes use CSS custom properties — those would need to be checked in the rendered DOM with prefers-color-scheme: dark active.', computed: `${darkRules.length} dark rules, 0 inline pairs`, required: 'Verifiable colour pairs', verdict: 'Info', severity: SEV.MINOR, howToFix: 'Run a manual check in dark mode, or expose colour custom properties on root element so this engine can sample them.' });
+    }
+
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 18: COLOUR-ONLY MEANING (WCAG 2.2 SC 1.4.1)
+     Heuristic: flags suspicious patterns where colour is the only
+     way to convey meaning. False-positive prone by nature, so all
+     verdicts are Warnings, not Fails — they say "review this".
+  ================================================================ */
+  function auditColourOnlyMeaning() {
+    const findings = [];
+
+    /* Pattern 1: copy that literally references a colour as the
+       discriminator. "Click the red button" relies on sighted
+       perception; if a screen reader user heard that copy, they have
+       no way to distinguish the red button from any other button. */
+    const COLOUR_WORDS = '(red|green|blue|yellow|orange|purple|pink|black|white|grey|gray|brown|cyan|magenta|amber|lime|teal|violet|maroon)';
+    const COLOUR_REF = new RegExp(
+      '\\b(click|press|select|tap|see|find|the|use)\\s+(?:the\\s+)?' + COLOUR_WORDS +
+      '\\s+(button|link|icon|tab|item|box|cell|row|dot|circle|square|arrow|bar|highlight|text|word|number|line|area|section|panel|card|badge)\\b',
+      'i'
+    );
+    document.querySelectorAll('p, li, td, dd, span, label, button, a, h1, h2, h3, h4, h5, h6').forEach(el => {
+      const txt = el.textContent || '';
+      if (txt.length < 5 || txt.length > 400) return;
+      const m = txt.match(COLOUR_REF);
+      if (m) {
+        findings.push({
+          id: generateId(), engine: 'Colour-Only Meaning',
+          element: describeEl(el),
+          criterion: 'WCAG 2.2 SC 1.4.1 Use of Colour (Level A)',
+          issue: `Copy refers to UI by colour alone: "${m[0]}". Screen-reader users cannot distinguish elements by colour.`,
+          computed: m[0],
+          required: 'Refer to UI by name, position, or shape, not colour',
+          verdict: 'Warning', severity: SEV.SERIOUS,
+          howToFix: 'Rephrase to "Press Save" or "Click the rightmost button" — name the element, do not describe its colour.'
+        });
+      }
+    });
+
+    /* Pattern 2: required-field markers that rely on a red asterisk
+       or a colour change with no programmatic indicator. Flag any
+       <input required> or [aria-required="true"] whose nearest label
+       contains an asterisk but the field has no aria-invalid, no
+       describedby announcing "required", and no visible "required"
+       text near the label. */
+    document.querySelectorAll('input[required],select[required],textarea[required],[aria-required="true"]').forEach(field => {
+      const labelEl = field.id
+        ? document.querySelector('label[for="' + (typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(field.id) : field.id) + '"]')
+        : field.closest('label');
+      if (!labelEl) return;
+      const labelText = labelEl.textContent || '';
+      const hasAsterisk = /\*/.test(labelText);
+      const saysRequired = /required|mandatory|must/i.test(labelText);
+      const hasAriaRequired = field.getAttribute('aria-required') === 'true' || field.required;
+      if (hasAsterisk && !saysRequired && !hasAriaRequired) {
+        findings.push({
+          id: generateId(), engine: 'Colour-Only Meaning',
+          element: describeEl(field),
+          criterion: 'WCAG 2.2 SC 1.4.1 / 3.3.2',
+          issue: 'Required field is marked only with an asterisk and colour, with no programmatic "required" indicator or text label.',
+          computed: 'Asterisk present in label; no aria-required; no "required" word',
+          required: 'Mark required fields with both visible text and aria-required',
+          verdict: 'Warning', severity: SEV.MODERATE,
+          howToFix: 'Add aria-required="true" on the field, and append visually-readable text such as "(required)" to the label.'
+        });
+      }
+    });
+
+    /* Pattern 3: status indicators where two adjacent siblings differ
+       only by background colour. Common pattern: green/red dots side
+       by side with no aria-label or text. */
+    const dots = Array.from(document.querySelectorAll('span, i, em, b, div')).filter(el => {
+      if (el.children.length > 0) return false;
+      if (el.textContent.trim()) return false;     /* has text — fine */
+      const cs = window.getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      if (r.width < 6 || r.width > 32) return false;   /* not a status-dot-sized element */
+      const bg = parseColour(cs.backgroundColor);
+      if (!bg || bg.a < 0.5) return false;
+      return !el.getAttribute('aria-label') && !el.getAttribute('title') && !el.getAttribute('aria-labelledby');
+    });
+    if (dots.length >= 3) {
+      findings.push({
+        id: generateId(), engine: 'Colour-Only Meaning', element: `${dots.length} small coloured elements`,
+        criterion: 'WCAG 2.2 SC 1.4.1 Use of Colour (Level A)',
+        issue: `${dots.length} small coloured shapes with no accessible name. Likely status indicators that convey meaning by colour alone.`,
+        computed: `${dots.length} matched`,
+        required: 'Each status indicator needs aria-label or visible text',
+        verdict: 'Warning', severity: SEV.MODERATE,
+        howToFix: 'Add aria-label="Active" / aria-label="Inactive" (or equivalent), or pair the dot with text such as "Online" / "Offline".'
+      });
+    }
+
+    if (findings.length === 0)
+      findings.push({ id: generateId(), engine: 'Colour-Only Meaning', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.1 (Level A)', issue: 'No colour-only-meaning patterns detected by heuristic.', computed: 'Heuristic only — manual review still recommended', required: 'No colour-only meaning', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'Manually verify any chart, badge, or status indicator on the page.' });
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 19: TARGET SIZE — AAA (WCAG 2.2 SC 2.5.5, 44×44)
+     Engine 14 covers the AA minimum (24×24). This adds the AAA
+     check (44×44) as a Warning so designers can see the gap to
+     mobile-friendly sizing without it being treated as a failure.
+  ================================================================ */
+  function auditTargetSizeAAA() {
+    const findings = [];
+    const SELECTOR = 'a[href],button,input:not([type="hidden"]),select,textarea,summary,[role="button"],[role="link"],[role="checkbox"],[role="radio"],[role="switch"],[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"],[role="option"],[role="tab"],[role="slider"],[role="spinbutton"],[tabindex="0"]';
+    const MIN = 44;
+    const targets = Array.from(document.querySelectorAll(SELECTOR)).filter(el => {
+      if (el.disabled) return false;
+      const cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    let count = 0;
+    targets.forEach(el => {
+      const cs = window.getComputedStyle(el);
+      if (el.tagName === 'A' && cs.display === 'inline') return;   /* exception: inline links */
+      const r = el.getBoundingClientRect();
+      const w = Math.round(r.width), h = Math.round(r.height);
+      /* Already at AA failure (< 24) — Engine 14 reported it. We add
+         AAA findings only for AA-passing targets that miss AAA. */
+      if (w >= 24 && h >= 24 && (w < MIN || h < MIN)) {
+        count++;
+        if (count <= 12) {
+          findings.push({
+            id: generateId(), engine: 'Target Size AAA',
+            element: describeEl(el),
+            criterion: 'WCAG 2.2 SC 2.5.5 Target Size (Level AAA)',
+            issue: `Target ${w}×${h}px meets AA (24×24) but is below the AAA recommendation of 44×44.`,
+            computed: `${w}×${h}px`,
+            required: '44×44 CSS pixels (AAA)',
+            verdict: 'Warning', severity: SEV.MODERATE,
+            howToFix: 'Mobile and motor-impaired users benefit from 44×44 targets. Add min-width/min-height: 44px or generous padding.'
+          });
+        }
+      }
+    });
+    if (count > 12) {
+      findings.push({ id: generateId(), engine: 'Target Size AAA', element: 'Page', criterion: 'WCAG 2.2 SC 2.5.5 (Level AAA)', issue: `Additional ${count - 12} targets meet AA but miss AAA 44×44.`, computed: `${count} sub-44 targets`, required: '44×44', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Audit your design system component sizes globally.' });
+    }
+    if (findings.length === 0)
+      findings.push({ id: generateId(), engine: 'Target Size AAA', element: 'Page', criterion: 'WCAG 2.2 SC 2.5.5 (Level AAA)', issue: 'All AA-passing targets also meet the 44×44 AAA recommendation.', computed: `${targets.length} checked`, required: '44×44', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action required.' });
+    return findings;
+  }
+
+  /* ================================================================
      MAIN RUNNER
   ================================================================ */
   try {
@@ -496,7 +837,11 @@
       { name: 'DOM Order', fn: auditDomOrder },
       { name: 'ARIA Validation', fn: auditAriaValidation },
       { name: 'Target Size', fn: auditTargetSize },
-      { name: 'Label in Name', fn: auditLabelInName }
+      { name: 'Label in Name', fn: auditLabelInName },
+      { name: 'Resize Text', fn: auditResizeText },
+      { name: 'Dark Mode Contrast', fn: auditDarkModeContrast },
+      { name: 'Colour-Only Meaning', fn: auditColourOnlyMeaning },
+      { name: 'Target Size AAA', fn: auditTargetSizeAAA }
     ];
 
     const findings = [];

@@ -4007,6 +4007,115 @@ function webAuditEngine() {
 
   function auditAriaValidation(){var findings=[],VALID_ROLES=new Set(['alert','alertdialog','button','checkbox','combobox','dialog','gridcell','link','log','marquee','menuitem','menuitemcheckbox','menuitemradio','option','progressbar','radio','scrollbar','searchbox','slider','spinbutton','status','switch','tab','tabpanel','textbox','timer','tooltip','treeitem','grid','listbox','menu','menubar','radiogroup','tablist','tree','treegrid','application','article','cell','columnheader','definition','directory','document','feed','figure','group','heading','img','list','listitem','math','none','note','presentation','row','rowgroup','rowheader','separator','table','term','toolbar','banner','complementary','contentinfo','form','main','navigation','region','search','generic']);var VALID_ARIA=new Set(['aria-activedescendant','aria-atomic','aria-autocomplete','aria-busy','aria-checked','aria-colcount','aria-colindex','aria-colspan','aria-controls','aria-current','aria-describedby','aria-description','aria-details','aria-disabled','aria-dropeffect','aria-errormessage','aria-expanded','aria-flowto','aria-grabbed','aria-haspopup','aria-hidden','aria-invalid','aria-keyshortcuts','aria-label','aria-labelledby','aria-level','aria-live','aria-modal','aria-multiline','aria-multiselectable','aria-orientation','aria-owns','aria-placeholder','aria-posinset','aria-pressed','aria-readonly','aria-relevant','aria-required','aria-roledescription','aria-rowcount','aria-rowindex','aria-rowspan','aria-selected','aria-setsize','aria-sort','aria-valuemax','aria-valuemin','aria-valuenow','aria-valuetext']);var BOOL_ARIA=new Set(['aria-atomic','aria-busy','aria-disabled','aria-grabbed','aria-hidden','aria-modal','aria-multiline','aria-multiselectable','aria-readonly','aria-required']);var TRI_ARIA=new Set(['aria-checked','aria-pressed']);var ariaEls=Array.from(document.querySelectorAll('[role],[aria-label],[aria-labelledby],[aria-describedby],[aria-hidden],[aria-expanded],[aria-checked],[aria-pressed],[aria-selected],[aria-live],[aria-controls],[aria-owns],[aria-haspopup],[aria-required],[aria-invalid],[aria-disabled],[aria-current],[aria-modal]')).filter(function(el){return window.getComputedStyle(el).display!=='none';}).slice(0,200);ariaEls.forEach(function(el){var role=el.getAttribute('role');if(role){role.trim().split(/\s+/).forEach(function(r){if(!VALID_ROLES.has(r))findings.push({id:generateId(),engine:'ARIA Validation',element:describeEl(el),criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'Invalid role "'+r+'".',computed:'role="'+role+'"',required:'Valid WAI-ARIA 1.2 role',verdict:'Fail',severity:SEV.SERIOUS,howToFix:'Replace "'+r+'" with a valid role.'});});}Array.from(el.attributes).forEach(function(attr){if(!attr.name.startsWith('aria-'))return;if(!VALID_ARIA.has(attr.name))findings.push({id:generateId(),engine:'ARIA Validation',element:describeEl(el),criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'Invalid attribute "'+attr.name+'".',computed:attr.name+'="'+attr.value+'"',required:'Valid WAI-ARIA attribute',verdict:'Fail',severity:SEV.MODERATE,howToFix:'Remove or fix attribute name.'});if(BOOL_ARIA.has(attr.name)&&attr.value!=='true'&&attr.value!=='false')findings.push({id:generateId(),engine:'ARIA Validation',element:describeEl(el),criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'"'+attr.name+'" value "'+attr.value+'" must be true/false.',computed:attr.name+'="'+attr.value+'"',required:'"true" or "false"',verdict:'Fail',severity:SEV.MODERATE,howToFix:'Set to "true" or "false".'});if(TRI_ARIA.has(attr.name)&&['true','false','mixed'].indexOf(attr.value)===-1)findings.push({id:generateId(),engine:'ARIA Validation',element:describeEl(el),criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'"'+attr.name+'" value "'+attr.value+'" invalid.',computed:attr.name+'="'+attr.value+'"',required:'"true", "false", or "mixed"',verdict:'Fail',severity:SEV.MODERATE,howToFix:'Use "true", "false", or "mixed".'});if(['aria-labelledby','aria-describedby','aria-controls','aria-owns','aria-flowto','aria-activedescendant','aria-details','aria-errormessage'].indexOf(attr.name)!==-1){attr.value.trim().split(/\s+/).forEach(function(id){if(id&&!document.getElementById(id))findings.push({id:generateId(),engine:'ARIA Validation',element:describeEl(el),criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'"'+attr.name+'" references missing ID "'+id+'".',computed:attr.name+'="'+attr.value+'"',required:'ID must exist',verdict:'Fail',severity:SEV.SERIOUS,howToFix:'Add element with id="'+id+'" or fix reference.'});});}});if(el.getAttribute('aria-hidden')==='true'){var hasFocusable=el.matches('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])')||el.querySelector('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])');if(hasFocusable)findings.push({id:generateId(),engine:'ARIA Validation',element:describeEl(el),criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'aria-hidden="true" with focusable children.',computed:'Focusable content hidden from AT',required:'No focusable content inside aria-hidden',verdict:'Fail',severity:SEV.CRITICAL,howToFix:'Remove aria-hidden or add tabindex="-1" to focusable children.'});}});if(!findings.length)findings.push({id:generateId(),engine:'ARIA Validation',element:'Page',criterion:'WCAG 2.2 SC 4.1.2 (Level A)',issue:'No ARIA issues.',computed:ariaEls.length+' checked',required:'Valid ARIA usage',verdict:'Pass',severity:SEV.MINOR,howToFix:'No action.'});return findings;}
 
+  /* ── ENGINE 14: Resize Text (1.4.4 AA) ── */
+  function auditResizeText(){
+    var findings=[],TEXT='p,li,td,th,dt,dd,figcaption,h1,h2,h3,h4,h5,h6,blockquote,label,button,a,span,div';
+    var probes=Array.from(document.querySelectorAll(TEXT)).filter(function(el){
+      var cs=window.getComputedStyle(el);
+      if(cs.display==='none'||cs.visibility==='hidden')return false;
+      return Array.from(el.childNodes).some(function(n){return n.nodeType===3&&n.textContent.trim().length>4;});
+    }).slice(0,250);
+    var before=probes.map(function(el){var r=el.getBoundingClientRect();return{el:el,w:r.width,h:r.height,sw:el.scrollWidth,sh:el.scrollHeight};});
+    var docBefore=document.documentElement.scrollWidth;
+    var orig=document.documentElement.style.zoom||'';
+    document.documentElement.style.zoom='2';
+    void document.documentElement.offsetHeight;
+    var docAfter=document.documentElement.scrollWidth;
+    var horiz=docAfter>docBefore*2.05;
+    var after=probes.map(function(el){var r=el.getBoundingClientRect();return{w:r.width,h:r.height,sw:el.scrollWidth,sh:el.scrollHeight};});
+    document.documentElement.style.zoom=orig;
+    void document.documentElement.offsetHeight;
+    var clipped=0;
+    after.forEach(function(a,i){
+      var b=before[i];
+      var grew=(a.sh>b.sh+2)||(a.sw>b.sw+2);
+      var contained=(a.h<=b.h*1.05)&&(a.w<=b.w*1.05);
+      if(grew&&contained){clipped++;if(clipped<=8)findings.push({id:generateId(),engine:'Resize Text',element:describeEl(b.el),criterion:'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',issue:'Element clips its content at 200% zoom.',computed:'before '+Math.round(b.w)+'x'+Math.round(b.h)+' (scroll '+b.sw+'x'+b.sh+'), after '+Math.round(a.w)+'x'+Math.round(a.h)+' (scroll '+a.sw+'x'+a.sh+')',required:'No clipping at 200%',verdict:'Fail',severity:SEV.SERIOUS,howToFix:'Replace fixed pixel heights with min-height. Remove overflow:hidden on text containers.'});}
+    });
+    if(horiz)findings.push({id:generateId(),engine:'Resize Text',element:'Document',criterion:'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',issue:'Page introduces horizontal scrolling at 200% zoom beyond expected proportional growth.',computed:'document.scrollWidth: '+docBefore+'px before, '+docAfter+'px after',required:'Reflow without two-dimensional scrolling',verdict:'Fail',severity:SEV.SERIOUS,howToFix:'Use responsive layout with relative units (rem, %, fr).'});
+    if(clipped>8)findings.push({id:generateId(),engine:'Resize Text',element:'Document',criterion:'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',issue:'Additional '+(clipped-8)+' elements also clip at 200% zoom.',computed:clipped+' clipped of '+before.length+' sampled',required:'No clipping at 200%',verdict:'Fail',severity:SEV.SERIOUS,howToFix:'Pattern is widespread.'});
+    if(!findings.length)findings.push({id:generateId(),engine:'Resize Text',element:'Page',criterion:'WCAG 2.2 SC 1.4.4 (Level AA)',issue:'Page survives 200% zoom without clipping.',computed:probes.length+' text elements sampled',required:'No clipping at 200%',verdict:'Pass',severity:SEV.MINOR,howToFix:'Verify manually with browser zoom.'});
+    return findings;
+  }
+
+  /* ── ENGINE 15: Dark Mode Contrast (1.4.3 dark palette) ── */
+  function auditDarkModeContrast(){
+    var findings=[],darkRules=[];
+    for(var i=0;i<document.styleSheets.length;i++){
+      var rules;try{rules=document.styleSheets[i].cssRules||[];}catch(e){continue;}
+      for(var j=0;j<rules.length;j++){var r=rules[j];if(r.conditionText&&/prefers-color-scheme\s*:\s*dark/i.test(r.conditionText)){for(var k=0;k<(r.cssRules||[]).length;k++)darkRules.push(r.cssRules[k]);}}
+    }
+    if(!darkRules.length){findings.push({id:generateId(),engine:'Dark Mode Contrast',element:'Page',criterion:'WCAG 2.2 SC 1.4.3 (dark mode)',issue:'No dark-mode CSS rules found.',computed:'0 @media (prefers-color-scheme: dark) rules',required:'Either no dark mode or dark rules present',verdict:'Info',severity:SEV.MINOR,howToFix:'If you intend to support dark mode, add @media (prefers-color-scheme: dark) styles.'});return findings;}
+    var checked=0,failed=0;
+    darkRules.forEach(function(rule){
+      if(!rule.style)return;
+      var fg=rule.style.color,bg=rule.style.backgroundColor||rule.style.background;
+      if(!fg||!bg)return;
+      var fgC=parseColour(fg),bgC=parseColour(bg);if(!fgC||!bgC)return;
+      var bgFinal=bgC.a>=1?bgC:{r:18,g:18,b:18,a:1};
+      var fgFinal=blendColour(fgC,bgFinal);
+      var ratio=contrastRatio(fgFinal,bgFinal);checked++;
+      if(ratio<4.5){failed++;if(failed<=6)findings.push({id:generateId(),engine:'Dark Mode Contrast',element:'selector: '+(rule.selectorText||'(unknown)'),criterion:'WCAG 2.2 SC 1.4.3 (Level AA — dark mode palette)',issue:'Dark-mode rule pairs foreground "'+fg+'" with background "'+bg+'" — contrast '+ratio.toFixed(2)+':1 fails 4.5:1.',computed:ratio.toFixed(2)+':1',required:'4.5:1 for normal text',verdict:'Fail',severity:ratio<3.0?SEV.CRITICAL:SEV.SERIOUS,howToFix:'Lighten the foreground or darken the background.'});}
+    });
+    if(failed>6)findings.push({id:generateId(),engine:'Dark Mode Contrast',element:'Page',criterion:'WCAG 2.2 SC 1.4.3 (dark mode palette)',issue:'Additional '+(failed-6)+' dark-mode contrast failures not listed.',computed:failed+' failures of '+checked+' declared pairs',required:'4.5:1',verdict:'Fail',severity:SEV.SERIOUS,howToFix:'Re-tune the dark palette holistically.'});
+    if(!failed&&checked)findings.push({id:generateId(),engine:'Dark Mode Contrast',element:'Page',criterion:'WCAG 2.2 SC 1.4.3 (dark mode)',issue:checked+' dark-mode colour pairs all meet 4.5:1.',computed:checked+' pairs OK',required:'4.5:1',verdict:'Pass',severity:SEV.MINOR,howToFix:'No action required.'});
+    else if(!checked)findings.push({id:generateId(),engine:'Dark Mode Contrast',element:'Page',criterion:'WCAG 2.2 SC 1.4.3 (dark mode)',issue:'Dark-mode rules present but no inline colour/background pairs found to verify.',computed:darkRules.length+' dark rules, 0 inline pairs',required:'Verifiable colour pairs',verdict:'Info',severity:SEV.MINOR,howToFix:'Many themes use CSS custom properties — manual check in dark mode recommended.'});
+    return findings;
+  }
+
+  /* ── ENGINE 16: Colour-Only Meaning (1.4.1 A) ── */
+  function auditColourOnlyMeaning(){
+    var findings=[];
+    var COLOUR='(red|green|blue|yellow|orange|purple|pink|black|white|grey|gray|brown|cyan|magenta|amber|lime|teal|violet|maroon)';
+    var REF=new RegExp('\\b(click|press|select|tap|see|find|the|use)\\s+(?:the\\s+)?'+COLOUR+'\\s+(button|link|icon|tab|item|box|cell|row|dot|circle|square|arrow|bar|highlight|text|word|number|line|area|section|panel|card|badge)\\b','i');
+    document.querySelectorAll('p,li,td,dd,span,label,button,a,h1,h2,h3,h4,h5,h6').forEach(function(el){
+      var t=el.textContent||'';if(t.length<5||t.length>400)return;
+      var m=t.match(REF);if(m)findings.push({id:generateId(),engine:'Colour-Only Meaning',element:describeEl(el),criterion:'WCAG 2.2 SC 1.4.1 Use of Colour (Level A)',issue:'Copy refers to UI by colour alone: "'+m[0]+'".',computed:m[0],required:'Refer to UI by name, position, or shape, not colour',verdict:'Warning',severity:SEV.SERIOUS,howToFix:'Rephrase to "Press Save" or "Click the rightmost button".'});
+    });
+    document.querySelectorAll('input[required],select[required],textarea[required],[aria-required="true"]').forEach(function(field){
+      var labelEl=field.id?document.querySelector('label[for="'+(typeof CSS!=='undefined'&&CSS.escape?CSS.escape(field.id):field.id)+'"]'):field.closest('label');
+      if(!labelEl)return;
+      var lt=labelEl.textContent||'';
+      var hasA=/\*/.test(lt),saysR=/required|mandatory|must/i.test(lt);
+      var hasAria=field.getAttribute('aria-required')==='true'||field.required;
+      if(hasA&&!saysR&&!hasAria)findings.push({id:generateId(),engine:'Colour-Only Meaning',element:describeEl(field),criterion:'WCAG 2.2 SC 1.4.1 / 3.3.2',issue:'Required field marked only with an asterisk and colour, no programmatic indicator.',computed:'Asterisk in label; no aria-required; no "required" word',required:'Mark required fields with text and aria-required',verdict:'Warning',severity:SEV.MODERATE,howToFix:'Add aria-required="true" and visible "(required)" text.'});
+    });
+    var dots=Array.from(document.querySelectorAll('span,i,em,b,div')).filter(function(el){
+      if(el.children.length>0)return false;
+      if(el.textContent.trim())return false;
+      var cs=window.getComputedStyle(el),r=el.getBoundingClientRect();
+      if(r.width<6||r.width>32)return false;
+      var bg=parseColour(cs.backgroundColor);if(!bg||bg.a<0.5)return false;
+      return !el.getAttribute('aria-label')&&!el.getAttribute('title')&&!el.getAttribute('aria-labelledby');
+    });
+    if(dots.length>=3)findings.push({id:generateId(),engine:'Colour-Only Meaning',element:dots.length+' small coloured elements',criterion:'WCAG 2.2 SC 1.4.1 Use of Colour (Level A)',issue:dots.length+' small coloured shapes with no accessible name. Likely status indicators.',computed:dots.length+' matched',required:'Each indicator needs aria-label or visible text',verdict:'Warning',severity:SEV.MODERATE,howToFix:'Add aria-label="Active"/"Inactive" or pair with text.'});
+    if(!findings.length)findings.push({id:generateId(),engine:'Colour-Only Meaning',element:'Page',criterion:'WCAG 2.2 SC 1.4.1 (Level A)',issue:'No colour-only-meaning patterns detected by heuristic.',computed:'Heuristic only',required:'No colour-only meaning',verdict:'Pass',severity:SEV.MINOR,howToFix:'Manually verify charts, badges, status indicators.'});
+    return findings;
+  }
+
+  /* ── ENGINE 17: Target Size — AAA (2.5.5) ── */
+  function auditTargetSizeAAA(){
+    var findings=[];
+    var SEL='a[href],button,input:not([type="hidden"]),select,textarea,summary,[role="button"],[role="link"],[role="checkbox"],[role="radio"],[role="switch"],[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"],[role="option"],[role="tab"],[role="slider"],[role="spinbutton"],[tabindex="0"]';
+    var MIN=44;
+    var targets=Array.from(document.querySelectorAll(SEL)).filter(function(el){
+      if(el.disabled)return false;
+      var cs=window.getComputedStyle(el);
+      if(cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity)===0)return false;
+      var r=el.getBoundingClientRect();return r.width>0&&r.height>0;
+    });
+    var count=0;
+    targets.forEach(function(el){
+      var cs=window.getComputedStyle(el);
+      if(el.tagName==='A'&&cs.display==='inline')return;
+      var r=el.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height);
+      if(w>=24&&h>=24&&(w<MIN||h<MIN)){count++;if(count<=12)findings.push({id:generateId(),engine:'Target Size AAA',element:describeEl(el),criterion:'WCAG 2.2 SC 2.5.5 Target Size (Level AAA)',issue:'Target '+w+'x'+h+'px meets AA (24x24) but is below AAA 44x44.',computed:w+'x'+h+'px',required:'44x44 CSS pixels (AAA)',verdict:'Warning',severity:SEV.MODERATE,howToFix:'Add min-width/min-height: 44px or generous padding.'});}
+    });
+    if(count>12)findings.push({id:generateId(),engine:'Target Size AAA',element:'Page',criterion:'WCAG 2.2 SC 2.5.5 (Level AAA)',issue:'Additional '+(count-12)+' targets meet AA but miss AAA 44x44.',computed:count+' sub-44 targets',required:'44x44',verdict:'Warning',severity:SEV.MODERATE,howToFix:'Audit your design system component sizes globally.'});
+    if(!findings.length)findings.push({id:generateId(),engine:'Target Size AAA',element:'Page',criterion:'WCAG 2.2 SC 2.5.5 (Level AAA)',issue:'All AA-passing targets also meet 44x44 AAA.',computed:targets.length+' checked',required:'44x44',verdict:'Pass',severity:SEV.MINOR,howToFix:'No action required.'});
+    return findings;
+  }
+
   /* ── Runner: collect all findings, post to opener ── */
   try {
     findingCounter = 0;
@@ -4023,7 +4132,11 @@ function webAuditEngine() {
       {name:'Dark Mode',          fn:auditDarkMode},
       {name:'Text Spacing',       fn:auditTextSpacing},
       {name:'DOM Order',          fn:auditDomOrder},
-      {name:'ARIA Validation',    fn:auditAriaValidation}
+      {name:'ARIA Validation',    fn:auditAriaValidation},
+      {name:'Resize Text',        fn:auditResizeText},
+      {name:'Dark Mode Contrast', fn:auditDarkModeContrast},
+      {name:'Colour-Only Meaning',fn:auditColourOnlyMeaning},
+      {name:'Target Size AAA',    fn:auditTargetSizeAAA}
     ];
     var findings = [];
     engines.forEach(function(engine) {
