@@ -18,6 +18,8 @@ WHAT IT AUDITS
 
 Live web pages. Paste a URL or click the toolbar button on any tab. AMASAMYA runs a full WCAG 2.2 audit on the active page covering colour contrast, ARIA validation, focus management, structural semantics, and the broader interaction patterns the standard requires.
 
+Beyond the structural checks, AMASAMYA also runs visual-behaviour audits that most other tools skip. It applies a 200% zoom to the page and detects content that clips or introduces horizontal scrolling. It parses any dark-mode stylesheet rules the page declares and verifies the contrast of every colour pair the dark palette specifies. It heuristically flags copy that names a UI element by colour alone, asterisk-only required-field markers with no programmatic indicator, and unlabelled small coloured shapes that look like status dots. It checks every interactive target against the AAA recommendation of forty-four by forty-four CSS pixels in addition to the AA minimum.
+
 Documents. Upload a file at the linked AMASAMYA web platform and the tool audits its accessibility. The supported formats include PDFs, Microsoft Office files, EPUB books, and OpenDocument files. Findings are format-specific because the underlying remediation differs from one format to the next.
 
 Mobile apps. A structured manual-test checklist for iOS, Android, and WearOS. Each item names the WCAG criterion, the assistive technology to use, and the specific test method. Reports can be exported.
@@ -132,9 +134,16 @@ specific feedback. Suggested text:
 > elsewhere in the description (the WCAG-engine enumeration and the
 > screen-reader brand list) that pattern-match the same policy. The
 > revised description focuses on what AMASAMYA does in plain prose
-> rather than enumerating supported names. The resubmission also
-> includes the corrected runtime icons (the previous build still
-> rendered as "A11Y") and freshly regenerated screenshots. Please
+> rather than enumerating supported names.
+>
+> This resubmission also bumps the package to v3.2.0, which adds four
+> new visual-behaviour audit engines: a 200% zoom verification for SC
+> 1.4.4, dark-mode palette contrast verification for SC 1.4.3, a
+> heuristic for colour-only meaning under SC 1.4.1, and the AAA
+> 44 by 44 target-size recommendation under SC 2.5.5. The earlier
+> branding fixes from the previous resubmission (corrected runtime
+> icons that previously still rendered as "A11Y", and freshly
+> regenerated screenshots) are all preserved in this build. Please
 > review at your convenience.
 >
 > — Akhilesh Malani
