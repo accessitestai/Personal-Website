@@ -46,6 +46,19 @@ positive or critical it is.
 If you'd prefer to be acknowledged publicly on our contributors page
 instead of (or in addition to) compensation, tell us in the form.
 
+## Installing the Chrome extension (if your test path uses it)
+
+When you install AMASAMYA from the Chrome Web Store, Chrome may show a
+dialog titled "Proceed with caution" that says the extension is not
+trusted by Enhanced Safe Browsing. This is normal for newly-approved
+extensions and means only that the extension has not yet accumulated
+install history — it is not a security concern. Click **Continue to
+install**.
+
+Chrome will then show a second dialog asking you to confirm two
+permissions. Click **Add extension** to complete the installation. The
+AMASAMYA toolbar icon will appear in Chrome's top-right area.
+
 ## What to test — suggested 30-minute path
 
 Pick a path based on what you do day-to-day. You don't need to do all of
