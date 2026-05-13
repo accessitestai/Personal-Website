@@ -455,9 +455,36 @@ a:hover {
 
 .hero h1 {
   margin-bottom: var(--spacing-sm);
-  /* Gradient stops kept within colours that achieve ≥4.5:1 on white.
-     --color-accent (#0891b2 = 3.68:1) is too light for text use;
-     --color-primary-light (#0369a1 = 5.93:1) is the lightest safe stop. */
+
+  /* ────────────────────────────────────────────────────────────────
+     CONTRAST RECEIPTS — WCAG 2.2 SC 1.4.3 AA + SC 1.4.6 AAA
+     ────────────────────────────────────────────────────────────────
+     axe-core and most automated scanners CANNOT measure contrast on
+     text painted with `background-clip: text` (the text has no single
+     "color" value — every character spans a gradient). This is a
+     known scanner blind spot, not a defect in this rule.
+
+     The math below is computed against the worst-case combinations:
+     each gradient stop measured against each possible background
+     colour the hero section uses (white #ffffff at the top of the
+     hero, slate-100 #f1f5f9 at the bottom via the linear-gradient
+     fade in .hero). The radial-gradient overlays in .hero use 5–7 %
+     opacity tints and shift effective background by less than ±0.5
+     ratio points, so the table below is the binding worst case.
+
+       Gradient stop                       | on #ffffff | on #f1f5f9
+       ────────────────────────────────────|────────────|───────────
+       0 %  --color-primary-dark  #082f49  |   13.88:1  |   12.67:1
+       55 % --color-primary       #0c4a6e  |    9.46:1  |    8.63:1
+       100% --color-primary-light #075280  |    8.31:1  |    7.58:1
+
+     Every stop passes WCAG 2.2 SC 1.4.3 AA (≥4.5:1) and
+     SC 1.4.6 AAA (≥7:1) on both background variants. The lightest
+     stop on the lightest background (7.58:1) is the floor.
+
+     If the gradient endpoints ever change, recompute the worst-case
+     stop against #f1f5f9 and confirm it stays ≥7:1 before merging.
+     ──────────────────────────────────────────────────────────────── */
   background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 55%, var(--color-primary-light) 100%);
   -webkit-background-clip: text;
   background-clip: text;
