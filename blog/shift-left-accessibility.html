@@ -46,10 +46,10 @@
     .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease; }
     .share-btn:hover { transform: translateY(-2px); }
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
-    .share-btn--linkedin { background: #0077b5; color: #fff; }
-    .share-btn--linkedin:hover { background: #005e93; color: #fff; }
-    .share-btn--twitter { background: #1da1f2; color: #fff; }
-    .share-btn--twitter:hover { background: #0d8ecf; color: #fff; }
+    .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
+    .share-btn--linkedin:hover { background: #00355a; color: #fff; }
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
     .share-btn svg { width: 18px; height: 18px; flex-shrink: 0; }

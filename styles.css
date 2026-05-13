@@ -5,8 +5,8 @@
   /* Primary palette — deep navy to teal */
   --color-primary: #0c4a6e;
   --color-primary-dark: #082f49;
-  --color-primary-light: #0369a1;
-  --color-accent: #0891b2;
+  --color-primary-light: #075280; /* darkened from #0369a1 (5.93:1) → #075280 (8.28:1 on white, 7.59:1 on slate-100 #f1f5f9) to pass WCAG 1.4.6 AAA on both surfaces */
+  --color-accent: #155e75; /* darkened from #0891b2 (3.68:1 for text) → cyan-800 (7.16:1) to pass WCAG 1.4.3 AA for normal text and AAA for large text */
   --color-accent-light: #22d3ee;
   --color-warm: #d97706;
 
