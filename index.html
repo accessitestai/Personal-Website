@@ -253,6 +253,49 @@
   </div>
 
   <main id="main-content">
+
+    <!-- ────────────────────────────────────────────────────────────
+         GAAD 2026 launch banner
+         ────────────────────────────────────────────────────────────
+         Shown only during the GAAD 2026 launch window
+         (Mon 2026-05-18 → Thu 2026-05-28, inclusive). The `hidden`
+         attribute keeps assistive tech from announcing it outside
+         that window. Inline script below removes the attribute if
+         the date is in window AND the user has not previously
+         clicked Dismiss (state stored in localStorage).
+         Remove this entire block after the launch window closes —
+         search the file for "GAAD 2026 launch banner" to find it.
+    ──────────────────────────────────────────────────────────── -->
+    <aside id="gaad-banner" class="gaad-banner" role="region" aria-labelledby="gaad-banner-heading" hidden>
+      <div class="container gaad-banner-inner">
+        <h2 id="gaad-banner-heading" class="gaad-banner-heading">GAAD 2026 release announcement</h2>
+        <p class="gaad-banner-text">
+          Released today on Global Accessibility Awareness Day 2026 — the AMASAMYA Chrome extension, the AMASAMYA web platform, and the AMASAMYA source code, all free and open-source under the MIT licence. <a href="blog/gaad-2026-launching-amasamya.html" class="gaad-banner-link">Read the launch post</a>.
+        </p>
+        <button type="button" id="gaad-banner-dismiss" class="gaad-banner-dismiss" aria-label="Dismiss GAAD 2026 release announcement">Dismiss</button>
+      </div>
+    </aside>
+    <script>
+      (function () {
+        /* Window: 18 May 2026 inclusive to 28 May 2026 inclusive. */
+        var now = new Date();
+        var start = new Date('2026-05-18T00:00:00');
+        var end   = new Date('2026-05-29T00:00:00'); /* exclusive upper bound */
+        if (now < start || now >= end) return;
+        if (localStorage.getItem('gaad-2026-dismissed') === '1') return;
+        var b = document.getElementById('gaad-banner');
+        if (!b) return;
+        b.removeAttribute('hidden');
+        var dismiss = document.getElementById('gaad-banner-dismiss');
+        if (dismiss) {
+          dismiss.addEventListener('click', function () {
+            try { localStorage.setItem('gaad-2026-dismissed', '1'); } catch (e) {}
+            b.setAttribute('hidden', '');
+          });
+        }
+      })();
+    </script>
+
     <!-- Hero Section -->
     <section id="hero" class="hero">
       <div class="container hero-content">

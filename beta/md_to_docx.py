@@ -82,6 +82,12 @@ DOCS = [
     ("beta/cws-listing-description.md",
      "beta/cws-listing-description.docx",
      "AMASAMYA — CWS Listing Description (paste-ready)"),
+    ("beta/gaad-outreach-list.md",
+     "beta/gaad-outreach-list.docx",
+     "AMASAMYA — GAAD 2026 Outreach List"),
+    ("beta/gaad-launch-posts.md",
+     "beta/gaad-launch-posts.docx",
+     "AMASAMYA — GAAD 2026 Launch Post Pack"),
 ]
 
 

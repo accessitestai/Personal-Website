@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="On Global Accessibility Awareness Day 2026, I'm releasing AMASAMYA — the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free. Here is what it is, why I built it, and how it differs from what already exists.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="GAAD, Global Accessibility Awareness Day, AMASAMYA, WCAG 2.2, accessibility audit, blind developer, screen reader, open source accessibility tool, RPwD Act, IS 17802">
+  <link rel="canonical" href="https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="AMASAMYA at GAAD 2026: a blind-first accessibility audit tool, now open-source | Akhilesh Malani">
+  <meta property="og:description" content="On Global Accessibility Awareness Day 2026, I am releasing AMASAMYA — the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free.">
+  <meta property="og:url" content="https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html">
+
+  <title>AMASAMYA at GAAD 2026: A Blind-First Audit Tool, Now Open-Source | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="../images/logo-icon.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .blog-post { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .blog-post-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); }
+    .blog-post-header h1 { font-size: 2rem; line-height: 1.3; color: var(--color-primary-dark); margin-bottom: 0.75rem; }
+    .blog-meta { color: var(--color-text-light); font-size: 0.95rem; }
+    .blog-meta time { font-weight: 600; }
+    .blog-post-content h2 { font-size: 1.4rem; color: var(--color-primary); margin-top: 2.5rem; margin-bottom: 1rem; }
+    .blog-post-content h3 { font-size: 1.15rem; margin-top: 2rem; margin-bottom: 0.75rem; }
+    .blog-post-content p { margin-bottom: 1.25rem; line-height: 1.8; }
+    .blog-post-content ul, .blog-post-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+    .blog-post-content li { margin-bottom: 0.5rem; line-height: 1.7; }
+    .blog-post-content blockquote { border-left: 4px solid var(--color-primary); padding: 1rem 1.5rem; margin: 1.5rem 0; background: var(--color-bg-alt); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; }
+    .blog-post-content code { background: var(--color-bg-alt); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .blog-post-content .callout { background: #eaf2f8; border: 1px solid #aed6f1; padding: 1.25rem; border-radius: var(--radius); margin: 1.5rem 0; }
+    .blog-post-content .callout strong { color: var(--color-primary); }
+    .blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; margin-top: 2rem; border-top: 2px solid var(--color-border); }
+    .blog-nav a { color: var(--color-primary); font-weight: 600; text-decoration: none; }
+    .blog-nav a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { .blog-post-header h1 { font-size: 1.5rem; } }
+    .share-section { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+    .share-section h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-text); }
+    .share-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease; }
+    .share-btn:hover { transform: translateY(-2px); }
+    .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
+    .share-btn--linkedin { background: #004471; color: #fff; }
+    .share-btn--linkedin:hover { background: #00355a; color: #fff; }
+    .share-btn--twitter { background: #000000; color: #fff; }
+    .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
+    .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
+    .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
+    .share-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .launch-banner {
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    .launch-banner p { color: #e2eaf4; margin: 0; }
+    .launch-banner strong { color: #fff; }
+  </style>
+  <script>
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true')})();
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <nav class="navbar" aria-label="Primary navigation">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand"><img src="../images/logo-horizontal.svg" alt="" role="presentation" class="logo-img" width="280" height="62"><span class="sr-only">Akhilesh Malani - Accessibility Architect, Home</span></a>
+        <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content" role="main">
+    <article class="blog-post">
+      <header class="blog-post-header">
+        <h1>AMASAMYA at GAAD 2026: A Blind-First Audit Tool, Now Open-Source</h1>
+        <p class="blog-meta"><time datetime="2026-05-21">21 May 2026</time> &middot; 7 minute read</p>
+      </header>
+
+      <div class="blog-post-content">
+
+        <div class="launch-banner" role="region" aria-label="GAAD 2026 release announcement">
+          <p><strong>Released today on Global Accessibility Awareness Day 2026:</strong> the AMASAMYA Chrome extension, the AMASAMYA web platform, and the AMASAMYA source code &mdash; all free, all blind-first, all open-source under the MIT licence.</p>
+        </div>
+
+        <h2>Why I am releasing this today</h2>
+
+        <p>Today is Global Accessibility Awareness Day. Every year on the third Thursday of May, the accessibility community pauses to talk about digital inclusion. The day has a real history &mdash; it was started in 2012 by a developer and a UX professional after a casual blog post about the gap between intent and reality in accessible web design. Thirteen years later, that gap is smaller, but it is still wide.</p>
+
+        <p>I am a screen reader user. I have spent over a decade working in digital accessibility as a consultant, an auditor, and an architect. Every audit tool I have tried to use to do my job was built on the assumption that the person running the audit can see. The findings are paragraphs of dense visual descriptions. The interfaces are dashboards designed to be scanned with eyes. The workflows assume the auditor can point at a problem on a screen and show it to a developer.</p>
+
+        <p>I cannot point at a screen. I needed a tool built on different assumptions. So I built one.</p>
+
+        <p>AMASAMYA is what I have been quietly building over the last several months. Today, on GAAD, I am releasing it to the community: as a free Chrome extension on the Web Store, as a free web platform at <a href="https://amasamya.akhileshmalani.com">amasamya.akhileshmalani.com</a>, and as open source on <a href="https://github.com/accessitestai/AMASAMYA">GitHub</a> under the MIT licence. There is no paywall, no signup required for the extension, and no telemetry sending data anywhere.</p>
+
+        <h2>What AMASAMYA is</h2>
+
+        <p>AMASAMYA is a WCAG 2.2 accessibility audit toolkit that ships in three forms:</p>
+
+        <ol>
+          <li>A <strong>Chrome extension</strong> that runs seventeen audit engines on any open tab in about five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel &mdash; navigable by heading with your screen reader's H key, no mouse needed.</li>
+          <li>A <strong>web platform</strong> that extends the same engines to uploaded documents in eight formats: PDF, Microsoft Office, EPUB, and OpenDocument. It also includes a structured mobile-app accessibility checklist for iOS, Android, and WearOS.</li>
+          <li>The <strong>source code</strong>, fully readable and forkable, with a README, contributing guide, and inline comments that explain the WCAG criterion each engine maps to.</li>
+        </ol>
+
+        <p>The seventeen engines cover the criteria that machine-checkable rules can actually verify: colour contrast at AA and AAA, focus management, structural semantics, ARIA validation, image alternatives, target size at both 2.5.8 AA and 2.5.5 AAA, text spacing, the 200% zoom reflow rule (1.4.4 Resize Text), dark-mode palette contrast verification, and a heuristic for colour-only meaning (1.4.1 Use of Colour). Three optional Vision AI modules &mdash; Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog &mdash; extend the audit beyond what local code can see, using your own API key. No data ever reaches AMASAMYA servers, because there are none.</p>
+
+        <h2>What is actually different about it</h2>
+
+        <p>The differences are not in the engine list. Most automated accessibility tools have a similar inventory of rules. The differences are in the assumptions:</p>
+
+        <p><strong>The interface is operable with a screen reader from the first commit.</strong> The Chrome side panel uses semantic headings so findings can be navigated by H key. Every finding announces its role, severity, and the recommended fix in a logical reading order. Reports export as HTML, CSV, JSON, or plain text &mdash; whichever format respects your workflow.</p>
+
+        <p><strong>Findings are written to be actionable, not just descriptive.</strong> Each one names the WCAG criterion, the severity, and a one-line remediation hint. The hint is written in the second person, in plain language, with the developer or content author as the reader &mdash; not the auditor.</p>
+
+        <p><strong>It is honest about its limits.</strong> Automated audit tools see roughly 30 to 40 per cent of accessibility issues. AMASAMYA is not a substitute for manual testing by a person with a disability. It is a complement, designed to take the mechanical checks off the table so manual testing time goes to the journey work tools cannot do.</p>
+
+        <p><strong>It is open-source.</strong> Anyone can read the engines, fork them, adapt them. If a rule looks wrong, you can verify the implementation against the WCAG technique it claims to check. There is no proprietary black box.</p>
+
+        <h2>What it costs</h2>
+
+        <p>Nothing. The Chrome extension is free on the Web Store. The web platform is free. The source code is MIT licensed.</p>
+
+        <p>The optional Vision AI features use your own API key (OpenAI or Anthropic). I do not see any data from those calls. If you would rather not use AI at all, the other fourteen engines run entirely locally with no external dependencies.</p>
+
+        <p>The project is self-funded. I have no investors influencing the privacy policy or feature roadmap. The reason I can give the tool away is that the cost of building it was my time, and I built it because I needed it.</p>
+
+        <h2>How to start using it</h2>
+
+        <p>Three paths, depending on what you want to do:</p>
+
+        <ul>
+          <li><strong>Audit a web page right now.</strong> <a href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif">Install the Chrome extension</a>. Open any page, press Ctrl + Shift + U, and the side panel will fill with findings within five seconds.</li>
+          <li><strong>Audit a document.</strong> Go to <a href="https://amasamya.akhileshmalani.com">amasamya.akhileshmalani.com</a>, sign in, and upload a PDF, Word file, PowerPoint deck, Excel workbook, EPUB book, or OpenDocument file.</li>
+          <li><strong>Read or fork the code.</strong> <a href="https://github.com/accessitestai/AMASAMYA">github.com/accessitestai/AMASAMYA</a> contains the full extension source, a README explaining each engine, and a CONTRIBUTING guide.</li>
+        </ul>
+
+        <h2>What I would value back</h2>
+
+        <p>Honest feedback. Critical especially. The kind of issue I cannot find on my own is the kind where AMASAMYA fails for a specific combination of screen reader, browser, and content. If the side panel becomes unusable with your assistive technology, or if a finding's wording confuses rather than clarifies, please open an issue on the repository &mdash; or reply directly to akhilesh.malani@gmail.com.</p>
+
+        <p>And if you do find the tool useful, a brief honest review on the <a href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif">Chrome Web Store listing</a> helps reduce the install-time warning for the next person who tries it. A critical review is as useful as a positive one.</p>
+
+        <h2>Closing</h2>
+
+        <p>GAAD exists because the accessibility community spent years pointing out that intent and reality do not match. Building blind-first is one small response to that observation. The tool released today is what I have to offer. It is not finished &mdash; nothing in accessibility ever is &mdash; but it works, it is honest about what it does and does not do, and it belongs to the community now.</p>
+
+        <p>Thank you to everyone who reviewed early versions, broke it in interesting ways, and told me to make it more honest about its limits. The version released today is better because of you.</p>
+
+        <p>Try it. Tell me what is wrong with it.</p>
+
+      </div>
+
+      <div class="share-section">
+        <h2>Share this article</h2>
+        <div class="share-buttons">
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html" target="_blank" rel="noopener noreferrer" class="share-btn share-btn--linkedin" aria-label="Share on LinkedIn (opens in new tab)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://twitter.com/intent/tweet?text=AMASAMYA%20at%20GAAD%202026%3A%20a%20blind-first%20accessibility%20audit%20tool%2C%20now%20open-source&url=https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html" target="_blank" rel="noopener noreferrer" class="share-btn share-btn--twitter" aria-label="Share on X/Twitter (opens in new tab)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X / Twitter
+          </a>
+          <a href="mailto:?subject=AMASAMYA%20at%20GAAD%202026%3A%20a%20blind-first%20accessibility%20audit%20tool%2C%20now%20open-source&body=I%20thought%20you%20might%20be%20interested%3A%20https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html" class="share-btn share-btn--email" aria-label="Share via email">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email
+          </a>
+        </div>
+      </div>
+
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="screen-reader-testing-guide.html">&larr; Previous: Screen Reader Testing Guide</a>
+        <a href="../index.html#blog">All Posts &rarr;</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "AMASAMYA at GAAD 2026: A Blind-First Audit Tool, Now Open-Source",
+    "description": "On Global Accessibility Awareness Day 2026, I am releasing AMASAMYA — the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free.",
+    "datePublished": "2026-05-21",
+    "dateModified": "2026-05-21",
+    "author": {
+      "@type": "Person",
+      "name": "Akhilesh Malani",
+      "url": "https://akhileshmalani.com",
+      "jobTitle": "Accessibility Architect & Digital Inclusion Strategist"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Akhilesh Malani",
+      "url": "https://akhileshmalani.com"
+    },
+    "mainEntityOfPage": "https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html",
+    "articleSection": "Accessibility",
+    "keywords": ["GAAD", "Global Accessibility Awareness Day", "AMASAMYA", "WCAG 2.2", "accessibility audit", "blind developer", "screen reader", "open source accessibility tool", "RPwD Act", "IS 17802"],
+    "wordCount": 1100,
+    "timeRequired": "PT7M"
+  }
+  </script>
+  <script src="../script.js"></script>
+</body>
+</html>
