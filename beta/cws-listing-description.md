@@ -24,6 +24,14 @@ Documents. Upload a file at the linked AMASAMYA web platform and the tool audits
 
 Mobile apps. A structured manual-test checklist for iOS, Android, and WearOS. Each item names the WCAG criterion, the assistive technology to use, and the specific test method. Reports can be exported.
 
+HOW TO USE IT
+
+After installation, open any web page you want to audit. Press Ctrl + Shift + U on Windows or Linux, or Command + Shift + U on Mac. The AMASAMYA side panel opens on the side of your Chrome window and fills with audit findings within five seconds.
+
+With a screen reader, press F6 to move focus into the side panel after the audit completes. Then use the H key in browse mode to move from one finding to the next. Each finding announces its WCAG criterion, its severity, and a one-sentence remediation hint.
+
+If the Ctrl + Shift + U shortcut does not work on your system — for example because Windows is using it for Unicode input — you can reassign it. Open chrome://extensions/shortcuts in the address bar, find AMASAMYA in the list, and bind any combination that is free on your machine. Alt + Shift + A is a safe alternative on most systems.
+
 VISION AI MODULES (optional, bring your own API key)
 
 Focus Indicator Narrator. Uses a Vision AI provider you configure to describe what the keyboard focus indicator looks like at every focusable element on the page. Lets a blind tester independently verify visual focus indicators without sighted help.
