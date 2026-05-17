@@ -343,8 +343,12 @@
         <legend>AI Provider</legend>
         <div class="radio-group">
           <label class="radio-label">
-            <input type="radio" name="vision-provider" id="provider-anthropic" value="anthropic" checked>
-            Anthropic (Claude — recommended)
+            <input type="radio" name="vision-provider" id="provider-gemini" value="gemini" checked>
+            Google Gemini (free tier — easiest to set up)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="vision-provider" id="provider-anthropic" value="anthropic">
+            Anthropic (Claude — highest quality)
           </label>
           <label class="radio-label">
             <input type="radio" name="vision-provider" id="provider-openai" value="openai">
@@ -354,12 +358,22 @@
       </fieldset>
 
       <div class="settings-field">
+        <label for="gemini-key">Google Gemini API Key</label>
+        <input type="password" id="gemini-key" class="key-input"
+               placeholder="AIza…" autocomplete="off"
+               aria-describedby="gemini-key-hint">
+        <p id="gemini-key-hint" class="field-hint">
+          Get your key at aistudio.google.com/app/apikey. Free tier includes generous daily usage at no cost. Used for Gemini Vision analysis.
+        </p>
+      </div>
+
+      <div class="settings-field">
         <label for="anthropic-key">Anthropic API Key</label>
         <input type="password" id="anthropic-key" class="key-input"
                placeholder="sk-ant-…" autocomplete="off"
                aria-describedby="anthropic-key-hint">
         <p id="anthropic-key-hint" class="field-hint">
-          Get your key at console.anthropic.com. Used for Claude Vision analysis.
+          Get your key at console.anthropic.com. Paid, highest quality. Used for Claude Vision analysis.
         </p>
       </div>
 
@@ -369,7 +383,7 @@
                placeholder="sk-…" autocomplete="off"
                aria-describedby="openai-key-hint">
         <p id="openai-key-hint" class="field-hint">
-          Get your key at platform.openai.com. Used for GPT-4o Vision analysis.
+          Get your key at platform.openai.com. Paid. Used for GPT-4o Vision analysis.
         </p>
       </div>
 

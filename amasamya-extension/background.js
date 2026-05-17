@@ -228,14 +228,25 @@ async function handleFocusElement(elementInfo, tabId) {
 
     const provider = store.AMASAMYA_vision_provider || 'anthropic';
 
+    /* v3.4.0 — Gemini support. Provider selection respects the user's
+       explicit choice first, then falls back to whichever key happens
+       to be configured. */
     if (provider === 'openai' && store.AMASAMYA_openai_key) {
       finding = await callOpenAIVision(dataUrl, elementInfo, store.AMASAMYA_openai_key);
+    } else if (provider === 'anthropic' && store.AMASAMYA_anthropic_key) {
+      finding = await callAnthropicVision(dataUrl, elementInfo, store.AMASAMYA_anthropic_key);
+    } else if (provider === 'gemini' && store.AMASAMYA_gemini_key) {
+      finding = await callGeminiVision(dataUrl, elementInfo, store.AMASAMYA_gemini_key);
+    } else if (store.AMASAMYA_gemini_key) {
+      finding = await callGeminiVision(dataUrl, elementInfo, store.AMASAMYA_gemini_key);
     } else if (store.AMASAMYA_anthropic_key) {
       finding = await callAnthropicVision(dataUrl, elementInfo, store.AMASAMYA_anthropic_key);
+    } else if (store.AMASAMYA_openai_key) {
+      finding = await callOpenAIVision(dataUrl, elementInfo, store.AMASAMYA_openai_key);
     } else {
       finding = {
         hasIndicator: null,
-        description:  'No Vision AI key configured. Add your Anthropic or OpenAI key in Settings.',
+        description:  'No Vision AI key configured. Add your Google Gemini, Anthropic, or OpenAI key in Settings. Gemini has a free tier and is the easiest provider to set up.',
         error:        true
       };
     }
@@ -311,6 +322,39 @@ async function callOpenAIVision(imageDataUrl, el, apiKey) {
   if (!res.ok) throw new Error(`OpenAI ${res.status}: ${await res.text()}`);
   const data = await res.json();
   return parseLLMJson(data.choices[0].message.content);
+}
+
+/* ── Vision LLM: Google Gemini (v3.4.0) ──
+   Gemini's generateContent endpoint accepts inline base64 image
+   parts. Gemini 1.5 / 2.0 Flash has a free tier with 15 RPM and
+   1500 RPD as of mid-2026 — generous enough for the kind of audit
+   volume any individual tester will produce. The endpoint hosts
+   the model name in the URL path. */
+async function callGeminiVision(imageDataUrl, el, apiKey) {
+  const base64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
+  const prompt = buildFocusPrompt(el);
+
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey);
+
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        role: 'user',
+        parts: [
+          { inlineData: { mimeType: 'image/png', data: base64 } },
+          { text: prompt }
+        ]
+      }],
+      generationConfig: { maxOutputTokens: 600, temperature: 0.2 }
+    })
+  });
+
+  if (!res.ok) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return parseLLMJson(text);
 }
 
 /* ── Prompt builder ── */
@@ -408,7 +452,7 @@ async function startVisualLayoutAudit() {
     await chrome.debugger.attach({ tabId: tab.id }, '1.3');
 
     const store = await chrome.storage.local.get([
-      'AMASAMYA_vision_provider', 'AMASAMYA_anthropic_key', 'AMASAMYA_openai_key'
+      'AMASAMYA_vision_provider', 'AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_gemini_key'
     ]);
 
     for (let i = 0; i < BREAKPOINTS.length; i++) {
@@ -448,11 +492,19 @@ async function startVisualLayoutAudit() {
       /* Send to Vision LLM */
       let finding;
       try {
-        const provider = store.AMASAMYA_vision_provider || 'anthropic';
+        const provider = store.AMASAMYA_vision_provider || 'gemini';
         if (provider === 'openai' && store.AMASAMYA_openai_key) {
           finding = await callOpenAILayoutVision(dataUrl, bp, store.AMASAMYA_openai_key);
+        } else if (provider === 'anthropic' && store.AMASAMYA_anthropic_key) {
+          finding = await callAnthropicLayoutVision(dataUrl, bp, store.AMASAMYA_anthropic_key);
+        } else if (provider === 'gemini' && store.AMASAMYA_gemini_key) {
+          finding = await callGeminiLayoutVision(dataUrl, bp, store.AMASAMYA_gemini_key);
+        } else if (store.AMASAMYA_gemini_key) {
+          finding = await callGeminiLayoutVision(dataUrl, bp, store.AMASAMYA_gemini_key);
         } else if (store.AMASAMYA_anthropic_key) {
           finding = await callAnthropicLayoutVision(dataUrl, bp, store.AMASAMYA_anthropic_key);
+        } else if (store.AMASAMYA_openai_key) {
+          finding = await callOpenAILayoutVision(dataUrl, bp, store.AMASAMYA_openai_key);
         } else {
           finding = { issues: [], note: 'No Vision AI key configured.', error: true };
         }
@@ -534,6 +586,35 @@ async function callOpenAILayoutVision(imageDataUrl, bp, apiKey) {
   if (!res.ok) throw new Error(`OpenAI ${res.status}: ${await res.text()}`);
   const data = await res.json();
   return parseLLMJson(data.choices[0].message.content);
+}
+
+/* v3.4.0 — Gemini equivalent of the layout-vision call. Same prompt
+   structure, same JSON output shape, different transport. */
+async function callGeminiLayoutVision(imageDataUrl, bp, apiKey) {
+  const base64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
+  const prompt = buildLayoutPrompt(bp);
+
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        role: 'user',
+        parts: [
+          { inlineData: { mimeType: 'image/png', data: base64 } },
+          { text: prompt }
+        ]
+      }],
+      generationConfig: { maxOutputTokens: 1024, temperature: 0.2 }
+    })
+  });
+
+  if (!res.ok) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return parseLLMJson(text);
 }
 
 function buildLayoutPrompt(bp) {

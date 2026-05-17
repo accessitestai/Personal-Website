@@ -80,27 +80,34 @@
      SETTINGS — load / save API keys
   ================================================================ */
 
+  /* v3.4.0 — Gemini added as a third provider option. Default for new
+     installs is gemini (free-tier, easiest first-time setup). Existing
+     installs preserve their prior provider choice. */
   const anthropicKeyInput = $('anthropic-key');
   const openaiKeyInput    = $('openai-key');
+  const geminiKeyInput    = $('gemini-key');
   const settingsStatus    = $('settings-status');
 
   /* Load saved keys on open */
   chrome.storage.local.get(
-    ['AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_vision_provider'],
+    ['AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_gemini_key', 'AMASAMYA_vision_provider'],
     (data) => {
       if (data.AMASAMYA_anthropic_key) anthropicKeyInput.value = data.AMASAMYA_anthropic_key;
       if (data.AMASAMYA_openai_key)    openaiKeyInput.value    = data.AMASAMYA_openai_key;
-      const provider = data.AMASAMYA_vision_provider || 'anthropic';
+      if (data.AMASAMYA_gemini_key)    geminiKeyInput.value    = data.AMASAMYA_gemini_key;
+      /* Default to gemini for new installs; preserve prior choice otherwise. */
+      const provider = data.AMASAMYA_vision_provider || 'gemini';
       const radio = document.querySelector(`input[name="vision-provider"][value="${provider}"]`);
       if (radio) radio.checked = true;
     }
   );
 
   $('save-settings-btn').addEventListener('click', () => {
-    const provider = document.querySelector('input[name="vision-provider"]:checked')?.value || 'anthropic';
+    const provider = document.querySelector('input[name="vision-provider"]:checked')?.value || 'gemini';
     chrome.storage.local.set({
       AMASAMYA_anthropic_key:   anthropicKeyInput.value.trim(),
       AMASAMYA_openai_key:      openaiKeyInput.value.trim(),
+      AMASAMYA_gemini_key:      geminiKeyInput.value.trim(),
       AMASAMYA_vision_provider: provider
     }, () => {
       settingsStatus.textContent = 'Settings saved.';
@@ -111,10 +118,11 @@
 
   $('clear-settings-btn').addEventListener('click', () => {
     chrome.storage.local.remove(
-      ['AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_vision_provider'],
+      ['AMASAMYA_anthropic_key', 'AMASAMYA_openai_key', 'AMASAMYA_gemini_key', 'AMASAMYA_vision_provider'],
       () => {
         anthropicKeyInput.value = '';
         openaiKeyInput.value    = '';
+        geminiKeyInput.value    = '';
         settingsStatus.textContent = 'Keys cleared.';
         announce('API keys cleared.');
         setTimeout(() => { settingsStatus.textContent = ''; }, 3000);
