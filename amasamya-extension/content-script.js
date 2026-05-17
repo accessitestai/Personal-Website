@@ -209,21 +209,104 @@
 
   /* ================================================================
      ENGINE 6: IMAGES
+     ================================================================
+     Deduplicates structurally identical images. A real-world bank /
+     enterprise page often reuses the same icon hundreds of times via
+     <use href="#id"> or by pasting the same <img src> in every row.
+     Reporting each occurrence individually produced reports with
+     700+ identical lines (Mujtaba IOB audit, May 2026). We now
+     fingerprint each unique problem and emit one finding per unique
+     fingerprint with an occurrence count.
   ================================================================ */
   function auditImages() {
     const findings = [];
-    Array.from(document.querySelectorAll('img,[role="img"],svg')).filter(el => { const cs = window.getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden'; }).forEach(el => {
+    /* Map fingerprint -> { count, sampleEl, kind } so we can emit one
+       finding per unique problem with the occurrence count. */
+    const seen = new Map();
+
+    function record(kind, key, el, build) {
+      const fp = kind + ':' + key;
+      const prior = seen.get(fp);
+      if (prior) { prior.count++; return; }
+      seen.set(fp, { count: 1, sampleEl: el, build });
+    }
+
+    function fingerprintSvg(el) {
+      /* Unified key — every reference to the same icon (whether
+         <svg id="X"> in a defs block or <svg><use href="#X"/></svg>
+         reusing it) produces the same fingerprint. So fixing one
+         source icon resolves every reuse on the page; one finding,
+         not many. */
+      const u = el.querySelector('use');
+      const href = u && (u.getAttribute('href') || u.getAttribute('xlink:href'));
+      const idRef = (href || '').replace(/^#/, '');
+      if (idRef) return 'icon=' + idRef;
+      if (el.id) return 'icon=' + el.id;
+      return 'html=' + (el.innerHTML || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+    }
+
+    Array.from(document.querySelectorAll('img,[role="img"],svg')).filter(el => {
+      const cs = window.getComputedStyle(el);
+      return cs.display !== 'none' && cs.visibility !== 'hidden';
+    }).forEach(el => {
       const tag = el.tagName.toLowerCase();
       if (tag === 'img') {
         const alt = el.getAttribute('alt');
-        if (alt === null) findings.push({ id: generateId(), engine: 'Images', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.1.1 (Level A)', issue: 'Missing alt attribute.', computed: 'absent', required: 'alt attribute required', verdict: 'Fail', severity: SEV.CRITICAL, howToFix: 'Add alt="" if decorative, or descriptive alt text.' });
-        else if (alt.trim() === '') findings.push({ id: generateId(), engine: 'Images', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.1.1 (Level A)', issue: `Decorative image (alt=""). Verify. File: ${(el.src || '').split('/').pop().split('?')[0]}`, computed: 'alt=""', required: 'Correct for decorative only', verdict: 'Info', severity: SEV.MINOR, howToFix: 'Confirm image is decorative.' });
-        else { const bad = ['image','photo','picture','graphic','icon','img','.png','.jpg','.gif','.svg','.webp']; if (bad.some(p => alt.toLowerCase() === p || alt.toLowerCase().endsWith(p))) findings.push({ id: generateId(), engine: 'Images', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.1.1 (Level A)', issue: `Generic alt "${alt}".`, computed: `alt="${alt}"`, required: 'Descriptive text', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Replace with meaningful description.' }); }
+        const srcKey = (el.getAttribute('src') || '') + '|' + (alt === null ? 'NULL' : alt);
+        if (alt === null) {
+          record('img-noalt', srcKey, el, ({ count, sampleEl }) => ({
+            id: generateId(), engine: 'Images', element: describeEl(sampleEl) + (count > 1 ? '  (and ' + (count - 1) + ' more identical)' : ''),
+            criterion: 'WCAG 2.2 SC 1.1.1 (Level A)',
+            issue: count > 1 ? `Missing alt attribute (${count} identical images on this page).` : 'Missing alt attribute.',
+            computed: 'absent' + (count > 1 ? ` × ${count}` : ''),
+            required: 'alt attribute required',
+            verdict: 'Fail', severity: SEV.CRITICAL,
+            howToFix: 'Add alt="" if decorative, or a descriptive alt text. Fixing one source fixes every occurrence.'
+          }));
+        } else if (alt.trim() === '') {
+          record('img-emptyalt', srcKey, el, ({ count, sampleEl }) => ({
+            id: generateId(), engine: 'Images', element: describeEl(sampleEl) + (count > 1 ? '  (and ' + (count - 1) + ' more identical)' : ''),
+            criterion: 'WCAG 2.2 SC 1.1.1 (Level A)',
+            issue: `Decorative image (alt=""). Verify. File: ${(sampleEl.src || '').split('/').pop().split('?')[0]}` + (count > 1 ? ` (${count} identical occurrences)` : ''),
+            computed: 'alt=""' + (count > 1 ? ` × ${count}` : ''),
+            required: 'Correct for decorative only',
+            verdict: 'Info', severity: SEV.MINOR,
+            howToFix: 'Confirm image is decorative.'
+          }));
+        } else {
+          const bad = ['image','photo','picture','graphic','icon','img','.png','.jpg','.gif','.svg','.webp'];
+          if (bad.some(p => alt.toLowerCase() === p || alt.toLowerCase().endsWith(p))) {
+            record('img-genericalt', srcKey, el, ({ count, sampleEl }) => ({
+              id: generateId(), engine: 'Images', element: describeEl(sampleEl) + (count > 1 ? '  (and ' + (count - 1) + ' more identical)' : ''),
+              criterion: 'WCAG 2.2 SC 1.1.1 (Level A)',
+              issue: `Generic alt "${alt}"` + (count > 1 ? ` (${count} identical occurrences)` : '') + '.',
+              computed: `alt="${alt}"` + (count > 1 ? ` × ${count}` : ''),
+              required: 'Descriptive text',
+              verdict: 'Fail', severity: SEV.SERIOUS,
+              howToFix: 'Replace with meaningful description. Fixing the source fixes every occurrence.'
+            }));
+          }
+        }
       }
       if (tag === 'svg' && el.getAttribute('aria-hidden') !== 'true' && !getAccessibleName(el) && !el.querySelector('title')) {
-        findings.push({ id: generateId(), engine: 'Images', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.1.1 (Level A)', issue: 'SVG has no accessible name.', computed: 'No title/aria-label', required: 'Accessible name or aria-hidden', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Add <title> or aria-hidden="true".' });
+        record('svg-noname', fingerprintSvg(el), el, ({ count, sampleEl }) => ({
+          id: generateId(), engine: 'Images', element: describeEl(sampleEl) + (count > 1 ? '  (and ' + (count - 1) + ' more identical reuses)' : ''),
+          criterion: 'WCAG 2.2 SC 1.1.1 (Level A)',
+          issue: count > 1
+            ? `SVG has no accessible name (${count} identical reuses of this icon on the page — typically a <use href> reference).`
+            : 'SVG has no accessible name.',
+          computed: 'No title/aria-label' + (count > 1 ? ` × ${count}` : ''),
+          required: 'Accessible name or aria-hidden',
+          verdict: 'Fail', severity: SEV.SERIOUS,
+          howToFix: 'Add <title> inside the SVG, or aria-hidden="true" if decorative. Fixing the source icon fixes every reuse on the page.'
+        }));
       }
     });
+
+    /* Emit one finding per unique problem. */
+    for (const entry of seen.values()) {
+      findings.push(entry.build(entry));
+    }
     return findings;
   }
 

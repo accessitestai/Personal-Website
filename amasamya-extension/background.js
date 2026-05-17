@@ -122,12 +122,54 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
    B. FOCUS NARRATOR — Module 2
 ════════════════════════════════════════════════════════ */
 
+/* v3.3.0 — Check that the user has a Vision AI key configured BEFORE
+   we walk a page, capture screenshots, and produce empty findings.
+   Bug surfaced by Mujtaba's IOB audit, May 2026: the Focus Narrator
+   was generating 12-element reports where every row said "No Vision
+   AI key configured" — the tool was wasting the user's time. */
+async function hasVisionAiKeyConfigured() {
+  const store = await chrome.storage.local.get([
+    'AMASAMYA_vision_provider',
+    'AMASAMYA_anthropic_key',
+    'AMASAMYA_openai_key',
+    'AMASAMYA_gemini_key'
+  ]);
+  const provider = store.AMASAMYA_vision_provider || 'anthropic';
+  if (provider === 'openai'    && store.AMASAMYA_openai_key)    return true;
+  if (provider === 'anthropic' && store.AMASAMYA_anthropic_key) return true;
+  if (provider === 'gemini'    && store.AMASAMYA_gemini_key)    return true;
+  /* Cross-provider fallback — if any key exists, treat as configured. */
+  return !!(store.AMASAMYA_openai_key || store.AMASAMYA_anthropic_key || store.AMASAMYA_gemini_key);
+}
+
 async function startFocusNarrator() {
   try {
+    /* Gate: require a configured Vision AI key BEFORE doing any work. */
+    if (!(await hasVisionAiKeyConfigured())) {
+      chrome.runtime.sendMessage({
+        type: 'focus-narrator-ui',
+        phase: 'error',
+        message: 'No Vision AI key configured. Open the Settings tab in the AMASAMYA side panel, add an API key from one of the supported providers (Anthropic Claude, OpenAI GPT-4o, or Google Gemini), and try the Focus Narrator again. Tip: Google Gemini has a generous free tier and is the easiest provider to set up if you do not already have a paid key.'
+      }).catch(() => {});
+      return;
+    }
+
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) { notifyPanelError('No active tab found.'); return; }
     if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
       notifyPanelError('Cannot audit browser internal pages.'); return;
+    }
+    /* Guard against running on the AMASAMYA platform itself or the side-panel
+       extension page — common mistake when users have the AMASAMYA tab focused
+       and the bank/audit-target tab in the background. */
+    if (tab.url.startsWith('https://amasamya.akhileshmalani.com') ||
+        tab.url.startsWith('http://localhost:3000/amasamya')) {
+      chrome.runtime.sendMessage({
+        type: 'focus-narrator-ui',
+        phase: 'error',
+        message: 'You are running the Focus Narrator on the AMASAMYA platform itself. Switch to the tab containing the page you actually want to audit, then run the Focus Narrator again.'
+      }).catch(() => {});
+      return;
     }
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -138,6 +180,35 @@ async function startFocusNarrator() {
   }
 }
 
+/* v3.3.0 — Throttle chrome.tabs.captureVisibleTab() so successive
+   calls stay under Chrome's MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND
+   quota (effectively 2 calls/sec). Without this, the Focus Narrator
+   on dense pages produced runs of "Error: quota exceeded" mixed in
+   with successful captures — Mujtaba's IOB report showed three such
+   errors. We keep a "last capture timestamp" and ensure 600 ms gap
+   between consecutive calls. Retries once on quota error with
+   additional backoff. */
+let __lastCaptureMs = 0;
+async function throttledCaptureVisibleTab() {
+  const MIN_GAP_MS = 600;
+  const elapsed = Date.now() - __lastCaptureMs;
+  if (elapsed < MIN_GAP_MS) await delay(MIN_GAP_MS - elapsed);
+  try {
+    const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'png' });
+    __lastCaptureMs = Date.now();
+    return dataUrl;
+  } catch (err) {
+    /* Quota errors look like "MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND". */
+    if (/CAPTURE.*QUOTA|CALLS_PER_SECOND/i.test(err.message || '')) {
+      await delay(1100);
+      const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'png' });
+      __lastCaptureMs = Date.now();
+      return dataUrl;
+    }
+    throw err;
+  }
+}
+
 async function handleFocusElement(elementInfo, tabId) {
   /* Brief additional delay so the browser renders the focus ring */
   await delay(200);
@@ -145,8 +216,8 @@ async function handleFocusElement(elementInfo, tabId) {
   let finding;
 
   try {
-    /* 1. Capture what is currently visible in the tab */
-    const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'png' });
+    /* 1. Capture what is currently visible in the tab (throttled) */
+    const dataUrl = await throttledCaptureVisibleTab();
 
     /* 2. Get API credentials from extension storage */
     const store = await chrome.storage.local.get([
@@ -301,10 +372,31 @@ const BREAKPOINTS = [
 async function startVisualLayoutAudit() {
   let tab;
   try {
+    /* v3.3.0 — gate on Vision AI key presence before any debugger
+       attachment / DOM work. Mirrors the Focus Narrator gate. */
+    if (!(await hasVisionAiKeyConfigured())) {
+      chrome.runtime.sendMessage({
+        type: 'visual-layout-ui',
+        phase: 'error',
+        message: 'No Vision AI key configured. Open the Settings tab in the AMASAMYA side panel, add an API key from one of the supported providers (Anthropic Claude, OpenAI GPT-4o, or Google Gemini), and try the Visual Layout Auditor again. Tip: Google Gemini has a generous free tier and is the easiest provider to set up if you do not already have a paid key.'
+      }).catch(() => {});
+      return;
+    }
+
     [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) { notifyPanelError('No active tab found.'); return; }
     if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
       notifyPanelError('Cannot audit browser internal pages.'); return;
+    }
+    /* Same cross-tab guard as Focus Narrator. */
+    if (tab.url.startsWith('https://amasamya.akhileshmalani.com') ||
+        tab.url.startsWith('http://localhost:3000/amasamya')) {
+      chrome.runtime.sendMessage({
+        type: 'visual-layout-ui',
+        phase: 'error',
+        message: 'You are running the Visual Layout Auditor on the AMASAMYA platform itself. Switch to the tab containing the page you actually want to audit, then try again.'
+      }).catch(() => {});
+      return;
     }
 
     chrome.runtime.sendMessage({
