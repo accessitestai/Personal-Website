@@ -266,9 +266,17 @@
          Remove this entire block after the launch window closes —
          search the file for "GAAD 2026 launch banner" to find it.
     ──────────────────────────────────────────────────────────── -->
-    <aside id="gaad-banner" class="gaad-banner" role="region" aria-labelledby="gaad-banner-heading" hidden>
+    <aside id="gaad-banner" class="gaad-banner" role="region" aria-label="GAAD 2026 release announcement" hidden>
       <div class="container gaad-banner-inner">
-        <h2 id="gaad-banner-heading" class="gaad-banner-heading">GAAD 2026 release announcement</h2>
+        <!-- Bug fix (Akhilesh report, 18 May 2026): the original H2 here
+             broke heading-hierarchy (SC 1.3.1 / 2.4.6) because it sat before
+             the page's H1. The banner is already a region landmark with an
+             aria-label, so it is announced as a region without needing a
+             child heading. The visible "GAAD 2026 release announcement"
+             text is now a plain <p> styled to look like a heading. Sighted
+             users see the same banner; screen-reader users navigating by
+             heading no longer hit a spurious H2 before the H1. -->
+        <p class="gaad-banner-heading">GAAD 2026 release announcement</p>
         <p class="gaad-banner-text">
           Released today on Global Accessibility Awareness Day 2026 — the AMASAMYA Chrome extension, the AMASAMYA web platform, and the AMASAMYA source code, all free and open-source under the MIT licence. <a href="blog/gaad-2026-launching-amasamya.html" class="gaad-banner-link">Read the launch post</a>.
         </p>
