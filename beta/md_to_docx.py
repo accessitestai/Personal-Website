@@ -88,6 +88,15 @@ DOCS = [
     ("beta/gaad-launch-posts.md",
      "beta/gaad-launch-posts.docx",
      "AMASAMYA — GAAD 2026 Launch Post Pack"),
+    ("beta/mujtaba-personal-setup-guide.md",
+     "beta/mujtaba-personal-setup-guide.docx",
+     "AMASAMYA — Personal Setup Guide (for Mujtaba)"),
+    ("beta/reading-amasamya-reports.md",
+     "beta/reading-amasamya-reports.docx",
+     "AMASAMYA — Reading an Audit Report"),
+    ("beta/finding-to-engineer-ticket.md",
+     "beta/finding-to-engineer-ticket.docx",
+     "AMASAMYA — From Finding to Engineer Ticket"),
 ]
 
 
