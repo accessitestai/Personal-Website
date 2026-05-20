@@ -451,15 +451,15 @@
           <legend>Select testing engine(s)</legend>
           <label class="engine-option">
             <input type="checkbox" id="engine-axe" checked>
-            <span><strong>axe-core</strong> — Industry standard, zero false positives, WCAG 2.2</span>
+            <span><strong>axe-core</strong> - Industry standard, zero false positives, WCAG 2.2</span>
           </label>
           <label class="engine-option">
             <input type="checkbox" id="engine-htmlcs" checked>
-            <span><strong>HTML_CodeSniffer</strong> — Catches additional issues, includes warnings and advisories</span>
+            <span><strong>HTML_CodeSniffer</strong> - Catches additional issues, includes warnings and advisories</span>
           </label>
           <label class="engine-option">
             <input type="checkbox" id="engine-ibm" checked>
-            <span><strong>IBM Equal Access</strong> — Open-source engine from IBM with rules for WCAG 2.1 AAA, ARIA patterns and mobile a11y</span>
+            <span><strong>IBM Equal Access</strong> - Open-source engine from IBM with rules for WCAG 2.1 AAA, ARIA patterns and mobile a11y</span>
           </label>
         </fieldset>
         <div class="checker-actions">
@@ -527,7 +527,7 @@
         <!-- ─────────── PDF REPORT PURCHASE ─────────── -->
         <aside class="pdf-report-cta" id="pdf-report-cta" aria-labelledby="pdf-report-heading">
           <h3 id="pdf-report-heading">Want a shareable PDF report?</h3>
-          <p>Get a branded, WCAG-mapped PDF of this scan with remediation guidance &mdash; perfect for sharing with your team, client, or compliance reviewer.</p>
+          <p>Get a branded, WCAG-mapped PDF of this scan with remediation guidance - perfect for sharing with your team, client, or compliance reviewer.</p>
           <a
             id="pdf-report-buy-btn"
             class="checker-btn"
@@ -535,7 +535,7 @@
             target="_blank"
             rel="noopener noreferrer"
             aria-describedby="pdf-new-tab-hint">
-            Buy full PDF report &mdash; $12
+            Buy full PDF report - $12
             <span class="sr-only"> (opens Stripe checkout in a new tab)</span>
           </a>
           <p id="pdf-new-tab-hint" class="field-hint">Secure checkout via Stripe. Opens in a new tab.</p>
@@ -583,7 +583,7 @@
   <!-- Accessibility testing engines -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.3/axe.min.js"></script>
   <script src="https://squizlabs.github.io/HTML_CodeSniffer/build/HTMLCS.js"></script>
-  <!-- IBM Equal Access Accessibility Checker (Apache-2.0) — extra open-source rule engine.
+  <!-- IBM Equal Access Accessibility Checker (Apache-2.0) - extra open-source rule engine.
        Exposes window.ace with a browser-compatible Checker. -->
   <script src="https://unpkg.com/accessibility-checker-engine@3.1.77/ace.js" crossorigin="anonymous"></script>
 
@@ -604,14 +604,14 @@
   (function () {
     'use strict';
 
-    /* PDF Buy button — point at the Stripe Payment Link or disable. */
+    /* PDF Buy button - point at the Stripe Payment Link or disable. */
     var pdfBtn = document.getElementById('pdf-report-buy-btn');
     var pdfHint = document.getElementById('pdf-new-tab-hint');
     var link = (window.AMASAMYA_CONFIG && window.AMASAMYA_CONFIG.stripePdfPaymentLink) || '';
     if (pdfBtn && link) {
       pdfBtn.href = link;
     } else if (pdfBtn) {
-      /* No link configured yet — don't send users nowhere. */
+      /* No link configured yet - don't send users nowhere. */
       pdfBtn.setAttribute('aria-disabled', 'true');
       pdfBtn.classList.add('is-disabled');
       pdfBtn.addEventListener('click', function (e) { e.preventDefault(); });
@@ -847,7 +847,7 @@
         manualPasses.push({ id: 'landmark-regions', description: 'Page has all required landmark regions' });
       }
 
-      // ── Heading hierarchy — no skipped levels (SC 1.3.1) ──
+      // ── Heading hierarchy - no skipped levels (SC 1.3.1) ──
       if (headings.length > 0) {
         var prevLevel = 0;
         var skippedHeadings = [];
@@ -1145,7 +1145,7 @@
           var checker = new ace.Checker();
           /* IBM_Accessibility is the default ruleset that covers WCAG 2.1 AA + IBM
              best practices. The engine also ships WCAG_2_1, WCAG_2_0 and
-             IBM_Accessibility_next — we stick with the default for stable output. */
+             IBM_Accessibility_next - we stick with the default for stable output. */
           checker.check(testContainer, ['IBM_Accessibility']).then(function (report) {
             var violations = [];
             var passCount = 0;
@@ -1168,7 +1168,7 @@
               var msg = r.message || '';
               var helpUrl = r.help || '';
 
-              /* IBM ruleIds are stable strings like "img_alt_valid", "aria_role_valid" —
+              /* IBM ruleIds are stable strings like "img_alt_valid", "aria_role_valid" -
                  good as our rule id. */
               violations.push({
                 id: r.ruleId || 'ibm-rule',
@@ -1256,7 +1256,7 @@
         if (nodeCount > 1) { html += '<dt>Total Affected</dt><dd>' + nodeCount + ' elements</dd>'; }
         html += '</dl>';
 
-        /* AI-explain slot — button triggers a call to /.netlify/functions/ai-explain
+        /* AI-explain slot - button triggers a call to /.netlify/functions/ai-explain
            and renders the result inline. The button and output panel are keyboard-
            and screen-reader accessible.
 
@@ -1313,7 +1313,7 @@
     }
 
     /* ════════════════════════════════════════════════════
-       AI-EXPLAIN — call /.netlify/functions/ai-explain
+       AI-EXPLAIN - call /.netlify/functions/ai-explain
        ════════════════════════════════════════════════════ */
     var aiExplainCache = {}; /* in-memory per-session cache keyed by payload hash */
     function aiCacheKey(p) {
@@ -1375,7 +1375,7 @@
       }
 
       outEl.innerHTML = '<div class="ai-explain-panel ai-explain-panel--loading"><p>Generating explanation\u2026</p></div>';
-      /* Do NOT use btn.disabled — disabling a focused element drops focus
+      /* Do NOT use btn.disabled - disabling a focused element drops focus
          to <body>, which scrolls the page to the top. Signal busy state via
          aria-busy + a CSS hook so the button stays keyboard-reachable and
          focus doesn't jump. */
@@ -1445,7 +1445,7 @@
       resultsSummary.innerHTML =
         '<div class="summary-card summary-card--score ' + scoreData.gradeClass + '" role="group" aria-label="Accessibility score: ' + scoreData.score + ' out of 100, grade ' + scoreData.grade + '">' +
           '<div class="score-circle">' + scoreData.score + '</div>' +
-          '<div class="score-info"><span class="score-grade">Grade ' + scoreData.grade + ' — ' + gradeLabels[scoreData.grade] + '</span><span class="score-desc">' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ', ' + passes.length + ' checks passed</span></div>' +
+          '<div class="score-info"><span class="score-grade">Grade ' + scoreData.grade + ' - ' + gradeLabels[scoreData.grade] + '</span><span class="score-desc">' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ', ' + passes.length + ' checks passed</span></div>' +
         '</div>' +
         '<div class="summary-card summary-card--critical" role="group" aria-label="Critical issues"><span class="summary-count">' + counts.critical + '</span><span class="summary-label">Critical</span></div>' +
         '<div class="summary-card summary-card--serious" role="group" aria-label="Serious issues"><span class="summary-count">' + counts.serious + '</span><span class="summary-label">Serious</span></div>' +
@@ -1465,7 +1465,7 @@
       }
 
       resultsSection.classList.add('visible');
-      resultsHeading.textContent = 'Results: Score ' + scoreData.score + '/100 (Grade ' + scoreData.grade + ') — ' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ', ' + passes.length + ' passed';
+      resultsHeading.textContent = 'Results: Score ' + scoreData.score + '/100 (Grade ' + scoreData.grade + ') - ' + totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '') + ', ' + passes.length + ' passed';
       resultsHeading.focus();
       document.getElementById('export-group').style.display = 'flex';
 

@@ -1,11 +1,11 @@
 /**
- * AMASAMYA Extension — Background Service Worker v3.0
+ * AMASAMYA Extension - Background Service Worker v3.0
  *
  * Orchestrates:
- *   A. WCAG Audit  — injects content-script.js, relays findings to side panel + platform
- *   B. Focus Narrator (Module 2) — screenshots + Vision LLM per focused element
- *   C. Visual Layout Auditor (Module 1) — debugger-based multi-breakpoint screenshots + Vision LLM
- *   D. State Change Watchdog (Module 3) — MutationObserver + live region / focus management checks
+ *   A. WCAG Audit  - injects content-script.js, relays findings to side panel + platform
+ *   B. Focus Narrator (Module 2) - screenshots + Vision LLM per focused element
+ *   C. Visual Layout Auditor (Module 1) - debugger-based multi-breakpoint screenshots + Vision LLM
+ *   D. State Change Watchdog (Module 3) - MutationObserver + live region / focus management checks
  */
 
 'use strict';
@@ -13,7 +13,7 @@
 const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
 
 /* ════════════════════════════════════════════════════════
-   A. WCAG AUDIT — existing behaviour (unchanged)
+   A. WCAG AUDIT - existing behaviour (unchanged)
 ════════════════════════════════════════════════════════ */
 
 chrome.action.onClicked.addListener(async (tab) => {
@@ -49,7 +49,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'focus-narrator-element-ready') {
-    /* Run async — cannot return a promise directly from onMessage */
+    /* Run async - cannot return a promise directly from onMessage */
     handleFocusElement(message.element, sender.tab?.id);
     return false;
   }
@@ -119,14 +119,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /* ════════════════════════════════════════════════════════
-   B. FOCUS NARRATOR — Module 2
+   B. FOCUS NARRATOR - Module 2
 ════════════════════════════════════════════════════════ */
 
-/* v3.3.0 — Check that the user has a Vision AI key configured BEFORE
+/* v3.3.0 - Check that the user has a Vision AI key configured BEFORE
    we walk a page, capture screenshots, and produce empty findings.
    Bug surfaced by Mujtaba's IOB audit, May 2026: the Focus Narrator
    was generating 12-element reports where every row said "No Vision
-   AI key configured" — the tool was wasting the user's time. */
+   AI key configured" - the tool was wasting the user's time. */
 async function hasVisionAiKeyConfigured() {
   const store = await chrome.storage.local.get([
     'AMASAMYA_vision_provider',
@@ -138,7 +138,7 @@ async function hasVisionAiKeyConfigured() {
   if (provider === 'openai'    && store.AMASAMYA_openai_key)    return true;
   if (provider === 'anthropic' && store.AMASAMYA_anthropic_key) return true;
   if (provider === 'gemini'    && store.AMASAMYA_gemini_key)    return true;
-  /* Cross-provider fallback — if any key exists, treat as configured. */
+  /* Cross-provider fallback - if any key exists, treat as configured. */
   return !!(store.AMASAMYA_openai_key || store.AMASAMYA_anthropic_key || store.AMASAMYA_gemini_key);
 }
 
@@ -160,7 +160,7 @@ async function startFocusNarrator() {
       notifyPanelError('Cannot audit browser internal pages.'); return;
     }
     /* Guard against running on the AMASAMYA platform itself or the side-panel
-       extension page — common mistake when users have the AMASAMYA tab focused
+       extension page - common mistake when users have the AMASAMYA tab focused
        and the bank/audit-target tab in the background. */
     if (tab.url.startsWith('https://amasamya.akhileshmalani.com') ||
         tab.url.startsWith('http://localhost:3000/amasamya')) {
@@ -180,11 +180,11 @@ async function startFocusNarrator() {
   }
 }
 
-/* v3.3.0 — Throttle chrome.tabs.captureVisibleTab() so successive
+/* v3.3.0 - Throttle chrome.tabs.captureVisibleTab() so successive
    calls stay under Chrome's MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND
    quota (effectively 2 calls/sec). Without this, the Focus Narrator
    on dense pages produced runs of "Error: quota exceeded" mixed in
-   with successful captures — Mujtaba's IOB report showed three such
+   with successful captures - Mujtaba's IOB report showed three such
    errors. We keep a "last capture timestamp" and ensure 600 ms gap
    between consecutive calls. Retries once on quota error with
    additional backoff. */
@@ -228,7 +228,7 @@ async function handleFocusElement(elementInfo, tabId) {
 
     const provider = store.AMASAMYA_vision_provider || 'anthropic';
 
-    /* v3.4.0 — Gemini support. Provider selection respects the user's
+    /* v3.4.0 - Gemini support. Provider selection respects the user's
        explicit choice first, then falls back to whichever key happens
        to be configured. */
     if (provider === 'openai' && store.AMASAMYA_openai_key) {
@@ -327,7 +327,7 @@ async function callOpenAIVision(imageDataUrl, el, apiKey) {
 /* ── Vision LLM: Google Gemini (v3.4.0) ──
    Gemini's generateContent endpoint accepts inline base64 image
    parts. Gemini 1.5 / 2.0 Flash has a free tier with 15 RPM and
-   1500 RPD as of mid-2026 — generous enough for the kind of audit
+   1500 RPD as of mid-2026 - generous enough for the kind of audit
    volume any individual tester will produce. The endpoint hosts
    the model name in the URL path. */
 async function callGeminiVision(imageDataUrl, el, apiKey) {
@@ -370,10 +370,10 @@ Look specifically at the element at those coordinates and the area immediately a
 
 Determine:
 1. Is there a VISIBLE focus indicator (outline, ring, border change, glow, underline, highlight)?
-2. If yes — what type, colour, approximate thickness in pixels?
+2. If yes - what type, colour, approximate thickness in pixels?
 3. Estimate the contrast ratio of the indicator against its immediate background.
-4. Does it appear to meet WCAG 2.4.7 Focus Visible (AA) — any visible indicator?
-5. Does it appear to meet WCAG 2.4.11 Focus Appearance (AA) — ≥2px, ≥3:1 contrast?
+4. Does it appear to meet WCAG 2.4.7 Focus Visible (AA) - any visible indicator?
+5. Does it appear to meet WCAG 2.4.11 Focus Appearance (AA) - ≥2px, ≥3:1 contrast?
 6. One clear sentence a blind tester can act on.
 
 Respond ONLY with this exact JSON (no markdown fences, no extra text):
@@ -400,23 +400,23 @@ function parseLLMJson(text) {
 }
 
 /* ════════════════════════════════════════════════════════
-   C. VISUAL LAYOUT AUDITOR — Module 1
+   C. VISUAL LAYOUT AUDITOR - Module 1
    Uses Chrome DevTools Protocol via chrome.debugger to emulate
    different viewport widths, captures screenshots at each,
    and sends them to Vision LLM for spatial analysis.
 ════════════════════════════════════════════════════════ */
 
 const BREAKPOINTS = [
-  { label: '320px  — Mobile S',  width: 320,  height: 568  },
-  { label: '375px  — Mobile M',  width: 375,  height: 812  },
-  { label: '768px  — Tablet',    width: 768,  height: 1024 },
-  { label: '1280px — Desktop',   width: 1280, height: 900  }
+  { label: '320px  - Mobile S',  width: 320,  height: 568  },
+  { label: '375px  - Mobile M',  width: 375,  height: 812  },
+  { label: '768px  - Tablet',    width: 768,  height: 1024 },
+  { label: '1280px - Desktop',   width: 1280, height: 900  }
 ];
 
 async function startVisualLayoutAudit() {
   let tab;
   try {
-    /* v3.3.0 — gate on Vision AI key presence before any debugger
+    /* v3.3.0 - gate on Vision AI key presence before any debugger
        attachment / DOM work. Mirrors the Focus Narrator gate. */
     if (!(await hasVisionAiKeyConfigured())) {
       chrome.runtime.sendMessage({
@@ -588,7 +588,7 @@ async function callOpenAILayoutVision(imageDataUrl, bp, apiKey) {
   return parseLLMJson(data.choices[0].message.content);
 }
 
-/* v3.4.0 — Gemini equivalent of the layout-vision call. Same prompt
+/* v3.4.0 - Gemini equivalent of the layout-vision call. Same prompt
    structure, same JSON output shape, different transport. */
 async function callGeminiLayoutVision(imageDataUrl, bp, apiKey) {
   const base64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
@@ -626,10 +626,10 @@ Identify ALL of the following visual accessibility issues:
 1. Overlapping elements (text on top of text, buttons covering checkboxes, etc.)
 2. Content cut off or hidden by overflow (text truncated, buttons partially hidden)
 3. Horizontal scrollbar present (WCAG 1.4.10 Reflow failure)
-4. Touch targets below 44×44px (WCAG 2.5.5) — estimated from visual size
+4. Touch targets below 44×44px (WCAG 2.5.5) - estimated from visual size
 5. Text too small to read comfortably (below 12px equivalent)
 6. Insufficient spacing between interactive elements
-7. Any layout "breakage" — components that look visually broken or misaligned
+7. Any layout "breakage" - components that look visually broken or misaligned
 
 Respond ONLY with this exact JSON (no markdown, no extra text):
 {
@@ -649,7 +649,7 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
 }
 
 /* ════════════════════════════════════════════════════════
-   D. STATE CHANGE WATCHDOG — Module 3
+   D. STATE CHANGE WATCHDOG - Module 3
 ════════════════════════════════════════════════════════ */
 
 let watchdogTabId  = null;
@@ -689,7 +689,7 @@ function stopStateWatchdog() {
   if (watchdogTabId) {
     chrome.tabs.sendMessage(watchdogTabId, { type: 'state-watchdog-stop' })
       .catch(() => {
-        /* Tab may have closed — send stopped signal anyway */
+        /* Tab may have closed - send stopped signal anyway */
         chrome.runtime.sendMessage({ type: 'state-watchdog-ui', phase: 'stopped' }).catch(() => {});
       });
     watchdogTabId  = null;
@@ -705,7 +705,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     chrome.runtime.sendMessage({
       type:    'state-watchdog-ui',
       phase:   'stopped',
-      reason:  'Page navigated away — watchdog detached.'
+      reason:  'Page navigated away - watchdog detached.'
     }).catch(() => {});
   }
 });
@@ -814,11 +814,11 @@ async function captureAnnotatedScreenshot(findings) {
 ════════════════════════════════════════════════════════ */
 
 async function sendResultsToPlatform(message) {
-  /* v3.4.1 — platform-bridge behaviour change.
+  /* v3.4.1 - platform-bridge behaviour change.
      Previously: every audit auto-created a new tab at PLATFORM_URL,
      pulling the user's focus away from the audit target tab and the
      Chrome side panel where findings actually live. Multiple testers
-     (Mujtaba, Akhilesh) reported this as confusing — they ran an
+     (Mujtaba, Akhilesh) reported this as confusing - they ran an
      audit, expected to see findings, and instead got dropped on a
      marketing landing page.
 
@@ -839,12 +839,12 @@ async function sendResultsToPlatform(message) {
   try {
     const existingTabs = await chrome.tabs.query({ url: PLATFORM_URL + '/*' });
     if (existingTabs.length === 0) {
-      /* No platform tab open — do nothing. Findings stay in the side
+      /* No platform tab open - do nothing. Findings stay in the side
          panel; the user can open the platform manually if they want
          the richer viewer. */
       return;
     }
-    /* Platform tab exists — forward results to it WITHOUT stealing
+    /* Platform tab exists - forward results to it WITHOUT stealing
        focus. Previously we focused the platform tab on every audit;
        now we just send the payload silently. The user can switch to
        the platform tab themselves if they want to see the rich

@@ -1,5 +1,5 @@
 /**
- * LinkedIn OAuth 2.0 — Step 1: Redirect user to LinkedIn for authorization.
+ * LinkedIn OAuth 2.0 - Step 1: Redirect user to LinkedIn for authorization.
  *
  * Visit: https://akhileshmalani.com/.netlify/functions/linkedin-auth
  *

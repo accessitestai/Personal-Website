@@ -12,7 +12,7 @@
   </defs>
   <rect width="128" height="128" rx="20" fill="url(#bg128)"/>
   <rect x="0" y="0" width="128" height="5" fill="url(#bar128)"/>
-  <!-- Wordmark — textLength forces 8-char AMASAMYA into the canvas
+  <!-- Wordmark - textLength forces 8-char AMASAMYA into the canvas
        width regardless of font availability so the icon is identical
        on every Chrome variant. -->
   <text x="64" y="68"

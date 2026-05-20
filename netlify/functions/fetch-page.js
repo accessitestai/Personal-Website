@@ -1,5 +1,5 @@
 /**
- * fetch-page.js — AMASAMYA URL Proxy
+ * fetch-page.js - AMASAMYA URL Proxy
  *
  * Fetches a remote URL on behalf of the browser-side checker,
  * bypassing CORS restrictions that would otherwise block the request.

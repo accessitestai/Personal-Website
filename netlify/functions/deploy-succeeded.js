@@ -23,7 +23,7 @@ const { getStore } = require("@netlify/blobs");
 const SITE_URL = "https://akhileshmalani.com";
 
 exports.handler = async function (event, context) {
-  console.log("[AutoPost] Deploy succeeded — checking for new blog posts...");
+  console.log("[AutoPost] Deploy succeeded - checking for new blog posts...");
 
   try {
     // 1. Fetch latest post info from the deployed site
@@ -31,7 +31,7 @@ exports.handler = async function (event, context) {
     try {
       var res = await fetch(SITE_URL + "/_latest-post.json?v=" + Date.now());
       if (!res.ok) {
-        console.log("[AutoPost] No _latest-post.json found (status " + res.status + ") — skipping.");
+        console.log("[AutoPost] No _latest-post.json found (status " + res.status + ") - skipping.");
         return { statusCode: 200, body: "No latest post file found" };
       }
       latestPost = await res.json();
@@ -53,7 +53,7 @@ exports.handler = async function (event, context) {
       lastSharedSlug = await store.get("last-shared-slug", { type: "text" });
     } catch (blobErr) {
       console.log("[AutoPost] Blobs read warning:", blobErr.message);
-      // Continue anyway — we'll try to post
+      // Continue anyway - we'll try to post
     }
 
     if (lastSharedSlug === latestPost.slug) {
@@ -75,13 +75,13 @@ exports.handler = async function (event, context) {
       try {
         await postToTwitter(latestPost);
         results.push("Twitter: posted");
-        console.log("[AutoPost] Twitter — posted successfully");
+        console.log("[AutoPost] Twitter - posted successfully");
       } catch (twErr) {
-        results.push("Twitter: failed — " + twErr.message);
+        results.push("Twitter: failed - " + twErr.message);
         console.error("[AutoPost] Twitter error:", twErr.message);
       }
     } else {
-      console.log("[AutoPost] Twitter not configured — skipping");
+      console.log("[AutoPost] Twitter not configured - skipping");
       results.push("Twitter: not configured");
     }
 
@@ -92,13 +92,13 @@ exports.handler = async function (event, context) {
       try {
         await postToLinkedIn(latestPost);
         results.push("LinkedIn: posted");
-        console.log("[AutoPost] LinkedIn — posted successfully");
+        console.log("[AutoPost] LinkedIn - posted successfully");
       } catch (liErr) {
-        results.push("LinkedIn: failed — " + liErr.message);
+        results.push("LinkedIn: failed - " + liErr.message);
         console.error("[AutoPost] LinkedIn error:", liErr.message);
       }
     } else {
-      console.log("[AutoPost] LinkedIn not configured — skipping");
+      console.log("[AutoPost] LinkedIn not configured - skipping");
       results.push("LinkedIn: not configured");
     }
 
@@ -123,7 +123,7 @@ exports.handler = async function (event, context) {
 
 
 // =====================================================
-// Twitter/X — Post using OAuth 1.0a (API v2)
+// Twitter/X - Post using OAuth 1.0a (API v2)
 // =====================================================
 async function postToTwitter(post) {
   var apiKey = process.env.TWITTER_API_KEY;
@@ -197,7 +197,7 @@ async function postToTwitter(post) {
 
 
 // =====================================================
-// LinkedIn — Post using REST API
+// LinkedIn - Post using REST API
 // =====================================================
 async function postToLinkedIn(post) {
   var accessToken = process.env.LINKEDIN_ACCESS_TOKEN;

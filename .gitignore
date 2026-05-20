@@ -73,3 +73,20 @@ Accessibility Library/
 Screenshots/
 *.zip
 amasamya-public-repo/
+
+# Per-session test data that should never be committed
+Test Reports/
+coverage.xlsx
+flipkart_audit.csv
+iob_focus.csv
+iob_wcag.csv
+
+# Extracted launch kit (binaries; rebuild from beta/ docx)
+AMASAMYA-Beta-Launch-Kit/
+
+# Large generated audio + on-device models
+voiceover_audio_guide/
+generate_voiceover_guide.py
+
+# Embedded worktrees from Claude Code sessions
+.claude/worktrees/

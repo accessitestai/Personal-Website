@@ -1,11 +1,11 @@
 /**
- * AMASAMYA Extension — Platform Bridge Content Script
+ * AMASAMYA Extension - Platform Bridge Content Script
  *
  * Runs on the AMASAMYA Platform page (https://amasamya.akhileshmalani.com).
  *
  * Purpose:
  *   The background service worker cannot directly call functions on a web
- *   page — it can only message content scripts. This script lives in the
+ *   page - it can only message content scripts. This script lives in the
  *   platform tab, receives the findings payload from the background via
  *   chrome.runtime.onMessage, and forwards it into the page's own
  *   JavaScript context via window.postMessage.

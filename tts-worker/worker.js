@@ -1,4 +1,4 @@
-/* Azure Speech TTS proxy — Cloudflare Worker
+/* Azure Speech TTS proxy - Cloudflare Worker
    Endpoints:
      GET /version          → which build is live
      GET /diag             → checks secret + Azure connectivity
@@ -81,12 +81,12 @@ export default {
     const url  = new URL(request.url);
     const path = url.pathname;
 
-    // /version — confirm which build is live
+    // /version - confirm which build is live
     if (path === '/version') {
       return json({ build: BUILD_ID, region: AZURE_REGION, hasKey: !!env.AZURE_TTS_KEY });
     }
 
-    // /diag — try to get a token from Azure to prove the key works
+    // /diag - try to get a token from Azure to prove the key works
     if (path === '/diag') {
       if (!env.AZURE_TTS_KEY) return json({ ok: false, step: 'secret', error: 'AZURE_TTS_KEY not set' }, 500);
       try {
@@ -111,7 +111,7 @@ export default {
       }
     }
 
-    // / — synthesize
+    // / - synthesize
     const text = url.searchParams.get('text');
     const lang = url.searchParams.get('lang') || 'en';
     const rate = url.searchParams.get('rate') || '0';

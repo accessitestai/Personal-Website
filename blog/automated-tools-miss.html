@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Automated accessibility tools catch only 30-40% of real issues. Here's what they miss — from someone who tests with a screen reader every day.">
+  <meta name="description" content="Automated accessibility tools catch only 30-40% of real issues. Here's what they miss - from someone who tests with a screen reader every day.">
   <meta name="author" content="Akhilesh Malani">
   <meta name="keywords" content="automated accessibility testing, WCAG, screen reader testing, axe, WAVE, Lighthouse, manual testing, accessibility audit">
   <link rel="canonical" href="https://akhileshmalani.com/blog/automated-tools-miss.html">
@@ -11,7 +11,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:title" content="Your Automated Tools Miss 70% of What I Find | Akhilesh Malani">
-  <meta property="og:description" content="Automated accessibility tools catch only 30-40% of real issues. Here's what they miss — from someone who tests with a screen reader every day.">
+  <meta property="og:description" content="Automated accessibility tools catch only 30-40% of real issues. Here's what they miss - from someone who tests with a screen reader every day.">
   <meta property="og:url" content="https://akhileshmalani.com/blog/automated-tools-miss.html">
 
   <title>Your Automated Tools Miss 70% of What I Find | Akhilesh Malani</title>
@@ -44,7 +44,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -134,7 +134,7 @@
 
         <p>Then I open the same page with my screen reader.</p>
 
-        <p>Within five minutes, I've found issues the tool never flagged. A modal that traps my focus. A dropdown that announces nothing when I select an option. A form that submits silently with no confirmation &mdash; I have no idea if it worked or failed. These aren't edge cases. They're the everyday experience of someone who actually depends on assistive technology.</p>
+        <p>Within five minutes, I've found issues the tool never flagged. A modal that traps my focus. A dropdown that announces nothing when I select an option. A form that submits silently with no confirmation - I have no idea if it worked or failed. These aren't edge cases. They're the everyday experience of someone who actually depends on assistive technology.</p>
 
         <h2>The Numbers Don't Lie</h2>
 
@@ -144,7 +144,7 @@
 
         <h2>What Automated Tools Are Good At</h2>
 
-        <p>Let me be clear &mdash; I'm not saying automated tools are useless. They're excellent for catching certain categories of issues quickly and at scale:</p>
+        <p>Let me be clear - I'm not saying automated tools are useless. They're excellent for catching certain categories of issues quickly and at scale:</p>
 
         <ul>
           <li><strong>Missing alt attributes</strong> on images (though they can't judge if the alt text is actually meaningful)</li>
@@ -157,7 +157,7 @@
 
         <p>These are important. Running axe, WAVE, or Lighthouse as part of your CI/CD pipeline is a good practice. I recommend it. But it's the starting point, not the finish line.</p>
 
-        <h2>What They Miss &mdash; and Why It Matters</h2>
+        <h2>What They Miss - and Why It Matters</h2>
 
         <h3>1. Keyboard Navigation and Focus Management</h3>
 
@@ -170,10 +170,10 @@
         <p>This is where the gap is widest. Automated tools check the DOM structure. They don't listen to what gets announced. I regularly find:</p>
 
         <ul>
-          <li>Buttons that announce as "clickable" with no label &mdash; I have no idea what they do</li>
+          <li>Buttons that announce as "clickable" with no label - I have no idea what they do</li>
           <li>Custom dropdowns that announce "blank" when I open them</li>
           <li>Tables with data that reads as a flat list of disconnected text, because row and column headers are missing or incorrectly associated</li>
-          <li>Dynamic content that updates visually but announces nothing &mdash; I'm left wondering if the page has changed at all</li>
+          <li>Dynamic content that updates visually but announces nothing - I'm left wondering if the page has changed at all</li>
         </ul>
 
         <h3>3. Meaningful Alt Text</h3>
@@ -196,14 +196,14 @@
 
         <p>Modern web applications are full of custom components: date pickers, autocomplete fields, drag-and-drop interfaces, accordions, tab panels. Each of these requires specific keyboard interaction patterns and ARIA roles to work correctly with screen readers.</p>
 
-        <p>Automated tools have no way to evaluate these. They can't press Arrow Down in a custom listbox to see if it moves to the next option. They can't check if Escape closes a modal and returns focus to the trigger. Only a human &mdash; preferably one who uses these patterns daily &mdash; can assess this.</p>
+        <p>Automated tools have no way to evaluate these. They can't press Arrow Down in a custom listbox to see if it moves to the next option. They can't check if Escape closes a modal and returns focus to the trigger. Only a human - preferably one who uses these patterns daily - can assess this.</p>
 
         <h2>The Real Cost of Relying Only on Automation</h2>
 
         <p>When organisations treat automated scans as a complete accessibility assessment, they end up with a false sense of compliance. The report says 95% pass rate. The reality is that a screen reader user still can't complete basic tasks on the site.</p>
 
         <div class="callout">
-          <strong>From my experience:</strong> In over 250 digital products I've evaluated, I have never once seen an automated tool catch every critical issue. Not once. The tools that matter most &mdash; the ones that find the barriers real people face &mdash; are a screen reader, a keyboard, and someone who knows how to use them.
+          <strong>From my experience:</strong> In over 250 digital products I've evaluated, I have never once seen an automated tool catch every critical issue. Not once. The tools that matter most - the ones that find the barriers real people face - are a screen reader, a keyboard, and someone who knows how to use them.
         </div>
 
         <h2>What I Recommend</h2>
@@ -214,7 +214,7 @@
           <li><strong>Automate what you can.</strong> Run axe or similar tools in your CI/CD pipeline. Catch the low-hanging fruit early and consistently.</li>
           <li><strong>Test with a keyboard.</strong> Unplug your mouse and try to complete every task. If you can't, neither can I.</li>
           <li><strong>Test with a screen reader.</strong> At minimum, test with NVDA (free) on Windows and VoiceOver on Mac/iOS. If you're targeting Android, add TalkBack.</li>
-          <li><strong>Include people with disabilities in your testing.</strong> Not as an afterthought, but as a regular part of your QA cycle. We catch things no one else does &mdash; because we live it.</li>
+          <li><strong>Include people with disabilities in your testing.</strong> Not as an afterthought, but as a regular part of your QA cycle. We catch things no one else does - because we live it.</li>
           <li><strong>Don't stop at the report.</strong> An audit is a snapshot. Accessibility is ongoing. Build it into your process, not just your checklist.</li>
         </ol>
 
@@ -263,7 +263,7 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Your Automated Tools Miss 70% of What I Find",
-    "description": "Automated accessibility tools catch only 30-40% of real issues. Here's what they miss — from someone who tests with a screen reader every day.",
+    "description": "Automated accessibility tools catch only 30-40% of real issues. Here's what they miss - from someone who tests with a screen reader every day.",
     "datePublished": "2026-03-10",
     "dateModified": "2026-03-20",
     "author": {

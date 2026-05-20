@@ -48,7 +48,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -134,7 +134,7 @@
       </header>
 
       <div class="blog-post-content">
-        <p>WAI-ARIA (Web Accessibility Initiative &mdash; Accessible Rich Internet Applications) was created to bridge the gap between complex web interfaces and assistive technologies. It's a powerful specification. It has made many things possible that weren't before.</p>
+        <p>WAI-ARIA (Web Accessibility Initiative - Accessible Rich Internet Applications) was created to bridge the gap between complex web interfaces and assistive technologies. It's a powerful specification. It has made many things possible that weren't before.</p>
 
         <p>It has also, in my experience, broken more websites than it has fixed.</p>
 
@@ -187,7 +187,7 @@
 &lt;/a&gt;</code></pre>
         </div>
 
-        <p>A sighted user sees "My Account." I hear "Navigate to your personal account dashboard page." This creates a disconnect. If someone tells me to click "My Account," I can't find it &mdash; because my screen reader is announcing something else entirely.</p>
+        <p>A sighted user sees "My Account." I hear "Navigate to your personal account dashboard page." This creates a disconnect. If someone tells me to click "My Account," I can't find it - because my screen reader is announcing something else entirely.</p>
 
         <p>WCAG 2.5.3 (Label in Name) exists specifically because of this problem. The accessible name should include the visible text, at minimum.</p>
 
@@ -213,15 +213,15 @@
 &lt;a href="/home" role="link"&gt;</code></pre>
         </div>
 
-        <p>Every one of these is redundant. The <code>&lt;nav&gt;</code> element already has an implicit role of "navigation." Adding <code>role="navigation"</code> doesn't help &mdash; but it signals that the developer doesn't understand how HTML semantics work, which often means there are bigger problems elsewhere.</p>
+        <p>Every one of these is redundant. The <code>&lt;nav&gt;</code> element already has an implicit role of "navigation." Adding <code>role="navigation"</code> doesn't help - but it signals that the developer doesn't understand how HTML semantics work, which often means there are bigger problems elsewhere.</p>
 
         <h3>5. ARIA Live Region Overload</h3>
 
-        <p>Live regions are meant to announce dynamic content changes to screen reader users. When a form error appears, or a notification pops up, or a counter updates &mdash; a live region makes sure I know about it.</p>
+        <p>Live regions are meant to announce dynamic content changes to screen reader users. When a form error appears, or a notification pops up, or a counter updates - a live region makes sure I know about it.</p>
 
         <p>The problem is when developers make everything a live region. I've tested pages where every section of content had <code>aria-live="polite"</code>. Every time anything changed on the page, my screen reader would interrupt what I was doing to announce it. On one e-commerce site, scrolling through a product list triggered dozens of announcements per second. My screen reader became essentially unusable.</p>
 
-        <p>The other extreme is using <code>aria-live="assertive"</code> for non-urgent updates. Assertive live regions interrupt whatever the screen reader is currently announcing. They should be reserved for critical alerts &mdash; error messages, session timeouts, urgent notifications. Not "3 items in your cart."</p>
+        <p>The other extreme is using <code>aria-live="assertive"</code> for non-urgent updates. Assertive live regions interrupt whatever the screen reader is currently announcing. They should be reserved for critical alerts - error messages, session timeouts, urgent notifications. Not "3 items in your cart."</p>
 
         <h3>6. Custom Widgets Without Keyboard Support</h3>
 
@@ -229,7 +229,7 @@
 
         <p>But the developer only added the ARIA roles. They didn't implement the keyboard interactions. So I press Arrow Right and nothing happens. I press Tab and it moves to the next focusable element on the page, skipping all the other tabs.</p>
 
-        <p>The ARIA roles created an expectation. The missing keyboard support broke it. Now I'm worse off than if there had been no ARIA at all &mdash; at least then I wouldn't have expected tab-like behaviour.</p>
+        <p>The ARIA roles created an expectation. The missing keyboard support broke it. Now I'm worse off than if there had been no ARIA at all - at least then I wouldn't have expected tab-like behaviour.</p>
 
         <h2>The Data Behind the Problem</h2>
 
@@ -238,7 +238,7 @@
         <ul>
           <li>Pages with ARIA present had <strong>more detected accessibility errors</strong> on average than pages without ARIA</li>
           <li>The correlation is clear: the more ARIA on a page, the more errors detected</li>
-          <li>This doesn't mean ARIA causes errors &mdash; it means that developers who use ARIA often don't use it correctly</li>
+          <li>This doesn't mean ARIA causes errors - it means that developers who use ARIA often don't use it correctly</li>
         </ul>
 
         <p>ARIA is a power tool. In skilled hands, it enables complex, accessible interfaces. In untrained hands, it creates a worse experience than plain HTML.</p>
@@ -269,9 +269,9 @@
 
         <h2>The Bottom Line</h2>
 
-        <p>ARIA is a tool, not a solution. Using it without understanding it is like using a power drill without knowing which way the bit turns &mdash; you'll make a hole, but probably not where you wanted it.</p>
+        <p>ARIA is a tool, not a solution. Using it without understanding it is like using a power drill without knowing which way the bit turns - you'll make a hole, but probably not where you wanted it.</p>
 
-        <p>If your team is working with ARIA and wants to make sure they're using it correctly, <a href="../index.html#contact">I'm happy to help</a>. I've spent over 16 years navigating the web with these patterns &mdash; I know what works, what breaks, and why.</p>
+        <p>If your team is working with ARIA and wants to make sure they're using it correctly, <a href="../index.html#contact">I'm happy to help</a>. I've spent over 16 years navigating the web with these patterns - I know what works, what breaks, and why.</p>
       </div>
 
       <div class="share-section">

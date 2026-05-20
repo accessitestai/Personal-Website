@@ -1,4 +1,4 @@
-# AMASAMYA — GAAD 2026 Launch Post Pack
+# AMASAMYA - GAAD 2026 Launch Post Pack
 
 Three paste-ready drafts to use on launch day, 21 May 2026.
 All three are Yellow-Argon safe (no comma-separated keyword piles).
@@ -18,7 +18,7 @@ Each one names a different posture and tone for the medium.
 Copy the section between `=== BEGIN ===` and `=== END ===` and paste
 into LinkedIn as a single post. Do not include any of the
 explanatory text outside the markers. After publishing, immediately
-post the **first comment** below the markers — LinkedIn down-ranks
+post the **first comment** below the markers - LinkedIn down-ranks
 posts with outbound links in the body, but it is fine in the first
 comment.
 
@@ -34,9 +34,9 @@ So I built AMASAMYA. Today, on GAAD 2026, I am releasing it to the community as 
 
 What it does:
 
-The Chrome extension runs seventeen WCAG 2.2 audit engines on any open tab in roughly five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel — navigable by heading with a screen reader's H key. No mouse required, ever.
+The Chrome extension runs seventeen WCAG 2.2 audit engines on any open tab in roughly five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel - navigable by heading with a screen reader's H key. No mouse required, ever.
 
-The web platform extends the same engines to uploaded documents — PDF, Microsoft Office, EPUB, OpenDocument — and to a structured mobile-app accessibility checklist.
+The web platform extends the same engines to uploaded documents - PDF, Microsoft Office, EPUB, OpenDocument - and to a structured mobile-app accessibility checklist.
 
 The source code is fully readable and forkable. README, contributing guide, and inline comments mapping every engine to its WCAG criterion.
 
@@ -73,8 +73,8 @@ Full launch post with links, source code, and the three release surfaces is in t
 
 Best lists to send to:
 
-- WebAIM Discussion List — `webaim-forum@list.webaim.org` (must be subscribed first)
-- DAISY-FORUM — `daisy-forum@listserv.daisy.org`
+- WebAIM Discussion List - `webaim-forum@list.webaim.org` (must be subscribed first)
+- DAISY-FORUM - `daisy-forum@listserv.daisy.org`
 - Any India-specific a11y list you are on
 
 One list per day for three days. Do not cross-post the same day.
@@ -82,23 +82,23 @@ Plain text only, no HTML, no attachments.
 
 ### Subject line
 
-> AMASAMYA — blind-first WCAG 2.2 audit tools released today on GAAD 2026
+> AMASAMYA - blind-first WCAG 2.2 audit tools released today on GAAD 2026
 
-### Body — paste verbatim
+### Body - paste verbatim
 
 > Hello list,
 >
-> Today is Global Accessibility Awareness Day, and I am releasing AMASAMYA — a set of accessibility audit tools I have been building over the last several months. I want this community to see them on the day they go public.
+> Today is Global Accessibility Awareness Day, and I am releasing AMASAMYA - a set of accessibility audit tools I have been building over the last several months. I want this community to see them on the day they go public.
 >
 > Three things released today, all free, all open-source, all designed for screen-reader use:
 >
 > The AMASAMYA Chrome extension. Audits any web page for WCAG 2.2 compliance in about five seconds. Seventeen audit engines including 200 percent zoom verification, dark-mode palette contrast, focus management, and target size at both AA and AAA. Optional Vision AI integration uses the user's own API key, never AMASAMYA servers. Free on the Chrome Web Store: https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif
 >
-> The AMASAMYA web platform at https://amasamya.akhileshmalani.com — extends the same engines to documents in eight formats (PDF, Microsoft Office, EPUB, OpenDocument), plus a structured mobile-app accessibility checklist for iOS, Android, and WearOS. Exports CSV, JSON, or HTML.
+> The AMASAMYA web platform at https://amasamya.akhileshmalani.com - extends the same engines to documents in eight formats (PDF, Microsoft Office, EPUB, OpenDocument), plus a structured mobile-app accessibility checklist for iOS, Android, and WearOS. Exports CSV, JSON, or HTML.
 >
-> The source code, MIT licensed, at https://github.com/accessitestai/AMASAMYA — extension code, README, CONTRIBUTING, privacy policy, all readable and forkable.
+> The source code, MIT licensed, at https://github.com/accessitestai/AMASAMYA - extension code, README, CONTRIBUTING, privacy policy, all readable and forkable.
 >
-> The whole point of the project is that the interface is operable with a screen reader from the first commit, and findings are written to be actionable by non-sighted developers. I am a screen reader user myself. The honest gap between what most automated tools see (around 30 to 40 per cent of WCAG criteria) and what manual testing catches is well understood here — AMASAMYA is designed to handle the mechanical part so manual testing time can go to the journey work tools cannot do.
+> The whole point of the project is that the interface is operable with a screen reader from the first commit, and findings are written to be actionable by non-sighted developers. I am a screen reader user myself. The honest gap between what most automated tools see (around 30 to 40 per cent of WCAG criteria) and what manual testing catches is well understood here - AMASAMYA is designed to handle the mechanical part so manual testing time can go to the journey work tools cannot do.
 >
 > What I would value back: honest feedback, critical especially. If the side panel becomes unusable with your assistive technology, or if a finding's wording confuses rather than clarifies, please open an issue on the repository or reply privately to akhilesh.malani@gmail.com.
 >
@@ -115,13 +115,13 @@ Plain text only, no HTML, no attachments.
 
 Use these for the 5 to 10 personal outreach contacts on launch day.
 Pick the template that matches the relationship. Customise the
-opening sentence every single time — never bulk-send.
+opening sentence every single time - never bulk-send.
 
-### Template A — Someone you already know in the a11y community
+### Template A - Someone you already know in the a11y community
 
 > Hi [name],
 >
-> Quick note on GAAD: I am releasing AMASAMYA today — the blind-first WCAG audit tool I have mentioned to you. Three surfaces went live this morning: Chrome extension, web platform, and the source code on GitHub.
+> Quick note on GAAD: I am releasing AMASAMYA today - the blind-first WCAG audit tool I have mentioned to you. Three surfaces went live this morning: Chrome extension, web platform, and the source code on GitHub.
 >
 > If you have a few minutes today, I would value any reaction you have to the launch post: https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html
 >
@@ -129,7 +129,7 @@ opening sentence every single time — never bulk-send.
 >
 > Akhilesh
 
-### Template B — Someone you have not spoken to recently, but who knows your work
+### Template B - Someone you have not spoken to recently, but who knows your work
 
 > Hi [name],
 >
@@ -141,7 +141,7 @@ opening sentence every single time — never bulk-send.
 >
 > The launch story explains the why and the honest limitations: https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html
 >
-> I thought of you because [one sentence on why — a specific past conversation, their published work, or a shared community connection].
+> I thought of you because [one sentence on why - a specific past conversation, their published work, or a shared community connection].
 >
 > If anything in the launch is useful to your work, I would value your honest reaction. No obligation either way.
 >
@@ -149,13 +149,13 @@ opening sentence every single time — never bulk-send.
 > Akhilesh Malani
 > https://akhileshmalani.com
 
-### Template C — Someone at an org on the outreach list (cold but with a real reason)
+### Template C - Someone at an org on the outreach list (cold but with a real reason)
 
 > Hi [name],
 >
-> I noticed your work on [specific thing — a blog post, a conference talk, a public project — name it precisely].
+> I noticed your work on [specific thing - a blog post, a conference talk, a public project - name it precisely].
 >
-> I am Akhilesh Malani, an accessibility architect and screen reader user. Today on Global Accessibility Awareness Day, I am releasing AMASAMYA — a WCAG 2.2 audit toolkit I have been building over the last several months. The interface and the audit findings are designed for screen-reader use from the first commit, which is unusual for tools in this space.
+> I am Akhilesh Malani, an accessibility architect and screen reader user. Today on Global Accessibility Awareness Day, I am releasing AMASAMYA - a WCAG 2.2 audit toolkit I have been building over the last several months. The interface and the audit findings are designed for screen-reader use from the first commit, which is unusual for tools in this space.
 >
 > Three surfaces released today, all free and open-source:
 >
@@ -170,11 +170,11 @@ opening sentence every single time — never bulk-send.
 > Best,
 > Akhilesh Malani
 
-### Template D — Friends and family (low-formality, share-friendly)
+### Template D - Friends and family (low-formality, share-friendly)
 
 > Hey [name],
 >
-> Today is Global Accessibility Awareness Day, and I am releasing AMASAMYA — the accessibility audit toolkit I have been working on.
+> Today is Global Accessibility Awareness Day, and I am releasing AMASAMYA - the accessibility audit toolkit I have been working on.
 >
 > If you would be willing to share the post with anyone you think might care, that would help: https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html
 >

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="On Global Accessibility Awareness Day 2026, I'm releasing AMASAMYA — the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free. Here is what it is, why I built it, and how it differs from what already exists.">
+  <meta name="description" content="On Global Accessibility Awareness Day 2026, I'm releasing AMASAMYA - the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free. Here is what it is, why I built it, and how it differs from what already exists.">
   <meta name="author" content="Akhilesh Malani">
   <meta name="keywords" content="GAAD, Global Accessibility Awareness Day, AMASAMYA, WCAG 2.2, accessibility audit, blind developer, screen reader, open source accessibility tool, RPwD Act, IS 17802">
   <link rel="canonical" href="https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html">
@@ -11,7 +11,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:title" content="AMASAMYA at GAAD 2026: a blind-first accessibility audit tool, now open-source | Akhilesh Malani">
-  <meta property="og:description" content="On Global Accessibility Awareness Day 2026, I am releasing AMASAMYA — the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free.">
+  <meta property="og:description" content="On Global Accessibility Awareness Day 2026, I am releasing AMASAMYA - the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free.">
   <meta property="og:url" content="https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html">
 
   <title>AMASAMYA at GAAD 2026: A Blind-First Audit Tool, Now Open-Source | Akhilesh Malani</title>
@@ -85,12 +85,12 @@
       <div class="blog-post-content">
 
         <div class="launch-banner" role="region" aria-label="GAAD 2026 release announcement">
-          <p><strong>Released today on Global Accessibility Awareness Day 2026:</strong> the AMASAMYA Chrome extension, the AMASAMYA web platform, and the AMASAMYA source code &mdash; all free, all blind-first, all open-source under the MIT licence.</p>
+          <p><strong>Released today on Global Accessibility Awareness Day 2026:</strong> the AMASAMYA Chrome extension, the AMASAMYA web platform, and the AMASAMYA source code - all free, all blind-first, all open-source under the MIT licence.</p>
         </div>
 
         <h2>Why I am releasing this today</h2>
 
-        <p>Today is Global Accessibility Awareness Day. Every year on the third Thursday of May, the accessibility community pauses to talk about digital inclusion. The day has a real history &mdash; it was started in 2012 by a developer and a UX professional after a casual blog post about the gap between intent and reality in accessible web design. Thirteen years later, that gap is smaller, but it is still wide.</p>
+        <p>Today is Global Accessibility Awareness Day. Every year on the third Thursday of May, the accessibility community pauses to talk about digital inclusion. The day has a real history - it was started in 2012 by a developer and a UX professional after a casual blog post about the gap between intent and reality in accessible web design. Thirteen years later, that gap is smaller, but it is still wide.</p>
 
         <p>I am a screen reader user. I have spent over a decade working in digital accessibility as a consultant, an auditor, and an architect. Every audit tool I have tried to use to do my job was built on the assumption that the person running the audit can see. The findings are paragraphs of dense visual descriptions. The interfaces are dashboards designed to be scanned with eyes. The workflows assume the auditor can point at a problem on a screen and show it to a developer.</p>
 
@@ -103,20 +103,20 @@
         <p>AMASAMYA is a WCAG 2.2 accessibility audit toolkit that ships in three forms:</p>
 
         <ol>
-          <li>A <strong>Chrome extension</strong> that runs seventeen audit engines on any open tab in about five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel &mdash; navigable by heading with your screen reader's H key, no mouse needed.</li>
+          <li>A <strong>Chrome extension</strong> that runs seventeen audit engines on any open tab in about five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel - navigable by heading with your screen reader's H key, no mouse needed.</li>
           <li>A <strong>web platform</strong> that extends the same engines to uploaded documents in eight formats: PDF, Microsoft Office, EPUB, and OpenDocument. It also includes a structured mobile-app accessibility checklist for iOS, Android, and WearOS.</li>
           <li>The <strong>source code</strong>, fully readable and forkable, with a README, contributing guide, and inline comments that explain the WCAG criterion each engine maps to.</li>
         </ol>
 
-        <p>The seventeen engines cover the criteria that machine-checkable rules can actually verify: colour contrast at AA and AAA, focus management, structural semantics, ARIA validation, image alternatives, target size at both 2.5.8 AA and 2.5.5 AAA, text spacing, the 200% zoom reflow rule (1.4.4 Resize Text), dark-mode palette contrast verification, and a heuristic for colour-only meaning (1.4.1 Use of Colour). Three optional Vision AI modules &mdash; Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog &mdash; extend the audit beyond what local code can see, using your own API key. No data ever reaches AMASAMYA servers, because there are none.</p>
+        <p>The seventeen engines cover the criteria that machine-checkable rules can actually verify: colour contrast at AA and AAA, focus management, structural semantics, ARIA validation, image alternatives, target size at both 2.5.8 AA and 2.5.5 AAA, text spacing, the 200% zoom reflow rule (1.4.4 Resize Text), dark-mode palette contrast verification, and a heuristic for colour-only meaning (1.4.1 Use of Colour). Three optional Vision AI modules - Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog - extend the audit beyond what local code can see, using your own API key. No data ever reaches AMASAMYA servers, because there are none.</p>
 
         <h2>What is actually different about it</h2>
 
         <p>The differences are not in the engine list. Most automated accessibility tools have a similar inventory of rules. The differences are in the assumptions:</p>
 
-        <p><strong>The interface is operable with a screen reader from the first commit.</strong> The Chrome side panel uses semantic headings so findings can be navigated by H key. Every finding announces its role, severity, and the recommended fix in a logical reading order. Reports export as HTML, CSV, JSON, or plain text &mdash; whichever format respects your workflow.</p>
+        <p><strong>The interface is operable with a screen reader from the first commit.</strong> The Chrome side panel uses semantic headings so findings can be navigated by H key. Every finding announces its role, severity, and the recommended fix in a logical reading order. Reports export as HTML, CSV, JSON, or plain text - whichever format respects your workflow.</p>
 
-        <p><strong>Findings are written to be actionable, not just descriptive.</strong> Each one names the WCAG criterion, the severity, and a one-line remediation hint. The hint is written in the second person, in plain language, with the developer or content author as the reader &mdash; not the auditor.</p>
+        <p><strong>Findings are written to be actionable, not just descriptive.</strong> Each one names the WCAG criterion, the severity, and a one-line remediation hint. The hint is written in the second person, in plain language, with the developer or content author as the reader - not the auditor.</p>
 
         <p><strong>It is honest about its limits.</strong> Automated audit tools see roughly 30 to 40 per cent of accessibility issues. AMASAMYA is not a substitute for manual testing by a person with a disability. It is a complement, designed to take the mechanical checks off the table so manual testing time goes to the journey work tools cannot do.</p>
 
@@ -142,13 +142,13 @@
 
         <h2>What I would value back</h2>
 
-        <p>Honest feedback. Critical especially. The kind of issue I cannot find on my own is the kind where AMASAMYA fails for a specific combination of screen reader, browser, and content. If the side panel becomes unusable with your assistive technology, or if a finding's wording confuses rather than clarifies, please open an issue on the repository &mdash; or reply directly to akhilesh.malani@gmail.com.</p>
+        <p>Honest feedback. Critical especially. The kind of issue I cannot find on my own is the kind where AMASAMYA fails for a specific combination of screen reader, browser, and content. If the side panel becomes unusable with your assistive technology, or if a finding's wording confuses rather than clarifies, please open an issue on the repository - or reply directly to akhilesh.malani@gmail.com.</p>
 
         <p>And if you do find the tool useful, a brief honest review on the <a href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif">Chrome Web Store listing</a> helps reduce the install-time warning for the next person who tries it. A critical review is as useful as a positive one.</p>
 
         <h2>Closing</h2>
 
-        <p>GAAD exists because the accessibility community spent years pointing out that intent and reality do not match. Building blind-first is one small response to that observation. The tool released today is what I have to offer. It is not finished &mdash; nothing in accessibility ever is &mdash; but it works, it is honest about what it does and does not do, and it belongs to the community now.</p>
+        <p>GAAD exists because the accessibility community spent years pointing out that intent and reality do not match. Building blind-first is one small response to that observation. The tool released today is what I have to offer. It is not finished - nothing in accessibility ever is - but it works, it is honest about what it does and does not do, and it belongs to the community now.</p>
 
         <p>Thank you to everyone who reviewed early versions, broke it in interesting ways, and told me to make it more honest about its limits. The version released today is better because of you.</p>
 
@@ -192,7 +192,7 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "AMASAMYA at GAAD 2026: A Blind-First Audit Tool, Now Open-Source",
-    "description": "On Global Accessibility Awareness Day 2026, I am releasing AMASAMYA — the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free.",
+    "description": "On Global Accessibility Awareness Day 2026, I am releasing AMASAMYA - the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free.",
     "datePublished": "2026-05-21",
     "dateModified": "2026-05-21",
     "author": {

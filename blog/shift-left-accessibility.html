@@ -48,7 +48,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -134,7 +134,7 @@
       </header>
 
       <div class="blog-post-content">
-        <p>Every organisation I work with has the same story. They build a product. They launch it. Months later &mdash; sometimes years later &mdash; someone runs an accessibility audit. The report comes back with hundreds of issues. Now they need to retrofit accessibility into a product that was never designed for it.</p>
+        <p>Every organisation I work with has the same story. They build a product. They launch it. Months later - sometimes years later - someone runs an accessibility audit. The report comes back with hundreds of issues. Now they need to retrofit accessibility into a product that was never designed for it.</p>
 
         <p>The cost of this approach is staggering. And it's almost entirely avoidable.</p>
 
@@ -184,15 +184,15 @@
         <ul>
           <li>Over <strong>4,000 ADA digital accessibility lawsuits</strong> were filed in 2023 alone in the US</li>
           <li>The average settlement cost ranges from <strong>$10,000 to $150,000</strong> for small to mid-sized companies, and significantly more for larger enterprises</li>
-          <li>The <strong>Domino's v. Robles</strong> case (2019) established that the ADA applies to websites connected to physical places of business &mdash; a precedent that has opened the door to thousands of lawsuits</li>
+          <li>The <strong>Domino's v. Robles</strong> case (2019) established that the ADA applies to websites connected to physical places of business - a precedent that has opened the door to thousands of lawsuits</li>
           <li>In India, the RPwD Act 2016 provides legal grounds for similar actions, and SEBI's recent mandate has made compliance a regulatory requirement for the financial sector</li>
         </ul>
 
-        <p>The cost of a single lawsuit can exceed the cost of building accessibility into your product from the start. And a lawsuit doesn't just cost money &mdash; it consumes leadership attention, damages your brand, and often results in a consent decree that requires years of ongoing compliance monitoring.</p>
+        <p>The cost of a single lawsuit can exceed the cost of building accessibility into your product from the start. And a lawsuit doesn't just cost money - it consumes leadership attention, damages your brand, and often results in a consent decree that requires years of ongoing compliance monitoring.</p>
 
         <h2>What "Shift-Left" Actually Means</h2>
 
-        <p>"Shift-left" is a concept from software testing that means moving quality checks earlier in the development process. Applied to accessibility, it means catching and fixing barriers before they make it into code &mdash; ideally during the design phase.</p>
+        <p>"Shift-left" is a concept from software testing that means moving quality checks earlier in the development process. Applied to accessibility, it means catching and fixing barriers before they make it into code - ideally during the design phase.</p>
 
         <p>Here's what that looks like in practice:</p>
 
@@ -200,7 +200,7 @@
 
         <ul>
           <li><strong>Annotate designs with accessibility requirements.</strong> Specify heading levels, focus order, alt text for images, and ARIA states for interactive components. If the designer documents it, the developer implements it correctly the first time.</li>
-          <li><strong>Use inclusive design patterns.</strong> Build your design system with accessibility baked in. Every button component, every form field, every modal &mdash; designed once with accessibility, used everywhere correctly.</li>
+          <li><strong>Use inclusive design patterns.</strong> Build your design system with accessibility baked in. Every button component, every form field, every modal - designed once with accessibility, used everywhere correctly.</li>
           <li><strong>Check colour contrast during design.</strong> Tools like Stark and the Figma contrast checker let designers verify contrast ratios before a single line of code is written.</li>
           <li><strong>Design for keyboard navigation.</strong> For every interactive flow, document what happens when the user presses Tab, Enter, Escape, and Arrow keys. If you can't describe the keyboard experience, neither can the developer.</li>
         </ul>
@@ -209,7 +209,7 @@
 
         <ul>
           <li><strong>Use semantic HTML.</strong> This is the single highest-impact practice. Use <code>&lt;button&gt;</code> for buttons, <code>&lt;nav&gt;</code> for navigation, <code>&lt;main&gt;</code> for main content, <code>&lt;h1&gt;</code> through <code>&lt;h6&gt;</code> for headings. Semantic HTML gives you keyboard support and screen reader compatibility for free.</li>
-          <li><strong>Integrate accessibility linting.</strong> Tools like eslint-plugin-jsx-a11y (for React) and axe-linter catch common issues as developers write code &mdash; before the code is even committed.</li>
+          <li><strong>Integrate accessibility linting.</strong> Tools like eslint-plugin-jsx-a11y (for React) and axe-linter catch common issues as developers write code - before the code is even committed.</li>
           <li><strong>Add automated accessibility tests to CI/CD.</strong> Run axe-core or pa11y as part of your build pipeline. If a pull request introduces a new accessibility violation, the build fails. This prevents regression.</li>
           <li><strong>Do component-level testing.</strong> Test each component in isolation with keyboard and screen reader before integrating it into the page. It's much easier to fix a component in development than a page in production.</li>
         </ul>
@@ -219,7 +219,7 @@
         <ul>
           <li><strong>Include accessibility in your test plans.</strong> Every user story should have accessibility acceptance criteria. "As a keyboard user, I can complete this flow using only Tab, Enter, and Escape."</li>
           <li><strong>Manual screen reader testing.</strong> Automated tools catch 30&ndash;40% of issues. Manual testing catches the rest. At minimum, test with NVDA on Windows and VoiceOver on Mac/iOS.</li>
-          <li><strong>Test with real users.</strong> If possible, include people with disabilities in your usability testing. We catch things that even experienced testers miss &mdash; because we encounter these barriers every day.</li>
+          <li><strong>Test with real users.</strong> If possible, include people with disabilities in your usability testing. We catch things that even experienced testers miss - because we encounter these barriers every day.</li>
         </ul>
 
         <h2>The Business Case</h2>
@@ -230,18 +230,18 @@
           <li><strong>Market size.</strong> Over 1.3 billion people worldwide have a disability (WHO). In India alone, the 2011 Census counted 26 million, with the actual number likely much higher. Add ageing populations with declining vision, hearing, and motor skills, and the addressable market grows significantly.</li>
           <li><strong>SEO benefits.</strong> Accessible websites tend to rank better in search engines. Semantic HTML, alt text, proper heading structure, and descriptive link text are all both accessibility best practices and SEO best practices.</li>
           <li><strong>Better user experience for everyone.</strong> Captions help people in noisy environments. Keyboard navigation helps power users. High contrast helps people using screens in sunlight. Good accessibility is good design.</li>
-          <li><strong>Innovation.</strong> Constraints drive creativity. Some of the most impactful technology innovations &mdash; voice assistants, predictive text, audiobooks, touchscreens &mdash; originated from accessibility research.</li>
+          <li><strong>Innovation.</strong> Constraints drive creativity. Some of the most impactful technology innovations - voice assistants, predictive text, audiobooks, touchscreens - originated from accessibility research.</li>
         </ul>
 
         <div class="callout">
-          <strong>Forrester Research estimated</strong> that for every dollar invested in UX (which includes accessibility), companies see a return of $100. The W3C's Web Accessibility Initiative documents multiple case studies showing direct revenue increases after accessibility improvements &mdash; from increased customer reach, reduced support costs, and improved conversion rates.
+          <strong>Forrester Research estimated</strong> that for every dollar invested in UX (which includes accessibility), companies see a return of $100. The W3C's Web Accessibility Initiative documents multiple case studies showing direct revenue increases after accessibility improvements - from increased customer reach, reduced support costs, and improved conversion rates.
         </div>
 
         <h2>What I've Seen Work</h2>
 
         <p>In my 16+ years working on accessibility, I've seen organisations take two approaches:</p>
 
-        <p><strong>Approach A: Retrofit.</strong> Build first, audit later, remediate under pressure. This is the 30x approach. I've worked with organisations that spent months &mdash; and significant budgets &mdash; remediating issues that could have been prevented with a few hours of design annotation and semantic HTML.</p>
+        <p><strong>Approach A: Retrofit.</strong> Build first, audit later, remediate under pressure. This is the 30x approach. I've worked with organisations that spent months - and significant budgets - remediating issues that could have been prevented with a few hours of design annotation and semantic HTML.</p>
 
         <p><strong>Approach B: Shift-left.</strong> Embed accessibility into design, development, and QA from day one. The upfront investment is modest: training for designers and developers, accessibility linting in the IDE, automated checks in the pipeline, and periodic manual audits to catch what automation misses.</p>
 
@@ -256,7 +256,7 @@
           <li><strong>Add accessibility linting to your development environment.</strong> This is a one-time setup that prevents issues continuously. It's the highest ROI investment you can make.</li>
           <li><strong>Add automated accessibility checks to your CI/CD pipeline.</strong> Block builds that introduce new violations. This prevents regression and creates a baseline.</li>
           <li><strong>Schedule quarterly manual audits.</strong> Automated checks are your daily safety net. Manual audits are your comprehensive review. Both are necessary.</li>
-          <li><strong>Assign an accessibility champion in each team.</strong> Not a dedicated role &mdash; a developer or designer who takes ownership of accessibility within their squad. Train them, support them, and give them authority to flag issues.</li>
+          <li><strong>Assign an accessibility champion in each team.</strong> Not a dedicated role - a developer or designer who takes ownership of accessibility within their squad. Train them, support them, and give them authority to flag issues.</li>
         </ol>
 
         <h2>The Bottom Line</h2>

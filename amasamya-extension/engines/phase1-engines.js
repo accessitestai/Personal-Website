@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Phase 1 Engines — Extracted from bookmarklet for extension use
+ * AMASAMYA Phase 1 Engines - Extracted from bookmarklet for extension use
  * 8 audit engines + utility functions
  */
 
@@ -356,7 +356,7 @@ function auditColourContrast() {
     if (ratio < requiredAA) {
       findings.push({
         id: generateId(), engine: 'Colour Contrast', element: describeEl(el),
-        criterion: `WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) — ${levelLabel}`,
+        criterion: `WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) - ${levelLabel}`,
         issue: `Contrast ratio of ${ratio.toFixed(2)}:1 fails the Level AA minimum of ${requiredAA}:1 for ${levelLabel}.`,
         computed: `${ratio.toFixed(2)}:1 (foreground: ${cs.color}, background: rgb(${bg.r},${bg.g},${bg.b}))`,
         required: `Minimum ${requiredAA}:1 for ${levelLabel} at Level AA`,
@@ -366,7 +366,7 @@ function auditColourContrast() {
     } else if (ratio < requiredAAA) {
       findings.push({
         id: generateId(), engine: 'Colour Contrast', element: describeEl(el),
-        criterion: `WCAG 2.2 SC 1.4.6 Contrast Enhanced (Level AAA) — ${levelLabel}`,
+        criterion: `WCAG 2.2 SC 1.4.6 Contrast Enhanced (Level AAA) - ${levelLabel}`,
         issue: `Contrast ratio of ${ratio.toFixed(2)}:1 passes Level AA but fails Level AAA minimum of ${requiredAAA}:1.`,
         computed: `${ratio.toFixed(2)}:1 (foreground: ${cs.color})`,
         required: `Minimum ${requiredAAA}:1 for ${levelLabel} at Level AAA`,

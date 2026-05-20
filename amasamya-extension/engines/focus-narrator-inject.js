@@ -1,5 +1,5 @@
 /**
- * AMASAMYA — Focus Indicator Narrator
+ * AMASAMYA - Focus Indicator Narrator
  * Module 2: Visual-to-Audio Engine
  *
  * Injected into the target page. Enumerates every focusable element,
@@ -96,13 +96,13 @@
     /* Scroll the element into the centre of the viewport */
     el.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'center' });
 
-    /* Small pause — let scroll settle and any CSS transitions finish */
+    /* Small pause - let scroll settle and any CSS transitions finish */
     await new Promise(r => setTimeout(r, 120));
 
     /* Apply keyboard focus */
     try { el.focus({ preventScroll: true }); } catch (_) {}
 
-    /* Another brief pause — let the focus ring render */
+    /* Another brief pause - let the focus ring render */
     await new Promise(r => setTimeout(r, 100));
 
     const rect = el.getBoundingClientRect();

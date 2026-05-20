@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Web Screen Reader & Read Aloud — v2.0
+   Web Screen Reader & Read Aloud - v2.0
    Zero-dependency, browser-native TTS (speechSynthesis API)
    ═══════════════════════════════════════════════════════════════════ */
 (function () {
@@ -13,7 +13,7 @@
      ═══════════════════════════════════════════════ */
   /* ─────────────────────────────────────────────────────────────
      CLOUD TTS via a Cloudflare Worker that proxies Azure Cognitive
-     Services Speech. Zero dependency for visitors — every user
+     Services Speech. Zero dependency for visitors - every user
      gets the same high-quality neural voice regardless of OS.
      If the Worker is unreachable (network outage, quota exhausted)
      the engine falls back to the local speechSynthesis so the
@@ -158,7 +158,7 @@
       audio.preload = 'auto';
       self._audio = audio;
 
-      // canplay fires sooner than canplaythrough — faster start
+      // canplay fires sooner than canplaythrough - faster start
       audio.oncanplay = function () { useCloud(audio); };
       audio.onerror = function () { useFallback(audio); };
 
@@ -450,7 +450,7 @@
   };
 
   /* ═══════════════════════════════════════════════
-     3. WEB SCREEN READER — v2.0
+     3. WEB SCREEN READER - v2.0
      ═══════════════════════════════════════════════ */
   var WebSR = {
     active: false,
@@ -868,12 +868,12 @@
       var el = node.element;
       var role = node.role;
 
-      // Links — click and handle anchor navigation
+      // Links - click and handle anchor navigation
       if (role === 'link') {
         var href = el.getAttribute('href') || '';
         el.click();
         if (href.charAt(0) === '#') {
-          // Anchor link — reset cursor to target section
+          // Anchor link - reset cursor to target section
           var self = this;
           setTimeout(function () {
             self.nodes = self._buildTree();
@@ -897,7 +897,7 @@
         return;
       }
 
-      // Buttons — click and announce new state
+      // Buttons - click and announce new state
       if (role === 'button') {
         var hadExpanded = el.hasAttribute('aria-expanded');
         el.click();
@@ -918,7 +918,7 @@
         return;
       }
 
-      // Switches (role="switch") — toggle and announce
+      // Switches (role="switch") - toggle and announce
       if (role === 'switch') {
         el.click();
         var self3 = this;
@@ -932,7 +932,7 @@
         return;
       }
 
-      // Checkboxes — toggle and announce
+      // Checkboxes - toggle and announce
       if (role === 'checkbox') {
         el.click();
         var self4 = this;
@@ -944,7 +944,7 @@
         return;
       }
 
-      // Radio buttons — select and announce
+      // Radio buttons - select and announce
       if (role === 'radio') {
         el.click();
         var self5 = this;
@@ -955,28 +955,28 @@
         return;
       }
 
-      // Text fields — enter focus mode
+      // Text fields - enter focus mode
       if (role === 'textbox' || role === 'searchbox' || role === 'combobox' || role === 'spinbutton') {
         this.mode = 'focus';
         el.focus();
         var fieldLabel = node.name || 'field';
         var fieldStates = node.states.length ? ', ' + node.states.join(', ') : '';
         VoiceEngine.speak('Focus mode. ' + fieldLabel + ', ' + this._getRoleLabel(role) + fieldStates + '. Type to edit. Press Escape to return to browse mode.');
-        this._updateStatus('FOCUS MODE — ' + fieldLabel + ' — Escape to exit');
+        this._updateStatus('FOCUS MODE - ' + fieldLabel + ' - Escape to exit');
         return;
       }
 
-      // Sliders — enter focus mode with value
+      // Sliders - enter focus mode with value
       if (role === 'slider') {
         this.mode = 'focus';
         el.focus();
         var val = el.value || el.getAttribute('aria-valuenow') || '';
         VoiceEngine.speak('Slider, value ' + val + '. Use arrow keys to adjust. Escape to exit.');
-        this._updateStatus('FOCUS MODE — Slider — Escape to exit');
+        this._updateStatus('FOCUS MODE - Slider - Escape to exit');
         return;
       }
 
-      // Default — just click
+      // Default - just click
       el.click();
       VoiceEngine.speak('Activated');
     },
@@ -1245,7 +1245,7 @@
           return;
         }
 
-        // Focus mode — only Escape and Tab pass through
+        // Focus mode - only Escape and Tab pass through
         if (self.mode === 'focus') {
           if (e.key === 'Escape') {
             e.preventDefault();
@@ -1266,7 +1266,7 @@
                     node.states = self._getStates(node.element);
                     var text = self._buildAnnouncement(node);
                     VoiceEngine.speak(text);
-                    self._updateStatus('FOCUS MODE — ' + text);
+                    self._updateStatus('FOCUS MODE - ' + text);
                     self._positionFocusRing();
                     return;
                   }
@@ -1398,7 +1398,7 @@
                  Matches universal "Esc = exit" UX. deactivate() also
                  stops any in-flight speech, so we don't need a separate
                  stop-speech branch. (Use Ctrl to silence speech without
-                 deactivating — see the Ctrl handler above.) */
+                 deactivating - see the Ctrl handler above.) */
               self.deactivate();
             }
             break;
@@ -1431,7 +1431,7 @@
         'Alt Shift E: open element list dialog. ' +
         'Escape: close dialog or stop speech.';
       VoiceEngine.speak(helpText);
-      this._updateStatus('Keyboard help — listening...');
+      this._updateStatus('Keyboard help - listening...');
     },
 
     _updateStatus: function (msg) {
@@ -1581,7 +1581,7 @@
   }
 
   /* ═══════════════════════════════════════════════
-     5. TRANSLATION HOOK — rebuild tree & switch voice
+     5. TRANSLATION HOOK - rebuild tree & switch voice
      ═══════════════════════════════════════════════ */
   // Detect translation by monitoring localStorage changes and DOM mutations
   // This avoids wrapping srAnnounce which could break the original live region

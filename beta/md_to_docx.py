@@ -4,7 +4,7 @@ Convert AMASAMYA's markdown plan documents into accessible .docx files.
 Why this exists: JAWS/NVDA users navigate Word documents by heading
 level (H key), list type (L key for lists, T for tables, etc). That
 only works if the document uses Word's built-in semantic styles
-('Heading 1', 'List Bullet', etc.) — not just larger or bolded text.
+('Heading 1', 'List Bullet', etc.) - not just larger or bolded text.
 A naive markdown-to-docx pipeline (e.g., pandoc with default settings)
 produces visually-correct but semantically-empty documents.
 
@@ -13,10 +13,10 @@ This converter:
   * Maps - and * bullet lines to Word's 'List Bullet' style.
   * Maps "1." numbered lines to 'List Number'.
   * Maps GFM tables to real Word tables with a header row marked
-    via repeatHeader (XML twiddle — python-docx doesn't expose it
+    via repeatHeader (XML twiddle - python-docx doesn't expose it
     natively).
   * Sets the document title in core properties so AT announces it on
-    open ("Tester Brief — AMASAMYA, by Akhilesh Malani").
+    open ("Tester Brief - AMASAMYA, by Akhilesh Malani").
   * Sets w:lang on the default style so AT picks up English without
     guessing.
   * Renders inline `code` as the Code Char style (real Char style,
@@ -48,55 +48,55 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS = [
     ("beta/tester-brief.md",
      "beta/tester-brief.docx",
-     "AMASAMYA Beta — Tester Brief"),
+     "AMASAMYA Beta - Tester Brief"),
     ("beta/feedback-form.md",
      "beta/feedback-form.docx",
-     "AMASAMYA Beta — Feedback Form Question Set"),
+     "AMASAMYA Beta - Feedback Form Question Set"),
     ("beta/outreach-emails.md",
      "beta/outreach-emails.docx",
-     "AMASAMYA Beta — Outreach Email Templates"),
+     "AMASAMYA Beta - Outreach Email Templates"),
     ("beta/pre-flight-checklist.md",
      "beta/pre-flight-checklist.docx",
-     "AMASAMYA Beta — Pre-Flight Checklist"),
+     "AMASAMYA Beta - Pre-Flight Checklist"),
     ("beta/funding/strategy.md",
      "beta/funding/strategy.docx",
-     "AMASAMYA — Beta-Stage Funding Strategy"),
+     "AMASAMYA - Beta-Stage Funding Strategy"),
     ("beta/funding/one-pager.md",
      "beta/funding/one-pager.docx",
-     "AMASAMYA — One-Page Brief for Funders"),
+     "AMASAMYA - One-Page Brief for Funders"),
     ("beta/funding/email-templates.md",
      "beta/funding/email-templates.docx",
-     "AMASAMYA — Funding Outreach Email Templates"),
+     "AMASAMYA - Funding Outreach Email Templates"),
     ("beta/funding/week-one-action-plan.md",
      "beta/funding/week-one-action-plan.docx",
-     "AMASAMYA — Funding Week-One Action Plan"),
+     "AMASAMYA - Funding Week-One Action Plan"),
     ("CONTRIBUTORS.md",
      "CONTRIBUTORS.docx",
-     "AMASAMYA — Contributors"),
+     "AMASAMYA - Contributors"),
     ("beta/README.md",
      "beta/README.docx",
-     "AMASAMYA Beta — Document Index"),
+     "AMASAMYA Beta - Document Index"),
     ("beta/cws-resubmission-checklist.md",
      "beta/cws-resubmission-checklist.docx",
-     "AMASAMYA — Chrome Web Store Resubmission Checklist"),
+     "AMASAMYA - Chrome Web Store Resubmission Checklist"),
     ("beta/cws-listing-description.md",
      "beta/cws-listing-description.docx",
-     "AMASAMYA — CWS Listing Description (paste-ready)"),
+     "AMASAMYA - CWS Listing Description (paste-ready)"),
     ("beta/gaad-outreach-list.md",
      "beta/gaad-outreach-list.docx",
-     "AMASAMYA — GAAD 2026 Outreach List"),
+     "AMASAMYA - GAAD 2026 Outreach List"),
     ("beta/gaad-launch-posts.md",
      "beta/gaad-launch-posts.docx",
-     "AMASAMYA — GAAD 2026 Launch Post Pack"),
+     "AMASAMYA - GAAD 2026 Launch Post Pack"),
     ("beta/mujtaba-personal-setup-guide.md",
      "beta/mujtaba-personal-setup-guide.docx",
-     "AMASAMYA — Personal Setup Guide (for Mujtaba)"),
+     "AMASAMYA - Personal Setup Guide (for Mujtaba)"),
     ("beta/reading-amasamya-reports.md",
      "beta/reading-amasamya-reports.docx",
-     "AMASAMYA — Reading an Audit Report"),
+     "AMASAMYA - Reading an Audit Report"),
     ("beta/finding-to-engineer-ticket.md",
      "beta/finding-to-engineer-ticket.docx",
-     "AMASAMYA — From Finding to Engineer Ticket"),
+     "AMASAMYA - From Finding to Engineer Ticket"),
 ]
 
 
@@ -211,7 +211,7 @@ BLOCKQUOTE_RE = re.compile(r"^>\s?(.*)$")
 def _ensure_doc_styles(doc):
     """Make sure the styles we reference actually exist."""
     styles = doc.styles
-    # Code Char style — used for inline `code`. Word ships 'HTML Code'
+    # Code Char style - used for inline `code`. Word ships 'HTML Code'
     # in some templates; create our own if missing.
     if "Inline Code" not in [s.name for s in styles]:
         try:
@@ -224,7 +224,7 @@ def _ensure_doc_styles(doc):
 
 
 def _set_doc_title(doc, title):
-    """Set the document's core title — what JAWS/NVDA announce on open."""
+    """Set the document's core title - what JAWS/NVDA announce on open."""
     cp = doc.core_properties
     cp.title = title
     cp.language = "en-US"
@@ -305,7 +305,7 @@ def convert(md_path: Path, docx_path: Path, title: str):
     _set_doc_language(doc)
     code_style = _ensure_doc_styles(doc)
 
-    # First-page document title — gives sighted readers what AT
+    # First-page document title - gives sighted readers what AT
     # already gets via core properties.
     h = doc.add_paragraph(title, style="Title")
 
@@ -326,7 +326,7 @@ def convert(md_path: Path, docx_path: Path, title: str):
         # Code block toggling
         if CODEBLOCK_RE.match(raw):
             if in_code:
-                # End of code block — drop in as preformatted paragraph
+                # End of code block - drop in as preformatted paragraph
                 code_text = "\n".join(code_buffer)
                 p = doc.add_paragraph()
                 run = p.add_run(code_text)
@@ -344,7 +344,7 @@ def convert(md_path: Path, docx_path: Path, title: str):
         # Tables: collect contiguous pipe lines, skip the separator row.
         if "|" in raw and (table_buffer or raw.strip().startswith("|") or raw.count("|") >= 2):
             if TABLE_SEP_RE.match(raw):
-                continue  # separator row — skip
+                continue  # separator row - skip
             if raw.strip() == "":
                 _flush_table(doc, table_buffer)
                 table_buffer = []
@@ -371,7 +371,7 @@ def convert(md_path: Path, docx_path: Path, title: str):
             blockquote_lines = []
             in_blockquote = False
 
-        # Empty line — paragraph break, no-op
+        # Empty line - paragraph break, no-op
         if raw.strip() == "":
             continue
 
@@ -386,7 +386,7 @@ def convert(md_path: Path, docx_path: Path, title: str):
         if m:
             level = len(m.group(1))
             heading_text = m.group(2)
-            # Strip Markdown emphasis from heading text — Word headings
+            # Strip Markdown emphasis from heading text - Word headings
             # take the style from the paragraph, so embedded **bold** is
             # noisy. Just use the plain text.
             heading_text = re.sub(r"[*_`]", "", heading_text)
@@ -453,7 +453,7 @@ def main():
         # Single-file mode for iterative testing.
         src = Path(sys.argv[1]).resolve()
         dst = src.with_suffix(".docx")
-        title = f"AMASAMYA — {src.stem.replace('-', ' ').title()}"
+        title = f"AMASAMYA - {src.stem.replace('-', ' ').title()}"
         convert(src, dst, title)
         return
     print("Converting AMASAMYA plan documents to accessible .docx …")

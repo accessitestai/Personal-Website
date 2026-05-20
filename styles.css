@@ -2,7 +2,7 @@
    CSS Custom Properties
    =========================== */
 :root {
-  /* Primary palette — deep navy to teal */
+  /* Primary palette - deep navy to teal */
   --color-primary: #0c4a6e;
   --color-primary-dark: #082f49;
   --color-primary-light: #075280; /* darkened from #0369a1 (5.93:1) → #075280 (8.28:1 on white, 7.59:1 on slate-100 #f1f5f9) to pass WCAG 1.4.6 AAA on both surfaces */
@@ -10,12 +10,12 @@
   --color-accent-light: #22d3ee;
   --color-warm: #d97706;
 
-  /* Text — high contrast */
+  /* Text - high contrast */
   --color-text: #0f172a;
   --color-text-light: #425066; /* darkened from #475569 (4.48:1) → #425066 (4.6:1) to pass WCAG 1.4.3 AA */
   --color-bg: #ffffff;
   --color-bg-alt: #f1f5f9;
-  --color-border: #64748b; /* was #cbd5e1 (1.72:1) — darkened to slate-500 (4.86:1) → passes SC 1.4.11 */
+  --color-border: #64748b; /* was #cbd5e1 (1.72:1) - darkened to slate-500 (4.86:1) → passes SC 1.4.11 */
   --color-focus: #0369a1;
   --color-card-bg: #ffffff;
 
@@ -33,7 +33,7 @@
   --radius: 12px;
   --radius-sm: 8px;
 
-  /* Shadows — tinted for depth */
+  /* Shadows - tinted for depth */
   --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.05), 0 2px 4px rgba(15, 23, 42, 0.04);
   --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04);
@@ -94,7 +94,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Screen reader only — SC 1.4.12 compliant:
+/* Screen reader only - SC 1.4.12 compliant:
    clip-path hides the element visually without constraining height,
    so text-spacing overrides don't cause content clipping. */
 .sr-only {
@@ -139,7 +139,7 @@ body {
   box-shadow: var(--shadow-lg), 0 0 0 3px var(--color-focus);
 }
 
-/* Removed: a:focus:not(:focus-visible) { outline:none } — suppressed focus for 76 elements (SC 2.4.7 FAIL).
+/* Removed: a:focus:not(:focus-visible) { outline:none } - suppressed focus for 76 elements (SC 2.4.7 FAIL).
    The global :focus-visible rule above handles keyboard-only focus rings correctly in all modern browsers. */
 
 /* ===========================
@@ -222,7 +222,7 @@ a:hover {
   border-bottom: 1px solid rgba(203, 213, 225, 0.6);
   z-index: 1000;
   padding: 0.75rem var(--spacing-md);
-  /* overflow-x:hidden removed — caused SC 1.4.12 text-spacing clip on nav items */
+  /* overflow-x:hidden removed - caused SC 1.4.12 text-spacing clip on nav items */
 }
 
 .nav-container {
@@ -439,7 +439,7 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #7ec8e3;
-  /* 7ec8e3 on 0c4a6e ≈ 7.4:1 — AAA pass */
+  /* 7ec8e3 on 0c4a6e ≈ 7.4:1 - AAA pass */
   margin: 0;
   flex-shrink: 0;
 }
@@ -447,14 +447,14 @@ a:hover {
   margin: 0;
   font-size: 0.98rem;
   line-height: 1.5;
-  color: #ffffff; /* white on the dark blue gradient — >12:1 on the lightest stop, AAA */
+  color: #ffffff; /* white on the dark blue gradient - >12:1 on the lightest stop, AAA */
   flex: 1 1 320px;
 }
 .gaad-banner-link {
   color: #cfe7f5;
   text-decoration: underline;
   font-weight: 600;
-  /* cfe7f5 on 0c4a6e ≈ 10.9:1 — AAA pass */
+  /* cfe7f5 on 0c4a6e ≈ 10.9:1 - AAA pass */
 }
 .gaad-banner-link:hover,
 .gaad-banner-link:focus {
@@ -539,11 +539,11 @@ a:hover {
   margin-bottom: var(--spacing-sm);
 
   /* ────────────────────────────────────────────────────────────────
-     CONTRAST RECEIPTS — WCAG 2.2 SC 1.4.3 AA + SC 1.4.6 AAA
+     CONTRAST RECEIPTS - WCAG 2.2 SC 1.4.3 AA + SC 1.4.6 AAA
      ────────────────────────────────────────────────────────────────
      axe-core and most automated scanners CANNOT measure contrast on
      text painted with `background-clip: text` (the text has no single
-     "color" value — every character spans a gradient). This is a
+     "color" value - every character spans a gradient). This is a
      known scanner blind spot, not a defect in this rule.
 
      The math below is computed against the worst-case combinations:
@@ -911,7 +911,7 @@ a:hover {
 .proof-logo {
   font-size: 0.95rem;
   font-weight: 600;
-  /* Use full-strength text colour — opacity:0.6 on #475569 on white = ~1.8:1, a critical contrast failure */
+  /* Use full-strength text colour - opacity:0.6 on #475569 on white = ~1.8:1, a critical contrast failure */
   color: var(--color-text);
   opacity: 1;
   transition: color var(--transition);
@@ -1796,7 +1796,7 @@ a:hover {
   --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
-/* Dark mode: skip-link fix — #38bdf8 bg + white text = 2.08:1 (FAIL); use dark text instead */
+/* Dark mode: skip-link fix - #38bdf8 bg + white text = 2.08:1 (FAIL); use dark text instead */
 [data-theme="dark"] .skip-link {
   color: var(--color-bg); /* #0f172a on #38bdf8 = 8.71:1 SC 1.4.3 */
 }
@@ -2354,7 +2354,7 @@ body > .skiptranslate:not(#google_translate_element) {
     -webkit-text-fill-color: ButtonText;
   }
 
-  /* Scroll-animation elements — ensure visible immediately */
+  /* Scroll-animation elements - ensure visible immediately */
   .fade-in,
   .fade-in-left,
   .fade-in-right,

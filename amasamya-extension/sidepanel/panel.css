@@ -1,4 +1,4 @@
-/* AMASAMYA Side Panel — Dark Theme */
+/* AMASAMYA Side Panel - Dark Theme */
 :root {
   --ama-navy:    #0a1628;
   --ama-blue:    #003366;
@@ -373,7 +373,7 @@ footer {
   text-align: center;
   transition: color 0.15s, border-color 0.15s;
   white-space: nowrap;
-  /* SC 2.5.5 — 44px minimum target height */
+  /* SC 2.5.5 - 44px minimum target height */
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -400,7 +400,7 @@ footer {
 /* Ensure hidden tabpanels are invisible */
 [role="tabpanel"][hidden] { display: none; }
 
-/* Main content area — used as scroll container for panels */
+/* Main content area - used as scroll container for panels */
 main {
   padding: 0; /* panels handle their own padding */
 }
@@ -471,7 +471,7 @@ main {
 }
 
 /* ================================================================
-   MODULE 2: FOCUS NARRATOR — summary strip + badge row
+   MODULE 2: FOCUS NARRATOR - summary strip + badge row
 ================================================================ */
 
 .fn-summary-strip {
@@ -495,7 +495,7 @@ main {
 .fn-total { background: rgba(126,200,227,0.1);  color: var(--ama-accent);  border: 1px solid var(--ama-border); }
 
 /* ================================================================
-   MODULE 1: VISUAL LAYOUT AUDITOR — breakpoint cards
+   MODULE 1: VISUAL LAYOUT AUDITOR - breakpoint cards
 ================================================================ */
 
 .vla-bps {
@@ -715,7 +715,7 @@ main {
 }
 
 /* ── Verdict classes used in state-watchdog table ── */
-/* 'verdict-info' is also used by WCAG panel — ensure it exists */
+/* 'verdict-info' is also used by WCAG panel - ensure it exists */
 .verdict-info    { color: var(--ama-info); }
 /* Alias used in scwAppendRow for Warning rows */
 .verdict-warning { color: var(--ama-warn); font-weight: 600; }
@@ -731,7 +731,7 @@ main {
 }
 
 /* ================================================================
-   RESPONSIVE — narrow side panel
+   RESPONSIVE - narrow side panel
 ================================================================ */
 
 @media (max-width: 400px) {

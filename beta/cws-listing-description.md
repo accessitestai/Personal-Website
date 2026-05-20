@@ -1,11 +1,11 @@
-# Chrome Web Store — Listing Description
+# Chrome Web Store - Listing Description
 
 This is the long-form description text for the AMASAMYA listing.
 **Paste the section between the two `=== BEGIN/END ===` markers
 verbatim into the Description field on the Chrome Web Store
 Developer Dashboard.**
 
-The text below the markers is reference / commentary — do not paste
+The text below the markers is reference / commentary - do not paste
 that.
 
 ---
@@ -30,7 +30,7 @@ After installation, open any web page you want to audit. Press Ctrl + Shift + U 
 
 With a screen reader, press F6 to move focus into the side panel after the audit completes. Then use the H key in browse mode to move from one finding to the next. Each finding announces its WCAG criterion, its severity, and a one-sentence remediation hint.
 
-If the Ctrl + Shift + U shortcut does not work on your system — for example because Windows is using it for Unicode input — you can reassign it. Open chrome://extensions/shortcuts in the address bar, find AMASAMYA in the list, and bind any combination that is free on your machine. Alt + Shift + A is a safe alternative on most systems.
+If the Ctrl + Shift + U shortcut does not work on your system - for example because Windows is using it for Unicode input - you can reassign it. Open chrome://extensions/shortcuts in the address bar, find AMASAMYA in the list, and bind any combination that is free on your machine. Alt + Shift + A is a safe alternative on most systems.
 
 VISION AI MODULES (optional, bring your own API key)
 
@@ -66,7 +66,7 @@ Detailed permission justifications and threat-model disclosure are in the privac
 
 WHO BUILT THIS
 
-AMASAMYA is built and maintained by Akhilesh Malani — accessibility architect and digital inclusion strategist. It is fully self-funded, with no investor influence on the privacy or feature roadmap.
+AMASAMYA is built and maintained by Akhilesh Malani - accessibility architect and digital inclusion strategist. It is fully self-funded, with no investor influence on the privacy or feature roadmap.
 
 LINKS
 
@@ -88,11 +88,11 @@ could plausibly flag the same way:
 
 | Old phrasing (removed) | Why it was risky | New phrasing |
 |---|---|---|
-| `Eight formats supported: PDF, Word (DOCX), PowerPoint (PPTX), Excel (XLSX), EPUB, and OpenDocument (ODT, ODS, ODP)` | Direct cause of the Yellow Argon rejection — long enumeration of file-format keywords, several with parenthetical aliases. | `The supported formats include PDFs, Microsoft Office files, EPUB books, and OpenDocument files.` |
+| `Eight formats supported: PDF, Word (DOCX), PowerPoint (PPTX), Excel (XLSX), EPUB, and OpenDocument (ODT, ODS, ODP)` | Direct cause of the Yellow Argon rejection - long enumeration of file-format keywords, several with parenthetical aliases. | `The supported formats include PDFs, Microsoft Office files, EPUB books, and OpenDocument files.` |
 | `13 specialist audit engines against the page (contrast, ARIA, focus order, landmarks, forms, headings, heading levels, reflow, target size, focus visibility, link purpose, image alt-text, and more)` | A 12-item parenthetical of WCAG-flavoured keywords. The exact pattern Chrome's policy targets. | `a full WCAG 2.2 audit … covering colour contrast, ARIA validation, focus management, structural semantics, and the broader interaction patterns the standard requires.` |
-| `fully operable with NVDA, JAWS, VoiceOver, and TalkBack` | Brand-name pile-up — the four highest-volume accessibility search terms in one comma list. | `fully operable with major Windows, macOS, and Android screen readers.` |
+| `fully operable with NVDA, JAWS, VoiceOver, and TalkBack` | Brand-name pile-up - the four highest-volume accessibility search terms in one comma list. | `fully operable with major Windows, macOS, and Android screen readers.` |
 | `Export as HTML, JSON, or plain text` | Mild but unnecessary; replaced with neutral phrasing. | `Reports can be exported.` |
-| `(mobile / tablet / laptop / desktop)` | Borderline — slash-separated keyword list; removed for safety. | `at four viewport widths` |
+| `(mobile / tablet / laptop / desktop)` | Borderline - slash-separated keyword list; removed for safety. | `at four viewport widths` |
 | `WHAT'S NEW IN v3.1.0` bullet list of feature keywords | Each bullet was a feature-keyword sentence; collectively they read as a keyword roll-up. | Section deleted. Anyone who wants the changelog can read it on the linked web platform. |
 | `Eight document formats supported (was two in v2)` | Same keyword pattern as the flagged sentence. | Removed with the rest of the WHAT'S NEW section. |
 
@@ -102,7 +102,7 @@ vs the previous ~3,600), well within the 16,000-character limit.
 ## Notes
 
 - The text uses `•` bullet points only inside section bodies that
-  read naturally as a list (none in this revision) — flat prose
+  read naturally as a list (none in this revision) - flat prose
   paragraphs are safer than bullets for this listing.
 - Section headers (`WHAT IT AUDITS`, `VISION AI MODULES`, etc.) are
   ALL-CAPS plain text because the Description field has no heading
@@ -111,10 +111,10 @@ vs the previous ~3,600), well within the 16,000-character limit.
   paragraph spacing.
 - All three URLs at the bottom should resolve to live pages. Verify
   before you paste:
-  - `amasamya.akhileshmalani.com` — main site, must be live.
-  - `amasamya.akhileshmalani.com/privacy` — must return 200 (already
+  - `amasamya.akhileshmalani.com` - main site, must be live.
+  - `amasamya.akhileshmalani.com/privacy` - must return 200 (already
     verified, with redirects in netlify.toml).
-  - `amasamya.akhileshmalani.com/credits` — needs to exist if you
+  - `amasamya.akhileshmalani.com/credits` - needs to exist if you
     want to keep this URL in the listing. If you haven't built the
     credits page yet, either remove that line from the listing
     description, or publish `CONTRIBUTORS.docx` as a rendered HTML
@@ -154,4 +154,4 @@ specific feedback. Suggested text:
 > regenerated screenshots) are all preserved in this build. Please
 > review at your convenience.
 >
-> — Akhilesh Malani
+> - Akhilesh Malani

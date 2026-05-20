@@ -1,10 +1,10 @@
 /**
- * AMASAMYA Extension — Side Panel v3.0
+ * AMASAMYA Extension - Side Panel v3.0
  *
  * Panels:
- *   1. WCAG Audit      — existing 13-engine results
- *   2. Visual Audit    — Focus Narrator (Module 2) + Visual Layout (Module 1)
- *   3. Settings        — Vision AI API keys
+ *   1. WCAG Audit      - existing 13-engine results
+ *   2. Visual Audit    - Focus Narrator (Module 2) + Visual Layout (Module 1)
+ *   3. Settings        - Vision AI API keys
  */
 
 (function () {
@@ -46,7 +46,7 @@
   function $(id) { return document.getElementById(id); }
 
   /* ================================================================
-     PANEL TABS — WAI-ARIA Tabs Pattern (horizontal)
+     PANEL TABS - WAI-ARIA Tabs Pattern (horizontal)
   ================================================================ */
 
   const PANEL_TABS = ['wcag', 'visual', 'settings'];
@@ -59,7 +59,7 @@
       if (tab)   { tab.setAttribute('aria-selected', String(active)); tab.setAttribute('tabindex', active ? '0' : '-1'); }
       if (panel) { panel.hidden = !active; }
     });
-    /* Screen reader announces the tab button naturally on focus — no announce() needed */
+    /* Screen reader announces the tab button naturally on focus - no announce() needed */
   }
 
   document.querySelectorAll('.panel-tab').forEach(tab => {
@@ -77,10 +77,10 @@
   });
 
   /* ================================================================
-     SETTINGS — load / save API keys
+     SETTINGS - load / save API keys
   ================================================================ */
 
-  /* v3.4.0 — Gemini added as a third provider option. Default for new
+  /* v3.4.0 - Gemini added as a third provider option. Default for new
      installs is gemini (free-tier, easiest first-time setup). Existing
      installs preserve their prior provider choice. */
   const anthropicKeyInput = $('anthropic-key');
@@ -174,7 +174,7 @@
   });
 
   /* ================================================================
-     WCAG AUDIT — existing logic (unchanged)
+     WCAG AUDIT - existing logic (unchanged)
   ================================================================ */
 
   let allFindings      = [];
@@ -198,7 +198,7 @@
   });
 
   function onAuditComplete() {
-    $('page-info').textContent = `${auditMeta.pageTitle} — ${auditMeta.pageUrl}`;
+    $('page-info').textContent = `${auditMeta.pageTitle} - ${auditMeta.pageUrl}`;
 
     const fail     = allFindings.filter(f => f.verdict   === 'Fail').length;
     const warn     = allFindings.filter(f => f.verdict   === 'Warning').length;
@@ -447,7 +447,7 @@
     }
 
     // Attach CSS selector to each finding for background rect lookup
-    // Selectors were not stored — derive a rough one from the element description
+    // Selectors were not stored - derive a rough one from the element description
     const withSelectors = failFindings.map((f, i) => {
       // Try to extract an id selector if the element description contains #id
       const idMatch = f.element && f.element.match(/#([\w-]+)/);
@@ -490,7 +490,7 @@
     }
 
     const baseDate = new Date(baseline.timestamp).toLocaleDateString();
-    $('baseline-status').textContent = `Baseline: ${baseline.summary.fail}F / ${baseline.summary.warn}W — saved ${baseDate}`;
+    $('baseline-status').textContent = `Baseline: ${baseline.summary.fail}F / ${baseline.summary.warn}W - saved ${baseDate}`;
 
     // Build fingerprint sets
     const baseSet = new Set((baseline.findings || []).map(baselineFingerprint));
@@ -507,7 +507,7 @@
       `<span class="reg-fixed">✔ ${fixedCount} fixed</span> &nbsp;` +
       `<span class="reg-same">${allFindings.filter(f=>f.verdict==='Fail').length - newCount} unchanged</span>`;
 
-    // Colour rows — wait for renderFindings to complete via setTimeout(0)
+    // Colour rows - wait for renderFindings to complete via setTimeout(0)
     setTimeout(() => {
       const rows = document.querySelectorAll('#findings-body tr[data-finding-id]');
       rows.forEach(row => {
@@ -537,7 +537,7 @@
       }
     });
     $('clear-baseline-btn').disabled = false;
-    $('baseline-status').textContent = `Baseline saved — ${new Date().toLocaleTimeString()}`;
+    $('baseline-status').textContent = `Baseline saved - ${new Date().toLocaleTimeString()}`;
     announce('Baseline saved for this URL.');
   });
 
@@ -584,7 +584,7 @@
           <p><strong>Fix:</strong> ${escHtml(f.howToFix)}</p></td></tr>`).join('');
     return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AMASAMYA Audit — ${escHtml(auditMeta.pageTitle)}</title>
+<title>AMASAMYA Audit - ${escHtml(auditMeta.pageTitle)}</title>
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:system-ui,sans-serif;color:#111;background:#fff;}
 .skip{position:absolute;top:-999px;left:-999px;background:#003366;color:#fff;padding:8px 16px;}.skip:focus{top:0;left:0;}
 header{background:#003366;color:#fff;padding:24px 32px;}header h1{font-size:1.5rem;margin-bottom:4px;}
@@ -612,7 +612,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 <div style="overflow-x:auto;"><table aria-label="Findings">
 <thead><tr><th>ID</th><th>Engine</th><th>Element</th><th>Criterion</th><th>Severity</th><th>Verdict</th><th>Detail</th></tr></thead>
 <tbody>${rows}</tbody></table></div></main>
-<footer>Generated by AMASAMYA v3.0.0 — AMASAMYA.akhileshmalani.com — Akhilesh Malani</footer>
+<footer>Generated by AMASAMYA v3.4.1 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
 </body></html>`;
   }
 
@@ -686,11 +686,11 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     const tbody = $('fn-results-body');
     const tr    = document.createElement('tr');
 
-    const verdict    = finding?.verdict || (finding?.hasIndicator === false ? 'FAIL' : finding?.hasIndicator === true ? 'PASS' : '—');
+    const verdict    = finding?.verdict || (finding?.hasIndicator === false ? 'FAIL' : finding?.hasIndicator === true ? 'PASS' : '-');
     const hasFocus   = finding?.hasIndicator;
     const passes247  = finding?.passes_2_4_7;
     const passes2411 = finding?.passes_2_4_11;
-    const description = finding?.description || finding?.note || (finding?.error ? 'Error — check API key in Settings.' : '—');
+    const description = finding?.description || finding?.note || (finding?.error ? 'Error - check API key in Settings.' : '-');
     const indicator  = finding?.indicatorType || (hasFocus ? 'present' : 'none');
     const color      = finding?.color || '';
     const thickness  = finding?.thicknessPx ? finding.thicknessPx + 'px' : '';
@@ -858,7 +858,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       lines.push(`Breakpoint: ${r.breakpoint.label}`);
       lines.push(`Summary: ${r.finding?.summary || 'N/A'}`);
       (r.finding?.issues || []).forEach(iss => {
-        lines.push(`  [${iss.severity}] ${iss.type} — ${iss.location}`);
+        lines.push(`  [${iss.severity}] ${iss.type} - ${iss.location}`);
         lines.push(`    ${iss.description} (WCAG ${iss.wcag || 'N/A'})`);
       });
       lines.push('');

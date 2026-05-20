@@ -5,7 +5,7 @@ working on this repository. Read it at the start of any session.
 
 ## About the human in this project
 
-**Akhilesh Malani** — accessibility architect and digital inclusion strategist.
+**Akhilesh Malani** - accessibility architect and digital inclusion strategist.
 **Screen-reader user**, primarily NVDA and JAWS on Windows. Less proficient
 with VoiceOver on macOS than with NVDA/JAWS on Windows.
 
@@ -36,7 +36,7 @@ Specifically, this means:
   If the destination has a deep link, give the URL instead of "navigate to X
   by clicking Y then Z".
 - **Reference UI by label text and role**, not by position. Say "the button
-  labelled Save" not "the Save button at the bottom of the form" — labels
+  labelled Save" not "the Save button at the bottom of the form" - labels
   are unambiguous to a screen reader; positions are not.
 - **State what the screen reader will announce** at each step where useful.
   "Your screen reader will announce 'Page loaded'." "NVDA will announce
@@ -46,33 +46,53 @@ Specifically, this means:
   first press; tell the user this proactively rather than letting them
   discover it as a failure.
 
+### Punctuation rule (immutable)
+
+**Never use the em-dash character.** That includes the literal Unicode
+em-dash (code point U+2014), the HTML named character reference for the
+em-dash, and any visual approximation of it. This applies to every piece
+of text I produce: chat responses, file content, code comments, commit
+messages, blog posts, audit-finding copy, anywhere. Akhilesh established
+this rule on 19 May 2026 after a full repo sweep removed roughly 1,800
+existing em-dashes.
+
+When the prose would naturally call for an em-dash, use one of:
+
+- a regular hyphen with surrounding spaces ( - ),
+- a comma,
+- a colon,
+- a full stop and a new sentence.
+
+Pick whichever reads cleanest in context. Em-dashes do not appear in
+this project, ever, going forward.
+
 ### Tone
 
 - **Plain, direct, no marketing language.**
 - **Honest about limitations and false positives.**
 - **No celebratory or congratulatory framing** unless explicitly warranted by
   a real achievement. Akhilesh has flagged that "this sounds rude" feedback
-  once — calibrate to warm-but-direct.
+  once - calibrate to warm-but-direct.
 - **Brevity over comprehensiveness.** When in doubt, shorter is better.
 
 ### Modifiers Akhilesh uses
 
 | Modifier | Meaning |
 |---|---|
-| `/silent` | No preamble, no commentary — give the answer directly. |
+| `/silent` | No preamble, no commentary - give the answer directly. |
 
 ## Project context (as of this writing)
 
-- **Personal-Website** (this repo) — akhileshmalani.com portfolio + AMASAMYA
+- **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
-- **AMASAMYA Chrome extension** — published on Chrome Web Store at extension
+- **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
   ID `blnfmiipkccpggpinjofhhglfcgglbif`. Currently at v3.2.0 with 17 audit
   engines.
-- **Public source** — github.com/accessitestai/AMASAMYA (mirror of the
+- **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
   private at github.com/accessitestai/Personal-Website.
-- **Hosting** — Netlify. Auto-deploys on push to `main`.
-- **Domains** — akhileshmalani.com (root portfolio), amasamya.akhileshmalani.com
+- **Hosting** - Netlify. Auto-deploys on push to `main`.
+- **Domains** - akhileshmalani.com (root portfolio), amasamya.akhileshmalani.com
   (audit platform).
 
 ## Things to avoid
@@ -85,5 +105,5 @@ Specifically, this means:
   keyboard path exists.
 - Adding emoji, decorative dashes, or visual ASCII art to any output Akhilesh
   will read with a screen reader.
-- Bulk-replying with "this is great work!" — Akhilesh prefers honest
+- Bulk-replying with "this is great work!" - Akhilesh prefers honest
   assessment over encouragement.

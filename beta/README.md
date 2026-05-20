@@ -1,13 +1,13 @@
-# AMASAMYA Beta — Document Index
+# AMASAMYA Beta - Document Index
 
 This folder contains everything you need for the AMASAMYA closed-beta
 launch. Every plan document is published in two formats:
 
-- **`.docx`** — accessible Word document, semantic headings, real
+- **`.docx`** - accessible Word document, semantic headings, real
   lists, real tables, document title set in core properties so JAWS
   and NVDA announce the document name on open. **This is the format
   to use for reading and printing.**
-- **`.md`** — same content as plain Markdown for developers, GitHub
+- **`.md`** - same content as plain Markdown for developers, GitHub
   rendering, and version control. Edit only the `.md` and re-run
   `python beta/md_to_docx.py` to regenerate the `.docx` versions.
 
@@ -15,7 +15,7 @@ launch. Every plan document is published in two formats:
 
 | # | File | Why |
 |---|---|---|
-| 1 | `funding/strategy.docx` | Frames the funding ask honestly — read this **before** writing any email. |
+| 1 | `funding/strategy.docx` | Frames the funding ask honestly - read this **before** writing any email. |
 | 2 | `funding/week-one-action-plan.docx` | Day-by-day actions for the next 7 days. ~6–8 hours of work. |
 | 3 | `funding/one-pager.docx` | The single-page brief you attach to every funding email. **Customise the bracketed fields before sending.** |
 | 4 | `funding/email-templates.docx` | Six templates: warm angel, cold angel, grant cover letter, pilot customer, friends-and-family, accelerator. |
@@ -26,20 +26,20 @@ launch. Every plan document is published in two formats:
 
 ## Files in repo root
 
-- `../CONTRIBUTORS.docx` — public credit page for beta testers and
+- `../CONTRIBUTORS.docx` - public credit page for beta testers and
   code contributors. Publish at `/amasamya/credits.html` or as a
   `CONTRIBUTORS` page on the site so testers see the credit policy
   before they fill the feedback form.
 
 ## Reading these on Windows with JAWS / NVDA
 
-1. Open Word (or LibreOffice Writer / Google Docs — all three handle
+1. Open Word (or LibreOffice Writer / Google Docs - all three handle
    the .docx files correctly).
 2. Press `Ctrl+O`, navigate to this folder, open the .docx you want.
 3. JAWS / NVDA announces the document title on open.
 4. Press `H` to jump heading-by-heading.
 5. Press `T` to jump table-by-table (the funding one-pager has two
-   tables — Use of Funds and Milestones).
+   tables - Use of Funds and Milestones).
 6. Press `L` to jump to the next list.
 7. Press `K` to jump to the next link.
 
@@ -70,18 +70,18 @@ The conversion sets:
 - `☐` / `☒` checkboxes for GFM task-list items, in a list bullet style.
 - Real tables (with first row marked as `tblHeader` so it repeats on
   page breaks) for GFM tables.
-- Word `Hyperlink` style for `[text](url)` markdown links — clickable,
+- Word `Hyperlink` style for `[text](url)` markdown links - clickable,
   AT-announced as links.
-- `Inline Code` character style for inline `` `code` `` — Consolas
+- `Inline Code` character style for inline `` `code` `` - Consolas
   font, AT can announce as code where the screen reader supports it.
 
 ## What's deliberately not auto-generated
 
-- **Cover image / logo** — keep these documents plain so AT users
+- **Cover image / logo** - keep these documents plain so AT users
   don't waste time on decorative images. Add only if a sighted
   reviewer specifically asks.
-- **Page numbers / footer** — Word's defaults are accessible enough.
+- **Page numbers / footer** - Word's defaults are accessible enough.
   Adding a custom footer in python-docx is fiddly; do it manually in
   Word for any document you'll print.
-- **Watermarks** — never add. Watermarks are read out by AT as
+- **Watermarks** - never add. Watermarks are read out by AT as
   literal text on every page.

@@ -25,7 +25,7 @@
   <!-- Right leg of A -->
   <line x1="195" y1="310" x2="135" y2="155" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
 
-  <!-- Arms stretched out (A crossbar) — the human reaching out -->
+  <!-- Arms stretched out (A crossbar) - the human reaching out -->
   <line x1="65" y1="200" x2="205" y2="200" stroke="#5dade2" stroke-width="12" stroke-linecap="round"/>
 
   <!-- === BRIDGE ARC connecting A to M === -->

@@ -1,5 +1,5 @@
 /**
- * LinkedIn OAuth 2.0 — Step 2: Handle callback, exchange code for token.
+ * LinkedIn OAuth 2.0 - Step 2: Handle callback, exchange code for token.
  *
  * After authorizing on LinkedIn, the user lands here.
  * This function displays the access token and person URN

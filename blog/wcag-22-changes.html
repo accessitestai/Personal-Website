@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most — from someone who tests against them daily.">
+  <meta name="description" content="WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most - from someone who tests against them daily.">
   <meta name="author" content="Akhilesh Malani">
   <meta name="keywords" content="WCAG 2.2, accessibility standards, success criteria, focus appearance, target size, accessible authentication, dragging movements, web accessibility">
   <link rel="canonical" href="https://akhileshmalani.com/blog/wcag-22-changes.html">
@@ -11,7 +11,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:title" content="WCAG 2.2: What Changed and Why It Matters | Akhilesh Malani">
-  <meta property="og:description" content="WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most — from someone who tests against them daily.">
+  <meta property="og:description" content="WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most - from someone who tests against them daily.">
   <meta property="og:url" content="https://akhileshmalani.com/blog/wcag-22-changes.html">
 
   <title>WCAG 2.2: What Changed and Why It Matters | Akhilesh Malani</title>
@@ -44,7 +44,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -130,83 +130,83 @@
       </header>
 
       <div class="blog-post-content">
-        <p>WCAG 2.2 became a W3C Recommendation in October 2023. That was over two years ago. And yet, in the audits I conduct week after week, I still find that most organisations are testing against WCAG 2.1 &mdash; or worse, 2.0. The new success criteria aren't optional extras. They address real gaps that people like me encounter every single day.</p>
+        <p>WCAG 2.2 became a W3C Recommendation in October 2023. That was over two years ago. And yet, in the audits I conduct week after week, I still find that most organisations are testing against WCAG 2.1 - or worse, 2.0. The new success criteria aren't optional extras. They address real gaps that people like me encounter every single day.</p>
 
         <p>I want to walk through what actually changed, what each new requirement means in practice, and which ones I think deserve your immediate attention. This isn't a theoretical overview. I test against these criteria with my screen reader, my keyboard, and my own experience of navigating the web without sight.</p>
 
         <h2>A Quick Refresher: What WCAG Is</h2>
 
-        <p>The Web Content Accessibility Guidelines (WCAG) are the international standard for digital accessibility. They're maintained by the W3C's Accessibility Guidelines Working Group, and they form the basis of accessibility legislation in most countries &mdash; including the European Accessibility Act, the Americans with Disabilities Act (as interpreted by the DOJ), and India's own evolving regulatory landscape.</p>
+        <p>The Web Content Accessibility Guidelines (WCAG) are the international standard for digital accessibility. They're maintained by the W3C's Accessibility Guidelines Working Group, and they form the basis of accessibility legislation in most countries - including the European Accessibility Act, the Americans with Disabilities Act (as interpreted by the DOJ), and India's own evolving regulatory landscape.</p>
 
         <p>WCAG organises its requirements into three conformance levels:</p>
 
         <ul>
-          <li><strong>Level A</strong> &mdash; the bare minimum. If you fail these, your product has fundamental barriers that prevent access entirely.</li>
-          <li><strong>Level AA</strong> &mdash; the standard most laws and policies reference. This is where your organisation should be aiming.</li>
-          <li><strong>Level AAA</strong> &mdash; the highest standard. Not typically required for full conformance, but individual AAA criteria are often worth meeting, especially when they directly affect your user base.</li>
+          <li><strong>Level A</strong> - the bare minimum. If you fail these, your product has fundamental barriers that prevent access entirely.</li>
+          <li><strong>Level AA</strong> - the standard most laws and policies reference. This is where your organisation should be aiming.</li>
+          <li><strong>Level AAA</strong> - the highest standard. Not typically required for full conformance, but individual AAA criteria are often worth meeting, especially when they directly affect your user base.</li>
         </ul>
 
-        <p>WCAG 2.2 builds on 2.1. It doesn't replace the existing criteria &mdash; it adds nine new ones and removes one. If you're already conformant with 2.1, you're most of the way there. But "most of the way" isn't the same as "done."</p>
+        <p>WCAG 2.2 builds on 2.1. It doesn't replace the existing criteria - it adds nine new ones and removes one. If you're already conformant with 2.1, you're most of the way there. But "most of the way" isn't the same as "done."</p>
 
         <h2>The 9 New Success Criteria</h2>
 
         <p>Let me go through each one. I'll explain what it requires, give you a practical example, and share my own take on how much it matters.</p>
 
-        <h3>2.4.11 Focus Not Obscured (Minimum) &mdash; Level AA</h3>
+        <h3>2.4.11 Focus Not Obscured (Minimum) - Level AA</h3>
 
         <p>When a component receives keyboard focus, it must not be entirely hidden by other content that the author has positioned on the page. Think of sticky headers, cookie banners, or chat widgets that sit on top of the page. If I Tab to a link and the focused element is completely behind a fixed footer bar, I have no visual indication of where I am.</p>
 
-        <p>Now, I'm blind &mdash; I don't rely on the visual focus indicator myself. But I work alongside sighted keyboard users constantly, and I've watched this problem frustrate them to the point of giving up. A colleague of mine with a motor impairment uses keyboard navigation exclusively. When focus disappears behind a sticky banner, she loses her place entirely and has to start over. This criterion addresses a real, common barrier.</p>
+        <p>Now, I'm blind - I don't rely on the visual focus indicator myself. But I work alongside sighted keyboard users constantly, and I've watched this problem frustrate them to the point of giving up. A colleague of mine with a motor impairment uses keyboard navigation exclusively. When focus disappears behind a sticky banner, she loses her place entirely and has to start over. This criterion addresses a real, common barrier.</p>
 
         <div class="callout">
           <strong>What to check:</strong> Tab through your entire page with sticky headers, footers, cookie notices, and chat widgets present. If focus ever disappears behind any of them, you have a failure.
         </div>
 
-        <h3>2.4.12 Focus Not Obscured (Enhanced) &mdash; Level AAA</h3>
+        <h3>2.4.12 Focus Not Obscured (Enhanced) - Level AAA</h3>
 
-        <p>This is the stricter version: no part of the focused component may be hidden by author-created content. The AA version (2.4.11) allows partial obscuring &mdash; as long as the element isn't <em>entirely</em> hidden, it passes. The AAA version says the entire focused component must be fully visible.</p>
+        <p>This is the stricter version: no part of the focused component may be hidden by author-created content. The AA version (2.4.11) allows partial obscuring - as long as the element isn't <em>entirely</em> hidden, it passes. The AAA version says the entire focused component must be fully visible.</p>
 
         <p>In my view, this is the standard you should aim for even though it's AAA. Partial visibility isn't much better than no visibility when you're trying to track your focus position across a complex interface.</p>
 
-        <h3>2.4.13 Focus Appearance &mdash; Level AAA</h3>
+        <h3>2.4.13 Focus Appearance - Level AAA</h3>
 
         <p>This criterion specifies minimum requirements for the focus indicator itself: it must have sufficient size and contrast. Specifically, the focus indicator must have a contrast ratio of at least 3:1 between its focused and unfocused states, and it must be at least as large as a 2 CSS pixel thick perimeter around the component.</p>
 
-        <p>I've been advocating for strong focus indicators for years. The number of websites I audit that use <code>outline: none</code> in their CSS with no replacement focus style is staggering. Even though this criterion is AAA, I recommend every team treat it as a baseline requirement. If your focus indicator is a faint dotted line that barely registers against your background colour, keyboard users are navigating blind &mdash; and I mean that without irony.</p>
+        <p>I've been advocating for strong focus indicators for years. The number of websites I audit that use <code>outline: none</code> in their CSS with no replacement focus style is staggering. Even though this criterion is AAA, I recommend every team treat it as a baseline requirement. If your focus indicator is a faint dotted line that barely registers against your background colour, keyboard users are navigating blind - and I mean that without irony.</p>
 
-        <h3>2.5.7 Dragging Movements &mdash; Level AA</h3>
+        <h3>2.5.7 Dragging Movements - Level AA</h3>
 
-        <p>Any functionality that uses dragging movements must also be operable with a single pointer action without dragging. This means if you've built a drag-and-drop interface &mdash; for reordering a list, moving items between columns, adjusting a slider &mdash; there must be an alternative that doesn't require dragging.</p>
+        <p>Any functionality that uses dragging movements must also be operable with a single pointer action without dragging. This means if you've built a drag-and-drop interface - for reordering a list, moving items between columns, adjusting a slider - there must be an alternative that doesn't require dragging.</p>
 
-        <p>This one matters enormously to me. I can't drag and drop. My screen reader doesn't support it. When I encounter a Kanban board where the only way to move a task from "In Progress" to "Done" is to drag it, that feature is completely inaccessible to me. I need a button, a menu, a select dropdown &mdash; any single-pointer alternative.</p>
+        <p>This one matters enormously to me. I can't drag and drop. My screen reader doesn't support it. When I encounter a Kanban board where the only way to move a task from "In Progress" to "Done" is to drag it, that feature is completely inaccessible to me. I need a button, a menu, a select dropdown - any single-pointer alternative.</p>
 
         <div class="callout">
           <strong>Common failures I find:</strong> Sortable lists with no alternative reorder mechanism, map interfaces where the only way to set a pin is to drag it, and slider controls that can't be operated with tap or click.
         </div>
 
-        <h3>2.5.8 Target Size (Minimum) &mdash; Level AA</h3>
+        <h3>2.5.8 Target Size (Minimum) - Level AA</h3>
 
         <p>Interactive targets must be at least 24 by 24 CSS pixels, or they must have sufficient spacing from other targets. There are exceptions for inline links within text, targets where the size is determined by the user agent, and cases where a larger alternative target exists on the same page.</p>
 
         <p>While I don't interact with touch targets visually, I see the impact of this criterion in every mobile audit I conduct. Users with motor impairments, tremors, or limited dexterity struggle with tiny buttons packed closely together. I've tested mobile banking apps where the "Transfer" and "Delete" buttons were 18 pixels apart. That's a recipe for costly mistakes. This criterion sets a sensible minimum.</p>
 
-        <h3>3.2.6 Consistent Help &mdash; Level A</h3>
+        <h3>3.2.6 Consistent Help - Level A</h3>
 
-        <p>If your site provides help mechanisms &mdash; contact information, a chatbot, a FAQ link, a phone number &mdash; these must appear in the same relative order across pages. If "Contact Us" is in the footer on one page and in the header on another, that's a failure.</p>
+        <p>If your site provides help mechanisms - contact information, a chatbot, a FAQ link, a phone number - these must appear in the same relative order across pages. If "Contact Us" is in the footer on one page and in the header on another, that's a failure.</p>
 
-        <p>This one resonates with me deeply. When I navigate a website with my screen reader, I build a mental model of where things are. I learn that the help link is the third item in the footer navigation. If it moves to a different location on a different page, I have to hunt for it all over again. For sighted users, this is a minor inconvenience. For me, it means re-scanning the entire page. Consistency isn't a nice-to-have &mdash; it's how I navigate efficiently.</p>
+        <p>This one resonates with me deeply. When I navigate a website with my screen reader, I build a mental model of where things are. I learn that the help link is the third item in the footer navigation. If it moves to a different location on a different page, I have to hunt for it all over again. For sighted users, this is a minor inconvenience. For me, it means re-scanning the entire page. Consistency isn't a nice-to-have - it's how I navigate efficiently.</p>
 
-        <h3>3.3.7 Redundant Entry &mdash; Level A</h3>
+        <h3>3.3.7 Redundant Entry - Level A</h3>
 
         <p>Information a user has already entered in a process must not be asked for again, unless re-entering it is essential, the user is given a way to select previously entered data, or the information is no longer valid. Think of multi-step forms that ask for your address on step one and again on step three.</p>
 
-        <p>Filling out forms with a screen reader is slow. Every field requires me to navigate to it, listen to the label, type my response, and move on. When I've already entered my postal address once and the form asks me to type it again on the next page, that's not just annoying &mdash; it's a significant time penalty. This criterion respects the effort that form completion requires for people who use assistive technology.</p>
+        <p>Filling out forms with a screen reader is slow. Every field requires me to navigate to it, listen to the label, type my response, and move on. When I've already entered my postal address once and the form asks me to type it again on the next page, that's not just annoying - it's a significant time penalty. This criterion respects the effort that form completion requires for people who use assistive technology.</p>
 
-        <h3>3.3.8 Accessible Authentication (Minimum) &mdash; Level AA</h3>
+        <h3>3.3.8 Accessible Authentication (Minimum) - Level AA</h3>
 
-        <p>If an authentication step requires a cognitive function test &mdash; like remembering a password, solving a puzzle, or recognising an image &mdash; an alternative must be available. Alternatives include allowing password managers to fill credentials, providing a copy-paste option, or offering an authentication method that doesn't rely on cognitive function tests (such as a hardware security key or biometric authentication).</p>
+        <p>If an authentication step requires a cognitive function test - like remembering a password, solving a puzzle, or recognising an image - an alternative must be available. Alternatives include allowing password managers to fill credentials, providing a copy-paste option, or offering an authentication method that doesn't rely on cognitive function tests (such as a hardware security key or biometric authentication).</p>
 
-        <p>This is one of the most impactful criteria in WCAG 2.2, and I say that from direct experience. CAPTCHAs have been my nemesis for over a decade. Image-based CAPTCHAs are completely inaccessible to me. Audio CAPTCHAs are often so distorted they're unusable. Puzzle CAPTCHAs that ask me to drag a piece into position are impossible with a screen reader. Every time I encounter one without an accessible alternative, I'm locked out. Not slowed down &mdash; locked out entirely.</p>
+        <p>This is one of the most impactful criteria in WCAG 2.2, and I say that from direct experience. CAPTCHAs have been my nemesis for over a decade. Image-based CAPTCHAs are completely inaccessible to me. Audio CAPTCHAs are often so distorted they're unusable. Puzzle CAPTCHAs that ask me to drag a piece into position are impossible with a screen reader. Every time I encounter one without an accessible alternative, I'm locked out. Not slowed down - locked out entirely.</p>
 
         <p>This criterion also protects people with cognitive disabilities who struggle with memory-based authentication. Requiring someone to transcribe a one-time code from memory (without allowing paste) is a barrier. Let people use their password managers. Let them paste. Provide alternatives.</p>
 
@@ -214,7 +214,7 @@
           <strong>What I tell every client:</strong> If your login flow blocks password managers or forces a CAPTCHA with no accessible alternative, you're locking out real users right now. Fix this first.
         </div>
 
-        <h3>3.3.9 Accessible Authentication (Enhanced) &mdash; Level AAA</h3>
+        <h3>3.3.9 Accessible Authentication (Enhanced) - Level AAA</h3>
 
         <p>This is the stricter version of 3.3.8. It removes the exception that allows object recognition and personal content recognition as cognitive function tests. Under 3.3.8, a site could ask you to identify which image contains a bicycle. Under 3.3.9, even that isn't permitted without an alternative that requires no cognitive function test at all.</p>
 
@@ -222,24 +222,24 @@
 
         <h2>What Was Removed: 4.1.1 Parsing</h2>
 
-        <p>WCAG 2.2 officially removed Success Criterion 4.1.1 Parsing. This criterion previously required that HTML be well-formed &mdash; no duplicate IDs, proper nesting, complete start and end tags. It was removed because modern browsers and assistive technologies now handle parsing errors gracefully. The issues that 4.1.1 was designed to prevent are effectively handled by the technology itself.</p>
+        <p>WCAG 2.2 officially removed Success Criterion 4.1.1 Parsing. This criterion previously required that HTML be well-formed - no duplicate IDs, proper nesting, complete start and end tags. It was removed because modern browsers and assistive technologies now handle parsing errors gracefully. The issues that 4.1.1 was designed to prevent are effectively handled by the technology itself.</p>
 
-        <p>That said, writing clean, valid HTML is still good practice. The removal of 4.1.1 doesn't mean you should stop caring about markup quality. Duplicate IDs still cause real problems for screen readers &mdash; if two elements share the same ID and a label references that ID, my screen reader may associate the label with the wrong element. It's just that this is now covered by other criteria (like 1.3.1 Info and Relationships and 4.1.2 Name, Role, Value) rather than a standalone parsing requirement.</p>
+        <p>That said, writing clean, valid HTML is still good practice. The removal of 4.1.1 doesn't mean you should stop caring about markup quality. Duplicate IDs still cause real problems for screen readers - if two elements share the same ID and a label references that ID, my screen reader may associate the label with the wrong element. It's just that this is now covered by other criteria (like 1.3.1 Info and Relationships and 4.1.2 Name, Role, Value) rather than a standalone parsing requirement.</p>
 
-        <h2>Which Criteria Matter Most &mdash; My Perspective</h2>
+        <h2>Which Criteria Matter Most - My Perspective</h2>
 
         <p>If I had to rank the nine new criteria by their real-world impact on users with disabilities, here's how I'd prioritise them:</p>
 
         <ol>
-          <li><strong>3.3.8 Accessible Authentication (Minimum)</strong> &mdash; because it's a gatekeeper. If you can't log in, nothing else matters. I've been locked out of services I'm paying for because of inaccessible CAPTCHAs. This is the most urgent fix for most organisations.</li>
-          <li><strong>2.5.7 Dragging Movements</strong> &mdash; because drag-and-drop without alternatives renders entire features unusable for keyboard and screen reader users. This isn't a minor inconvenience; it's a complete blocker.</li>
-          <li><strong>3.3.7 Redundant Entry</strong> &mdash; because forms are already the hardest part of the web for assistive technology users. Asking us to repeat information we've already provided is a significant and unnecessary burden.</li>
-          <li><strong>2.4.11 Focus Not Obscured (Minimum)</strong> &mdash; because sticky UI elements are everywhere now, and keyboard users lose their place constantly when focus slips behind them.</li>
-          <li><strong>3.2.6 Consistent Help</strong> &mdash; because when I need help, I need to find it quickly. Inconsistent placement forces me to search the entire page.</li>
-          <li><strong>2.5.8 Target Size (Minimum)</strong> &mdash; because mobile usage continues to grow, and small touch targets disproportionately affect people with motor impairments.</li>
-          <li><strong>2.4.13 Focus Appearance</strong> &mdash; because even though it's AAA, strong focus indicators are essential for every keyboard user.</li>
-          <li><strong>2.4.12 Focus Not Obscured (Enhanced)</strong> &mdash; because full visibility is always better than partial visibility.</li>
-          <li><strong>3.3.9 Accessible Authentication (Enhanced)</strong> &mdash; because if you've already met 3.3.8 properly, you're likely close to meeting this one too.</li>
+          <li><strong>3.3.8 Accessible Authentication (Minimum)</strong> - because it's a gatekeeper. If you can't log in, nothing else matters. I've been locked out of services I'm paying for because of inaccessible CAPTCHAs. This is the most urgent fix for most organisations.</li>
+          <li><strong>2.5.7 Dragging Movements</strong> - because drag-and-drop without alternatives renders entire features unusable for keyboard and screen reader users. This isn't a minor inconvenience; it's a complete blocker.</li>
+          <li><strong>3.3.7 Redundant Entry</strong> - because forms are already the hardest part of the web for assistive technology users. Asking us to repeat information we've already provided is a significant and unnecessary burden.</li>
+          <li><strong>2.4.11 Focus Not Obscured (Minimum)</strong> - because sticky UI elements are everywhere now, and keyboard users lose their place constantly when focus slips behind them.</li>
+          <li><strong>3.2.6 Consistent Help</strong> - because when I need help, I need to find it quickly. Inconsistent placement forces me to search the entire page.</li>
+          <li><strong>2.5.8 Target Size (Minimum)</strong> - because mobile usage continues to grow, and small touch targets disproportionately affect people with motor impairments.</li>
+          <li><strong>2.4.13 Focus Appearance</strong> - because even though it's AAA, strong focus indicators are essential for every keyboard user.</li>
+          <li><strong>2.4.12 Focus Not Obscured (Enhanced)</strong> - because full visibility is always better than partial visibility.</li>
+          <li><strong>3.3.9 Accessible Authentication (Enhanced)</strong> - because if you've already met 3.3.8 properly, you're likely close to meeting this one too.</li>
         </ol>
 
         <p>Your priorities may differ depending on your user base. But if you're asking me where to start, start with authentication and interactive patterns. Those are where the barriers are most severe.</p>
@@ -255,7 +255,7 @@
           <li><strong>Check your sticky elements.</strong> Tab through every page with your sticky headers, cookie banners, and chat widgets active. If focus disappears behind any of them, adjust your scroll offset or element positioning.</li>
           <li><strong>Audit your multi-step forms.</strong> Map out every piece of information you collect across form steps. If you're asking for the same data twice without pre-populating it, refactor the flow.</li>
           <li><strong>Verify help mechanism placement.</strong> Check that your help links, contact information, and support options appear in the same location on every page.</li>
-          <li><strong>Update your testing checklist.</strong> Add the nine new criteria to your QA process. Train your testers on what to look for. Better yet, include people with disabilities in your testing &mdash; we'll find the real-world failures that checklists miss.</li>
+          <li><strong>Update your testing checklist.</strong> Add the nine new criteria to your QA process. Train your testers on what to look for. Better yet, include people with disabilities in your testing - we'll find the real-world failures that checklists miss.</li>
         </ol>
 
         <h2>The Bottom Line</h2>
@@ -303,7 +303,7 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "WCAG 2.2: What Changed and Why It Matters",
-    "description": "WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most — from someone who tests against them daily.",
+    "description": "WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most - from someone who tests against them daily.",
     "datePublished": "2026-03-05",
     "dateModified": "2026-03-05",
     "author": {

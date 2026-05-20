@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension — Content Script
+ * AMASAMYA Extension - Content Script
  * Injected into the active tab to run all 13 audit engines.
  * Results are sent to the service worker via chrome.runtime.sendMessage.
  */
@@ -156,8 +156,8 @@
       if (!fgRaw) return;
       const bg = getEffectiveBg(el), fg = blendColour(fgRaw, bg), ratio = contrastRatio(fg, bg), large = isLargeText(cs);
       const reqAA = large ? CONTRAST.LARGE_AA : CONTRAST.NORMAL_AA, reqAAA = large ? CONTRAST.LARGE_AAA : CONTRAST.NORMAL_AAA, label = large ? 'large text' : 'normal text';
-      if (ratio < reqAA) findings.push({ id: generateId(), engine: 'Colour Contrast', element: describeEl(el), criterion: `WCAG 2.2 SC 1.4.3 (Level AA) — ${label}`, issue: `Contrast ${ratio.toFixed(2)}:1 below ${reqAA}:1 for ${label}.`, computed: `${ratio.toFixed(2)}:1 (fg: ${cs.color})`, required: `${reqAA}:1`, verdict: 'Fail', severity: ratio < 2.0 ? SEV.CRITICAL : SEV.SERIOUS, howToFix: `Adjust colours to achieve ${reqAA}:1+.` });
-      else if (ratio < reqAAA) findings.push({ id: generateId(), engine: 'Colour Contrast', element: describeEl(el), criterion: `WCAG 2.2 SC 1.4.6 (Level AAA) — ${label}`, issue: `Contrast ${ratio.toFixed(2)}:1 passes AA but fails AAA (${reqAAA}:1).`, computed: `${ratio.toFixed(2)}:1`, required: `${reqAAA}:1`, verdict: 'Warning', severity: SEV.MODERATE, howToFix: `Increase to ${reqAAA}:1 for AAA.` });
+      if (ratio < reqAA) findings.push({ id: generateId(), engine: 'Colour Contrast', element: describeEl(el), criterion: `WCAG 2.2 SC 1.4.3 (Level AA) - ${label}`, issue: `Contrast ${ratio.toFixed(2)}:1 below ${reqAA}:1 for ${label}.`, computed: `${ratio.toFixed(2)}:1 (fg: ${cs.color})`, required: `${reqAA}:1`, verdict: 'Fail', severity: ratio < 2.0 ? SEV.CRITICAL : SEV.SERIOUS, howToFix: `Adjust colours to achieve ${reqAA}:1+.` });
+      else if (ratio < reqAAA) findings.push({ id: generateId(), engine: 'Colour Contrast', element: describeEl(el), criterion: `WCAG 2.2 SC 1.4.6 (Level AAA) - ${label}`, issue: `Contrast ${ratio.toFixed(2)}:1 passes AA but fails AAA (${reqAAA}:1).`, computed: `${ratio.toFixed(2)}:1`, required: `${reqAAA}:1`, verdict: 'Warning', severity: SEV.MODERATE, howToFix: `Increase to ${reqAAA}:1 for AAA.` });
     });
     Array.from(document.querySelectorAll('button,input,select,textarea,[role="button"],[role="checkbox"],[role="radio"],[role="switch"]')).filter(el => { const cs = window.getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden'; }).slice(0, 80).forEach(el => {
       const cs = window.getComputedStyle(el), bc = parseColour(cs.borderColor), bg = getEffectiveBg(el.parentElement || el);
@@ -232,7 +232,7 @@
     }
 
     function fingerprintSvg(el) {
-      /* Unified key — every reference to the same icon (whether
+      /* Unified key - every reference to the same icon (whether
          <svg id="X"> in a defs block or <svg><use href="#X"/></svg>
          reusing it) produces the same fingerprint. So fixing one
          source icon resolves every reuse on the page; one finding,
@@ -293,7 +293,7 @@
           id: generateId(), engine: 'Images', element: describeEl(sampleEl) + (count > 1 ? '  (and ' + (count - 1) + ' more identical reuses)' : ''),
           criterion: 'WCAG 2.2 SC 1.1.1 (Level A)',
           issue: count > 1
-            ? `SVG has no accessible name (${count} identical reuses of this icon on the page — typically a <use href> reference).`
+            ? `SVG has no accessible name (${count} identical reuses of this icon on the page - typically a <use href> reference).`
             : 'SVG has no accessible name.',
           computed: 'No title/aria-label' + (count > 1 ? ` × ${count}` : ''),
           required: 'Accessible name or aria-hidden',
@@ -352,14 +352,14 @@
     els.forEach(el => {
       const cs = window.getComputedStyle(el);
       if (cs.backgroundImage && cs.backgroundImage !== 'none' && !el.textContent.trim() && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby')) {
-        findings.push({ id: generateId(), engine: 'High Contrast', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.3 — High Contrast Mode', issue: 'Background-image element with no text fallback. Lost in forced-colors mode.', computed: `bg-image present; no text/aria-label`, required: 'Text fallback or inline SVG with currentColor', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Add text content or use inline SVG with currentColor.' });
+        findings.push({ id: generateId(), engine: 'High Contrast', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.3 - High Contrast Mode', issue: 'Background-image element with no text fallback. Lost in forced-colors mode.', computed: `bg-image present; no text/aria-label`, required: 'Text fallback or inline SVG with currentColor', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Add text content or use inline SVG with currentColor.' });
       }
       if (el.matches('button,a[href],input,select,textarea,[role="button"],[role="link"]') && (parseFloat(cs.borderWidth) || 0) === 0 && cs.borderStyle === 'none' && cs.outlineStyle === 'none') {
-        findings.push({ id: generateId(), engine: 'High Contrast', element: describeEl(el), criterion: 'WCAG 2.2 SC 2.4.11 — High Contrast Mode', issue: 'Interactive element has no border or outline. May lack visible boundary in forced-colors mode.', computed: 'border: none; outline: none', required: 'Visible boundary in forced-colors mode', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Add border: 2px solid transparent (becomes visible in forced-colors).' });
+        findings.push({ id: generateId(), engine: 'High Contrast', element: describeEl(el), criterion: 'WCAG 2.2 SC 2.4.11 - High Contrast Mode', issue: 'Interactive element has no border or outline. May lack visible boundary in forced-colors mode.', computed: 'border: none; outline: none', required: 'Visible boundary in forced-colors mode', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Add border: 2px solid transparent (becomes visible in forced-colors).' });
       }
     });
     const custom = Array.from(document.querySelectorAll('input[type="checkbox"],input[type="radio"]')).filter(el => { const cs = window.getComputedStyle(el); const r = el.getBoundingClientRect(); return cs.opacity === '0' || (cs.position === 'absolute' && (r.width <= 1 || r.height <= 1)); });
-    if (custom.length > 0) findings.push({ id: generateId(), engine: 'High Contrast', element: `${custom.length} custom controls`, criterion: 'WCAG 2.2 SC 1.4.3 — High Contrast Mode', issue: `${custom.length} hidden native controls with custom styling. May lose state indicators in forced-colors.`, computed: `${custom.length} hidden inputs`, required: 'Operable in forced-colors', verdict: 'Warning', severity: SEV.SERIOUS, howToFix: 'Add @media (forced-colors: active) fallback styles.' });
+    if (custom.length > 0) findings.push({ id: generateId(), engine: 'High Contrast', element: `${custom.length} custom controls`, criterion: 'WCAG 2.2 SC 1.4.3 - High Contrast Mode', issue: `${custom.length} hidden native controls with custom styling. May lose state indicators in forced-colors.`, computed: `${custom.length} hidden inputs`, required: 'Operable in forced-colors', verdict: 'Warning', severity: SEV.SERIOUS, howToFix: 'Add @media (forced-colors: active) fallback styles.' });
     if (findings.length === 0) findings.push({ id: generateId(), engine: 'High Contrast', element: 'Page', criterion: 'High Contrast Mode', issue: 'No issues detected.', computed: `${els.length} checked`, required: 'Visible in forced-colors', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'Verify manually.' });
     return findings;
   }
@@ -372,11 +372,11 @@
     let hasDarkStyles = false;
     try { for (const s of document.styleSheets) { try { for (const r of s.cssRules || []) { if (r.conditionText && r.conditionText.includes('prefers-color-scheme')) { hasDarkStyles = true; break; } } } catch(e){} if (hasDarkStyles) break; } } catch(e){}
     const hasThemeAttr = document.documentElement.hasAttribute('data-theme') || document.documentElement.classList.contains('dark') || document.body.classList.contains('dark') || document.body.classList.contains('dark-mode');
-    if (!hasDarkStyles && !hasThemeAttr) findings.push({ id: generateId(), engine: 'Dark Mode', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 — Dark Mode', issue: 'No dark mode support detected.', computed: 'No prefers-color-scheme rules or theme classes', required: 'Support user colour scheme preferences', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Add @media (prefers-color-scheme: dark) styles.' });
+    if (!hasDarkStyles && !hasThemeAttr) findings.push({ id: generateId(), engine: 'Dark Mode', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 - Dark Mode', issue: 'No dark mode support detected.', computed: 'No prefers-color-scheme rules or theme classes', required: 'Support user colour scheme preferences', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Add @media (prefers-color-scheme: dark) styles.' });
     const textEls = Array.from(document.querySelectorAll('*')).filter(el => { if (['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','SVG','PATH','BR','HR'].includes(el.tagName)) return false; if (!Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim())) return false; const cs = window.getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden'; }).slice(0, 100);
-    textEls.forEach(el => { const s = el.getAttribute('style') || ''; if (/(?:^|;)\s*color\s*:/i.test(s) || /(?:^|;)\s*background(?:-color)?\s*:/i.test(s)) findings.push({ id: generateId(), engine: 'Dark Mode', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.3 — Dark Mode', issue: 'Inline colour styles may not adapt to dark mode.', computed: `style="${s.slice(0, 80)}"`, required: 'Use CSS custom properties', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Replace inline styles with CSS custom properties.' }); });
+    textEls.forEach(el => { const s = el.getAttribute('style') || ''; if (/(?:^|;)\s*color\s*:/i.test(s) || /(?:^|;)\s*background(?:-color)?\s*:/i.test(s)) findings.push({ id: generateId(), engine: 'Dark Mode', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.3 - Dark Mode', issue: 'Inline colour styles may not adapt to dark mode.', computed: `style="${s.slice(0, 80)}"`, required: 'Use CSS custom properties', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Replace inline styles with CSS custom properties.' }); });
     const bodyBg = getEffectiveBg(document.body);
-    if (luminance(bodyBg) < 0.2) { textEls.slice(0, 80).forEach(el => { const cs = window.getComputedStyle(el), fg = parseColour(cs.color); if (!fg) return; const bg = getEffectiveBg(el), ratio = contrastRatio(blendColour(fg, bg), bg), large = isLargeText(cs), req = large ? CONTRAST.LARGE_AA : CONTRAST.NORMAL_AA; if (ratio < req) findings.push({ id: generateId(), engine: 'Dark Mode', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.3 — Dark Mode Active', issue: `Dark mode contrast ${ratio.toFixed(2)}:1 below ${req}:1.`, computed: `${ratio.toFixed(2)}:1`, required: `${req}:1`, verdict: 'Fail', severity: ratio < 2 ? SEV.CRITICAL : SEV.SERIOUS, howToFix: 'Adjust dark mode colours.' }); }); }
+    if (luminance(bodyBg) < 0.2) { textEls.slice(0, 80).forEach(el => { const cs = window.getComputedStyle(el), fg = parseColour(cs.color); if (!fg) return; const bg = getEffectiveBg(el), ratio = contrastRatio(blendColour(fg, bg), bg), large = isLargeText(cs), req = large ? CONTRAST.LARGE_AA : CONTRAST.NORMAL_AA; if (ratio < req) findings.push({ id: generateId(), engine: 'Dark Mode', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.3 - Dark Mode Active', issue: `Dark mode contrast ${ratio.toFixed(2)}:1 below ${req}:1.`, computed: `${ratio.toFixed(2)}:1`, required: `${req}:1`, verdict: 'Fail', severity: ratio < 2 ? SEV.CRITICAL : SEV.SERIOUS, howToFix: 'Adjust dark mode colours.' }); }); }
     if (findings.length === 0) findings.push({ id: generateId(), engine: 'Dark Mode', element: 'Page', criterion: 'Dark Mode', issue: 'No issues.', computed: `Dark styles: ${hasDarkStyles || hasThemeAttr}`, required: 'Contrast maintained', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action.' });
     return findings;
   }
@@ -467,7 +467,7 @@
   }
 
   /* ================================================================
-     ENGINE 14: TARGET SIZE (WCAG 2.2 SC 2.5.8 — NEW)
+     ENGINE 14: TARGET SIZE (WCAG 2.2 SC 2.5.8 - NEW)
      Every interactive target must be ≥ 24×24 CSS pixels.
      Inline text links are exempt per the SC 2.5.8 exception.
   ================================================================ */
@@ -484,7 +484,7 @@
     });
     targets.forEach(el => {
       const cs = window.getComputedStyle(el);
-      // Inline text links are exempt (SC 2.5.8 exception 1 — inline)
+      // Inline text links are exempt (SC 2.5.8 exception 1 - inline)
       if (el.tagName === 'A' && cs.display === 'inline') return;
       const r = el.getBoundingClientRect();
       const w = Math.round(r.width), h = Math.round(r.height);
@@ -508,7 +508,7 @@
   }
 
   /* ================================================================
-     ENGINE 15: LABEL IN NAME (WCAG 2.2 SC 2.5.3 — NEW)
+     ENGINE 15: LABEL IN NAME (WCAG 2.2 SC 2.5.3 - NEW)
      For controls with visible text, the accessible name must CONTAIN
      that visible text so speech-input users can activate by speaking it.
   ================================================================ */
@@ -532,7 +532,7 @@
       const accName = getAccessibleName(el);
       if (!accName) return; // no accessible name to compare
 
-      // Case-insensitive substring check — normalise whitespace
+      // Case-insensitive substring check - normalise whitespace
       const normVis = visibleText.toLowerCase().replace(/\s+/g, ' ');
       const normAcc = accName.toLowerCase().replace(/\s+/g, ' ');
       if (normAcc.includes(normVis)) return; // passes
@@ -561,7 +561,7 @@
 
   /* ================================================================
      ENGINE 16: RESIZE TEXT (WCAG 2.2 SC 1.4.4)
-     Verifies that the page survives a 200% zoom — the criterion
+     Verifies that the page survives a 200% zoom - the criterion
      allows reflow, but content must not be lost or clipped. We
      temporarily scale the page via CSS zoom, sample the layout,
      compare against the baseline, then revert. Sites that hard-code
@@ -589,7 +589,7 @@
     const docBefore = document.documentElement.scrollWidth;
 
     /* Apply 200% zoom. CSS zoom (Chromium-supported) reflows text and
-       grows pixel sizes proportionally — closest in-page approximation
+       grows pixel sizes proportionally - closest in-page approximation
        of browser-zoom-to-200%. */
     const original = document.documentElement.style.zoom || '';
     document.documentElement.style.zoom = '2';
@@ -622,7 +622,7 @@
             id: generateId(), engine: 'Resize Text',
             element: describeEl(b.el),
             criterion: 'WCAG 2.2 SC 1.4.4 Resize Text (Level AA)',
-            issue: 'Element clips its content at 200% zoom. Content overflows but the visible box stays the same — text becomes inaccessible.',
+            issue: 'Element clips its content at 200% zoom. Content overflows but the visible box stays the same - text becomes inaccessible.',
             computed: `before ${Math.round(b.w)}×${Math.round(b.h)} (scroll ${b.sw}×${b.sh}), after ${Math.round(a.w)}×${Math.round(a.h)} (scroll ${a.sw}×${a.sh})`,
             required: 'No clipping at 200% zoom',
             verdict: 'Fail', severity: SEV.SERIOUS,
@@ -667,7 +667,7 @@
      This engine goes further: parses every @media (prefers-color-scheme:
      dark) rule, extracts the colour pairs the rule defines, and computes
      contrast ratios for each pair. Catches dark themes that "support"
-     dark mode but ship low-contrast palettes — the most common pattern
+     dark mode but ship low-contrast palettes - the most common pattern
      in retrofitted dark themes.
   ================================================================ */
   function auditDarkModeContrast() {
@@ -676,7 +676,7 @@
 
     /* Walk every reachable stylesheet collecting rules inside an
        @media (prefers-color-scheme: dark) block. Cross-origin sheets
-       throw on access — skip silently. */
+       throw on access - skip silently. */
     for (let i = 0; i < document.styleSheets.length; i++) {
       let rules;
       try { rules = document.styleSheets[i].cssRules || []; }
@@ -724,8 +724,8 @@
           findings.push({
             id: generateId(), engine: 'Dark Mode Contrast',
             element: `selector: ${rule.selectorText || '(unknown)'}`,
-            criterion: 'WCAG 2.2 SC 1.4.3 (Level AA — dark mode palette)',
-            issue: `Dark-mode rule pairs foreground "${fg}" with background "${bg}" — contrast ratio ${ratio.toFixed(2)}:1 fails 4.5:1.`,
+            criterion: 'WCAG 2.2 SC 1.4.3 (Level AA - dark mode palette)',
+            issue: `Dark-mode rule pairs foreground "${fg}" with background "${bg}" - contrast ratio ${ratio.toFixed(2)}:1 fails 4.5:1.`,
             computed: `${ratio.toFixed(2)}:1`,
             required: '4.5:1 for normal text',
             verdict: 'Fail', severity: ratio < 3.0 ? SEV.CRITICAL : SEV.SERIOUS,
@@ -749,7 +749,7 @@
     if (pairsFailed === 0 && pairsChecked > 0) {
       findings.push({ id: generateId(), engine: 'Dark Mode Contrast', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 (dark mode)', issue: `${pairsChecked} dark-mode colour pairs all meet 4.5:1.`, computed: `${pairsChecked} pairs OK`, required: '4.5:1', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action required.' });
     } else if (pairsChecked === 0) {
-      findings.push({ id: generateId(), engine: 'Dark Mode Contrast', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 (dark mode)', issue: 'Dark-mode rules present but no inline colour/background pairs found to verify. Many themes use CSS custom properties — those would need to be checked in the rendered DOM with prefers-color-scheme: dark active.', computed: `${darkRules.length} dark rules, 0 inline pairs`, required: 'Verifiable colour pairs', verdict: 'Info', severity: SEV.MINOR, howToFix: 'Run a manual check in dark mode, or expose colour custom properties on root element so this engine can sample them.' });
+      findings.push({ id: generateId(), engine: 'Dark Mode Contrast', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.3 (dark mode)', issue: 'Dark-mode rules present but no inline colour/background pairs found to verify. Many themes use CSS custom properties - those would need to be checked in the rendered DOM with prefers-color-scheme: dark active.', computed: `${darkRules.length} dark rules, 0 inline pairs`, required: 'Verifiable colour pairs', verdict: 'Info', severity: SEV.MINOR, howToFix: 'Run a manual check in dark mode, or expose colour custom properties on root element so this engine can sample them.' });
     }
 
     return findings;
@@ -759,7 +759,7 @@
      ENGINE 18: COLOUR-ONLY MEANING (WCAG 2.2 SC 1.4.1)
      Heuristic: flags suspicious patterns where colour is the only
      way to convey meaning. False-positive prone by nature, so all
-     verdicts are Warnings, not Fails — they say "review this".
+     verdicts are Warnings, not Fails - they say "review this".
   ================================================================ */
   function auditColourOnlyMeaning() {
     const findings = [];
@@ -787,7 +787,7 @@
           computed: m[0],
           required: 'Refer to UI by name, position, or shape, not colour',
           verdict: 'Warning', severity: SEV.SERIOUS,
-          howToFix: 'Rephrase to "Press Save" or "Click the rightmost button" — name the element, do not describe its colour.'
+          howToFix: 'Rephrase to "Press Save" or "Click the rightmost button" - name the element, do not describe its colour.'
         });
       }
     });
@@ -826,7 +826,7 @@
        by side with no aria-label or text. */
     const dots = Array.from(document.querySelectorAll('span, i, em, b, div')).filter(el => {
       if (el.children.length > 0) return false;
-      if (el.textContent.trim()) return false;     /* has text — fine */
+      if (el.textContent.trim()) return false;     /* has text - fine */
       const cs = window.getComputedStyle(el);
       const r = el.getBoundingClientRect();
       if (r.width < 6 || r.width > 32) return false;   /* not a status-dot-sized element */
@@ -847,12 +847,12 @@
     }
 
     if (findings.length === 0)
-      findings.push({ id: generateId(), engine: 'Colour-Only Meaning', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.1 (Level A)', issue: 'No colour-only-meaning patterns detected by heuristic.', computed: 'Heuristic only — manual review still recommended', required: 'No colour-only meaning', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'Manually verify any chart, badge, or status indicator on the page.' });
+      findings.push({ id: generateId(), engine: 'Colour-Only Meaning', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.1 (Level A)', issue: 'No colour-only-meaning patterns detected by heuristic.', computed: 'Heuristic only - manual review still recommended', required: 'No colour-only meaning', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'Manually verify any chart, badge, or status indicator on the page.' });
     return findings;
   }
 
   /* ================================================================
-     ENGINE 19: TARGET SIZE — AAA (WCAG 2.2 SC 2.5.5, 44×44)
+     ENGINE 19: TARGET SIZE - AAA (WCAG 2.2 SC 2.5.5, 44×44)
      Engine 14 covers the AA minimum (24×24). This adds the AAA
      check (44×44) as a Warning so designers can see the gap to
      mobile-friendly sizing without it being treated as a failure.
@@ -874,7 +874,7 @@
       if (el.tagName === 'A' && cs.display === 'inline') return;   /* exception: inline links */
       const r = el.getBoundingClientRect();
       const w = Math.round(r.width), h = Math.round(r.height);
-      /* Already at AA failure (< 24) — Engine 14 reported it. We add
+      /* Already at AA failure (< 24) - Engine 14 reported it. We add
          AAA findings only for AA-passing targets that miss AAA. */
       if (w >= 24 && h >= 24 && (w < MIN || h < MIN)) {
         count++;

@@ -3,18 +3,18 @@
   <channel>
     <title>Akhilesh Malani - Accessibility Blog</title>
     <link>https://akhileshmalani.com</link>
-    <description>Insights on digital accessibility from Akhilesh Malani — a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>
+    <description>Insights on digital accessibility from Akhilesh Malani - a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>
     <language>en</language>
     <managingEditor>akhilesh.malani@gmail.com (Akhilesh Malani)</managingEditor>
     <lastBuildDate>Tue, 07 Apr 2026 06:05:45 GMT</lastBuildDate>
     <atom:link href="https://akhileshmalani.com/feed.xml" rel="self" type="application/rss+xml"/>
 
     <item>
-      <title>How to Test Your Website with a Screen Reader — A Beginner's Guide</title>
+      <title>How to Test Your Website with a Screen Reader - A Beginner's Guide</title>
       <link>https://akhileshmalani.com/blog/screen-reader-testing-guide.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/screen-reader-testing-guide.html</guid>
       <pubDate>Sat, 14 Mar 2026 18:30:00 +0530</pubDate>
-      <description>A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS — written by someone who uses them every day.</description>
+      <description>A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS - written by someone who uses them every day.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -23,7 +23,7 @@
       <link>https://akhileshmalani.com/blog/automated-tools-miss.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/automated-tools-miss.html</guid>
       <pubDate>Mon, 09 Mar 2026 18:30:00 +0530</pubDate>
-      <description>Automated accessibility tools catch only 30-40% of real issues. Here's what they miss — from someone who tests with a screen reader every day.</description>
+      <description>Automated accessibility tools catch only 30-40% of real issues. Here's what they miss - from someone who tests with a screen reader every day.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -32,16 +32,16 @@
       <link>https://akhileshmalani.com/blog/wcag-22-changes.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/wcag-22-changes.html</guid>
       <pubDate>Wed, 04 Mar 2026 18:30:00 +0530</pubDate>
-      <description>WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most — from someone who tests against them daily.</description>
+      <description>WCAG 2.2 introduced 9 new success criteria. Here's what actually changed, what it means for your products, and which ones matter most - from someone who tests against them daily.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
     <item>
-      <title>Accessibility Is Not a Checklist — It's a Culture</title>
+      <title>Accessibility Is Not a Checklist - It's a Culture</title>
       <link>https://akhileshmalani.com/blog/accessibility-not-checklist.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/accessibility-not-checklist.html</guid>
       <pubDate>Fri, 27 Feb 2026 18:30:00 +0530</pubDate>
-      <description>Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails — and what building a real accessibility culture looks like.</description>
+      <description>Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails - and what building a real accessibility culture looks like.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
@@ -59,7 +59,7 @@
       <link>https://akhileshmalani.com/blog/banking-app-blind-user.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/banking-app-blind-user.html</guid>
       <pubDate>Thu, 19 Feb 2026 18:30:00 +0530</pubDate>
-      <description>I'm blind. I use banking apps every day. Here's what actually happens when I try to check my balance, transfer money, or pay a bill — and what banks get wrong.</description>
+      <description>I'm blind. I use banking apps every day. Here's what actually happens when I try to check my balance, transfer money, or pay a bill - and what banks get wrong.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 

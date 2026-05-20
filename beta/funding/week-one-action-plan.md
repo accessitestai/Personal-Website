@@ -1,14 +1,14 @@
-# AMASAMYA Funding — Week One Action Plan
+# AMASAMYA Funding - Week One Action Plan
 
 The hardest part of fundraising is starting. This page tells you
 exactly what to do for the next seven days. No big picture, no
-strategy — just actions, in order.
+strategy - just actions, in order.
 
 Time investment: **~6–8 hours total over the week**.
 
 ---
 
-## Day 1 (today / tomorrow) — 90 minutes
+## Day 1 (today / tomorrow) - 90 minutes
 
 - [ ] Read `beta/funding/strategy.md` once. Skim, don't memorise.
 - [ ] Read `beta/funding/one-pager.md`. Fill in **every bracketed
@@ -17,7 +17,7 @@ Time investment: **~6–8 hours total over the week**.
 - [ ] Render the one-pager to a single PDF. Name it
       `AMASAMYA_one_pager_[YYYY_MM_DD].pdf`. Anyone you send it to
       should be able to see it on their phone in under 10 seconds.
-- [ ] Make a list — paper or spreadsheet — of **5 warm contacts** who
+- [ ] Make a list - paper or spreadsheet - of **5 warm contacts** who
       have at any point in the last 3 years:
       - said something positive about your work, or
       - mentioned investing / backing founders, or
@@ -26,20 +26,20 @@ Time investment: **~6–8 hours total over the week**.
 
 You don't need 50 names. You need 5.
 
-## Day 2 — 60 minutes
+## Day 2 - 60 minutes
 
 - [ ] Open `beta/funding/email-templates.md`, Template 1.
 - [ ] Customise it for **one** name from your list. Write the email by
-      hand — don't try to template the customisations. Reference a
+      hand - don't try to template the customisations. Reference a
       specific past conversation or shared interest.
 - [ ] Read the email out loud once. Cut anything that sounds like a
       sales pitch.
 - [ ] Send it. Right now. Not after another revision.
 - [ ] Log it in your tracking spreadsheet. The columns from
-      `beta/outreach-emails.md` work here too — add a "Funding ask?"
+      `beta/outreach-emails.md` work here too - add a "Funding ask?"
       column to distinguish from tester outreach.
 
-## Day 3 — 45 minutes
+## Day 3 - 45 minutes
 
 - [ ] Customise Template 1 for **two more** names from your list.
       Send both before lunch.
@@ -48,16 +48,16 @@ You don't need 50 names. You need 5.
 - [ ] Identify **one** organisation that fits the criteria in
       `strategy.md` Track 3 (recent WCAG news, EAA deadline pressure,
       stated accessibility commitment without internal tooling).
-      Find a real human's name and email — LinkedIn first, then their
+      Find a real human's name and email - LinkedIn first, then their
       website's "team" page.
 - [ ] Save Template 4 customised for that organisation as a draft.
       **Do not send yet.**
 
-## Day 4 — 90 minutes
+## Day 4 - 90 minutes
 
 - [ ] Open the pilot-customer draft from yesterday. Read it cold
       with fresh eyes. Customise the price ($2,500 is a starting
-      point — adjust if their org is large) and the scope. Send it.
+      point - adjust if their org is large) and the scope. Send it.
 - [ ] Pick **one** grant program from `strategy.md` Track 2.
       Start the application form. You don't need to finish it today.
 - [ ] If you've had any reply to your Day-2 or Day-3 emails: reply
@@ -65,13 +65,13 @@ You don't need 50 names. You need 5.
       me think". Same-day reply rate matters more than reply
       content.
 
-## Day 5 — 30 minutes
+## Day 5 - 30 minutes
 
 - [ ] Customise Template 1 for the remaining **two names** from your
       original list. Send.
 - [ ] Continue the grant application. Aim to be 50% done.
 
-## Days 6–7 — flexible
+## Days 6–7 - flexible
 
 - [ ] Finish the grant application. Submit before Sunday night.
 - [ ] If you have any inbound calls scheduled from earlier emails:
@@ -80,7 +80,7 @@ You don't need 50 names. You need 5.
       output) ready to share if asked.
 - [ ] Update your tracking spreadsheet. Count: emails sent, replies
       received, calls scheduled, dollars committed. If you sent 5+
-      emails and got 0 replies, the problem is the email — re-read
+      emails and got 0 replies, the problem is the email - re-read
       Template 1 against your sent copy.
 
 ---
@@ -90,7 +90,7 @@ You don't need 50 names. You need 5.
 Honest answers:
 
 1. **Did I send 5 funding emails?** If no, why? (If "didn't have time"
-   — make time next week. If "didn't have the right contacts" — that's
+   - make time next week. If "didn't have the right contacts" - that's
    a real problem, see below.)
 
 2. **Did anyone reply?**
@@ -112,7 +112,7 @@ Honest answers:
    - Yes → the buyer call usually closes faster than investor calls
      ($2.5k is a small approval). Push for a meeting in week 2.
    - No → send a polite one-line follow-up at day 7 (`Just bumping in
-     case my last note got lost — happy to scope smaller if useful.`)
+     case my last note got lost - happy to scope smaller if useful.`)
      and then drop it.
 
 ---
@@ -123,22 +123,22 @@ Honest answers:
 
 Then your week-1 list is shorter and you spend more of week 1 on Tracks
 2, 3, and 4 (grants, pilots, accelerators) where warm intros aren't
-required. Don't skip Track 1 — even **one** warm contact is worth
+required. Don't skip Track 1 - even **one** warm contact is worth
 trying.
 
 ### "I want to wait until the Chrome Web Store approval lands."
 
 Don't. The Web Store approval is a *separate* milestone you can
-mention in updates ("CWS approved last week — beta now live"). It's
+mention in updates ("CWS approved last week - beta now live"). It's
 not a prerequisite for sending a funding email. If anything, the
-"pending review" status is a *credibility marker* — you've shipped
+"pending review" status is a *credibility marker* - you've shipped
 real work to a real distribution channel.
 
 ### "I'm worried about looking desperate."
 
 You're solo, pre-revenue, and asking for $5k. Sophisticated funders
 know this is exactly what early stage looks like. The desperation
-signal isn't *what* you're asking for — it's *how* you're asking.
+signal isn't *what* you're asking for - it's *how* you're asking.
 Templates 1 and 2 above are not desperate. Pretending you don't need
 the money would be.
 
@@ -165,8 +165,8 @@ Yes, $0 is on the success list. Most of week 2 is conversations, not
 cheques. Cheques arrive in weeks 3–6 if the conversations went well.
 
 If by **end of week 6** nothing has committed, the strategy needs a
-serious re-think — *not* "send more emails" but "what's broken in the
+serious re-think - *not* "send more emails" but "what's broken in the
 pitch / network / market signal". Schedule a 60-minute conversation
 with one trusted founder or advisor and walk through it cold.
 
-— Akhilesh Malani
+- Akhilesh Malani

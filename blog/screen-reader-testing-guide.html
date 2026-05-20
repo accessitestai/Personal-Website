@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS — written by someone who uses them every day.">
+  <meta name="description" content="A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS - written by someone who uses them every day.">
   <meta name="author" content="Akhilesh Malani">
   <meta name="keywords" content="screen reader testing, NVDA, JAWS, accessibility testing, keyboard navigation, WCAG, VoiceOver, web accessibility, beginner guide">
   <link rel="canonical" href="https://akhileshmalani.com/blog/screen-reader-testing-guide.html">
 
   <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:title" content="How to Test Your Website with a Screen Reader — A Beginner's Guide | Akhilesh Malani">
-  <meta property="og:description" content="A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS — written by someone who uses them every day.">
+  <meta property="og:title" content="How to Test Your Website with a Screen Reader - A Beginner's Guide | Akhilesh Malani">
+  <meta property="og:description" content="A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS - written by someone who uses them every day.">
   <meta property="og:url" content="https://akhileshmalani.com/blog/screen-reader-testing-guide.html">
 
-  <title>How to Test Your Website with a Screen Reader — A Beginner's Guide | Akhilesh Malani</title>
+  <title>How to Test Your Website with a Screen Reader - A Beginner's Guide | Akhilesh Malani</title>
   <link rel="icon" type="image/svg+xml" href="../images/logo-icon.svg">
   <link rel="stylesheet" href="../styles.css">
   <style>
@@ -55,7 +55,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -129,12 +129,12 @@
       <ol>
         <li><a href="../index.html">Home</a></li>
         <li><a href="../index.html#blog">Blog</a></li>
-        <li><span aria-current="page">How to Test Your Website with a Screen Reader — A Beginner's Guide</span></li>
+        <li><span aria-current="page">How to Test Your Website with a Screen Reader - A Beginner's Guide</span></li>
       </ol>
     </nav>
     <article class="blog-post" aria-label="Blog post">
       <header class="blog-post-header">
-        <h1>How to Test Your Website with a Screen Reader &mdash; A Beginner's Guide</h1>
+        <h1>How to Test Your Website with a Screen Reader - A Beginner's Guide</h1>
         <p class="blog-meta">
           By <strong>Akhilesh Malani</strong> &middot; <time datetime="2026-03-15">March 15, 2026</time> &middot; 12 min read
         </p>
@@ -145,24 +145,24 @@
 
         <p>I don't say that to shame anyone. I say it because it's the single biggest gap in web development today. You wouldn't ship a product without looking at it in a browser. But every day, teams ship products without ever listening to them.</p>
 
-        <p>As someone who uses JAWS and NVDA every single day &mdash; not for testing, but to actually use the web &mdash; I want to give you a practical starting point. This isn't an academic overview. This is what I'd tell you if you sat down next to me and said, "Show me how to do this."</p>
+        <p>As someone who uses JAWS and NVDA every single day - not for testing, but to actually use the web - I want to give you a practical starting point. This isn't an academic overview. This is what I'd tell you if you sat down next to me and said, "Show me how to do this."</p>
 
         <h2>Which Screen Reader Should You Start With?</h2>
 
         <p>If you're on Windows, start with <strong>NVDA</strong>. It's free, open-source, and widely used. You can download it from <a href="https://www.nvaccess.org/" rel="noopener noreferrer">nvaccess.org</a> and be up and running in under five minutes.</p>
 
-        <p>If you're on a Mac, VoiceOver is already built in &mdash; press <kbd>Command + F5</kbd> to toggle it on and off. On iOS, triple-click the Home button or Side button. On Android, use TalkBack.</p>
+        <p>If you're on a Mac, VoiceOver is already built in - press <kbd>Command + F5</kbd> to toggle it on and off. On iOS, triple-click the Home button or Side button. On Android, use TalkBack.</p>
 
         <p>But if you're choosing one to learn first, I recommend NVDA for a few reasons:</p>
 
         <ul>
           <li>It's free, so there's zero barrier to entry</li>
           <li>It pairs with Firefox, which has excellent accessibility support</li>
-          <li>It's what a large portion of screen reader users on Windows actually use &mdash; WebAIM's screen reader survey consistently places NVDA among the most popular choices</li>
+          <li>It's what a large portion of screen reader users on Windows actually use - WebAIM's screen reader survey consistently places NVDA among the most popular choices</li>
           <li>Its speech viewer panel lets you read what's being announced, which helps when you're still learning to process audio output</li>
         </ul>
 
-        <p>JAWS is the other major screen reader on Windows. It's commercial software with a licence fee, and it's what I use as my primary screen reader for professional work. If your organisation is serious about accessibility testing, having at least one JAWS licence is worth it &mdash; the two screen readers sometimes handle edge cases differently. But for getting started, NVDA is the right choice.</p>
+        <p>JAWS is the other major screen reader on Windows. It's commercial software with a licence fee, and it's what I use as my primary screen reader for professional work. If your organisation is serious about accessibility testing, having at least one JAWS licence is worth it - the two screen readers sometimes handle edge cases differently. But for getting started, NVDA is the right choice.</p>
 
         <div class="callout">
           <strong>Tip:</strong> When you first launch NVDA, it will start talking immediately. Don't panic. Press <kbd>Insert + Q</kbd> to quit if you need to stop. Press <kbd>Insert + S</kbd> to toggle speech mode between talk, beeps, and off. And turn on the Speech Viewer (NVDA menu &gt; Tools &gt; Speech Viewer) so you can read what's being said while you learn.
@@ -174,26 +174,26 @@
 
         <h3>General Navigation</h3>
         <ul>
-          <li><kbd>Tab</kbd> &mdash; Move to the next focusable element (links, buttons, form fields)</li>
-          <li><kbd>Shift + Tab</kbd> &mdash; Move to the previous focusable element</li>
-          <li><kbd>Enter</kbd> &mdash; Activate a link or button</li>
-          <li><kbd>Space</kbd> &mdash; Activate a button, check a checkbox, or toggle a control</li>
-          <li><kbd>Escape</kbd> &mdash; Close a dialog or menu</li>
-          <li><kbd>Arrow keys</kbd> &mdash; Navigate within menus, radio groups, tab panels, and other composite widgets</li>
+          <li><kbd>Tab</kbd> - Move to the next focusable element (links, buttons, form fields)</li>
+          <li><kbd>Shift + Tab</kbd> - Move to the previous focusable element</li>
+          <li><kbd>Enter</kbd> - Activate a link or button</li>
+          <li><kbd>Space</kbd> - Activate a button, check a checkbox, or toggle a control</li>
+          <li><kbd>Escape</kbd> - Close a dialog or menu</li>
+          <li><kbd>Arrow keys</kbd> - Navigate within menus, radio groups, tab panels, and other composite widgets</li>
         </ul>
 
         <h3>NVDA Browse Mode Quick Keys</h3>
         <p>When NVDA is in browse mode (which it enters automatically on web pages), you can use single letter keys to jump between elements:</p>
         <ul>
-          <li><kbd>H</kbd> &mdash; Next heading</li>
-          <li><kbd>Shift + H</kbd> &mdash; Previous heading</li>
-          <li><kbd>1</kbd> through <kbd>6</kbd> &mdash; Next heading at that level (e.g., <kbd>2</kbd> jumps to the next <code>&lt;h2&gt;</code>)</li>
-          <li><kbd>F</kbd> &mdash; Next form field</li>
-          <li><kbd>B</kbd> &mdash; Next button</li>
-          <li><kbd>T</kbd> &mdash; Next table</li>
-          <li><kbd>K</kbd> &mdash; Next link</li>
-          <li><kbd>D</kbd> &mdash; Next landmark</li>
-          <li><kbd>G</kbd> &mdash; Next graphic (image)</li>
+          <li><kbd>H</kbd> - Next heading</li>
+          <li><kbd>Shift + H</kbd> - Previous heading</li>
+          <li><kbd>1</kbd> through <kbd>6</kbd> - Next heading at that level (e.g., <kbd>2</kbd> jumps to the next <code>&lt;h2&gt;</code>)</li>
+          <li><kbd>F</kbd> - Next form field</li>
+          <li><kbd>B</kbd> - Next button</li>
+          <li><kbd>T</kbd> - Next table</li>
+          <li><kbd>K</kbd> - Next link</li>
+          <li><kbd>D</kbd> - Next landmark</li>
+          <li><kbd>G</kbd> - Next graphic (image)</li>
         </ul>
 
         <p>These quick keys are how I actually navigate the web. When I land on a page, I don't start reading from the top. I press <kbd>H</kbd> to skim the headings, get a sense of the page structure, and jump to the section I need. It's the screen reader equivalent of visually scanning a page. If your headings are missing or out of order, this navigation breaks down completely.</p>
@@ -201,9 +201,9 @@
         <h3>The Elements List</h3>
         <p>Press <kbd>Insert + F7</kbd> in NVDA to open the Elements List. This gives you a filterable view of all headings, links, landmarks, and form fields on the page. It's the fastest way to audit your page structure. If your heading hierarchy looks wrong here, it will feel wrong to every screen reader user who visits.</p>
 
-        <h2>What to Test &mdash; A Practical Checklist</h2>
+        <h2>What to Test - A Practical Checklist</h2>
 
-        <p>Here's what I check on every page I test. This isn't an exhaustive WCAG audit &mdash; it's the set of things that, in my experience, have the biggest impact on whether a screen reader user can actually use your site.</p>
+        <p>Here's what I check on every page I test. This isn't an exhaustive WCAG audit - it's the set of things that, in my experience, have the biggest impact on whether a screen reader user can actually use your site.</p>
 
         <h3>1. Page Title and Landmarks</h3>
 
@@ -298,7 +298,7 @@
           <li>Required fields are indicated programmatically (<code>aria-required="true"</code> or the <code>required</code> attribute), not just with a visual asterisk</li>
           <li>When validation errors occur, the error message is associated with the relevant field (using <code>aria-describedby</code>)</li>
           <li>Focus moves to the first error or to an error summary after a failed submission</li>
-          <li>Error messages are announced &mdash; not just displayed visually in red text</li>
+          <li>Error messages are announced - not just displayed visually in red text</li>
         </ul>
 
         <div class="code-comparison">
@@ -339,7 +339,7 @@
 
         <h3>6. ARIA Live Regions</h3>
 
-        <p>When content changes dynamically on the page &mdash; a notification appears, a counter updates, search results load &mdash; screen reader users need to be told. We can't see the change happen visually. ARIA live regions solve this.</p>
+        <p>When content changes dynamically on the page - a notification appears, a counter updates, search results load - screen reader users need to be told. We can't see the change happen visually. ARIA live regions solve this.</p>
 
         <p>What to check:</p>
         <ul>
@@ -362,14 +362,14 @@
         <p>Modals are one of the most commonly broken patterns I encounter. Here's what needs to happen for a modal to work with a screen reader:</p>
 
         <ul>
-          <li>When the modal opens, focus moves into it &mdash; ideally to the first focusable element or the modal heading</li>
+          <li>When the modal opens, focus moves into it - ideally to the first focusable element or the modal heading</li>
           <li>Focus is trapped inside the modal while it's open (Tab cycles within the modal, not behind it)</li>
           <li>The modal has a role of <code>dialog</code> and an accessible name (via <code>aria-labelledby</code> pointing to its heading)</li>
           <li>Pressing <kbd>Escape</kbd> closes the modal</li>
           <li>When the modal closes, focus returns to the element that triggered it</li>
         </ul>
 
-        <p>I test dozens of modals every month. I'd estimate that fewer than half of the custom-built modals I encounter get all five of these right. Use the native <code>&lt;dialog&gt;</code> element when you can &mdash; it handles most of this for you.</p>
+        <p>I test dozens of modals every month. I'd estimate that fewer than half of the custom-built modals I encounter get all five of these right. Use the native <code>&lt;dialog&gt;</code> element when you can - it handles most of this for you.</p>
 
         <h3>8. Tables</h3>
 
@@ -409,7 +409,7 @@
           </div>
         </div>
 
-        <p>If you're using a table for layout rather than data, add <code>role="presentation"</code> so screen readers don't try to interpret it as a data table. Better yet, don't use tables for layout at all &mdash; use CSS.</p>
+        <p>If you're using a table for layout rather than data, add <code>role="presentation"</code> so screen readers don't try to interpret it as a data table. Better yet, don't use tables for layout at all - use CSS.</p>
 
         <h2>Common Mistakes Beginners Make</h2>
 
@@ -441,14 +441,14 @@
 
         <p>This is something that took me years to articulate, but it's the most important thing in this entire article.</p>
 
-        <p>A page can be technically screen reader accessible &mdash; every element has the right roles, labels, and attributes &mdash; and still be miserable to use. Technically, a screen reader can read it. Practically, no one would want to.</p>
+        <p>A page can be technically screen reader accessible - every element has the right roles, labels, and attributes - and still be miserable to use. Technically, a screen reader can read it. Practically, no one would want to.</p>
 
         <p>Here's what I mean. I've tested e-commerce sites where every product had alt text, every button had a label, every form was properly marked up. But to add a single item to my cart, I had to navigate through 47 elements. The page had no heading structure, so I couldn't skip to the content I needed. There were no landmarks, so I had to read through the entire navigation, promotional banners, and sidebar before reaching the product listing.</p>
 
         <p>Technically accessible? Yes. Usable? Absolutely not.</p>
 
         <blockquote>
-          Accessibility is the floor. Usability is the goal. If a sighted user can complete a task in 10 seconds and a screen reader user needs 5 minutes for the same task, you have an accessibility problem &mdash; even if every automated check passes.
+          Accessibility is the floor. Usability is the goal. If a sighted user can complete a task in 10 seconds and a screen reader user needs 5 minutes for the same task, you have an accessibility problem - even if every automated check passes.
         </blockquote>
 
         <p>Usability means:</p>
@@ -517,8 +517,8 @@
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "How to Test Your Website with a Screen Reader — A Beginner's Guide",
-    "description": "A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS — written by someone who uses them every day.",
+    "headline": "How to Test Your Website with a Screen Reader - A Beginner's Guide",
+    "description": "A practical, step-by-step guide to testing your website with screen readers like NVDA and JAWS - written by someone who uses them every day.",
     "datePublished": "2026-03-15",
     "dateModified": "2026-03-15",
     "author": {

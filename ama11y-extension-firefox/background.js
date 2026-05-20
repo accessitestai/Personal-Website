@@ -1,12 +1,12 @@
 /**
- * AMASAMYA Extension (Firefox) — Background Script
+ * AMASAMYA Extension (Firefox) - Background Script
  * Orchestrates audit injection, sidebar, message passing,
  * and automatic AMASAMYA Platform integration.
  *
  * Flow:
  *  1. User presses Ctrl+Shift+U on any page.
  *  2. Content script runs all 13 audit engines (bypasses CSP).
- *  3. Results go to the sidebar (existing behaviour — unchanged).
+ *  3. Results go to the sidebar (existing behaviour - unchanged).
  *  4. Results ALSO go to the AMASAMYA Platform tab automatically (new).
  *     The platform tab is opened/focused and the findings appear in
  *     the Web Audit section, ready for AI enhancement.
@@ -33,9 +33,9 @@ browser.browserAction.onClicked.addListener(async (tab) => {
 browser.runtime.onMessage.addListener((message, sender) => {
   if (message.type === 'audit-results' || message.type === 'audit-error') {
 
-    // ── 1. Forward to sidebar (existing behaviour — unchanged) ──
+    // ── 1. Forward to sidebar (existing behaviour - unchanged) ──
     browser.runtime.sendMessage(message).catch(() => {
-      // Sidebar may not be open yet — store for later recovery
+      // Sidebar may not be open yet - store for later recovery
       browser.storage.local.set({ lastAudit: message }).catch(() => {});
     });
 
@@ -50,7 +50,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
  * Find or open the AMASAMYA Platform tab, then post the findings
  * into it via the platform bridge content script.
  *
- * Fails silently — the sidebar always has the results as fallback.
+ * Fails silently - the sidebar always has the results as fallback.
  */
 async function sendResultsToPlatform(message) {
   const payload = {
@@ -92,7 +92,7 @@ async function sendResultsToPlatform(message) {
     }
 
   } catch (err) {
-    // Non-fatal — the sidebar still shows results
+    // Non-fatal - the sidebar still shows results
     console.warn('AMASAMYA platform bridge:', err.message);
   }
 }

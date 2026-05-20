@@ -1,7 +1,7 @@
-# AMASAMYA Beta — Outreach Email Templates
+# AMASAMYA Beta - Outreach Email Templates
 
 Pick the template that matches the channel. **Customise the bracketed
-fields before sending.** Subject lines matter more than the body — they
+fields before sending.** Subject lines matter more than the body - they
 decide whether the email is opened.
 
 Rules of thumb:
@@ -12,16 +12,16 @@ Rules of thumb:
 
 ---
 
-## Template 1 — WebAIM mailing list / Deque axe-Slack
+## Template 1 - WebAIM mailing list / Deque axe-Slack
 
 Use after lurking 1–2 weeks so you're not the "person who only shows up
 when they want something".
 
-**Subject (Slack):** *[Beta] Looking for blind testers for AMASAMYA — a
+**Subject (Slack):** *[Beta] Looking for blind testers for AMASAMYA - a
 new WCAG 2.2 audit tool, $[X] honoraria*
 
 **Subject (WebAIM list):** *Seeking blind beta testers for new WCAG 2.2
-audit tool — paid sessions*
+audit tool - paid sessions*
 
 **Body:**
 
@@ -41,27 +41,27 @@ audit tool — paid sessions*
 >
 > If you're interested, reply directly or DM me. I'll send a short
 > brief, the test URL, and book a session if you'd like to test
-> together on Zoom (your choice — async via form is also fine).
+> together on Zoom (your choice - async via form is also fine).
 >
 > Happy to answer questions in-thread.
 >
-> — Akhilesh Malani · [link to your LinkedIn or homepage]
+> - Akhilesh Malani · [link to your LinkedIn or homepage]
 
 ---
 
-## Template 2 — Knowbility / DAISY / RNIB / NFB / AFB / CNIB
+## Template 2 - Knowbility / DAISY / RNIB / NFB / AFB / CNIB
 
 Slower lead time but warmer audience. Address an actual person if you
-can find one — community-managers and tech-team-leads have public
+can find one - community-managers and tech-team-leads have public
 profiles on LinkedIn.
 
-**Subject:** *Beta evaluation request — AMASAMYA WCAG audit tool*
+**Subject:** *Beta evaluation request - AMASAMYA WCAG audit tool*
 
 **Body:**
 
 > Hi [first name],
 >
-> I'm Akhilesh Malani — accessibility architect, building a web-based
+> I'm Akhilesh Malani - accessibility architect, building a web-based
 > WCAG 2.2 audit platform called AMASAMYA. The tool runs accessibility
 > audits on live URLs, uploaded documents, and mobile-app checklists.
 > It's designed blind-first: the entire interface is operable with a
@@ -75,7 +75,7 @@ profiles on LinkedIn.
 > 1. Forwarding this to your community-of-practice / tech evaluation
 >    group, with whatever framing you're comfortable with.
 > 2. Letting me sponsor a paid evaluation by one or more of your
->    members — $[X] honorarium per tester, format up to them.
+>    members - $[X] honorarium per tester, format up to them.
 > 3. A 20-minute call where I demo the tool and you tell me whether
 >    you'd consider listing it in [your tool registry / your community
 >    resources / your supplier evaluations].
@@ -87,31 +87,31 @@ profiles on LinkedIn.
 > No obligation. If this isn't a fit, just reply "no thanks" and I won't
 > follow up.
 >
-> Thank you for your time —
+> Thank you for your time -
 >
 > Akhilesh Malani
 > [link]
 
 ---
 
-## Template 3 — Individual paid expert (LinkedIn DM or email)
+## Template 3 - Individual paid expert (LinkedIn DM or email)
 
 Use when you already know who you're approaching. Direct, transactional,
 respectful.
 
-**Subject:** *Paid 1-hour evaluation request — accessibility audit tool*
+**Subject:** *Paid 1-hour evaluation request - accessibility audit tool*
 
 **Body:**
 
 > Hi [first name],
 >
-> I came across your work on [specific thing — name a talk, article, or
-> project; do not say "your great work" — that's a sighted-developer
+> I came across your work on [specific thing - name a talk, article, or
+> project; do not say "your great work" - that's a sighted-developer
 > tell].
 >
 > I've built a WCAG 2.2 audit platform called AMASAMYA and I'm in
 > closed-beta. Before I open it up, I'd value your evaluation: a
-> 60-minute paid session (USD $[X]), format up to you — async with my
+> 60-minute paid session (USD $[X]), format up to you - async with my
 > tester brief, or live on Zoom, or however you usually work.
 >
 > What you'd be looking at: a web app that audits live URLs, uploaded
@@ -131,20 +131,20 @@ respectful.
 
 ---
 
-## Template 4 — r/Blind on Reddit
+## Template 4 - r/Blind on Reddit
 
-Reddit's a11y-related subs are strict about self-promotion — read the
+Reddit's a11y-related subs are strict about self-promotion - read the
 rules of each sub before posting and consider asking the mods first.
 Frame as participation request, not promotion.
 
 **Title:** *[Help wanted] $[X] for a 30-minute beta test of a new WCAG
-audit tool — daily screen reader users only*
+audit tool - daily screen reader users only*
 
 **Body:**
 
 > Hi r/Blind,
 >
-> Mods, please remove if this isn't OK — I read the rules and I think
+> Mods, please remove if this isn't OK - I read the rules and I think
 > it fits but I'd rather you tell me than ban me.
 >
 > I've built a web-based accessibility audit tool called AMASAMYA. The
@@ -166,15 +166,15 @@ audit tool — daily screen reader users only*
 >
 > Tester brief (no signup needed to read it): [link]
 >
-> Reply or DM if interested — I'll send instructions and the form.
+> Reply or DM if interested - I'll send instructions and the form.
 
 ---
 
-## Template 5 — Personal warm intro (someone you already know)
+## Template 5 - Personal warm intro (someone you already know)
 
-Use sparingly — close contacts only. Skip the formality.
+Use sparingly - close contacts only. Skip the formality.
 
-**Subject:** *Quick favour — beta-testing my a11y tool*
+**Subject:** *Quick favour - beta-testing my a11y tool*
 
 > Hey [name],
 >
@@ -183,15 +183,15 @@ Use sparingly — close contacts only. Skip the formality.
 >
 > Brief: [link]
 >
-> If you're slammed, no worries — would you forward this to one screen
+> If you're slammed, no worries - would you forward this to one screen
 > reader user you trust?
 >
-> Thanks —
+> Thanks -
 > A.
 
 ---
 
-## Tracking — keep this simple
+## Tracking - keep this simple
 
 Don't build a CRM. A single spreadsheet works. Columns:
 
@@ -203,7 +203,7 @@ Update it the same day each event happens, or it stops being useful.
 ## Cadence
 
 - Don't follow up before 7 days. Don't follow up more than twice. After
-  the second silence, drop it — the next person is more likely to say
+  the second silence, drop it - the next person is more likely to say
   yes than the silent one.
 - When a tester finishes, send the gift card *that day*. The single
   fastest way to lose tester goodwill is being slow with money.

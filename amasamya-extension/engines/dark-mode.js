@@ -19,7 +19,7 @@ function auditDarkMode() {
           }
         }
       } catch (e) {
-        // Cross-origin stylesheet — skip
+        // Cross-origin stylesheet - skip
       }
       if (hasDarkModeStyles) break;
     }
@@ -44,7 +44,7 @@ function auditDarkMode() {
   if (!hasDarkModeStyles && !hasThemeVars && !hasThemeAttr) {
     findings.push({
       id: generateId(), engine: 'Dark Mode', element: 'Page',
-      criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) — Dark Mode',
+      criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) - Dark Mode',
       issue: 'No dark mode support detected. The page does not appear to respond to prefers-color-scheme: dark media query, and no theme custom properties or class-based theming was found.',
       computed: 'No @media (prefers-color-scheme: dark) rules, no theme CSS custom properties, no dark mode class',
       required: 'Pages should support user colour scheme preferences for accessibility',
@@ -72,7 +72,7 @@ function auditDarkMode() {
       const cs = window.getComputedStyle(el);
       findings.push({
         id: generateId(), engine: 'Dark Mode', element: describeEl(el),
-        criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) — Dark Mode',
+        criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) - Dark Mode',
         issue: `Element has inline ${hasInlineColor ? 'color' : ''}${hasInlineColor && hasInlineBg ? ' and ' : ''}${hasInlineBg ? 'background-color' : ''} style. Inline styles override theme changes and may cause contrast failures in dark mode.`,
         computed: `Inline style: ${inlineStyle.slice(0, 100)}`,
         required: 'Colours should use CSS custom properties or classes that adapt to theme changes',
@@ -89,7 +89,7 @@ function auditDarkMode() {
   const isDarkBg = luminance(bodyBg) < 0.2;
 
   if (isDarkBg) {
-    // Page appears to be in dark mode — check for contrast issues specific to dark themes
+    // Page appears to be in dark mode - check for contrast issues specific to dark themes
     textElements.slice(0, 100).forEach(el => {
       const cs = window.getComputedStyle(el);
       const fgRaw = parseColour(cs.color);
@@ -103,7 +103,7 @@ function auditDarkMode() {
       if (ratio < requiredAA) {
         findings.push({
           id: generateId(), engine: 'Dark Mode', element: describeEl(el),
-          criterion: `WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) — Dark Mode Active`,
+          criterion: `WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) - Dark Mode Active`,
           issue: `Dark mode contrast failure: ratio of ${ratio.toFixed(2)}:1 is below the ${requiredAA}:1 minimum for ${large ? 'large' : 'normal'} text.`,
           computed: `${ratio.toFixed(2)}:1 (fg: ${cs.color}, bg: rgb(${bg.r},${bg.g},${bg.b}))`,
           required: `Minimum ${requiredAA}:1 in dark mode`,
@@ -117,7 +117,7 @@ function auditDarkMode() {
   if (findings.length === 0) {
     findings.push({
       id: generateId(), engine: 'Dark Mode', element: 'Page',
-      criterion: 'WCAG 2.2 SC 1.4.3 — Dark Mode',
+      criterion: 'WCAG 2.2 SC 1.4.3 - Dark Mode',
       issue: 'No dark mode-specific issues detected.',
       computed: `Dark mode styles detected: ${hasDarkModeStyles || hasThemeVars || hasThemeAttr}`,
       required: 'Colours must maintain sufficient contrast in dark mode',

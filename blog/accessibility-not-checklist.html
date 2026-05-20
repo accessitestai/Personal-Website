@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails — and what building a real accessibility culture looks like.">
+  <meta name="description" content="Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails - and what building a real accessibility culture looks like.">
   <meta name="author" content="Akhilesh Malani">
   <meta name="keywords" content="accessibility culture, WCAG compliance, accessibility strategy, inclusive design, accessibility checklist, digital accessibility, accessibility leadership">
   <link rel="canonical" href="https://akhileshmalani.com/blog/accessibility-not-checklist.html">
 
   <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Accessibility Is Not a Checklist — It's a Culture | Akhilesh Malani">
-  <meta property="og:description" content="Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails — and what building a real accessibility culture looks like.">
+  <meta property="og:title" content="Accessibility Is Not a Checklist - It's a Culture | Akhilesh Malani">
+  <meta property="og:description" content="Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails - and what building a real accessibility culture looks like.">
   <meta property="og:url" content="https://akhileshmalani.com/blog/accessibility-not-checklist.html">
 
-  <title>Accessibility Is Not a Checklist — It's a Culture | Akhilesh Malani</title>
+  <title>Accessibility Is Not a Checklist - It's a Culture | Akhilesh Malani</title>
   <link rel="icon" type="image/svg+xml" href="../images/logo-icon.svg">
   <link rel="stylesheet" href="../styles.css">
   <style>
@@ -44,7 +44,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -118,23 +118,23 @@
       <ol>
         <li><a href="../index.html">Home</a></li>
         <li><a href="../index.html#blog">Blog</a></li>
-        <li><span aria-current="page">Accessibility Is Not a Checklist — It's a Culture</span></li>
+        <li><span aria-current="page">Accessibility Is Not a Checklist - It's a Culture</span></li>
       </ol>
     </nav>
     <article class="blog-post" aria-label="Blog post">
       <header class="blog-post-header">
-        <h1>Accessibility Is Not a Checklist &mdash; It's a Culture</h1>
+        <h1>Accessibility Is Not a Checklist - It's a Culture</h1>
         <p class="blog-meta">
           By <strong>Akhilesh Malani</strong> &middot; <time datetime="2026-02-28">February 28, 2026</time> &middot; 8 min read
         </p>
       </header>
 
       <div class="blog-post-content">
-        <p>I have watched the same pattern unfold dozens of times over the past sixteen years. An organisation discovers it has accessibility problems &mdash; usually because a legal complaint lands on someone's desk, or a major client starts asking uncomfortable questions. They bring me in. I audit their digital products, deliver a report thick with findings, and their team gets to work fixing things. For a few weeks, accessibility is the priority.</p>
+        <p>I have watched the same pattern unfold dozens of times over the past sixteen years. An organisation discovers it has accessibility problems - usually because a legal complaint lands on someone's desk, or a major client starts asking uncomfortable questions. They bring me in. I audit their digital products, deliver a report thick with findings, and their team gets to work fixing things. For a few weeks, accessibility is the priority.</p>
 
         <p>Then the fixes ship. The report goes into a folder. And within six months, the same organisation is building the same inaccessible patterns all over again.</p>
 
-        <p>This is not an occasional outcome. It is the default. And it happens because these organisations never treated accessibility as something they <em>are</em>. They treated it as something they <em>do</em> &mdash; briefly, reluctantly, and only when forced.</p>
+        <p>This is not an occasional outcome. It is the default. And it happens because these organisations never treated accessibility as something they <em>are</em>. They treated it as something they <em>do</em> - briefly, reluctantly, and only when forced.</p>
 
         <h2>The Compliance Trap</h2>
 
@@ -144,7 +144,7 @@
 
         <p>It is not.</p>
 
-        <p>I have tested products that technically met every WCAG success criterion I could measure &mdash; and were still profoundly difficult to use with a screen reader. The heading structure was technically correct but the information architecture made no sense. The form labels existed but the error handling was so confusing that I abandoned the task after three attempts. The colour contrast ratios passed, but the visual design relied so heavily on spatial relationships that the content was meaningless when linearised.</p>
+        <p>I have tested products that technically met every WCAG success criterion I could measure - and were still profoundly difficult to use with a screen reader. The heading structure was technically correct but the information architecture made no sense. The form labels existed but the error handling was so confusing that I abandoned the task after three attempts. The colour contrast ratios passed, but the visual design relied so heavily on spatial relationships that the content was meaningless when linearised.</p>
 
         <blockquote>Compliance asks: "Does this meet the standard?" Culture asks: "Can people actually use this?"</blockquote>
 
@@ -164,7 +164,7 @@
 
         <h3>Developers Write Semantic HTML by Default</h3>
 
-        <p>In an accessibility culture, developers reach for a <code>&lt;button&gt;</code> before they reach for a <code>&lt;div onclick&gt;</code>. They use native form elements. They understand that a <code>&lt;nav&gt;</code> is not just a styling hook &mdash; it is how my screen reader lets me jump directly to the navigation. They don't override the browser's built-in accessibility because they've learned, often the hard way, that reimplementing something the browser already does well is where most accessibility failures begin.</p>
+        <p>In an accessibility culture, developers reach for a <code>&lt;button&gt;</code> before they reach for a <code>&lt;div onclick&gt;</code>. They use native form elements. They understand that a <code>&lt;nav&gt;</code> is not just a styling hook - it is how my screen reader lets me jump directly to the navigation. They don't override the browser's built-in accessibility because they've learned, often the hard way, that reimplementing something the browser already does well is where most accessibility failures begin.</p>
 
         <p>This is not advanced knowledge. It is foundational. But in organisations that treat accessibility as a checklist, developers never learn it because no one teaches it until the audit findings arrive.</p>
 
@@ -176,7 +176,7 @@
 
         <h3>Leadership Measures and Tracks It</h3>
 
-        <p>In an accessibility culture, leadership does not treat accessibility as a feel-good initiative buried in the corporate social responsibility report. They track it the same way they track performance, security, and uptime. There are metrics. There are dashboards. There are targets. And when those targets are missed, there are consequences &mdash; just as there would be if the site went down or a security vulnerability went unpatched.</p>
+        <p>In an accessibility culture, leadership does not treat accessibility as a feel-good initiative buried in the corporate social responsibility report. They track it the same way they track performance, security, and uptime. There are metrics. There are dashboards. There are targets. And when those targets are missed, there are consequences - just as there would be if the site went down or a security vulnerability went unpatched.</p>
 
         <p>I have seen organisations transform their accessibility posture within a single year, and in every case, the turning point was the same: someone with real authority decided it mattered and started asking for numbers.</p>
 
@@ -189,12 +189,12 @@
           <li><strong>There is no accessibility champion, team, or clear owner.</strong> When I ask "Who is responsible for accessibility here?" and the answer involves a long pause and several people looking at each other, I know exactly where things stand. Accessibility without ownership is accessibility without accountability.</li>
           <li><strong>Remediation is always "next sprint."</strong> I have heard this phrase more than any other in my career. Critical accessibility issues get logged, prioritised as important, and then perpetually deferred because there is always something more urgent. There is always a feature that someone with decision-making power cares about more.</li>
           <li><strong>The accessibility budget is zero until a legal threat arrives.</strong> Nothing reveals an organisation's actual priorities like its budget. If accessibility only gets funded in response to a legal notice or a regulatory deadline, the organisation is not investing in accessibility. It is paying to make a problem go away.</li>
-          <li><strong>Accessibility knowledge lives in one person.</strong> If your entire accessibility capability depends on a single individual &mdash; and when that person is on leave, nothing gets reviewed &mdash; you do not have an accessibility practice. You have a single point of failure.</li>
+          <li><strong>Accessibility knowledge lives in one person.</strong> If your entire accessibility capability depends on a single individual - and when that person is on leave, nothing gets reviewed - you do not have an accessibility practice. You have a single point of failure.</li>
         </ul>
 
         <h2>How to Shift from Checklist to Culture</h2>
 
-        <p>The good news is that the shift is possible. I have seen it happen. It is not fast, it is not easy, and it requires sustained commitment. But the organisations that make this shift don't just produce more accessible products &mdash; they produce better products overall.</p>
+        <p>The good news is that the shift is possible. I have seen it happen. It is not fast, it is not easy, and it requires sustained commitment. But the organisations that make this shift don't just produce more accessible products - they produce better products overall.</p>
 
         <h3>Start with Awareness, Not Training</h3>
 
@@ -202,17 +202,17 @@
 
         <p>Start with awareness instead. Let people experience what inaccessibility feels like. Have them try to complete a task on their own product using only a keyboard. Let them hear what a screen reader actually says when it encounters their checkout flow. Show them videos of real users struggling with interfaces that "passed" an automated audit.</p>
 
-        <p>When people understand <em>why</em> accessibility matters &mdash; not as a legal obligation, but as a fundamental quality of good design &mdash; the training that follows lands completely differently.</p>
+        <p>When people understand <em>why</em> accessibility matters - not as a legal obligation, but as a fundamental quality of good design - the training that follows lands completely differently.</p>
 
         <h3>Embed Accessibility into Design Systems</h3>
 
-        <p>If your organisation uses a design system or component library, that is the single most leveraged place to invest in accessibility. When the base components are accessible &mdash; when the buttons, form fields, modals, and navigation patterns all have correct semantics, keyboard support, and ARIA built in &mdash; every team that uses those components inherits that accessibility by default.</p>
+        <p>If your organisation uses a design system or component library, that is the single most leveraged place to invest in accessibility. When the base components are accessible - when the buttons, form fields, modals, and navigation patterns all have correct semantics, keyboard support, and ARIA built in - every team that uses those components inherits that accessibility by default.</p>
 
         <p>I have seen organisations reduce their audit findings by more than half simply by investing in their design system's accessibility. The maths is straightforward: fix it once at the component level, and every product that uses that component benefits.</p>
 
         <h3>Include People with Disabilities in Testing</h3>
 
-        <p>I cannot overstate this. No amount of expert review fully replaces the insight that comes from watching someone who uses assistive technology every day interact with your product. Their workarounds, their frustrations, their expectations &mdash; these are things you cannot learn from a guideline or a checklist.</p>
+        <p>I cannot overstate this. No amount of expert review fully replaces the insight that comes from watching someone who uses assistive technology every day interact with your product. Their workarounds, their frustrations, their expectations - these are things you cannot learn from a guideline or a checklist.</p>
 
         <p>This does not need to be expensive or complicated. Even a small, regular cadre of testers with different disabilities and assistive technology setups will surface issues that your internal team simply cannot see. Pay them fairly. Include them early. Listen to what they tell you, especially when it is uncomfortable.</p>
 
@@ -226,11 +226,11 @@
 
         <p>I want to be direct about what is at stake when organisations treat accessibility as a checkbox exercise, because the consequences are not abstract. They are felt by real people trying to do real things.</p>
 
-        <p>I have tested an online job application portal where the submit button was completely invisible to my screen reader. The application form itself was technically accessible &mdash; every field had a label, every required field was marked. But the button to actually submit my application was a custom component built with <code>&lt;div&gt;</code> elements and JavaScript click handlers. It had no role, no accessible name, nothing. The automated audit flagged zero issues on the form page. A compliance report would have called it conformant. And a blind person trying to apply for a job simply could not.</p>
+        <p>I have tested an online job application portal where the submit button was completely invisible to my screen reader. The application form itself was technically accessible - every field had a label, every required field was marked. But the button to actually submit my application was a custom component built with <code>&lt;div&gt;</code> elements and JavaScript click handlers. It had no role, no accessible name, nothing. The automated audit flagged zero issues on the form page. A compliance report would have called it conformant. And a blind person trying to apply for a job simply could not.</p>
 
         <p>I have tested a healthcare appointment booking system where the calendar date picker worked perfectly with a mouse. With a keyboard, it was impossible to navigate. I could not select a date. I could not book an appointment. The system met colour contrast requirements and had proper heading structure. By the numbers, it was largely compliant. In reality, it locked me out of scheduling my own medical care.</p>
 
-        <p>I have tested e-learning platforms where the course content was technically marked up with proper headings and lists, but the video player had no keyboard controls and no captions. The quizzes used drag-and-drop interactions with no keyboard alternative. A student with a disability could enrol, log in, and see the course catalogue &mdash; all "accessible." But they could not actually learn.</p>
+        <p>I have tested e-learning platforms where the course content was technically marked up with proper headings and lists, but the video player had no keyboard controls and no captions. The quizzes used drag-and-drop interactions with no keyboard alternative. A student with a disability could enrol, log in, and see the course catalogue - all "accessible." But they could not actually learn.</p>
 
         <div class="callout">
           <strong>The pattern is always the same:</strong> The parts of the product that auditors typically check are accessible. The parts where users actually accomplish their goals are not. Checkbox accessibility protects organisations from legal findings. It does not protect users from exclusion.
@@ -244,13 +244,13 @@
 
         <p>That is not the point.</p>
 
-        <p>The point is intent. The point is that when your team sits down to build something, accessibility is in the room from the start &mdash; not as a constraint, but as a value. The point is that when an issue is found, it gets fixed promptly, not because a legal notice forced it, but because your team genuinely does not want anyone to be excluded from using what they built.</p>
+        <p>The point is intent. The point is that when your team sits down to build something, accessibility is in the room from the start - not as a constraint, but as a value. The point is that when an issue is found, it gets fixed promptly, not because a legal notice forced it, but because your team genuinely does not want anyone to be excluded from using what they built.</p>
 
         <p>The point is continuous improvement. Ship, learn, listen, improve. Test with real people. Measure your progress. Celebrate your gains. Acknowledge your gaps honestly and work to close them.</p>
 
-        <p>The organisations I have seen do this well are not the ones with the biggest budgets or the most sophisticated tools. They are the ones where someone &mdash; often just one person at first &mdash; refused to accept that a passing audit score meant the job was done. They pushed for more. They asked harder questions. They brought in people who could tell them what the experience was really like.</p>
+        <p>The organisations I have seen do this well are not the ones with the biggest budgets or the most sophisticated tools. They are the ones where someone - often just one person at first - refused to accept that a passing audit score meant the job was done. They pushed for more. They asked harder questions. They brought in people who could tell them what the experience was really like.</p>
 
-        <p>That is the shift from checklist to culture. It does not happen in a sprint. It happens over months and years of consistent, deliberate effort. But when it takes hold, it changes everything &mdash; not just for people with disabilities, but for everyone who uses what you build.</p>
+        <p>That is the shift from checklist to culture. It does not happen in a sprint. It happens over months and years of consistent, deliberate effort. But when it takes hold, it changes everything - not just for people with disabilities, but for everyone who uses what you build.</p>
 
         <p>If your organisation is ready to make that shift, or if you are the one person trying to push for it from the inside, <a href="../index.html#contact">I would welcome that conversation</a>.</p>
       </div>
@@ -290,8 +290,8 @@
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Accessibility Is Not a Checklist — It's a Culture",
-    "description": "Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails — and what building a real accessibility culture looks like.",
+    "headline": "Accessibility Is Not a Checklist - It's a Culture",
+    "description": "Too many organisations treat accessibility as a compliance checkbox. Here's why that approach fails - and what building a real accessibility culture looks like.",
     "datePublished": "2026-02-28",
     "dateModified": "2026-02-28",
     "author": {

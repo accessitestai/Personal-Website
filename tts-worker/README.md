@@ -1,13 +1,13 @@
-# Azure Speech TTS — Cloudflare Worker
+# Azure Speech TTS - Cloudflare Worker
 
 A thin proxy that turns Azure Cognitive Services' neural TTS into a simple
 `audio/mpeg` HTTP endpoint your static site can call from anywhere. The Azure
-subscription key lives in a Cloudflare Worker secret — never in source, never
+subscription key lives in a Cloudflare Worker secret - never in source, never
 in git.
 
 ## One-time setup
 
-1. Create a Speech resource in Azure (Free **F0** tier is fine — 500k
+1. Create a Speech resource in Azure (Free **F0** tier is fine - 500k
    characters per month, no credit card).
 2. From the resource's **Keys and Endpoint** page, copy **Key 1** and the
    **Location/Region** (e.g. `centralindia`). If your region is not
@@ -42,7 +42,7 @@ You should hear Hindi neural speech.
 
 | param | required | default | notes                                       |
 |-------|----------|---------|---------------------------------------------|
-| text  | yes      | —       | Max 3000 chars per request                  |
+| text  | yes      | -       | Max 3000 chars per request                  |
 | lang  | no       | en      | Short code (hi, ta, fr, zh-CN, …)           |
 | voice | no       | auto    | Full Azure voice name override              |
 | rate  | no       | 0       | Integer percent, e.g. `-10` or `+20`        |
@@ -51,7 +51,7 @@ You should hear Hindi neural speech.
 
 ```
 wrangler secret put AZURE_TTS_KEY     # paste new key
-wrangler deploy                       # optional — secrets update live
+wrangler deploy                       # optional - secrets update live
 ```
 
 ## Limits

@@ -92,7 +92,7 @@
   </url>
   <!-- Cross-host link into the AMASAMYA subdomain. Google treats subdomains
        as separate properties, so this isn't a substitute for submitting
-       amasamya.akhileshmalani.com/sitemap.xml in Search Console — but it
+       amasamya.akhileshmalani.com/sitemap.xml in Search Console - but it
        does help with discovery from the apex domain's crawl budget. -->
   <url>
     <loc>https://amasamya.akhileshmalani.com/</loc>

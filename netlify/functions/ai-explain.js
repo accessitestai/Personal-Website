@@ -1,11 +1,11 @@
 /**
- * ai-explain.js — AMASAMYA AI Explainer
+ * ai-explain.js - AMASAMYA AI Explainer
  *
  * Takes a raw accessibility issue (rule ID, WCAG criterion, and an
  * optional HTML snippet) and returns a plain-language explanation
  * plus a suggested fix.
  *
- * Routing order (cheapest first — most calls should never touch AI):
+ * Routing order (cheapest first - most calls should never touch AI):
  *   1. Rule-based canned answers  (zero cost, instant)
  *   2. In-memory warm cache       (zero cost, lasts per Lambda instance)
  *   3. Gemini 1.5 Flash           (free tier, generous daily quota)
@@ -15,9 +15,9 @@
  * Body:       { ruleId, wcag, nodeHtml, message }
  * Response:   { source, explanation, fix }
  *
- * Env vars (set in Netlify UI — Site settings → Environment variables):
- *   GEMINI_API_KEY   (required for Gemini — get it free at https://aistudio.google.com/)
- *   GROQ_API_KEY     (optional fallback — https://console.groq.com/)
+ * Env vars (set in Netlify UI - Site settings → Environment variables):
+ *   GEMINI_API_KEY   (required for Gemini - get it free at https://aistudio.google.com/)
+ *   GROQ_API_KEY     (optional fallback - https://console.groq.com/)
  *
  * Notes:
  *   - Warm cache lives for the lifetime of the Lambda instance
@@ -53,18 +53,18 @@ const RULE_LIBRARY = {
   },
   'heading-order': {
     explanation: 'Skipping heading levels (e.g. <h1> then <h3>) breaks the document outline. Screen-reader users navigate by headings and expect a logical hierarchy.',
-    fix: 'Use heading levels in order — h1, h2, h3 — without jumping. Use CSS for visual size, not a different heading level.'
+    fix: 'Use heading levels in order - h1, h2, h3 - without jumping. Use CSS for visual size, not a different heading level.'
   },
   'link-name': {
     explanation: 'Links without accessible text (empty links or links containing only an icon) are announced as "link" or "link, image" with no destination.',
     fix: 'Add visible link text, or an aria-label, or an sr-only span inside the link describing where it goes.'
   },
   'button-name': {
-    explanation: 'Buttons without accessible text are announced as just "button" — users have no idea what pressing it will do.',
+    explanation: 'Buttons without accessible text are announced as just "button" - users have no idea what pressing it will do.',
     fix: 'Put text inside the button, or add aria-label, or include an sr-only span. Icon-only buttons must still announce their action.'
   },
   'html-has-lang': {
-    explanation: 'Without a lang attribute on <html>, screen readers may read content in the wrong language — an English page read with Spanish pronunciation is painful.',
+    explanation: 'Without a lang attribute on <html>, screen readers may read content in the wrong language - an English page read with Spanish pronunciation is painful.',
     fix: 'Add lang="en" (or the relevant BCP-47 language code) to the <html> element.'
   },
   'document-title': {
@@ -84,7 +84,7 @@ const RULE_LIBRARY = {
     fix: 'Make every id on the page unique. If you need a shared hook, use a class instead.'
   },
   'aria-required-attr': {
-    explanation: 'Certain ARIA roles require specific attributes — e.g. role="checkbox" must have aria-checked. Without them, assistive tech can\'t communicate state.',
+    explanation: 'Certain ARIA roles require specific attributes - e.g. role="checkbox" must have aria-checked. Without them, assistive tech can\'t communicate state.',
     fix: 'Either add the required ARIA attributes or switch to a native HTML element (which already provides the semantics for free).'
   },
   'aria-valid-attr-value': {
@@ -97,10 +97,10 @@ const RULE_LIBRARY = {
   },
   'list': {
     explanation: 'Items styled as a list but not in <ul>/<ol>/<dl> are not announced as a list by screen readers, so users lose the count and structure.',
-    fix: 'Wrap the items in <ul> or <ol>, with each item in an <li>. If you need custom styling, use CSS — don\'t remove the semantics.'
+    fix: 'Wrap the items in <ul> or <ol>, with each item in an <li>. If you need custom styling, use CSS - don\'t remove the semantics.'
   },
   'frame-title': {
-    explanation: 'An <iframe> without a title is announced as just "frame" — users can\'t tell what\'s inside without entering it.',
+    explanation: 'An <iframe> without a title is announced as just "frame" - users can\'t tell what\'s inside without entering it.',
     fix: 'Add a title attribute to every <iframe> that describes its content or purpose.'
   },
   'WCAG2AA.Principle1.Guideline1_1.1_1_1.H37': { /* HTMLCS alias for image-alt */
@@ -138,7 +138,7 @@ function cacheGet(key) {
 }
 function cacheSet(key, value) {
   if (WARM_CACHE.size >= WARM_CACHE_MAX) {
-    /* Evict oldest entry (first key — Map preserves insertion order). */
+    /* Evict oldest entry (first key - Map preserves insertion order). */
     const firstKey = WARM_CACHE.keys().next().value;
     if (firstKey) WARM_CACHE.delete(firstKey);
   }
@@ -291,7 +291,7 @@ exports.handler = async function (event) {
     console.warn('[ai-explain] Groq failed:', err.message);
   }
 
-  /* Last-resort generic message — better than a 500. */
+  /* Last-resort generic message - better than a 500. */
   return json(200, {
     source: 'fallback',
     explanation: 'This is an accessibility issue reported by the scanner. Review the rule and the offending element against WCAG 2.2 guidance.',

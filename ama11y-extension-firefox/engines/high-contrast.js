@@ -29,7 +29,7 @@ function auditHighContrast() {
       if (!hasTextContent && !hasAriaLabel) {
         findings.push({
           id: generateId(), engine: 'High Contrast', element: describeEl(el),
-          criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) — High Contrast Mode',
+          criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) - High Contrast Mode',
           issue: 'Element uses background-image with no text fallback. In Windows High Contrast mode, background images are removed, making this element invisible or meaningless.',
           computed: `background-image: ${bgImage.slice(0, 80)}; text content: none; aria-label: none`,
           required: 'Visible text or accessible name that remains when background images are stripped',
@@ -46,14 +46,14 @@ function auditHighContrast() {
     const isInteractive = el.matches('button, a[href], input, select, textarea, [role="button"], [role="link"]');
 
     if (isInteractive && borderWidth === 0 && borderStyle === 'none') {
-      // Interactive element with no border — in forced-colors mode, the browser
+      // Interactive element with no border - in forced-colors mode, the browser
       // adds a border, but custom styling may not survive
       const outline = cs.outlineStyle;
       const outlineWidth = parseFloat(cs.outlineWidth) || 0;
       if (outline === 'none' && outlineWidth === 0) {
         findings.push({
           id: generateId(), engine: 'High Contrast', element: describeEl(el),
-          criterion: 'WCAG 2.2 SC 2.4.11 Focus Appearance (Level AA) — High Contrast Mode',
+          criterion: 'WCAG 2.2 SC 2.4.11 Focus Appearance (Level AA) - High Contrast Mode',
           issue: 'Interactive element has no border and no outline. In forced-colors mode, custom focus indicators that rely on colour alone may not be visible.',
           computed: `border: ${borderStyle} ${borderWidth}px; outline: ${outline} ${outlineWidth}px`,
           required: 'Interactive elements must have visible boundaries that survive forced-colors mode',
@@ -76,7 +76,7 @@ function auditHighContrast() {
   if (customControls.length > 0) {
     findings.push({
       id: generateId(), engine: 'High Contrast', element: `${customControls.length} custom controls`,
-      criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) — High Contrast Mode',
+      criterion: 'WCAG 2.2 SC 1.4.3 Contrast Minimum (Level AA) - High Contrast Mode',
       issue: `${customControls.length} visually hidden native checkbox/radio inputs found (likely replaced with CSS-styled custom controls). Custom styled form controls may lose their visual state indicators in Windows High Contrast mode.`,
       computed: `${customControls.length} hidden native inputs with custom visual replacements`,
       required: 'Custom controls must remain operable and visually distinguishable in forced-colors mode',
@@ -100,7 +100,7 @@ function auditHighContrast() {
   statusElements.forEach(el => {
     findings.push({
       id: generateId(), engine: 'High Contrast', element: describeEl(el),
-      criterion: 'WCAG 2.2 SC 1.4.1 Use of Color (Level A) — High Contrast Mode',
+      criterion: 'WCAG 2.2 SC 1.4.1 Use of Color (Level A) - High Contrast Mode',
       issue: 'Status indicator element appears to rely primarily on colour. In forced-colors mode, background colours are overridden and the indicator may become invisible.',
       computed: `text content: "${el.textContent.trim() || 'none'}"`,
       required: 'Status must be conveyed through text, icons, or patterns in addition to colour',
@@ -112,7 +112,7 @@ function auditHighContrast() {
   if (findings.length === 0) {
     findings.push({
       id: generateId(), engine: 'High Contrast', element: 'Page',
-      criterion: 'WCAG 2.2 SC 1.4.3 — High Contrast Mode',
+      criterion: 'WCAG 2.2 SC 1.4.3 - High Contrast Mode',
       issue: 'No high contrast mode issues detected in the sampled elements.',
       computed: `${meaningfulBgElements.length} elements checked`,
       required: 'All content must remain visible and operable in forced-colors mode',

@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AMASAMYA — Blind-First WCAG 2.2 Accessibility Audit Platform</title>
+  <title>AMASAMYA - Blind-First WCAG 2.2 Accessibility Audit Platform</title>
   <meta name="description" content="AMASAMYA is a blind-first WCAG 2.2 accessibility audit platform for the web, documents, and mobile. Built and maintained by Akhilesh Malani.">
   <meta name="author" content="Akhilesh Malani">
   <link rel="canonical" href="https://amasamya.akhileshmalani.com/">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="AMASAMYA — Blind-First WCAG 2.2 Accessibility Audit Platform">
+  <meta property="og:title" content="AMASAMYA - Blind-First WCAG 2.2 Accessibility Audit Platform">
   <meta property="og:description" content="WCAG 2.2 accessibility audits for live web pages, document files, and mobile apps. Designed for and by people who use screen readers.">
   <meta property="og:url" content="https://amasamya.akhileshmalani.com/">
   <meta property="og:site_name" content="AMASAMYA">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="AMASAMYA — Blind-First Accessibility Audit Platform">
+  <meta name="twitter:title" content="AMASAMYA - Blind-First Accessibility Audit Platform">
   <meta name="twitter:description" content="WCAG 2.2 audits for the web, documents, and mobile. Designed blind-first.">
 
   <!-- Preconnect for Firebase auto-redirect (signed-in users land in the app) -->
@@ -201,7 +201,7 @@
           <p>
             Paste a URL or click the toolbar button on any tab. AMASAMYA runs a full WCAG 2.2
             audit covering colour contrast, ARIA validation, focus management, and structural
-            semantics — across the interaction patterns the standard requires.
+            semantics - across the interaction patterns the standard requires.
           </p>
         </article>
         <article class="feature" aria-labelledby="feat-doc">
@@ -224,11 +224,11 @@
     </section>
 
     <section aria-labelledby="vision-ai">
-      <h2 id="vision-ai">Vision AI modules — optional, bring your own key</h2>
+      <h2 id="vision-ai">Vision AI modules - optional, bring your own key</h2>
       <p>
         Three optional modules use a Vision AI provider you configure (OpenAI or Anthropic).
         Your API key is encrypted at rest in your browser with a non-extractable WebCrypto
-        master key — keys never reach AMASAMYA servers, because there are none.
+        master key - keys never reach AMASAMYA servers, because there are none.
       </p>
       <div class="features">
         <article class="feature" aria-labelledby="feat-narrator">
@@ -262,7 +262,7 @@
         <ul>
           <li>Every screen is fully operable with major Windows, macOS, and Android screen readers.</li>
           <li>Audit findings announce role, severity, and remediation in a logical reading order.</li>
-          <li>Exported reports are themselves accessible — semantic headings, labelled regions, navigable tables.</li>
+          <li>Exported reports are themselves accessible - semantic headings, labelled regions, navigable tables.</li>
           <li>Audits run locally; no page content is ever sent to AMASAMYA servers.</li>
           <li>The platform's own pages pass an axe-core 4.10 self-audit with zero violations.</li>
         </ul>
@@ -293,7 +293,7 @@
     <section aria-labelledby="who">
       <h2 id="who">Who built AMASAMYA</h2>
       <p>
-        AMASAMYA is built and maintained by <a href="https://akhileshmalani.com">Akhilesh Malani</a> —
+        AMASAMYA is built and maintained by <a href="https://akhileshmalani.com">Akhilesh Malani</a> -
         accessibility architect and digital inclusion strategist. The platform is fully self-funded,
         with no investor influence on the privacy or feature roadmap. Beta-tester credits are listed
         on the <a href="/credits">Contributors page</a>.
@@ -306,7 +306,7 @@
 <footer role="contentinfo">
   <div class="container">
     <p>
-      AMASAMYA v3.1 · Built by
+      AMASAMYA v3.4 · Built by
       <a href="https://akhileshmalani.com">Akhilesh Malani</a>
     </p>
     <p>
@@ -323,10 +323,10 @@
      bot crawler), the landing page is still fully usable. -->
 <script type="module">
   /* Crawlers, screen readers, and prefers-reduced-data clients all
-     skip auth state checks — we only redirect humans who explicitly
+     skip auth state checks - we only redirect humans who explicitly
      have a Firebase session. */
   if (navigator.userAgent && /bot|crawl|slurp|spider|googlebot|bingbot/i.test(navigator.userAgent)) {
-    /* Bot — show the static landing page, do not redirect. */
+    /* Bot - show the static landing page, do not redirect. */
   } else {
     try {
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
@@ -337,14 +337,14 @@
         const auth = getAuth(app);
         onAuthStateChanged(auth, user => {
           if (user) {
-            /* Signed in — go straight to the app. URL preserves history
+            /* Signed in - go straight to the app. URL preserves history
                so back-button returns to the landing page. */
             window.location.replace('/index.html');
           }
         });
       }
     } catch (_) {
-      /* Firebase couldn't load — landing page stays interactive,
+      /* Firebase couldn't load - landing page stays interactive,
          user clicks "Sign in" manually if they want to. */
     }
   }

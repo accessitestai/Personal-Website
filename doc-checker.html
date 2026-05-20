@@ -272,7 +272,7 @@
 
     <div class="checker-page">
       <h1>Document Accessibility Checker</h1>
-      <p class="checker-intro">Upload a PDF, Word (.docx), or PowerPoint (.pptx) file and I will analyse it for common accessibility issues. This tool runs entirely in your browser — your documents are never uploaded to any server. Your files stay private.</p>
+      <p class="checker-intro">Upload a PDF, Word (.docx), or PowerPoint (.pptx) file and I will analyse it for common accessibility issues. This tool runs entirely in your browser - your documents are never uploaded to any server. Your files stay private.</p>
 
       <nav aria-label="Checker tools" class="checker-nav">
         <a href="checker.html">Web Checker</a>
@@ -475,19 +475,19 @@
                 // Check 5: Page count
                 checks.push({ status: 'info', category: 'Structure', title: 'Document has ' + totalPages + ' page' + (totalPages !== 1 ? 's' : ''), description: 'Documents longer than 5 pages should have bookmarks or a table of contents for navigation.' });
                 if (totalPages > 5) {
-                  checks.push({ status: 'warn', category: 'Navigation', title: 'Long document — consider adding bookmarks', description: 'With ' + totalPages + ' pages, screen reader users need bookmarks (PDF) or a table of contents to navigate efficiently. Without them, they must read every page sequentially.' });
+                  checks.push({ status: 'warn', category: 'Navigation', title: 'Long document - consider adding bookmarks', description: 'With ' + totalPages + ' pages, screen reader users need bookmarks (PDF) or a table of contents to navigate efficiently. Without them, they must read every page sequentially.' });
                 }
 
                 // Check 6: Images detected
                 if (hasImages) {
-                  checks.push({ status: 'warn', category: 'Images', title: 'Images detected — verify alt text', description: 'This document contains images. Each informative image needs alternative text. Decorative images should be marked as artifacts. This tool cannot verify alt text in PDFs — use Adobe Acrobat Pro\'s Accessibility Checker for a thorough check.' });
+                  checks.push({ status: 'warn', category: 'Images', title: 'Images detected - verify alt text', description: 'This document contains images. Each informative image needs alternative text. Decorative images should be marked as artifacts. This tool cannot verify alt text in PDFs - use Adobe Acrobat Pro\'s Accessibility Checker for a thorough check.' });
                 } else {
                   checks.push({ status: 'pass', category: 'Images', title: 'No images detected', description: 'No images found, so no alternative text is needed.' });
                 }
 
                 // Check 7: Heading structure (heuristic)
                 var headingPatterns = fullText.match(/^[A-Z][A-Za-z\s]{3,60}$/gm);
-                checks.push({ status: 'info', category: 'Structure', title: 'Heading structure requires manual verification', description: 'Proper heading structure (H1, H2, H3) is critical for screen reader navigation. This tool cannot detect PDF tags — use Adobe Acrobat Pro\'s Accessibility Checker or PAC (PDF Accessibility Checker) to verify tags and heading structure.' });
+                checks.push({ status: 'info', category: 'Structure', title: 'Heading structure requires manual verification', description: 'Proper heading structure (H1, H2, H3) is critical for screen reader navigation. This tool cannot detect PDF tags - use Adobe Acrobat Pro\'s Accessibility Checker or PAC (PDF Accessibility Checker) to verify tags and heading structure.' });
 
                 // Check 8: Tables (heuristic)
                 if (fullText.indexOf('\t') !== -1 || /\d+\s{2,}\d+/.test(fullText)) {
@@ -498,7 +498,7 @@
                 var urlPattern = /https?:\/\/[^\s]+/g;
                 var urls = fullText.match(urlPattern);
                 if (urls && urls.length > 0) {
-                  checks.push({ status: 'info', category: 'Links', title: urls.length + ' URL' + (urls.length !== 1 ? 's' : '') + ' found in text', description: 'Ensure these are actual hyperlinks (not just plain text URLs) so screen reader users can activate them. Also ensure link text is descriptive — avoid raw URLs as link text.' });
+                  checks.push({ status: 'info', category: 'Links', title: urls.length + ' URL' + (urls.length !== 1 ? 's' : '') + ' found in text', description: 'Ensure these are actual hyperlinks (not just plain text URLs) so screen reader users can activate them. Also ensure link text is descriptive - avoid raw URLs as link text.' });
                 }
 
                 // Check 10: Reading order
@@ -586,7 +586,7 @@
                 if (headings.length > 0) {
                   checks.push({ status: 'pass', category: 'Structure', title: headings.length + ' heading' + (headings.length !== 1 ? 's' : '') + ' found', description: 'Headings found: ' + headings.join(', ') + '. Verify they follow a logical hierarchy (Heading 1 > Heading 2 > Heading 3).' });
                 } else {
-                  checks.push({ status: 'fail', category: 'Structure', title: 'No headings found', description: 'Use built-in Heading styles (Heading 1, 2, 3) instead of just making text bold. Screen readers use headings to navigate — without them, users must read every word to find what they need.' });
+                  checks.push({ status: 'fail', category: 'Structure', title: 'No headings found', description: 'Use built-in Heading styles (Heading 1, 2, 3) instead of just making text bold. Screen readers use headings to navigate - without them, users must read every word to find what they need.' });
                 }
 
                 // Check lists
@@ -598,7 +598,7 @@
                 // Check tables
                 var tables = doc.querySelectorAll('tbl');
                 if (tables.length > 0) {
-                  checks.push({ status: 'warn', category: 'Tables', title: tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' found — verify header rows', description: 'Ensure each table has a designated header row (Table Properties > Row > Repeat as header row). Never use merged cells — they break screen reader navigation entirely.' });
+                  checks.push({ status: 'warn', category: 'Tables', title: tables.length + ' table' + (tables.length !== 1 ? 's' : '') + ' found - verify header rows', description: 'Ensure each table has a designated header row (Table Properties > Row > Repeat as header row). Never use merged cells - they break screen reader navigation entirely.' });
                 }
 
                 // Check images
@@ -606,7 +606,7 @@
                 var images = doc.querySelectorAll('imagedata');
                 var imgCount = drawings.length + images.length;
                 if (imgCount > 0) {
-                  checks.push({ status: 'warn', category: 'Images', title: imgCount + ' image' + (imgCount !== 1 ? 's' : '') + ' found — verify alt text', description: 'Right-click each image > Edit Alt Text. Provide a meaningful description for informative images. Mark decorative images as decorative.' });
+                  checks.push({ status: 'warn', category: 'Images', title: imgCount + ' image' + (imgCount !== 1 ? 's' : '') + ' found - verify alt text', description: 'Right-click each image > Edit Alt Text. Provide a meaningful description for informative images. Mark decorative images as decorative.' });
                 } else {
                   checks.push({ status: 'pass', category: 'Images', title: 'No images detected', description: 'No images found, so no alternative text is needed.' });
                 }
@@ -618,7 +618,7 @@
                 // Hyperlinks
                 var hyperlinks = doc.querySelectorAll('hyperlink');
                 if (hyperlinks.length > 0) {
-                  checks.push({ status: 'info', category: 'Links', title: hyperlinks.length + ' hyperlink' + (hyperlinks.length !== 1 ? 's' : '') + ' found', description: 'Ensure all links have descriptive text. Avoid "click here" or raw URLs as link text. Screen reader users often navigate by listing all links — descriptive text is essential.' });
+                  checks.push({ status: 'info', category: 'Links', title: hyperlinks.length + ' hyperlink' + (hyperlinks.length !== 1 ? 's' : '') + ' found', description: 'Ensure all links have descriptive text. Avoid "click here" or raw URLs as link text. Screen reader users often navigate by listing all links - descriptive text is essential.' });
                 }
               }));
             }
@@ -735,7 +735,7 @@
               }
 
               if (totalImages > 0) {
-                checks.push({ status: 'warn', category: 'Images', title: totalImages + ' image' + (totalImages !== 1 ? 's' : '') + ' found — verify alt text', description: 'Right-click each image > Edit Alt Text. Provide meaningful descriptions. Mark decorative images (logos, background graphics) as decorative.' });
+                checks.push({ status: 'warn', category: 'Images', title: totalImages + ' image' + (totalImages !== 1 ? 's' : '') + ' found - verify alt text', description: 'Right-click each image > Edit Alt Text. Provide meaningful descriptions. Mark decorative images (logos, background graphics) as decorative.' });
               } else {
                 checks.push({ status: 'pass', category: 'Images', title: 'No images detected', description: 'No images found in the slides.' });
               }

@@ -356,7 +356,7 @@ function generateRssFeed(posts) {
 '  <channel>\n' +
 '    <title>Akhilesh Malani - Accessibility Blog</title>\n' +
 '    <link>https://akhileshmalani.com</link>\n' +
-'    <description>Insights on digital accessibility from Akhilesh Malani — a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>\n' +
+'    <description>Insights on digital accessibility from Akhilesh Malani - a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>\n' +
 '    <language>en</language>\n' +
 '    <managingEditor>akhilesh.malani@gmail.com (Akhilesh Malani)</managingEditor>\n' +
 '    <lastBuildDate>' + new Date().toUTCString() + '</lastBuildDate>\n' +
@@ -474,7 +474,7 @@ function build() {
       JSON.stringify(latestPostData, null, 2),
       'utf8'
     );
-    console.log('[SOCIAL] Generated _latest-post.json — latest: "' + latestPost.title + '"');
+    console.log('[SOCIAL] Generated _latest-post.json - latest: "' + latestPost.title + '"');
   }
 
   console.log('\nBuild complete! Total blog posts: ' + allPosts.length);

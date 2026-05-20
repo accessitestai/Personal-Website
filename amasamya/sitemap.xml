@@ -4,8 +4,8 @@
   Lists every page on the subdomain that is intended to be indexable.
 
   Excluded by design:
-    /index.html  — the auth-walled application; emits <meta robots="noindex,nofollow">.
-    /auth.html   — the sign-in page; same noindex policy.
+    /index.html  - the auth-walled application; emits <meta robots="noindex,nofollow">.
+    /auth.html   - the sign-in page; same noindex policy.
 
   When adding a new public page, list it here, push, and re-submit the
   sitemap in Google Search Console (Sitemaps > Add a new sitemap).

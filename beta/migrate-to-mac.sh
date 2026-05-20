@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AMASAMYA — macOS migration script.
+# AMASAMYA - macOS migration script.
 #
 # Run from Terminal on a fresh MacBook Pro. Bootstraps Homebrew, Node,
 # Python, Git, generates an SSH key, copies it to the clipboard for
@@ -8,7 +8,7 @@
 #
 # This script is designed to be screen-reader-friendly:
 #   * Every step prints a clear "STEP N of 6 ..." banner.
-#   * No silent failures — set -e exits on the first error.
+#   * No silent failures - set -e exits on the first error.
 #   * Final line is exactly "MIGRATION COMPLETE" or "MIGRATION FAILED"
 #     so you can read the last line with VoiceOver and know the
 #     outcome at a glance.
@@ -30,13 +30,13 @@ GIT_EMAIL="akhilesh.malani@gmail.com"
 step() {
   echo ""
   echo "================================================================"
-  echo "STEP $1 of 6 — $2"
+  echo "STEP $1 of 6 - $2"
   echo "================================================================"
   echo ""
 }
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 1 — Homebrew
+# STEP 1 - Homebrew
 # ─────────────────────────────────────────────────────────────────
 step 1 "Installing Homebrew (the package manager macOS doesn't ship)"
 
@@ -55,14 +55,14 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 2 — System tooling: Git, Node 20, Python 3.12
+# STEP 2 - System tooling: Git, Node 20, Python 3.12
 # ─────────────────────────────────────────────────────────────────
 step 2 "Installing Git, Node, and Python via Homebrew"
 brew install git node@20 python@3.12 || true   # idempotent
 brew link --overwrite node@20 2>/dev/null || true
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 3 — Git identity
+# STEP 3 - Git identity
 # ─────────────────────────────────────────────────────────────────
 step 3 "Configuring git identity"
 git config --global user.email "${GIT_EMAIL}"
@@ -71,7 +71,7 @@ git config --global init.defaultBranch main
 echo "git identity set to ${GIT_EMAIL}"
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 4 — SSH key for GitHub
+# STEP 4 - SSH key for GitHub
 # ─────────────────────────────────────────────────────────────────
 step 4 "Generating an SSH key and copying it to your clipboard"
 
@@ -87,7 +87,7 @@ pbcopy < "${HOME}/.ssh/id_ed25519.pub"
 
 cat <<'EOF'
 
-ACTION REQUIRED — please follow these steps now:
+ACTION REQUIRED - please follow these steps now:
 
   1. Press Cmd+Space to open Spotlight.
   2. Type Safari and press Return.
@@ -112,7 +112,7 @@ echo ""
 echo "Testing GitHub SSH connection..."
 # Add github.com to known_hosts so the test doesn't prompt for confirmation.
 ssh-keyscan github.com >> "${HOME}/.ssh/known_hosts" 2>/dev/null || true
-# `ssh -T git@github.com` returns exit code 1 even on success — we
+# `ssh -T git@github.com` returns exit code 1 even on success - we
 # detect success by the greeting in the output instead.
 if ssh -T -o StrictHostKeyChecking=accept-new git@github.com 2>&1 | grep -q "successfully authenticated"; then
   echo "GitHub SSH connection verified."
@@ -129,7 +129,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 5 — Clone the repo
+# STEP 5 - Clone the repo
 # ─────────────────────────────────────────────────────────────────
 step 5 "Cloning the AMASAMYA repository"
 
@@ -148,7 +148,7 @@ echo "Repo is at: ${TARGET_DIR}"
 git log --oneline -3
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 6 — Project dependencies
+# STEP 6 - Project dependencies
 # ─────────────────────────────────────────────────────────────────
 step 6 "Installing project dependencies (Node, Playwright browser, Python)"
 

@@ -1,4 +1,4 @@
-# AMASAMYA Beta — Tester Brief
+# AMASAMYA Beta - Tester Brief
 
 Thank you for agreeing to test AMASAMYA. This page tells you everything
 you need before you start. Reading time: ~3 minutes.
@@ -8,7 +8,7 @@ you need before you start. Reading time: ~3 minutes.
 AMASAMYA is a web-based accessibility audit platform that runs WCAG 2.2
 checks on:
 - Live web pages (paste a URL, get findings).
-- Documents you upload — PDF, Word (DOCX), PowerPoint (PPTX), Excel
+- Documents you upload - PDF, Word (DOCX), PowerPoint (PPTX), Excel
   (XLSX), EPUB, OpenDocument (ODT/ODS/ODP), and legacy `.doc`.
 - Mobile apps (structured manual checklist for iOS/Android/WearOS).
 
@@ -52,41 +52,41 @@ When you install AMASAMYA from the Chrome Web Store, Chrome may show a
 dialog titled "Proceed with caution" that says the extension is not
 trusted by Enhanced Safe Browsing. This is normal for newly-approved
 extensions and means only that the extension has not yet accumulated
-install history — it is not a security concern. Click **Continue to
+install history - it is not a security concern. Click **Continue to
 install**.
 
 Chrome will then show a second dialog asking you to confirm two
 permissions. Click **Add extension** to complete the installation. The
 AMASAMYA toolbar icon will appear in Chrome's top-right area.
 
-## What to test — suggested 30-minute path
+## What to test - suggested 30-minute path
 
 Pick a path based on what you do day-to-day. You don't need to do all of
 it.
 
-### Path 1 — Web audit (10 min)
+### Path 1 - Web audit (10 min)
 
 1. Open [https://amasamya.akhileshmalani.com](https://amasamya.akhileshmalani.com).
 2. Sign in with Google, or set up a PIN.
 3. Go to the **Web Audit** tab.
 4. Paste a URL of a site you know well. Run the audit.
 5. When findings come back, navigate them with your screen reader.
-6. Pick one Fail and one Warning — read the "How to fix" hint and the
+6. Pick one Fail and one Warning - read the "How to fix" hint and the
    linked reference. Did they help?
 
-### Path 2 — Document audit (10 min)
+### Path 2 - Document audit (10 min)
 
 1. Sign in.
 2. Open the **Documents** tab.
 3. Upload any PDF, Word document, or PowerPoint deck you have lying
-   around — preferably one you know has accessibility issues.
+   around - preferably one you know has accessibility issues.
 4. Read through the findings list.
 5. Tell us: are the findings format-appropriate? Are the "How to fix"
    hints actionable?
 
-### Path 3 — Vision AI features (10 min, optional)
+### Path 3 - Vision AI features (10 min, optional)
 
-These features need an OpenAI or Anthropic API key — your own.
+These features need an OpenAI or Anthropic API key - your own.
 We never see your key.
 
 1. Open **AI Settings** tab.
@@ -108,12 +108,12 @@ We never see your key.
 
 ## How to send feedback
 
-Three options — pick whichever is easier:
+Three options - pick whichever is easier:
 
 1. **Form** (10 minutes): [link to feedback form]
 2. **Email**: reply to the message that brought you here. Free-form is
    fine.
-3. **30-min Zoom call**: book a slot at [calendly link] — we'll do the
+3. **30-min Zoom call**: book a slot at [calendly link] - we'll do the
    testing together, no prep needed.
 
 ## What happens after
@@ -125,7 +125,7 @@ your feedback.
 
 If you want to be credited publicly on the contributors page, we'll
 include your name and a link of your choosing (LinkedIn, blog, mastodon,
-nothing). If you'd rather stay anonymous, that's the default — say so
+nothing). If you'd rather stay anonymous, that's the default - say so
 explicitly only if you want public credit.
 
 ## Questions before you start
@@ -133,4 +133,4 @@ explicitly only if you want public credit.
 Reply to the email that brought you here, or message
 [YOUR_EMAIL_OR_HANDLE]. I usually reply same day.
 
-— Akhilesh Malani, AMASAMYA
+- Akhilesh Malani, AMASAMYA

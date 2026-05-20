@@ -15,7 +15,7 @@ test.describe('Web Screen Reader', () => {
     await page.waitForLoadState('networkidle');
     // Activate the screen reader directly so the toggle state is deterministic.
     await page.evaluate(() => window._wsrScreenReader.activate());
-    // Condition-based wait — the intro/auto-land sequence finishes when
+    // Condition-based wait - the intro/auto-land sequence finishes when
     // the tree has been built and the cursor is non-negative. Replaces a
     // 1.5s timeout that flaked under CI load.
     await page.waitForFunction(() => {

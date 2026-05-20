@@ -4,13 +4,13 @@ Prepared for Mujtaba, May 2026.
 
 This is a one-page template that converts a single AMASAMYA finding into a defect ticket your engineering team can act on. The template works in Jira, GitHub Issues, Azure DevOps, or any other tracker. Total reading time: about five minutes.
 
-## The template — six fields
+## The template - six fields
 
 Every accessibility ticket has the same six fields. Copying the structure makes triage easier for the engineering team because they always know where to look.
 
-**1. Title.** One sentence. Names the WCAG criterion, the element, and the symptom. Example: "WCAG 1.1.1 — search input has no accessible name on the homepage".
+**1. Title.** One sentence. Names the WCAG criterion, the element, and the symptom. Example: "WCAG 1.1.1 - search input has no accessible name on the homepage".
 
-**2. WCAG reference.** The exact criterion and conformance level, plus a link to the W3C technique page. Example: `WCAG 2.2 SC 1.1.1 Non-text Content (Level A) — https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html`.
+**2. WCAG reference.** The exact criterion and conformance level, plus a link to the W3C technique page. Example: `WCAG 2.2 SC 1.1.1 Non-text Content (Level A) - https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html`.
 
 **3. Severity.** Critical, Serious, Moderate, or Minor, taken straight from the AMASAMYA finding.
 
@@ -44,7 +44,7 @@ How to Fix: Add <label for="">, aria-label, or aria-labelledby.
 
 The engineering ticket for this becomes:
 
-> **Title:** WCAG 1.3.1 / 3.3.2 — main search input on the homepage is unlabelled
+> **Title:** WCAG 1.3.1 / 3.3.2 - main search input on the homepage is unlabelled
 >
 > **WCAG reference:** WCAG 2.2 SC 1.3.1 Info and Relationships (Level A) plus SC 3.3.2 Labels or Instructions (Level A). W3C technique: https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html and https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html
 >
@@ -52,7 +52,7 @@ The engineering ticket for this becomes:
 >
 > **Where to find it:** Indian Overseas Bank net banking homepage, on element `<input class="nw1UBF v1zwn25">` near the top of the page. The element has placeholder text "Search for Products, Brands and More" but no associated label.
 >
-> **What is wrong:** The homepage's main search input has no associated `<label>` element, no `aria-label` attribute, and no `aria-labelledby` reference. Placeholder text is not a substitute for a label — screen readers may or may not announce placeholder text depending on the browser and the user's verbosity settings, and the placeholder disappears when the user begins typing, leaving them with no context. NVDA tab navigation announces this field as "edit" only.
+> **What is wrong:** The homepage's main search input has no associated `<label>` element, no `aria-label` attribute, and no `aria-labelledby` reference. Placeholder text is not a substitute for a label - screen readers may or may not announce placeholder text depending on the browser and the user's verbosity settings, and the placeholder disappears when the user begins typing, leaving them with no context. NVDA tab navigation announces this field as "edit" only.
 >
 > **Acceptance criteria:**
 > - The input has either a visible `<label for="search-input">Search</label>` element preceding it, or an `aria-label="Search"` attribute on the input itself. A visible label is preferred for low-vision users and is consistent with general usability practice.
@@ -68,12 +68,12 @@ It does not include screenshots. Screen reader users do not produce or consume s
 
 It does not include code. The engineering team's job is to write the fix. Your job is to specify the defect clearly enough that they cannot fix the wrong thing. Suggested code in a ticket sometimes helps and sometimes traps the engineer into a specific solution that is not optimal for their codebase.
 
-It does not include automated-tool screenshots. The AMASAMYA finding ID is sufficient provenance — anyone who wants to verify can re-run the audit. Pasting the AMASAMYA report into a ticket as a screenshot is overkill.
+It does not include automated-tool screenshots. The AMASAMYA finding ID is sufficient provenance - anyone who wants to verify can re-run the audit. Pasting the AMASAMYA report into a ticket as a screenshot is overkill.
 
 ## A small habit that compounds
 
-When you triage a batch of AMASAMYA findings, group them by Engine first. All the Images-engine findings become one batch, all the Forms-engine findings another. Often the same root cause is producing multiple findings — fix the design-system component once, and ten tickets become one ticket with ten acceptance criteria. Your engineering team will appreciate this; it is the difference between forty tickets in their backlog and four.
+When you triage a batch of AMASAMYA findings, group them by Engine first. All the Images-engine findings become one batch, all the Forms-engine findings another. Often the same root cause is producing multiple findings - fix the design-system component once, and ten tickets become one ticket with ten acceptance criteria. Your engineering team will appreciate this; it is the difference between forty tickets in their backlog and four.
 
 If you find yourself unable to group, that is also fine. Some engineering teams want one ticket per defect. Adopt whatever convention your team already uses.
 
-— Akhilesh Malani
+- Akhilesh Malani

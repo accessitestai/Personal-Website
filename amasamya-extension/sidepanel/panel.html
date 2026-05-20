@@ -17,7 +17,7 @@
 <header role="banner">
   <div class="header-bar">
     <h1>AMASAMYA</h1>
-    <span class="version">v3.0</span>
+    <span class="version">v3.4</span>
   </div>
   <p id="page-info" class="page-info">Waiting for audit…</p>
 </header>
@@ -55,11 +55,11 @@
     <section aria-labelledby="summary-heading">
       <h2 id="summary-heading">Summary</h2>
       <div id="summary-cards" class="summary-cards" role="region" aria-label="Finding counts">
-        <div class="card"><span class="count count-fail" id="count-fail">—</span><span class="label">Failures</span></div>
-        <div class="card"><span class="count count-warn" id="count-warn">—</span><span class="label">Warnings</span></div>
-        <div class="card"><span class="count count-pass" id="count-pass">—</span><span class="label">Passes</span></div>
-        <div class="card"><span class="count count-info" id="count-info">—</span><span class="label">Info</span></div>
-        <div class="card"><span class="count count-total" id="count-total">—</span><span class="label">Total</span></div>
+        <div class="card"><span class="count count-fail" id="count-fail">-</span><span class="label">Failures</span></div>
+        <div class="card"><span class="count count-warn" id="count-warn">-</span><span class="label">Warnings</span></div>
+        <div class="card"><span class="count count-pass" id="count-pass">-</span><span class="label">Passes</span></div>
+        <div class="card"><span class="count count-info" id="count-info">-</span><span class="label">Info</span></div>
+        <div class="card"><span class="count count-total" id="count-total">-</span><span class="label">Total</span></div>
       </div>
       <div class="severity-row" role="region" aria-label="Severity breakdown">
         <span class="sev-badge sev-critical"><span id="sev-critical">0</span> Critical</span>
@@ -128,7 +128,7 @@
         <button id="export-html"       type="button" class="btn" disabled>HTML</button>
         <button id="export-csv"        type="button" class="btn" disabled>CSV</button>
         <button id="export-text"       type="button" class="btn" disabled>Text</button>
-        <button id="export-sarif"      type="button" class="btn" disabled title="SARIF 2.1.0 — for GitHub Code Scanning / CI">SARIF</button>
+        <button id="export-sarif"      type="button" class="btn" disabled title="SARIF 2.1.0 - for GitHub Code Scanning / CI">SARIF</button>
         <button id="export-annotated"  type="button" class="btn btn-screenshot" disabled title="Annotated PNG screenshot with numbered issue boxes">📸 Screenshot</button>
       </div>
     </section>
@@ -189,7 +189,7 @@
       <!-- Results -->
       <div id="fn-results-wrap" hidden>
         <h3 id="fn-results-heading" class="results-subheading">
-          Focus Audit Results — <span id="fn-page-title"></span>
+          Focus Audit Results - <span id="fn-page-title"></span>
         </h3>
         <div id="fn-summary-strip" class="fn-summary-strip" role="region" aria-label="Focus audit summary">
           <span id="fn-count-pass"  class="fn-badge fn-pass">0 Pass</span>
@@ -252,7 +252,7 @@
       <!-- Results -->
       <div id="vla-results-wrap" hidden>
         <h3 id="vla-results-heading" class="results-subheading">
-          Layout Audit Results — <span id="vla-page-title"></span>
+          Layout Audit Results - <span id="vla-page-title"></span>
         </h3>
         <div id="vla-breakpoints-container" class="vla-bps">
           <!-- Populated by JS: one card per breakpoint -->
@@ -268,7 +268,7 @@
       <p class="section-desc">
         Monitors the active page in real time using a MutationObserver. Detects dynamic
         content additions, ARIA state changes, dialog appearances, and hidden-attribute
-        toggles — then checks whether each change is correctly surfaced to assistive
+        toggles - then checks whether each change is correctly surfaced to assistive
         technology via live regions or focus management. Covers WCAG SC 4.1.3 (Status
         Messages) and SC 2.4.3 (Focus Order).
       </p>
@@ -294,7 +294,7 @@
       <!-- Results -->
       <div id="scw-results-wrap" hidden>
         <h3 id="scw-results-heading" class="results-subheading">
-          State Change Events —
+          State Change Events -
           <span id="scw-event-count">0</span> detected
         </h3>
         <div id="scw-summary-strip" class="fn-summary-strip" role="region"
@@ -344,11 +344,11 @@
         <div class="radio-group">
           <label class="radio-label">
             <input type="radio" name="vision-provider" id="provider-gemini" value="gemini" checked>
-            Google Gemini (free tier — easiest to set up)
+            Google Gemini (free tier - easiest to set up)
           </label>
           <label class="radio-label">
             <input type="radio" name="vision-provider" id="provider-anthropic" value="anthropic">
-            Anthropic (Claude — highest quality)
+            Anthropic (Claude - highest quality)
           </label>
           <label class="radio-label">
             <input type="radio" name="vision-provider" id="provider-openai" value="openai">
@@ -398,7 +398,7 @@
     <section aria-labelledby="about-heading">
       <h2 id="about-heading">About</h2>
       <p class="section-desc">
-        AMASAMYA v3.0 — Built by Akhilesh Malani, Accessibility Architect &amp;
+        AMASAMYA v3.4 - Built by Akhilesh Malani, Accessibility Architect &amp;
         Digital Inclusion Strategist.<br>
         <a href="https://amasamya.akhileshmalani.com" target="_blank" rel="noopener">
           AMASAMYA.akhileshmalani.com
@@ -411,7 +411,7 @@
 </main>
 
 <footer role="contentinfo">
-  <p>AMASAMYA v3.0 — Private and Confidential</p>
+  <p>AMASAMYA v3.4 - Private and Confidential</p>
 </footer>
 
 <script src="panel.js"></script>

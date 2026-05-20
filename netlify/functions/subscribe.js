@@ -1,5 +1,5 @@
 /**
- * subscribe.js — AMASAMYA email-capture
+ * subscribe.js - AMASAMYA email-capture
  *
  * Accepts an email address from the public checker's email form
  * and either forwards it to ConvertKit / Buttondown (if API env
@@ -10,7 +10,7 @@
  * Body:      { email, source }
  * Response:  { ok: true, provider }
  *
- * Env vars (all optional — first match wins):
+ * Env vars (all optional - first match wins):
  *   CONVERTKIT_API_KEY + CONVERTKIT_FORM_ID
  *     → subscribes to a ConvertKit form
  *       https://app.convertkit.com/account_settings/advanced_settings  (API key)
@@ -20,14 +20,14 @@
  *     → subscribes to Buttondown. Get it at https://buttondown.com/settings/programming
  *
  * If no env vars are set, the email is logged and a friendly "ok"
- * is returned — so the form is never broken in front of a user,
+ * is returned - so the form is never broken in front of a user,
  * and you can retrieve the emails from Netlify's Function logs
  * until you decide on a vendor.
  */
 
 'use strict';
 
-/* Basic email sanity check — RFC-complete validation isn't worth
+/* Basic email sanity check - RFC-complete validation isn't worth
    it for a signup form. This catches the obvious typos. */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -76,7 +76,7 @@ async function sendToButtondown(email, source) {
       tags: source ? [source] : undefined
     })
   });
-  /* Buttondown returns 201 on new, 400 if already subscribed — treat both as success. */
+  /* Buttondown returns 201 on new, 400 if already subscribed - treat both as success. */
   if (!res.ok && res.status !== 400) throw new Error('Buttondown HTTP ' + res.status);
   return 'buttondown';
 }
@@ -107,6 +107,6 @@ exports.handler = async function (event) {
   }
 
   /* Fallback: log and succeed. Emails visible in Netlify Function log. */
-  console.log('[subscribe] No provider configured — captured email:', email, 'source:', source);
+  console.log('[subscribe] No provider configured - captured email:', email, 'source:', source);
   return json(200, { ok: true, provider: 'log' });
 };

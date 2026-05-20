@@ -44,7 +44,7 @@
     .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
     .share-btn--linkedin { background: #004471; color: #fff; } /* upgraded: was #0077b5 (4.87:1, AA pass / AAA fail) → #004471 (~9.5:1, AAA pass). */
     .share-btn--linkedin:hover { background: #00355a; color: #fff; }
-    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA — white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
+    .share-btn--twitter { background: #000000; color: #fff; } /* fixed: WCAG 1.4.3 AA - white on #1da1f2 was 2.82:1 (FAIL). Black (X brand) is 21:1. */
     .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
     .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
     .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
@@ -130,11 +130,11 @@
       </header>
 
       <div class="blog-post-content">
-        <p>India has its own accessibility guidelines for government websites. They are called GIGW &mdash; Guidelines for Indian Government Websites. The latest version, GIGW 3.0, explicitly mandates that every government website must be accessible to people with disabilities. It is not a suggestion. It is a requirement.</p>
+        <p>India has its own accessibility guidelines for government websites. They are called GIGW - Guidelines for Indian Government Websites. The latest version, GIGW 3.0, explicitly mandates that every government website must be accessible to people with disabilities. It is not a suggestion. It is a requirement.</p>
 
         <p>And yet, as a blind citizen who depends on these websites to access public services, I can tell you with complete certainty: the vast majority of Indian government websites do not follow their own guidelines.</p>
 
-        <p>The irony is difficult to overstate. The same government that published these accessibility standards, the same government that signed the UN Convention on the Rights of Persons with Disabilities, the same government that enacted the Rights of Persons with Disabilities Act in 2016 &mdash; this government runs websites that I cannot use independently. Every single day.</p>
+        <p>The irony is difficult to overstate. The same government that published these accessibility standards, the same government that signed the UN Convention on the Rights of Persons with Disabilities, the same government that enacted the Rights of Persons with Disabilities Act in 2016 - this government runs websites that I cannot use independently. Every single day.</p>
 
         <h2>What Is GIGW 3.0?</h2>
 
@@ -143,7 +143,7 @@
         <p>GIGW 3.0 covers a wide range of requirements:</p>
 
         <ul>
-          <li>All content must be perceivable, operable, understandable, and robust &mdash; the four WCAG principles</li>
+          <li>All content must be perceivable, operable, understandable, and robust - the four WCAG principles</li>
           <li>Documents published on government websites must be in accessible formats</li>
           <li>Forms must be properly labelled and navigable by keyboard</li>
           <li>Multimedia content must have alternatives (captions, transcripts, audio descriptions)</li>
@@ -155,25 +155,25 @@
 
         <h2>What I Actually Find When I Use Government Websites</h2>
 
-        <p>I have been working in digital accessibility for over sixteen years. I use a screen reader for every interaction I have with a computer or phone. When I visit a government website to do something as routine as downloading a certificate, checking a policy document, or filing a grievance, here is what I encounter &mdash; not occasionally, but consistently.</p>
+        <p>I have been working in digital accessibility for over sixteen years. I use a screen reader for every interaction I have with a computer or phone. When I visit a government website to do something as routine as downloading a certificate, checking a policy document, or filing a grievance, here is what I encounter - not occasionally, but consistently.</p>
 
         <h3>Scanned PDFs That Are Invisible to Screen Readers</h3>
 
         <p>This is perhaps the most widespread and most damaging barrier. Government departments regularly upload documents as scanned image PDFs. These are photographs of paper. My screen reader sees a blank page. There is no text layer, no structure, no reading order. The document might as well not exist.</p>
 
-        <p>I am talking about circulars, gazette notifications, application forms, public notices &mdash; documents that citizens need to read and act upon. When these are scanned images, every blind or low-vision citizen in the country is excluded. GIGW 3.0 explicitly requires documents to be in accessible formats. This requirement is ignored on a massive scale.</p>
+        <p>I am talking about circulars, gazette notifications, application forms, public notices - documents that citizens need to read and act upon. When these are scanned images, every blind or low-vision citizen in the country is excluded. GIGW 3.0 explicitly requires documents to be in accessible formats. This requirement is ignored on a massive scale.</p>
 
         <h3>Forms Without Labels</h3>
 
         <p>Government websites are full of forms. Apply for a certificate. Register a complaint. File a tax return. Submit a grievance. These forms routinely have input fields with no associated labels. My screen reader lands on a text box and announces "edit text" or "blank." I have no idea whether I am supposed to type my name, my address, my Aadhaar number, or something else entirely.</p>
 
-        <p>Sometimes visual labels exist on screen, but they are not programmatically linked to the input fields. The sighted user sees "Father's Name" next to the box. I hear nothing. The fix is straightforward &mdash; a proper <code>&lt;label&gt;</code> element with a <code>for</code> attribute. It takes seconds to implement. It is absent on form after form after form.</p>
+        <p>Sometimes visual labels exist on screen, but they are not programmatically linked to the input fields. The sighted user sees "Father's Name" next to the box. I hear nothing. The fix is straightforward - a proper <code>&lt;label&gt;</code> element with a <code>for</code> attribute. It takes seconds to implement. It is absent on form after form after form.</p>
 
         <h3>CAPTCHAs With No Audio Alternative</h3>
 
         <p>This one is personal. CAPTCHAs are the gatekeepers of government services. Want to log in? CAPTCHA. Want to download a document? CAPTCHA. Want to check the status of your application? CAPTCHA.</p>
 
-        <p>Visual CAPTCHAs are, by definition, inaccessible to blind users. GIGW 3.0 requires an accessible alternative &mdash; an audio CAPTCHA, a logical question, or another mechanism that does not rely on vision. On most government portals I have tested, there is no such alternative. The CAPTCHA is a distorted image of text, and I am simply locked out.</p>
+        <p>Visual CAPTCHAs are, by definition, inaccessible to blind users. GIGW 3.0 requires an accessible alternative - an audio CAPTCHA, a logical question, or another mechanism that does not rely on vision. On most government portals I have tested, there is no such alternative. The CAPTCHA is a distorted image of text, and I am simply locked out.</p>
 
         <p>I have had to call family members to read CAPTCHAs to me over the phone so I can access services that are supposed to be my right as a citizen. This is not accessibility. This is exclusion with extra steps.</p>
 
@@ -187,23 +187,23 @@
 
         <p>HTML tables have a specific purpose: presenting tabular data with row and column relationships. Government websites frequently use tables to control the visual layout of pages. My screen reader interprets these as data tables and announces "table with 15 rows and 4 columns" when there is no actual data relationship at all. This creates a confusing, disorienting experience where I hear row and column announcements for what is simply a page layout.</p>
 
-        <p>Conversely, when actual data tables are used &mdash; budget figures, statistical reports, comparison charts &mdash; they often lack proper header markup. I hear a stream of numbers with no context for what each number represents.</p>
+        <p>Conversely, when actual data tables are used - budget figures, statistical reports, comparison charts - they often lack proper header markup. I hear a stream of numbers with no context for what each number represents.</p>
 
         <h3>No Skip Navigation</h3>
 
-        <p>Skip navigation links allow keyboard and screen reader users to bypass repetitive content &mdash; typically the header and navigation menu &mdash; and jump directly to the main content. This is one of the simplest accessibility features to implement. A single hidden link at the top of the page.</p>
+        <p>Skip navigation links allow keyboard and screen reader users to bypass repetitive content - typically the header and navigation menu - and jump directly to the main content. This is one of the simplest accessibility features to implement. A single hidden link at the top of the page.</p>
 
         <p>On many government websites, this link does not exist. Every time I visit a new page, I must tab through the entire navigation menu, every link in the header, every dropdown item, before I reach the content I actually came for. On sites with extensive mega-menus, this can mean pressing Tab fifty or sixty times before reaching the first line of actual content.</p>
 
         <h3>Poor Mobile Responsiveness</h3>
 
-        <p>India's Digital India initiative rightly emphasises mobile access. A significant portion of Indian citizens access the internet primarily through smartphones. Yet many government websites are not responsive. Content overflows the viewport, buttons are too small to tap, and zoom is often disabled &mdash; a direct violation of WCAG 2.1's reflow and resize requirements.</p>
+        <p>India's Digital India initiative rightly emphasises mobile access. A significant portion of Indian citizens access the internet primarily through smartphones. Yet many government websites are not responsive. Content overflows the viewport, buttons are too small to tap, and zoom is often disabled - a direct violation of WCAG 2.1's reflow and resize requirements.</p>
 
         <p>For users who rely on screen magnification on mobile devices, a non-responsive government website is effectively unusable.</p>
 
         <h2>The Accessibility Widget Trap</h2>
 
-        <p>In recent years, I have noticed a growing trend on Indian government websites: the accessibility overlay widget. A small icon, usually in the corner of the page, that claims to offer accessibility features &mdash; text resizing, contrast adjustment, screen reader compatibility, and so on.</p>
+        <p>In recent years, I have noticed a growing trend on Indian government websites: the accessibility overlay widget. A small icon, usually in the corner of the page, that claims to offer accessibility features - text resizing, contrast adjustment, screen reader compatibility, and so on.</p>
 
         <p>I need to be direct about this: <strong>accessibility overlay widgets do not make a website accessible.</strong> They are a superficial band-aid that creates an illusion of compliance while leaving the underlying barriers untouched.</p>
 
@@ -224,7 +224,7 @@
 
         <h2>The Certificate Paradox</h2>
 
-        <p>There is a particular irony that I find difficult to articulate without frustration. The government of India issues disability certificates through its various portals and health departments. These certificates are essential documents &mdash; they unlock access to reservations in education and employment, travel concessions, assistive device subsidies, pension schemes, and other entitlements under the RPwD Act.</p>
+        <p>There is a particular irony that I find difficult to articulate without frustration. The government of India issues disability certificates through its various portals and health departments. These certificates are essential documents - they unlock access to reservations in education and employment, travel concessions, assistive device subsidies, pension schemes, and other entitlements under the RPwD Act.</p>
 
         <p>The websites where a person with a disability must go to apply for, check the status of, or download their disability certificate are themselves inaccessible.</p>
 
@@ -252,7 +252,7 @@
 
         <h3>Include People with Disabilities in Usability Testing</h3>
 
-        <p>Accessibility is not something you can fully evaluate from the outside. You need people who use screen readers, people who navigate by keyboard, people who use switch devices, people who rely on magnification &mdash; actually testing the product during development. Not as an afterthought during a final review, but as a regular part of the design and QA cycle. We find barriers that no automated tool and no sighted tester will catch, because we experience them firsthand.</p>
+        <p>Accessibility is not something you can fully evaluate from the outside. You need people who use screen readers, people who navigate by keyboard, people who use switch devices, people who rely on magnification - actually testing the product during development. Not as an afterthought during a final review, but as a regular part of the design and QA cycle. We find barriers that no automated tool and no sighted tester will catch, because we experience them firsthand.</p>
 
         <h3>Stop Relying on Overlay Widgets</h3>
 
@@ -264,13 +264,13 @@
 
         <h3>Procure Accessible Technology from the Start</h3>
 
-        <p>Accessibility is far cheaper to build in from the beginning than to retrofit. Government IT procurement policies must require accessibility conformance as a mandatory evaluation criterion &mdash; not a nice-to-have checkbox at the end, but a disqualifying factor if absent. When government agencies hire vendors to build websites and applications, the RFP must specify GIGW 3.0 and WCAG 2.1 AA conformance as deliverables, tested and verified before final payment.</p>
+        <p>Accessibility is far cheaper to build in from the beginning than to retrofit. Government IT procurement policies must require accessibility conformance as a mandatory evaluation criterion - not a nice-to-have checkbox at the end, but a disqualifying factor if absent. When government agencies hire vendors to build websites and applications, the RFP must specify GIGW 3.0 and WCAG 2.1 AA conformance as deliverables, tested and verified before final payment.</p>
 
         <h2>A Right, Not a Favour</h2>
 
         <p>I want to end with something I feel strongly about, because the data and the technical arguments, while important, can obscure the human reality of this situation.</p>
 
-        <p>India has over 26 million people with disabilities, according to the 2011 Census &mdash; and the actual number is widely acknowledged to be significantly higher. Every one of us is a citizen. Every one of us has the same right to access government services, government information, and government processes as any other citizen.</p>
+        <p>India has over 26 million people with disabilities, according to the 2011 Census - and the actual number is widely acknowledged to be significantly higher. Every one of us is a citizen. Every one of us has the same right to access government services, government information, and government processes as any other citizen.</p>
 
         <p>When a government website is inaccessible, it is not an inconvenience. It is a denial of rights. It forces me to depend on someone else to do something I am fully capable of doing independently, if only the technology were built correctly.</p>
 

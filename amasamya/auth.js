@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   AMASAMYA — Firebase Authentication (auth.js)
+   AMASAMYA - Firebase Authentication (auth.js)
    Providers: Google · Email / Password
    Post-login destination: ./index.html (main audit platform)
    WCAG 2.2 AA compliant interactions.
@@ -84,7 +84,7 @@
       'auth/invalid-credential':       'Incorrect email or password. Please try again.',
       'auth/weak-password':            'Password must be at least 8 characters.',
       'auth/too-many-requests':        'Too many sign-in attempts. Please wait a moment and try again.',
-      'auth/popup-closed-by-user':     'Sign-in cancelled — the pop-up was closed.',
+      'auth/popup-closed-by-user':     'Sign-in cancelled - the pop-up was closed.',
       'auth/cancelled-popup-request':  'Sign-in cancelled.',
       'auth/popup-blocked':            'Your browser blocked the sign-in pop-up. Please allow pop-ups for this site and try again.',
       'auth/account-exists-with-different-credential': 'An account with that email exists, but it uses a different sign-in method. Try another provider.',
@@ -95,7 +95,7 @@
       'auth/invalid-action-code':      'This link is invalid. It may have already been used.',
     };
 
-    /* Firebase Password Policy — extract the specific requirements from the raw message.
+    /* Firebase Password Policy - extract the specific requirements from the raw message.
        Firebase returns messages like:
          "Firebase: Password does not meet requirements [Password must contain an upper case character, Password must contain a numeric character]. (auth/password-does-not-meet-requirements)." */
     if (code === 'auth/password-does-not-meet-requirements') {
@@ -110,7 +110,7 @@
   }
 
   /* ════════════════════════════════════════════════════
-     GUARD — Already signed in → go straight to app
+     GUARD - Already signed in → go straight to app
   ════════════════════════════════════════════════════ */
   if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
     setStatus('Authentication service unavailable. Please refresh the page.', true);
@@ -124,7 +124,7 @@
   }
 
   /* ════════════════════════════════════════════════════
-     TAB SWITCHING — Sign In / Create Account
+     TAB SWITCHING - Sign In / Create Account
   ════════════════════════════════════════════════════ */
   var tabBtns   = Array.from(document.querySelectorAll('.auth-tab'));
   var panelMap  = {
@@ -225,7 +225,7 @@
   }
 
   /* ════════════════════════════════════════════════════
-     EMAIL / PASSWORD — SIGN IN
+     EMAIL / PASSWORD - SIGN IN
   ════════════════════════════════════════════════════ */
   var signinForm = document.getElementById('signin-form');
   if (signinForm) {
@@ -274,7 +274,7 @@
   }
 
   /* ════════════════════════════════════════════════════
-     EMAIL / PASSWORD — CREATE ACCOUNT
+     EMAIL / PASSWORD - CREATE ACCOUNT
   ════════════════════════════════════════════════════ */
   /* ────────────────────────────────────────────────────
      Live password-policy validation.
@@ -305,7 +305,7 @@
       var passed = rule.test(value);
       li.setAttribute('data-passed', passed ? 'true' : 'false');
       /* Icon is decorative; the text is what SR reads. Only add the
-         "Met: / Not met: " prefix once the user has started typing —
+         "Met: / Not met: " prefix once the user has started typing -
          before that every rule is trivially unmet, and prefixing all
          5 with "Not met" just adds noise on initial focus. */
       var state = li.querySelector('.rule-state');
@@ -324,7 +324,7 @@
       /* Clear any stale server error once the user starts typing again. */
       var errEl = document.getElementById('signup-pass-err');
       if (errEl && errEl.textContent) errEl.textContent = '';
-      /* Debounced live summary for screen readers — announces only
+      /* Debounced live summary for screen readers - announces only
          when the user pauses typing, to avoid per-keystroke spam. */
       if (announceTimer) clearTimeout(announceTimer);
       announceTimer = setTimeout(function () {
@@ -406,7 +406,7 @@
   }
 
   /* ════════════════════════════════════════════════════
-     CANCEL BUTTONS — leave the auth flow
+     CANCEL BUTTONS - leave the auth flow
   ════════════════════════════════════════════════════ */
   var CANCEL_DEST = 'https://akhileshmalani.com';
   function cancelAuth() {

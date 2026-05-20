@@ -1,10 +1,10 @@
-# Chrome Web Store Resubmission Checklist — AMASAMYA v3.1.0
+# Chrome Web Store Resubmission Checklist - AMASAMYA v3.4.0
 
 This is the complete list of things to do to clear the rejection that
 came after the AMA11Y → AMASAMYA rename. The repo side is already
 done (icons regenerated, screenshots regenerated, ZIP built clean).
 The remaining items are all on the **Chrome Web Store Developer
-Dashboard** — you have to do them by hand in the browser.
+Dashboard** - you have to do them by hand in the browser.
 
 Estimated time: **45–60 minutes**.
 
@@ -16,7 +16,7 @@ The rejection was almost certainly caused by **brand inconsistency
 across the listing**, not by a code problem. Specifically:
 
 1. **Extension runtime icons** (the small icon Chrome shows in the
-   toolbar and on the listing tile) still said **"A11Y"** — they were
+   toolbar and on the listing tile) still said **"A11Y"** - they were
    never updated when the brand changed. ✅ Fixed in this commit.
 2. **All 9 store-assets PNGs** (icons, marquee, small promo, 5
    screenshots) were rendered **before** the AMA11Y → AMASAMYA HTML
@@ -25,12 +25,12 @@ across the listing**, not by a code problem. Specifically:
    ✅ Regenerated in this commit.
 3. **The Dashboard's listing fields** (display name, description,
    privacy URL, screenshot uploads, marquee, small promo) need to be
-   re-saved by you. Chrome doesn't pick those up from the ZIP — they
+   re-saved by you. Chrome doesn't pick those up from the ZIP - they
    live on the Dashboard.
 
 ---
 
-## Step 1 — Upload the new ZIP
+## Step 1 - Upload the new ZIP
 
 1. Sign in to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole/).
 2. Open the AMASAMYA item.
@@ -41,14 +41,14 @@ across the listing**, not by a code problem. Specifically:
 
 If you see a validator error:
 
-- *"Manifest description too long"* — already verified at 131 chars
+- *"Manifest description too long"* - already verified at 131 chars
   (limit 132). If this fires, the validator counts something
   differently; trim one character.
-- *"Icon dimensions don't match"* — the new PNGs are exactly 16×16,
+- *"Icon dimensions don't match"* - the new PNGs are exactly 16×16,
   32×32, 48×48, 128×128. If the validator complains, re-render with
   `node amasamya-extension/icons/render-icons.js` and re-zip.
 
-## Step 2 — Update Store Listing fields
+## Step 2 - Update Store Listing fields
 
 Click **Store listing** in the left sidebar.
 
@@ -56,7 +56,7 @@ Click **Store listing** in the left sidebar.
 
 | Field | Value to paste |
 |---|---|
-| **Item name** | `AMASAMYA — Accessibility Audit Tool` |
+| **Item name** | `AMASAMYA - Accessibility Audit Tool` |
 | **Summary** (short description, 132 char max) | `Blind-first WCAG 2.2 audit tool with Vision AI modules: Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog.` |
 | **Description** (long description, 16 000 char max) | See `cws-listing-description.md` (next file in this folder). Paste the whole thing. |
 | **Category** | `Developer Tools` |
@@ -65,7 +65,7 @@ Click **Store listing** in the left sidebar.
 ### Graphic assets
 
 Upload all five from `store-assets/` (use the new files dated April 28
-or later — verify in Explorer that the file modified date is recent):
+or later - verify in Explorer that the file modified date is recent):
 
 | Slot | File to upload | Size | What it is |
 |---|---|---|---|
@@ -79,11 +79,11 @@ or later — verify in Explorer that the file modified date is recent):
 | **Screenshot 5** | `store-assets/ss5-settings.png` | 1280 × 800 | Settings & Vision AI configuration |
 
 **Critical**: delete any old screenshots in the slots first. The
-Dashboard does not auto-replace — uploading a new file with the same
+Dashboard does not auto-replace - uploading a new file with the same
 slot number adds it; you'll have two of the same slot if you don't
 delete first.
 
-## Step 3 — Privacy practices
+## Step 3 - Privacy practices
 
 Click **Privacy practices** in the left sidebar.
 
@@ -97,7 +97,7 @@ WCAG 2.2 accessibility compliance and reports findings to the user.
 ### Permissions justifications
 
 Each entry below pastes into the corresponding "Why this permission?"
-text box. Copy the whole block for that permission — reviewers want
+text box. Copy the whole block for that permission - reviewers want
 specific use-case sentences, not generic ones.
 
 **`activeTab`**
@@ -114,7 +114,7 @@ on.
 
 ```
 Used to inject the locally-bundled WCAG audit scripts into the active
-tab on user invocation. All audit logic ships inside the extension —
+tab on user invocation. All audit logic ships inside the extension -
 no remote code is fetched or executed. Required because Manifest V3
 removed the ability for content_scripts alone to do dynamic injection.
 ```
@@ -124,7 +124,7 @@ removed the ability for content_scripts alone to do dynamic injection.
 ```
 Used to display the audit results panel in the Chrome side panel
 instead of opening a new window. The side panel keeps results visible
-while the user inspects the audited page in the main viewport — a
+while the user inspects the audited page in the main viewport - a
 key affordance for blind users who need a stable focus context.
 ```
 
@@ -168,7 +168,7 @@ shows during the session, providing visible consent for every use.
 The whole purpose of an accessibility audit tool is that the user
 chooses which page to audit. Restricting host permissions to a fixed
 list would defeat the tool. The extension only ever reads or modifies
-the active tab on user invocation — no automated scraping, no
+the active tab on user invocation - no automated scraping, no
 background reading, no cross-origin data leakage. The privacy policy
 documents this scope precisely.
 ```
@@ -198,7 +198,7 @@ Tick under "Data usage":
 https://amasamya.akhileshmalani.com/privacy
 ```
 
-This URL is alive and accessible (verified by us — there are 200-OK
+This URL is alive and accessible (verified by us - there are 200-OK
 redirects from every plausible variant including the legacy
 `/AMA11Y/privacy*` paths in netlify.toml).
 
@@ -211,21 +211,21 @@ https://amasamya.akhileshmalani.com/amasamya/privacy.html
 
 That hits the canonical file with no redirect needed.
 
-## Step 4 — Distribution
+## Step 4 - Distribution
 
 Click **Distribution** in the left sidebar.
 
 - Visibility: **Public** (or **Unlisted** if you want to soft-launch
-  with only the people you share the direct URL with — recommended
+  with only the people you share the direct URL with - recommended
   for the first 1–2 weeks of beta).
 - Regions: pick the regions you want; default is "All regions".
 - Pricing: **Free**.
 
-## Step 5 — Submit for review
+## Step 5 - Submit for review
 
 1. Top-right of any page in the Dashboard, click **Submit for review**.
 2. Confirm the submission summary (Chrome shows a diff of what
-   changed since the last review — this should highlight the new ZIP
+   changed since the last review - this should highlight the new ZIP
    version, the new screenshots, and the new icon).
 3. Submit.
 
@@ -233,9 +233,9 @@ Typical first-review SLA: **1–3 business days**.
 Resubmission after fixes: **same or faster**, since reviewers see the
 delta and can compare against the prior rejection note.
 
-## Step 6 — While you wait
+## Step 6 - While you wait
 
-- Watch your developer email — that's where rejection / approval
+- Watch your developer email - that's where rejection / approval
   notes land. They do not appear in the Dashboard until ~2 hours
   after the email.
 - Don't make further changes until the review completes. Re-uploading
@@ -243,7 +243,7 @@ delta and can compare against the prior rejection note.
 - If approved: the listing goes live within 30 minutes of the
   approval email.
 - If rejected: the email cites the specific policy section. Reply to
-  it (do not just resubmit) — appeals get faster turnaround than
+  it (do not just resubmit) - appeals get faster turnaround than
   silent fixes-and-resubmits.
 
 ---
@@ -251,7 +251,7 @@ delta and can compare against the prior rejection note.
 ## Things I deliberately did NOT change in the manifest
 
 For transparency, here's what the manifest still requests and why
-each is justified — useful if a reviewer asks you to defend any of
+each is justified - useful if a reviewer asks you to defend any of
 these in a follow-up:
 
 - **`<all_urls>` host permissions**: An accessibility audit tool that
@@ -264,7 +264,7 @@ these in a follow-up:
   banner gives visible consent every time it's used, which is the
   correct UX safeguard for this permission.
 - **Manifest description at 131/132 chars**: One char under the
-  limit. Tight, but accurate — every word in the description names a
+  limit. Tight, but accurate - every word in the description names a
   shipped feature, no marketing fluff.
 
 ---
@@ -276,7 +276,7 @@ the rejection?"):
 
 | Change | Why |
 |---|---|
-| Extension runtime icons (16/32/48/128) re-rendered from new SVG sources that say "AMASAMYA" instead of "A11Y". | The old icons were never updated when the brand changed — this was almost certainly the inconsistency the reviewer flagged. |
+| Extension runtime icons (16/32/48/128) re-rendered from new SVG sources that say "AMASAMYA" instead of "A11Y". | The old icons were never updated when the brand changed - this was almost certainly the inconsistency the reviewer flagged. |
 | All 9 store-asset PNGs re-rendered from the AMASAMYA-era HTML (which already said "AMASAMYA" but the PNGs were rendered before that change). | Same root cause as above for the listing-side assets. |
 | Folder renamed `ama11y-extension/` → `amasamya-extension/`. | Internal cleanliness. Web Store doesn't see folder names but it eliminates a potential reviewer-confusing breadcrumb if they pull the source ZIP. |
 | Privacy policy URL handling tightened on the Netlify side: redirects added for every plausible URL variant (`/privacy`, `/privacy.html`, `/amasamya/privacy`, plus legacy `/ama11y/privacy*` and case-variant `/AMA11Y/*`). | Eliminates the "privacy URL inaccessible" rejection class entirely. |
@@ -285,4 +285,4 @@ the rejection?"):
 
 ---
 
-— Akhilesh Malani
+- Akhilesh Malani

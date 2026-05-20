@@ -1,22 +1,22 @@
-# AMASAMYA — One-Page Brief for Funders
+# AMASAMYA - One-Page Brief for Funders
 
 *Render as a single PDF, no logo header, plain typography. Anyone who
 wants more than one page is the wrong reader for this stage.*
 
 ---
 
-**AMASAMYA** — A blind-first WCAG 2.2 accessibility audit platform for
+**AMASAMYA** - A blind-first WCAG 2.2 accessibility audit platform for
 the web, documents, and mobile.
 
 [https://amasamya.akhileshmalani.com](https://amasamya.akhileshmalani.com) ·
-[CONTRIBUTORS.md] · [Chrome Web Store listing — pending]
+[CONTRIBUTORS.md] · [Chrome Web Store listing - pending]
 
 ## The problem
 
 The European Accessibility Act takes effect June 2025. ADA Title II
 applies to public-sector digital content. Section 508 is enforced
 across US federal contractors. Yet **most accessibility audit tools
-are built by sighted developers for sighted developers** — they're
+are built by sighted developers for sighted developers** - they're
 hard to use without a screen reader, they cover HTML well but documents
 poorly, and their findings are written in jargon that doesn't help a
 non-sighted developer fix the problem.
@@ -26,15 +26,15 @@ non-sighted developer fix the problem.
 AMASAMYA is a web-based audit platform with three engines and a Chrome
 extension:
 
-- **Web Audit** — runs 13 WCAG 2.2 engines on any URL the user provides.
-- **Document Audit** — parses and audits 8 file formats (PDF, DOCX,
+- **Web Audit** - runs 13 WCAG 2.2 engines on any URL the user provides.
+- **Document Audit** - parses and audits 8 file formats (PDF, DOCX,
   PPTX, XLSX, EPUB, ODT, ODS, ODP) with format-specific findings and
   step-by-step "How to fix" hints.
-- **Mobile Checklist** — structured manual-test workflow for iOS,
+- **Mobile Checklist** - structured manual-test workflow for iOS,
   Android, and WearOS.
-- **Vision AI integration** — optional Focus Indicator Narrator and
+- **Vision AI integration** - optional Focus Indicator Narrator and
   Visual Layout Auditor backed by GPT-4o or Claude (using the user's
-  own API key — keys never reach our servers).
+  own API key - keys never reach our servers).
 
 The entire UI is keyboard- and screen-reader-first. Every audit finding
 is paired with a specific remediation hint and at least one
@@ -53,7 +53,7 @@ authoritative reference link.
 
 ## What I'm raising
 
-**$[2,500 / 7,500 / 20,000]** — itemised:
+**$[2,500 / 7,500 / 20,000]** - itemised:
 
 | Item | Amount |
 |---|---|
@@ -64,7 +64,7 @@ authoritative reference link.
 
 I am the sole user of these funds. There is no team to pay.
 
-## Use of funds — milestones
+## Use of funds - milestones
 
 | Week | Deliverable |
 |---|---|
@@ -80,12 +80,12 @@ I am the sole user of these funds. There is no team to pay.
   upgrades are running through 2026.
 - EU Accessibility Act enforcement starts June 2025.
 - Vision AI (GPT-4o, Claude 4) makes affordable, accurate alt-text
-  description and layout analysis newly possible — AMASAMYA is among
+  description and layout analysis newly possible - AMASAMYA is among
   the first audit tools to integrate this directly.
 
 ## The founder
 
-**Akhilesh Malani** — accessibility architect, ~10 years in digital
+**Akhilesh Malani** - accessibility architect, ~10 years in digital
 inclusion strategy, previously [add 1–2 specific roles or projects].
 [link to LinkedIn or homepage]
 
@@ -103,5 +103,5 @@ If none of these fit, no need to reply. If any of them do, reply to
 this email and I'll send a short due-diligence packet (financials,
 test reports, deploy logs) within 24 hours.
 
-— Akhilesh Malani
+- Akhilesh Malani
 [your email] · [your phone, optional]

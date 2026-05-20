@@ -185,7 +185,7 @@
   var registerError = document.getElementById('register-error');
   var userNameEl = document.getElementById('library-user-name');
 
-  // Library UI only exists on index.html — bail out on other pages that share script.js
+  // Library UI only exists on index.html - bail out on other pages that share script.js
   // (checker.html, etc.) so bare references to the Firebase globals below never throw.
   if (!guestView || !pendingView || !contentView) return;
 
@@ -432,7 +432,7 @@
             } else if (doc.exists && !doc.data().approved) {
               showView('pending');
             } else if (retries > 0) {
-              // Document might not exist yet if just registered — retry after a short delay
+              // Document might not exist yet if just registered - retry after a short delay
               setTimeout(function () { checkApproval(retries - 1); }, 1500);
             } else {
               showView('pending');
@@ -834,7 +834,7 @@
   // Track the element that had focus before the help dialog opened
   var previousFocus = null;
 
-  // Create help dialog dynamically — role="dialog" on the inner dialog, not the overlay
+  // Create help dialog dynamically - role="dialog" on the inner dialog, not the overlay
   var helpHTML = '<div class="kbd-help-overlay" id="kbd-help">' +
     '<div class="kbd-help-dialog" role="dialog" aria-labelledby="kbd-help-title" aria-modal="true">' +
     '<h2 id="kbd-help-title" tabindex="-1">Keyboard Shortcuts</h2>' +
@@ -846,26 +846,26 @@
     '<li>Toggle Screen Reader: <kbd>Alt + 5</kbd></li>' +
     '<li>Accessibility Settings: <kbd>Alt + 0</kbd></li>' +
     '<li>Show this help: <kbd>?</kbd></li>' +
-    '<li>SR — Toggle (alternate): <kbd>Alt + Shift + R</kbd></li>' +
+    '<li>SR - Toggle (alternate): <kbd>Alt + Shift + R</kbd></li>' +
     '<li>Read Aloud (alternate): <kbd>Alt + Shift + A</kbd></li>' +
-    '<li>SR — Next / Prev element: <kbd>↓</kbd> / <kbd>↑</kbd></li>' +
-    '<li>SR — Activate element: <kbd>Enter</kbd></li>' +
-    '<li>SR — Pause / resume speech: <kbd>Space</kbd></li>' +
-    '<li>SR — Stop speech: <kbd>Ctrl</kbd></li>' +
-    '<li>SR — Deactivate: <kbd>Esc</kbd></li>' +
-    '<li>SR — Next heading: <kbd>H</kbd> (reverse: <kbd>Shift + H</kbd>)</li>' +
-    '<li>SR — Headings by level: <kbd>1</kbd>–<kbd>6</kbd></li>' +
-    '<li>SR — Next link: <kbd>K</kbd></li>' +
-    '<li>SR — Next button: <kbd>B</kbd></li>' +
-    '<li>SR — Next form field: <kbd>F</kbd></li>' +
-    '<li>SR — Next landmark: <kbd>D</kbd></li>' +
-    '<li>SR — Next list: <kbd>L</kbd></li>' +
-    '<li>SR — Next image: <kbd>I</kbd></li>' +
-    '<li>SR — Next table: <kbd>T</kbd></li>' +
-    '<li>SR — Table cell nav: <kbd>Ctrl + Alt + Arrows</kbd></li>' +
-    '<li>SR — Read from here: <kbd>C</kbd></li>' +
-    '<li>SR — Element list: <kbd>E</kbd></li>' +
-    '<li>SR — Help: <kbd>?</kbd> (inside SR mode)</li>' +
+    '<li>SR - Next / Prev element: <kbd>↓</kbd> / <kbd>↑</kbd></li>' +
+    '<li>SR - Activate element: <kbd>Enter</kbd></li>' +
+    '<li>SR - Pause / resume speech: <kbd>Space</kbd></li>' +
+    '<li>SR - Stop speech: <kbd>Ctrl</kbd></li>' +
+    '<li>SR - Deactivate: <kbd>Esc</kbd></li>' +
+    '<li>SR - Next heading: <kbd>H</kbd> (reverse: <kbd>Shift + H</kbd>)</li>' +
+    '<li>SR - Headings by level: <kbd>1</kbd>–<kbd>6</kbd></li>' +
+    '<li>SR - Next link: <kbd>K</kbd></li>' +
+    '<li>SR - Next button: <kbd>B</kbd></li>' +
+    '<li>SR - Next form field: <kbd>F</kbd></li>' +
+    '<li>SR - Next landmark: <kbd>D</kbd></li>' +
+    '<li>SR - Next list: <kbd>L</kbd></li>' +
+    '<li>SR - Next image: <kbd>I</kbd></li>' +
+    '<li>SR - Next table: <kbd>T</kbd></li>' +
+    '<li>SR - Table cell nav: <kbd>Ctrl + Alt + Arrows</kbd></li>' +
+    '<li>SR - Read from here: <kbd>C</kbd></li>' +
+    '<li>SR - Element list: <kbd>E</kbd></li>' +
+    '<li>SR - Help: <kbd>?</kbd> (inside SR mode)</li>' +
     '</ul>' +
     '<button type="button" class="kbd-help-close" id="kbd-help-close">Close</button>' +
     '</div></div>';
@@ -991,7 +991,7 @@
 })();
 
 // ===========================
-// Translation Feature — Accessible Menu Button Pattern
+// Translation Feature - Accessible Menu Button Pattern
 // Single Enter press on any language = instant translation
 // Full keyboard: Arrow keys, Enter, Escape, Home, End, type-ahead
 // ===========================
@@ -1310,7 +1310,7 @@
   });
 
   // =============================================
-  // Fast Translation Engine (Direct API — no heavy widget)
+  // Fast Translation Engine (Direct API - no heavy widget)
   // Uses Google's lightweight translate endpoint directly
   // Caches translations in localStorage for instant repeat visits
   // =============================================
@@ -1384,7 +1384,7 @@
       });
   }
 
-  // Cache helpers — translations persist in localStorage for 24 hours
+  // Cache helpers - translations persist in localStorage for 24 hours
   function getCacheKey(langCode) { return 'tr_' + langCode + '_' + location.pathname; }
 
   function loadCache(langCode) {
@@ -1409,7 +1409,7 @@
     });
   }
 
-  // Translate the page — fast parallel API calls with deduplication and caching
+  // Translate the page - fast parallel API calls with deduplication and caching
   function translatePage(langCode) {
     showLoading();
 
@@ -1420,7 +1420,7 @@
       return { node: node, text: node.textContent };
     });
 
-    // Deduplicate — translate each unique string only once
+    // Deduplicate - translate each unique string only once
     var uniqueMap = {};
     textNodes.forEach(function (node) {
       var t = node.textContent.trim();
@@ -1442,7 +1442,7 @@
       return;
     }
 
-    // Translate uncached texts — 8 parallel requests at a time
+    // Translate uncached texts - 8 parallel requests at a time
     var CONCURRENCY = 8;
     var translationMap = {};
     Object.keys(cached).forEach(function (k) { translationMap[k] = cached[k]; });
@@ -1477,7 +1477,7 @@
       });
   }
 
-  // Restore page to English — instant, no API call needed
+  // Restore page to English - instant, no API call needed
   function restoreToEnglish() {
     originalTexts.forEach(function (item) {
       item.node.textContent = item.text;
@@ -1511,12 +1511,12 @@
     buildMenuItems();
   }
 
-  // Select a language — one Enter = immediate translation
+  // Select a language - one Enter = immediate translation
   function selectLanguage(langCode) {
     closeMenu();
 
     if (langCode === '') {
-      // Restore to English — instant, no reload
+      // Restore to English - instant, no reload
       if (isTranslated) {
         restoreToEnglish();
         updateAfterTranslation(null);

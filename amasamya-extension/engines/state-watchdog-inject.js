@@ -1,5 +1,5 @@
 /**
- * AMASAMYA — State Change Watchdog
+ * AMASAMYA - State Change Watchdog
  * Module 3: Dynamic Content & AT Notification Checker
  *
  * Injected into the target page on demand. Sets up a MutationObserver
@@ -11,7 +11,7 @@
  *   2. Dialog / alertdialog appearing without focus management (SC 2.4.3)
  *   3. aria-hidden removed without live region (SC 4.1.3)
  *   4. hidden attribute removed without live region (SC 4.1.3)
- *   5. ARIA state attribute changes (aria-expanded / aria-checked / etc.) — Info
+ *   5. ARIA state attribute changes (aria-expanded / aria-checked / etc.) - Info
  *
  * Message flow:
  *   inject → bg:  state-watchdog-started   (ready)
@@ -121,19 +121,19 @@
         }
       });
     } catch (_) {
-      /* Context invalidated (extension reloaded) — stop silently */
+      /* Context invalidated (extension reloaded) - stop silently */
       running = false;
     }
   }
 
   /* ──────────────────────────────────────────────
-     CHECK 1 — Dynamic content without live region
+     CHECK 1 - Dynamic content without live region
   ────────────────────────────────────────────── */
 
   function checkDynamicContent(addedNode) {
     if (!isSignificantNode(addedNode)) return;
 
-    /* Dialog role — hand off to focus check */
+    /* Dialog role - hand off to focus check */
     if (isDialogRole(addedNode)) {
       checkDialogFocus(addedNode);
       return;
@@ -144,16 +144,16 @@
     if (text.length < 4) return;
 
     if (hasLiveRegionAncestor(addedNode)) {
-      /* Good pattern — content will be announced */
+      /* Good pattern - content will be announced */
       reportEvent({
         type:        'Dynamic content in live region',
         verdict:     'Info',
         wcag:        'SC 4.1.3',
         element:     addedNode,
-        description: `Content "${text.slice(0, 60)}…" added inside a live region — screen readers will announce it.`
+        description: `Content "${text.slice(0, 60)}…" added inside a live region - screen readers will announce it.`
       });
     } else {
-      /* Missing live region — potential SC 4.1.3 failure */
+      /* Missing live region - potential SC 4.1.3 failure */
       reportEvent({
         type:        'Dynamic content, no live region',
         verdict:     'Fail',
@@ -167,12 +167,12 @@
   }
 
   /* ──────────────────────────────────────────────
-     CHECK 2 — Dialog appearing without focus mgmt
+     CHECK 2 - Dialog appearing without focus mgmt
   ────────────────────────────────────────────── */
 
   function checkDialogFocus(dialogEl) {
     const sel = getSelector(dialogEl);
-    /* Wait 400 ms — allow the opening script to move focus */
+    /* Wait 400 ms - allow the opening script to move focus */
     setTimeout(() => {
       if (!running)                            return;
       if (!document.body.contains(dialogEl))  return;   /* already removed */
@@ -204,16 +204,16 @@
   }
 
   /* ──────────────────────────────────────────────
-     CHECK 3 — ARIA state attribute changes
+     CHECK 3 - ARIA state attribute changes
   ────────────────────────────────────────────── */
 
   function checkAriaStateChange(el, attrName, oldVal, newVal) {
-    /* aria-hidden removal — content becomes visible */
+    /* aria-hidden removal - content becomes visible */
     if (attrName === 'aria-hidden' && newVal === 'false' && oldVal === 'true') {
       if (!isSignificantNode(el)) return;
       if (hasLiveRegionAncestor(el)) return;   /* covered by live region */
       reportEvent({
-        type:        'aria-hidden removed — no live region',
+        type:        'aria-hidden removed - no live region',
         verdict:     'Warning',
         wcag:        'SC 4.1.3',
         element:     el,
@@ -223,7 +223,7 @@
       return;
     }
 
-    /* aria-expanded toggle — informational (correct pattern) */
+    /* aria-expanded toggle - informational (correct pattern) */
     if (attrName === 'aria-expanded') {
       const controlled = el.getAttribute('aria-controls');
       reportEvent({
@@ -233,12 +233,12 @@
         element:     el,
         description: `${getSelector(el)} toggled aria-expanded from "${oldVal}" to "${newVal}"` +
                      (controlled ? `. Controlled panel: #${controlled}.` :
-                                   '. No aria-controls present — consider adding one.')
+                                   '. No aria-controls present - consider adding one.')
       });
       return;
     }
 
-    /* Other state changes — informational */
+    /* Other state changes - informational */
     if (oldVal !== newVal) {
       reportEvent({
         type:        `${attrName}: ${oldVal} → ${newVal}`,
@@ -251,7 +251,7 @@
   }
 
   /* ──────────────────────────────────────────────
-     CHECK 4 — hidden attribute removed
+     CHECK 4 - hidden attribute removed
   ────────────────────────────────────────────── */
 
   function checkHiddenAttrChange(el, oldVal, newVal) {
@@ -264,7 +264,7 @@
       if (text.length < 3) return;
 
       reportEvent({
-        type:        'hidden removed — no live region',
+        type:        'hidden removed - no live region',
         verdict:     'Warning',
         wcag:        'SC 4.1.3',
         element:     el,
