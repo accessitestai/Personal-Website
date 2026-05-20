@@ -814,6 +814,20 @@ async function captureAnnotatedScreenshot(findings) {
 ════════════════════════════════════════════════════════ */
 
 async function sendResultsToPlatform(message) {
+  /* v3.4.1 — platform-bridge behaviour change.
+     Previously: every audit auto-created a new tab at PLATFORM_URL,
+     pulling the user's focus away from the audit target tab and the
+     Chrome side panel where findings actually live. Multiple testers
+     (Mujtaba, Akhilesh) reported this as confusing — they ran an
+     audit, expected to see findings, and instead got dropped on a
+     marketing landing page.
+
+     New behaviour: this function ONLY forwards results to an existing
+     platform tab if the user already has one open. If no platform tab
+     is open, it does nothing silently. The audit findings are
+     ALWAYS available in the side panel; the platform tab is now
+     opt-in (the user opens it themselves if they want the richer
+     report viewer). */
   const payload = {
     type:      'AMASAMYA_platform_results',
     findings:  message.findings  || [],
@@ -824,18 +838,19 @@ async function sendResultsToPlatform(message) {
 
   try {
     const existingTabs = await chrome.tabs.query({ url: PLATFORM_URL + '/*' });
-    if (existingTabs.length > 0) {
-      const platformTab = existingTabs[0];
-      await chrome.tabs.update(platformTab.id, { active: true });
-      try { await chrome.windows.update(platformTab.windowId, { focused: true }); } catch (_) {}
-      await delay(150);
-      await chrome.tabs.sendMessage(platformTab.id, payload);
-    } else {
-      const newTab = await chrome.tabs.create({ url: PLATFORM_URL, active: true });
-      await waitForTabLoad(newTab.id);
-      await delay(500);
-      await chrome.tabs.sendMessage(newTab.id, payload);
+    if (existingTabs.length === 0) {
+      /* No platform tab open — do nothing. Findings stay in the side
+         panel; the user can open the platform manually if they want
+         the richer viewer. */
+      return;
     }
+    /* Platform tab exists — forward results to it WITHOUT stealing
+       focus. Previously we focused the platform tab on every audit;
+       now we just send the payload silently. The user can switch to
+       the platform tab themselves if they want to see the rich
+       report. */
+    const platformTab = existingTabs[0];
+    await chrome.tabs.sendMessage(platformTab.id, payload);
   } catch (err) {
     console.warn('AMASAMYA platform bridge:', err.message);
   }
