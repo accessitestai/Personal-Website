@@ -86,8 +86,11 @@ this project, ever, going forward.
 - **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
-  ID `blnfmiipkccpggpinjofhhglfcgglbif`. Currently at v3.2.0 with 17 audit
-  engines.
+  ID `blnfmiipkccpggpinjofhhglfcgglbif`. Currently at v3.4.2 with 19 audit
+  engines. (v3.4.1 was rejected by Chrome Web Store under rejection code
+  "Purple Nickel" for a privacy policy that lacked explicit per-category
+  data disclosures; v3.4.2 ships the rewritten policy plus side-panel UX
+  hardening described in the v3.4.2 commit.)
 - **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
   private at github.com/accessitestai/Personal-Website.

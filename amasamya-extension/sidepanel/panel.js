@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Side Panel v3.0
+ * AMASAMYA Extension - Side Panel v3.4.2
  *
  * Panels:
  *   1. WCAG Audit      - existing 13-engine results
@@ -75,6 +75,51 @@
       if (next) { e.preventDefault(); switchPanel(next.id.replace('ptab-','')); next.focus(); }
     });
   });
+
+  /* ================================================================
+     CLOSE BUTTON + ESCAPE-KEY FOCUS TRAP
+     ----------------------------------------------------------------
+     Two related concerns for screen-reader users:
+
+     1. Chrome's default behaviour when Escape is pressed inside a
+        side panel is to keep the panel visible but yank keyboard
+        focus back to the underlying page tab. For an NVDA/JAWS user
+        navigating the findings table this is disorienting: the
+        panel is still there but their reading cursor has jumped to
+        a completely different document. Suppress the default and
+        keep focus inside the panel.
+
+     2. There was no explicit way to close the panel from inside
+        it. Add a visible "Close" button in the header that calls
+        window.close() - this is the supported MV3 side-panel close
+        path. ========================================================= */
+
+  const closeBtn = $('close-panel-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      try { window.close(); } catch (_) { /* nothing to do */ }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    /* Do not interfere with native Escape behaviour on form
+       controls (e.g. closing a native <select> dropdown or
+       cancelling an in-progress text input). Only trap Escape
+       when focus is on a non-editable element. */
+    const t = e.target;
+    const tag = t && t.tagName ? t.tagName.toUpperCase() : '';
+    const editable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
+    if (editable) return;
+    e.preventDefault();
+    e.stopPropagation();
+    /* Keep keyboard focus inside the panel by re-focusing the
+       currently-selected tab. NVDA/JAWS will announce the tab
+       again, giving the user an unambiguous "you are still in
+       AMASAMYA" cue. */
+    const selectedTab = document.querySelector('.panel-tab[aria-selected="true"]');
+    if (selectedTab) selectedTab.focus();
+  }, true);
 
   /* ================================================================
      SETTINGS - load / save API keys
@@ -192,6 +237,13 @@
           timestamp: data.lastAudit.timestamp || new Date().toISOString()
         };
         onAuditComplete();
+        chrome.storage.session.remove('lastAudit');
+      } else if (data?.lastAudit?.type === 'audit-error') {
+        /* Surface restricted-URL or injection errors that were
+           dispatched by background.js before the side panel had
+           a chance to subscribe to chrome.runtime messages. */
+        announce(`AMASAMYA audit error: ${data.lastAudit.error}`);
+        $('page-info').textContent = 'Error: ' + data.lastAudit.error;
         chrome.storage.session.remove('lastAudit');
       }
     });
@@ -322,7 +374,7 @@
   /* Export */
   $('export-json').addEventListener('click', () => {
     downloadFile(JSON.stringify({
-      tool: 'AMASAMYA', version: '3.1.0', page: auditMeta.pageTitle,
+      tool: 'AMASAMYA', version: '3.4.2', page: auditMeta.pageTitle,
       url: auditMeta.pageUrl, timestamp: auditMeta.timestamp,
       summary: { total: allFindings.length, fail: allFindings.filter(f=>f.verdict==='Fail').length,
         warning: allFindings.filter(f=>f.verdict==='Warning').length,
@@ -417,7 +469,7 @@
         tool: {
           driver: {
             name: 'AMASAMYA',
-            version: '3.1.0',
+            version: '3.4.2',
             informationUri: 'https://amasamya.akhileshmalani.com',
             rules
           }
@@ -563,12 +615,42 @@
     if (e.key === 'End')  { e.preventDefault(); btns[btns.length-1].focus(); }
   });
 
+  /* Mirror of background.js restrictedUrlReason(). Kept in sync
+     so the panel's "Re-run Audit" button shows the same screen-
+     reader-friendly explanation as the Ctrl+Shift+U path. */
+  function restrictedUrlReason(url) {
+    if (!url) return 'No active tab URL is available.';
+    const u = url.toLowerCase();
+    if (u.startsWith('chrome://') || u.startsWith('chrome-extension://') ||
+        u.startsWith('edge://')   || u.startsWith('about:') ||
+        u.startsWith('view-source:') || u.startsWith('chrome-search://') ||
+        u.startsWith('devtools://')) {
+      return 'AMASAMYA cannot audit browser internal pages. Switch to a regular http or https tab and try again.';
+    }
+    if (u.startsWith('https://chromewebstore.google.com/') ||
+        u.startsWith('https://chrome.google.com/webstore')) {
+      return 'AMASAMYA cannot audit the Chrome Web Store gallery. Chrome blocks all extensions from scripting that domain. Switch to a regular site and try again.';
+    }
+    if (u.startsWith('file://')) {
+      return 'AMASAMYA cannot audit local file:// pages by default. Enable "Allow access to file URLs" for AMASAMYA in chrome://extensions and reload the tab.';
+    }
+    return null;
+  }
+
   $('reaudit-btn').addEventListener('click', async () => {
-    announce('Running audit…');
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) {
-      try { await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content-script.js'] }); }
-      catch (err) { announce('Re-audit error: ' + err.message); }
+    if (!tab) { announce('No active tab found.'); return; }
+    const reason = restrictedUrlReason(tab.url);
+    if (reason) {
+      announce(reason);
+      $('page-info').textContent = reason;
+      return;
+    }
+    announce('Running audit…');
+    try {
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content-script.js'] });
+    } catch (err) {
+      announce('AMASAMYA could not run on this tab: ' + err.message);
     }
   });
 
@@ -612,7 +694,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 <div style="overflow-x:auto;"><table aria-label="Findings">
 <thead><tr><th>ID</th><th>Engine</th><th>Element</th><th>Criterion</th><th>Severity</th><th>Verdict</th><th>Detail</th></tr></thead>
 <tbody>${rows}</tbody></table></div></main>
-<footer>Generated by AMASAMYA v3.4.1 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
+<footer>Generated by AMASAMYA v3.4.2 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
 </body></html>`;
   }
 

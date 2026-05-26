@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Background Service Worker v3.0
+ * AMASAMYA Extension - Background Service Worker v3.4.2
  *
  * Orchestrates:
  *   A. WCAG Audit  - injects content-script.js, relays findings to side panel + platform
@@ -16,12 +16,55 @@ const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
    A. WCAG AUDIT - existing behaviour (unchanged)
 ════════════════════════════════════════════════════════ */
 
+/* Chrome forbids extensions from injecting scripts into a handful
+   of "restricted" URLs: browser-internal pages, the Chrome Web
+   Store gallery (both old and new domains), the view-source
+   scheme, and other extension pages. Trying anyway surfaces an
+   unhelpful raw error like "The extensions gallery cannot be
+   scripted." For a screen-reader user that error is doubly
+   disorienting because it gives no hint about what to do next.
+   Centralise the detection here and return a clear plain-English
+   reason that both background.js and panel.js can show. */
+function restrictedUrlReason(url) {
+  if (!url) return 'No active tab URL is available.';
+  const u = url.toLowerCase();
+  if (u.startsWith('chrome://') || u.startsWith('chrome-extension://') ||
+      u.startsWith('edge://')   || u.startsWith('about:') ||
+      u.startsWith('view-source:') || u.startsWith('chrome-search://') ||
+      u.startsWith('devtools://')) {
+    return 'AMASAMYA cannot audit browser internal pages. Switch to a regular http or https tab and try again.';
+  }
+  if (u.startsWith('https://chromewebstore.google.com/') ||
+      u.startsWith('https://chrome.google.com/webstore')) {
+    return 'AMASAMYA cannot audit the Chrome Web Store gallery. Chrome blocks all extensions from scripting that domain. Switch to a regular site and try again.';
+  }
+  if (u.startsWith('file://')) {
+    return 'AMASAMYA cannot audit local file:// pages by default. Enable "Allow access to file URLs" for AMASAMYA in chrome://extensions and reload the tab.';
+  }
+  return null;
+}
+
 chrome.action.onClicked.addListener(async (tab) => {
   try { await chrome.sidePanel.open({ windowId: tab.windowId }); } catch (_) {}
+  const reason = restrictedUrlReason(tab && tab.url);
+  if (reason) {
+    /* Surface the reason to the side panel so a screen-reader
+       user hears it through the polite live region. Fall back to
+       session storage if the panel is not yet listening. */
+    const msg = { type: 'audit-error', error: reason };
+    chrome.runtime.sendMessage(msg).catch(() => {
+      chrome.storage.session.set({ lastAudit: msg }).catch(() => {});
+    });
+    return;
+  }
   try {
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content-script.js'] });
   } catch (err) {
     console.error('AMASAMYA injection error:', err);
+    const msg = { type: 'audit-error', error: 'AMASAMYA could not run on this tab: ' + err.message };
+    chrome.runtime.sendMessage(msg).catch(() => {
+      chrome.storage.session.set({ lastAudit: msg }).catch(() => {});
+    });
   }
 });
 
