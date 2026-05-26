@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SC 3.2.6 Consistent Help - Test Fixture (Page A)</title>
+  <!--
+    Fixture for AMASAMYA engine 22 (Consistent Help).
+    Reference: https://www.w3.org/TR/WCAG22/#consistent-help
+
+    SC 3.2.6 requires that when a Set of Web Pages provides any of
+    these help mechanisms - human contact details, human contact
+    mechanism, self-help, or fully automated contact - they occur in
+    the same relative order on each page, unless a change is initiated
+    by the user.
+
+    Engine detection heuristic (partial - emits Warning, not Fail):
+      Scan the current page for known help signals (contact link,
+      help link, FAQ link, chat widget) and record their order. The
+      engine cannot determine "same relative order across pages" from
+      a single audit, so it emits a Warning prompting the auditor to
+      run the same audit on another page in the set and compare.
+
+    This fixture is Page A. A sibling fixture for Page B would carry
+    the same mechanisms in either the same order (pass) or a
+    different order (fail) but is not included here - the engine's
+    single-page output is a Warning regardless.
+  -->
+</head>
+<body>
+  <header>
+    <h1>Acme Corp - Page A</h1>
+    <nav aria-label="Primary">
+      <ul>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/help"
+               data-amasamya-expect="warn"
+               data-amasamya-reason="Help link detected, position is 1 of 3 help mechanisms">Help</a></li>
+        <li><a href="/contact"
+               data-amasamya-expect="warn"
+               data-amasamya-reason="Contact link detected, position is 2 of 3">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Welcome</h2>
+    <p>Page body content.</p>
+  </main>
+
+  <footer>
+    <p>Phone: <a href="tel:+18005551234"
+                 data-amasamya-expect="warn"
+                 data-amasamya-reason="Human contact mechanism (telephone), position is 3 of 3">1-800-555-1234</a></p>
+    <p><a href="/faq">FAQ</a></p>
+  </footer>
+
+  <button type="button" id="chat-widget"
+          aria-label="Open chat"
+          data-amasamya-expect="warn"
+          data-amasamya-reason="Chat widget (automated contact), recorded but order across pages cannot be verified in a single audit">Chat</button>
+</body>
+</html>

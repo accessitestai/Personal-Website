@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SC 3.3.8 Accessible Authentication (Minimum) - Test Fixture</title>
+  <!--
+    Fixture for AMASAMYA engine 24 (Accessible Authentication, Minimum).
+    Reference: https://www.w3.org/TR/WCAG22/#accessible-authentication-minimum
+
+    SC 3.3.8 requires that a cognitive function test (such as
+    remembering a password, solving a puzzle, identifying objects) is
+    not required for any step in an authentication process unless an
+    alternative is available, or the cognitive function test can be
+    bypassed by the user.
+
+    Engine detection signals:
+      - <img> with src or alt matching captcha, recaptcha, hcaptcha, puzzle
+      - iframe with src containing google.com/recaptcha or hcaptcha.com
+      - Inputs labelled "Type the characters", "Solve this puzzle",
+        "Identify the images containing..."
+      - "Memorise this code" patterns
+      - Magic-link sign-in is a positive signal (passes SC 3.3.8 when present)
+  -->
+</head>
+<body>
+  <h1>Sign in</h1>
+
+  <h2>Pass case - password manager friendly, no CAPTCHA</h2>
+  <form aria-label="Pass sign-in">
+    <label for="pass-username">Email</label>
+    <input type="email" id="pass-username" name="username"
+           autocomplete="email username"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Password manager can fill username; no cognitive function test on this form">
+
+    <label for="pass-password">Password</label>
+    <input type="password" id="pass-password" name="password"
+           autocomplete="current-password"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Password field allows paste, autocomplete enabled, password managers work">
+
+    <button type="submit">Sign in</button>
+
+    <p>
+      <a href="/magic-link"
+         data-amasamya-expect="pass"
+         data-amasamya-reason="Magic-link alternative removes the cognitive function test of recalling a password">Sign in with a link instead</a>
+    </p>
+  </form>
+
+  <h2>Fail case - CAPTCHA with no alternative</h2>
+  <form aria-label="Fail sign-in with CAPTCHA">
+    <label for="fail-username">Email</label>
+    <input type="email" id="fail-username" name="username">
+
+    <label for="fail-password">Password</label>
+    <input type="password" id="fail-password" name="password">
+
+    <div class="captcha-block"
+         data-amasamya-expect="fail"
+         data-amasamya-reason="reCAPTCHA iframe present, no audio alternative or magic-link bypass on this page">
+      <iframe src="https://www.google.com/recaptcha/api/fallback?k=test"
+              title="reCAPTCHA challenge"
+              width="300" height="150"></iframe>
+    </div>
+
+    <button type="submit">Sign in</button>
+  </form>
+
+  <h2>Fail case - paste-blocking password field</h2>
+  <form aria-label="Fail sign-in with paste blocked">
+    <label for="fail-paste-pw">Memorable password</label>
+    <input type="password" id="fail-paste-pw" name="memorable_password"
+           autocomplete="off"
+           onpaste="return false;"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="Password field blocks paste and disables autocomplete, forcing the user to recall the password (cognitive function test)">
+    <button type="submit">Sign in</button>
+  </form>
+
+  <h2>Warning case - image-grid puzzle (engine cannot confirm intent)</h2>
+  <form aria-label="Warning puzzle">
+    <fieldset data-amasamya-expect="warn"
+              data-amasamya-reason="Image-selection grid detected; could be CAPTCHA or could be legitimate UI - emit Warning for manual review">
+      <legend>Select all images containing a traffic light</legend>
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjOGNkIi8+PC9zdmc+" alt="Tile 1">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjY2Q4Ii8+PC9zdmc+" alt="Tile 2">
+    </fieldset>
+  </form>
+</body>
+</html>

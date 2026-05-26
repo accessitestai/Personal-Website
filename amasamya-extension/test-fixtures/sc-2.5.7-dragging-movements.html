@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SC 2.5.7 Dragging Movements - Test Fixture</title>
+  <!--
+    Fixture for AMASAMYA engine 21 (Dragging Movements).
+    Reference: https://www.w3.org/TR/WCAG22/#dragging-movements
+
+    Engine detection heuristic:
+      A control fails if it has pointerdown + pointermove (or
+      mousedown + mousemove, or touchstart + touchmove) handlers
+      AND no single-pointer alternative is exposed (button, keyboard
+      shortcut, or up/down control).
+  -->
+  <style>
+    .slider-track { position: relative; height: 6px; background: #ccc; border-radius: 3px; width: 200px; margin: 12px 0; }
+    .slider-thumb { position: absolute; top: -5px; width: 16px; height: 16px; background: #003366; border-radius: 50%; cursor: grab; }
+    .reorder-item { padding: 8px 12px; background: #eef; border: 1px solid #99c; margin: 4px 0; cursor: grab; }
+    button { padding: 4px 12px; }
+  </style>
+</head>
+<body>
+  <h1>SC 2.5.7 Dragging Movements</h1>
+
+  <h2>Pass cases - drag plus single-pointer alternative</h2>
+
+  <section aria-label="Slider with buttons">
+    <h3>Volume</h3>
+    <div class="slider-track">
+      <div id="pass-slider-thumb" class="slider-thumb"
+           role="slider" tabindex="0"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
+           aria-label="Volume"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Drag handler present but adjacent +/- buttons and keyboard arrow keys provide single-pointer alternative"></div>
+    </div>
+    <button type="button" id="pass-slider-down" aria-label="Decrease volume">-</button>
+    <button type="button" id="pass-slider-up"   aria-label="Increase volume">+</button>
+  </section>
+
+  <section aria-label="Reorderable list with move buttons">
+    <h3>Task order</h3>
+    <ul aria-label="Tasks, reorderable">
+      <li class="reorder-item" id="pass-item-1" draggable="true" tabindex="0"
+          data-amasamya-expect="pass"
+          data-amasamya-reason="Draggable but Move up / Move down buttons exist per item">
+        Write report
+        <button type="button" aria-label="Move Write report up">Up</button>
+        <button type="button" aria-label="Move Write report down">Down</button>
+      </li>
+      <li class="reorder-item" id="pass-item-2" draggable="true" tabindex="0">
+        Review pull request
+        <button type="button" aria-label="Move Review pull request up">Up</button>
+        <button type="button" aria-label="Move Review pull request down">Down</button>
+      </li>
+    </ul>
+  </section>
+
+  <h2>Fail cases - drag with no alternative</h2>
+
+  <section aria-label="Slider without buttons">
+    <h3>Brightness</h3>
+    <div class="slider-track">
+      <div id="fail-slider-thumb" class="slider-thumb"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="Drag handlers (pointerdown+pointermove) attached via JS, no button alternative, no keyboard handler"></div>
+    </div>
+  </section>
+
+  <section aria-label="Reorderable list without buttons">
+    <h3>Photo gallery</h3>
+    <ul aria-label="Photos, reorderable">
+      <li class="reorder-item" id="fail-item-1" draggable="true"
+          data-amasamya-expect="fail"
+          data-amasamya-reason="draggable=true with no Move buttons or keyboard reordering">
+        Photo 1
+      </li>
+      <li class="reorder-item" id="fail-item-2" draggable="true">
+        Photo 2
+      </li>
+    </ul>
+  </section>
+
+  <section aria-label="Signature pad">
+    <h3>Signature</h3>
+    <canvas id="fail-signature" width="300" height="100" tabindex="0"
+            data-amasamya-expect="fail"
+            data-amasamya-reason="Canvas with continuous mousedown+mousemove drawing, no typed-name alternative"
+            aria-label="Sign here by dragging"></canvas>
+  </section>
+
+  <script>
+    /* Attach drag handlers so the engine's runtime listener detection can see
+       them. The engine checks both inline attributes and addEventListener
+       registrations (via a proxy installed at audit time). */
+
+    // PASS: slider with alternative buttons
+    const passThumb = document.getElementById('pass-slider-thumb');
+    passThumb.addEventListener('pointerdown', () => {});
+    passThumb.addEventListener('pointermove', () => {});
+
+    // FAIL: slider without alternative
+    const failThumb = document.getElementById('fail-slider-thumb');
+    failThumb.addEventListener('pointerdown', () => {});
+    failThumb.addEventListener('pointermove', () => {});
+
+    // FAIL: signature canvas
+    const sig = document.getElementById('fail-signature');
+    sig.addEventListener('mousedown', () => {});
+    sig.addEventListener('mousemove', () => {});
+    sig.addEventListener('touchstart', () => {}, { passive: true });
+    sig.addEventListener('touchmove',  () => {}, { passive: true });
+  </script>
+</body>
+</html>

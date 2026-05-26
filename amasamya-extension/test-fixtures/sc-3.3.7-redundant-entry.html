@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SC 3.3.7 Redundant Entry - Test Fixture</title>
+  <!--
+    Fixture for AMASAMYA engine 23 (Redundant Entry).
+    Reference: https://www.w3.org/TR/WCAG22/#redundant-entry
+
+    SC 3.3.7 requires that information previously entered by or
+    provided to the user is either auto-populated or available for the
+    user to select. Asking the user to re-enter the same data later in
+    the same session is a failure.
+
+    Engine detection heuristic (partial - emits Warning, not Fail):
+      Detect multi-step form indicators (step indicator, progress
+      bar with role=progressbar, fieldsets labelled Step N, hidden
+      "previous values" inputs) and check whether a second step asks
+      for fields that appear to repeat the first step's fields. Same
+      label text + same input purpose token = candidate violation.
+
+    Single-page detection is necessarily partial. The engine emits a
+    Warning with the candidate repeated fields so an auditor can
+    confirm against the real flow.
+  -->
+</head>
+<body>
+  <h1>Checkout - Step 2 of 3</h1>
+
+  <ol class="step-indicator" aria-label="Checkout progress">
+    <li>1. Shipping</li>
+    <li aria-current="step">2. Billing</li>
+    <li>3. Review</li>
+  </ol>
+
+  <h2>Pass case - billing address with same-as-shipping checkbox</h2>
+  <form aria-label="Billing - pass">
+    <label>
+      <input type="checkbox" id="pass-same-as-shipping"
+             data-amasamya-expect="pass"
+             data-amasamya-reason="Same-as-shipping toggle auto-populates the repeated address fields">
+      Use same address as shipping
+    </label>
+
+    <label for="pass-billing-street">Street</label>
+    <input type="text" id="pass-billing-street" name="billing_street"
+           autocomplete="street-address">
+
+    <label for="pass-billing-city">City</label>
+    <input type="text" id="pass-billing-city" name="billing_city"
+           autocomplete="address-level2">
+  </form>
+
+  <h2>Fail case - billing email repeated without auto-fill</h2>
+  <form aria-label="Billing - fail">
+    <p>You already entered an email on Step 1. Please re-enter it for verification:</p>
+
+    <label for="fail-billing-email">Email</label>
+    <input type="email" id="fail-billing-email" name="billing_email"
+           autocomplete="email"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="Step 2 asks for email already collected on Step 1 with no auto-populate or select option">
+
+    <label for="fail-billing-phone">Phone</label>
+    <input type="tel" id="fail-billing-phone" name="billing_phone"
+           autocomplete="tel"
+           data-amasamya-expect="warn"
+           data-amasamya-reason="Engine cannot confirm whether phone was already collected on Step 1 from this fixture alone; emits Warning">
+  </form>
+
+  <p>
+    <a href="?step=1">Back to Step 1</a>
+    <button type="submit">Continue to Step 3</button>
+  </p>
+</body>
+</html>

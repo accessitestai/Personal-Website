@@ -90,3 +90,7 @@ generate_voiceover_guide.py
 
 # Embedded worktrees from Claude Code sessions
 .claude/worktrees/
+
+# Playwright run artifacts
+test-results/
+playwright-report/

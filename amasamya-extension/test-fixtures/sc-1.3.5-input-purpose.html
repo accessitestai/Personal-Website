@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SC 1.3.5 Identify Input Purpose - Test Fixture</title>
+  <!--
+    Fixture for AMASAMYA engine 20 (Identify Input Purpose).
+    Reference: https://www.w3.org/TR/WCAG22/#identify-input-purpose
+
+    Convention used by the test runner:
+      data-amasamya-expect="pass" -> engine should emit a Pass for this field.
+      data-amasamya-expect="fail" -> engine should emit a Fail for this field.
+      data-amasamya-expect="warn" -> engine should emit a Warning for this field.
+      data-amasamya-reason="..."  -> human-readable description of why.
+  -->
+</head>
+<body>
+  <h1>SC 1.3.5 Identify Input Purpose</h1>
+
+  <h2>Pass cases</h2>
+  <form aria-label="Pass cases">
+    <label for="pass-email">Email</label>
+    <input type="email" id="pass-email" name="email"
+           autocomplete="email"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: email">
+
+    <label for="pass-given">First name</label>
+    <input type="text" id="pass-given" name="firstname"
+           autocomplete="given-name"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: given-name">
+
+    <label for="pass-family">Last name</label>
+    <input type="text" id="pass-family" name="lastname"
+           autocomplete="family-name"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: family-name">
+
+    <label for="pass-tel">Phone</label>
+    <input type="tel" id="pass-tel" name="phone"
+           autocomplete="tel"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: tel">
+
+    <label for="pass-street">Street address</label>
+    <input type="text" id="pass-street" name="address1"
+           autocomplete="street-address"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: street-address">
+
+    <label for="pass-cc">Card number</label>
+    <input type="text" id="pass-cc" name="cardnumber"
+           autocomplete="cc-number" inputmode="numeric"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: cc-number">
+
+    <label for="pass-current-pw">Password</label>
+    <input type="password" id="pass-current-pw" name="password"
+           autocomplete="current-password"
+           data-amasamya-expect="pass"
+           data-amasamya-reason="Valid WCAG token: current-password">
+  </form>
+
+  <h2>Fail cases</h2>
+  <form aria-label="Fail cases">
+    <label for="fail-email-missing">Email (no autocomplete)</label>
+    <input type="email" id="fail-email-missing" name="email"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="Field collects email purpose data but has no autocomplete attribute">
+
+    <label for="fail-email-off">Email (autocomplete off)</label>
+    <input type="email" id="fail-email-off" name="email"
+           autocomplete="off"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="autocomplete=off blocks SC 1.3.5 programmatic identification">
+
+    <label for="fail-given-invalid">First name (vendor token)</label>
+    <input type="text" id="fail-given-invalid" name="firstname"
+           autocomplete="fname"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="fname is not in the WCAG 2.2 input-purpose token list">
+
+    <label for="fail-tel-missing">Phone (no autocomplete)</label>
+    <input type="tel" id="fail-tel-missing" name="mobile"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="Field collects telephone purpose data, no autocomplete">
+
+    <label for="fail-cc-missing">Card number (no autocomplete)</label>
+    <input type="text" id="fail-cc-missing" name="cardnumber" inputmode="numeric"
+           data-amasamya-expect="fail"
+           data-amasamya-reason="Field collects credit-card purpose data, no autocomplete">
+  </form>
+
+  <h2>Out-of-scope cases (engine should not report)</h2>
+  <form aria-label="Out of scope">
+    <label for="oos-search">Search</label>
+    <input type="search" id="oos-search" name="q"
+           data-amasamya-expect="none"
+           data-amasamya-reason="Search input does not collect input-purpose data">
+
+    <label for="oos-comment">Comment</label>
+    <textarea id="oos-comment" name="comment"
+              data-amasamya-expect="none"
+              data-amasamya-reason="Free-text comment, no defined purpose"></textarea>
+
+    <label for="oos-quantity">Quantity</label>
+    <input type="number" id="oos-quantity" name="qty" min="1" max="10"
+           data-amasamya-expect="none"
+           data-amasamya-reason="Numeric quantity, no defined purpose">
+  </form>
+</body>
+</html>
