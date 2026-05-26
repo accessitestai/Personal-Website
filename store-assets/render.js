@@ -37,7 +37,7 @@ const ASSETS = [
     const htmlPath = path.join(__dirname, a.html);
     const pngPath  = path.join(__dirname, a.out);
     if (!fs.existsSync(htmlPath)) {
-      console.warn(`  WARN ${a.html} missing — skip`);
+      console.warn(`  WARN ${a.html} missing - skip`);
       continue;
     }
     const ctx = await browser.newContext({
@@ -46,7 +46,7 @@ const ASSETS = [
     });
     const page = await ctx.newPage();
     await page.goto('file:///' + htmlPath.replace(/\\/g, '/'));
-    /* Wait for fonts so glyphs render at correct width — without
+    /* Wait for fonts so glyphs render at correct width - without
        this, the screenshot can be taken before custom Segoe UI
        weights settle and the layout shifts horizontally. */
     await page.evaluate(() => document.fonts.ready);

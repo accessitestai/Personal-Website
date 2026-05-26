@@ -34,7 +34,7 @@ So I built AMASAMYA. Today, on GAAD 2026, I am releasing it to the community as 
 
 What it does:
 
-The Chrome extension runs seventeen WCAG 2.2 audit engines on any open tab in roughly five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel - navigable by heading with a screen reader's H key. No mouse required, ever.
+The Chrome extension runs nineteen WCAG 2.2 audit engines on any open tab in roughly five seconds. Press Ctrl + Shift + U on any page, and findings appear in the Chrome side panel - navigable by heading with a screen reader's H key. No mouse required, ever.
 
 The web platform extends the same engines to uploaded documents - PDF, Microsoft Office, EPUB, OpenDocument - and to a structured mobile-app accessibility checklist.
 

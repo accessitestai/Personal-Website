@@ -31,7 +31,7 @@ The two columns together give you a clean triage rule: **Critical Fails first, S
 ## The other columns
 
 - **ID** - a row identifier like `AMASAMYA-0007`. Used when you want to refer to a specific finding in a ticket without copy-pasting the whole row.
-- **Engine** - which of the seventeen audit engines produced this finding. Engines like Images, Forms, Colour Contrast, Focus Visibility. Useful for filtering: if you want to see only colour contrast issues, sort or filter by Engine.
+- **Engine** - which of the nineteen audit engines produced this finding. Engines like Images, Forms, Colour Contrast, Focus Visibility. Useful for filtering: if you want to see only colour contrast issues, sort or filter by Engine.
 - **Element** - a short description of the DOM element the finding is about. Example: `<button.btn-primary> "Submit"`. The format is tag name, optional class or id, and the visible label in quotes.
 - **Criterion** - the WCAG 2.2 Success Criterion (SC) reference. Looks like `WCAG 2.2 SC 1.1.1 Non-text Content (Level A)`. The Level A / AA / AAA suffix tells you how strict the rule is.
 - **Issue** - one sentence describing what is wrong.
