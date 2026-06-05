@@ -128,7 +128,18 @@
   function run() {
     const findings = [];
     /* Candidate set: every element. We early-exit cheaply for
-       non-candidates. The probe map keeps the actual lookups O(1). */
+       non-candidates. The probe map keeps the actual lookups O(1).
+
+       NOTE on production behaviour: the inline copy of this engine
+       in content-script.js uses a narrower candidate selector for
+       perf, because the production runtime has no listener probe
+       to consult (the probe must be installed at document_start,
+       which the extension does not currently arrange). Production
+       therefore relies on attribute and ARIA signals only. This
+       standalone module retains the listener-probe path for unit
+       testing. v4.0.1 keeps the two implementations behaviourally
+       compatible: every fixture pass case here remains catchable
+       by the production selector list. */
     const all = document.querySelectorAll('*');
     all.forEach((el) => {
       const dragKind = isDraggableCandidate(el);

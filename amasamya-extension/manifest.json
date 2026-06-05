@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
   "name": "AMASAMYA - Accessibility Audit Tool",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Blind-first WCAG 2.2 audit tool with Vision AI modules: Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog.",
   "author": "Akhilesh Malani",
   "homepage_url": "https://amasamya.akhileshmalani.com",
+  "minimum_chrome_version": "114",
 
   "permissions": [
     "activeTab",

@@ -840,15 +840,20 @@ main {
 /* Row-level baseline diff colouring */
 .finding-row-new     { background: rgba(231, 76, 60, 0.10) !important; }
 .finding-row-fixed   { background: rgba(46, 204, 113, 0.10) !important; }
+/*
+  Generated badges on diff-row first cells. Plain text instead of ▲ / ✔
+  glyphs so screen readers do not announce "black up-pointing triangle".
+  The CSS content is announced by NVDA browse-mode reads of the table.
+*/
 .finding-row-new td:first-child::before {
-  content: '▲ NEW ';
+  content: 'NEW ';
   color: var(--ama-error);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 .finding-row-fixed td:first-child::before {
-  content: '✔ FIXED ';
+  content: 'FIXED ';
   color: var(--ama-success);
   font-size: 0.65rem;
   font-weight: 700;

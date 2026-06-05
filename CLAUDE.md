@@ -86,14 +86,18 @@ this project, ever, going forward.
 - **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
-  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v3.4.2 was the last shipped patch
-  and reached Published status without further reviewer pushback. Current
-  development branch targets v4.0.0 with 24 audit engines (five new ones
-  added on top of the 19 from v3.4.2: SC 1.3.5 Identify Input Purpose,
-  SC 2.5.7 Dragging Movements, SC 3.2.6 Consistent Help, SC 3.3.7
-  Redundant Entry, SC 3.3.8 Accessible Authentication Minimum). Audit
-  diff and history is planned for v4.1.0, offline-only Vision AI for
-  v5.0; see amasamya-extension/ROADMAP.md.
+  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0 shipped 24 engines. Current
+  development branch targets v4.0.1 with the same 24 engines plus a
+  thorough internal-audit fix pass: live-region politeness split, emoji
+  noise removed from labels, Redundant-Entry warning flood capped to a
+  single page-level summary, Dragging-Movements pre-filtered for
+  performance, Mac keyboard shortcut text corrected, manifest gets
+  minimum_chrome_version 114, two remaining unescaped innerHTML writes
+  hardened, summary cards made keyboard-focusable, main landmark made
+  programmatically focusable for skip-link, Playwright webServer wired so
+  the screen-reader tests run by default. Audit diff and history is still
+  planned for v4.1.0; offline-only Vision AI for v5.0. See
+  amasamya-extension/ROADMAP.md.
 - **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
   private at github.com/accessitestai/Personal-Website.

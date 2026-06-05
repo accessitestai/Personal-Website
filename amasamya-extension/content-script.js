@@ -15,7 +15,7 @@
      PHASE 1 ENGINES + UTILITIES (inlined from phase1-engines.js)
   ================================================================ */
 
-  const TOOL_VERSION = '4.0.0';
+  const TOOL_VERSION = '4.0.1';
   const CONTRAST = { NORMAL_AA: 4.5, LARGE_AA: 3.0, NORMAL_AAA: 7.0, LARGE_AAA: 4.5, NON_TEXT: 3.0 };
   const LARGE_TEXT_PT_BOLD = 14;
   const LARGE_TEXT_PT_NORMAL = 18;
@@ -1062,7 +1062,28 @@
         return n.length > 0;
       });
     }
-    document.querySelectorAll('*').forEach(el => {
+    /*
+      v4.0.1 perf: previously this walked document.querySelectorAll('*')
+      and called window.getComputedStyle() twice per element, which
+      on a 10k-node enterprise page (Salesforce, Gmail) added hundreds
+      of ms. Now we pre-filter to a candidate set via narrow
+      selectors that cover every dragging signal except cursor:grab.
+      The cursor signal is checked only on visible elements that
+      survived the first pass, which keeps getComputedStyle calls
+      proportional to actual interactive elements rather than the
+      full DOM.
+    */
+    const candidateSelector = [
+      '[draggable="true"]',
+      '[role="slider"][aria-valuenow]',
+      '[role="scrollbar"][aria-valuenow]',
+      '[ondragstart]', '[ondrag]',
+      '[onpointerdown]', '[onpointermove]',
+      '[onmousedown]', '[onmousemove]',
+      '[ontouchstart]', '[ontouchmove]'
+    ].join(',');
+    const candidates = Array.from(document.querySelectorAll(candidateSelector));
+    candidates.forEach(el => {
       const kind = isDraggable(el);
       if (!kind) return;
       const cs = window.getComputedStyle(el);
@@ -1170,32 +1191,62 @@
       });
     }
     if (!isMultiStep()) return findings;
-    document.querySelectorAll('input[autocomplete]:not([autocomplete="off"])').forEach(el => {
+
+    /* The previous implementation emitted a Warning per input on every
+       multi-step page, which produced 10+ low-value findings on any
+       checkout flow. Tighten to:
+
+         - Always Fail every input whose nearby text contains re-entry
+           wording AND has no autofill toggle in its form scope. These
+           are concrete violations.
+         - Emit ONE summary Warning per audit if any candidate fields
+           exist but no autofill toggle is present anywhere on the
+           page. The list of affected fields is included in the
+           computed column for the reviewer to triage.
+
+       This eliminates the warning flood while keeping the actual
+       finding the engine cares about. */
+
+    const candidates = Array.from(document.querySelectorAll(
+      'input[autocomplete]:not([autocomplete="off"])'
+    )).filter(el => {
       const cs = window.getComputedStyle(el);
-      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      return cs.display !== 'none' && cs.visibility !== 'hidden';
+    });
+
+    const ambiguousCandidates = [];
+    candidates.forEach(el => {
       const reentry = REENTRY.test(nearbyText(el));
       const af = hasAutofill(el.closest('form, fieldset, section'));
       const ac = el.getAttribute('autocomplete');
-      const base = {
-        id: generateId(), engine: 'Redundant Entry', element: describeEl(el),
-        criterion: 'WCAG 2.2 SC 3.3.7 Redundant Entry (Level A)'
-      };
       if (reentry && !af) {
-        findings.push(Object.assign({}, base, {
+        findings.push({
+          id: generateId(), engine: 'Redundant Entry', element: describeEl(el),
+          criterion: 'WCAG 2.2 SC 3.3.7 Redundant Entry (Level A)',
           issue: `Multi-step flow asks the user to re-enter ${ac} without an auto-fill option.`,
-          computed: 're-entry wording near field, no autofill', required: 'Auto-fill or "use previous" control',
+          computed: 're-entry wording near field, no autofill',
+          required: 'Auto-fill or "use previous" control',
           verdict: 'Fail', severity: SEV.MODERATE,
           howToFix: 'Pre-populate the field or provide a "use previous"/"same as" control.'
-        }));
-      } else {
-        findings.push(Object.assign({}, base, {
-          issue: `Multi-step flow detected. Field collects ${ac}; cannot confirm whether the value was already requested earlier.`,
-          computed: 'multi-step + field with known purpose', required: 'Verify against prior steps',
-          verdict: 'Warning', severity: SEV.MINOR,
-          howToFix: 'If this value was already collected earlier in the flow, pre-populate or expose a "use previous" control.'
-        }));
+        });
+      } else if (!af) {
+        ambiguousCandidates.push(ac);
       }
     });
+
+    if (ambiguousCandidates.length > 0 && !hasAutofill(document)) {
+      /* Single summary Warning, not one per field. */
+      findings.push({
+        id: generateId(), engine: 'Redundant Entry', element: 'Page',
+        criterion: 'WCAG 2.2 SC 3.3.7 Redundant Entry (Level A)',
+        issue: `Multi-step flow detected with ${ambiguousCandidates.length} candidate field${ambiguousCandidates.length === 1 ? '' : 's'} that may repeat earlier entries. No auto-fill control found anywhere on the page.`,
+        computed: `Candidate autocomplete tokens: ${[...new Set(ambiguousCandidates)].join(', ')}`,
+        required: 'Verify against prior steps; expose an auto-fill or "use previous" control if any value repeats',
+        verdict: 'Warning', severity: SEV.MINOR,
+        howToFix: 'Run AMASAMYA on an earlier step of the same flow to confirm which values are being asked twice, then pre-populate or expose a "use previous" / "same as" control.'
+      });
+    }
+
     return findings;
   }
 

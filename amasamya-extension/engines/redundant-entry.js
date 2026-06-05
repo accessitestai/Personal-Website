@@ -138,44 +138,54 @@
     /* If not in a multi-step flow there is nothing to warn about. */
     if (!multiStep) return findings;
 
-    /* Walk inputs that collect known-purpose data and look for
-       re-entry wording. Autofill is evaluated PER FORM/SECTION
-       SCOPE: a same-as-shipping toggle in one form does not
-       exonerate a re-entry field in a different form on the
-       same page. */
+    /* Walk inputs that collect known-purpose data. Autofill is
+       evaluated PER FORM/SECTION SCOPE: a same-as-shipping toggle
+       in one form does not exonerate a re-entry field in a
+       different form on the same page.
+
+       v4.0.1 change: previously every ambiguous field got its own
+       Warning, which flooded the audit on any multi-step form.
+       Now ambiguous fields are aggregated into a single page-level
+       Warning, only emitted if no autofill toggle exists anywhere
+       on the page. Concrete Fails (explicit re-entry wording +
+       no scope-level autofill) are still per-field. */
     const inputs = document.querySelectorAll('input[autocomplete]:not([autocomplete="off"])');
+    const ambiguousTokens = [];
     inputs.forEach(el => {
       if (!isVisible(el)) return;
       const text     = nearbyText(el);
       const reentry  = REENTRY_PHRASES.test(text);
       const autofill = hasAutofillToggle(scopeForInput(el));
-
-      const base = {
-        engine:    'Redundant Entry',
-        criterion: 'WCAG 2.2 SC 3.3.7 (Level A)',
-        selector:  cssPath(el),
-        element:   (el.outerHTML || '').slice(0, 200)
-      };
+      const ac       = el.getAttribute('autocomplete');
 
       if (reentry && !autofill) {
-        findings.push(Object.assign({}, base, {
-          verdict:  'Fail',
-          severity: 'Moderate',
-          issue:    `Multi-step flow asks the user to re-enter ${el.getAttribute('autocomplete')} information without an auto-fill or selection option.`,
-          howToFix: 'Pre-populate the field from the user\'s prior entry, or provide a "use previous" / "same as" control.'
-        }));
+        findings.push({
+          engine:    'Redundant Entry',
+          criterion: 'WCAG 2.2 SC 3.3.7 (Level A)',
+          selector:  cssPath(el),
+          element:   (el.outerHTML || '').slice(0, 200),
+          verdict:   'Fail',
+          severity:  'Moderate',
+          issue:     `Multi-step flow asks the user to re-enter ${ac} information without an auto-fill or selection option.`,
+          howToFix:  'Pre-populate the field from the user\'s prior entry, or provide a "use previous" / "same as" control.'
+        });
         return;
       }
-
-      /* Multi-step flow + field with known purpose, but no explicit
-         re-entry wording. Warning so an auditor confirms. */
-      findings.push(Object.assign({}, base, {
-        verdict:  'Warning',
-        severity: 'Minor',
-        issue:    `Multi-step flow detected. Field collects ${el.getAttribute('autocomplete')} data; engine cannot confirm whether the same data was already requested earlier in the flow.`,
-        howToFix: 'If this field repeats a value the user already entered earlier in the flow, pre-populate it or expose a "use previous" control.'
-      }));
+      if (!autofill) ambiguousTokens.push(ac);
     });
+
+    if (ambiguousTokens.length > 0 && !globalAutofill) {
+      findings.push({
+        engine:    'Redundant Entry',
+        criterion: 'WCAG 2.2 SC 3.3.7 (Level A)',
+        selector:  'document',
+        element:   'Page',
+        verdict:   'Warning',
+        severity:  'Minor',
+        issue:     `Multi-step flow detected with ${ambiguousTokens.length} candidate field${ambiguousTokens.length === 1 ? '' : 's'} that may repeat earlier entries. No auto-fill control found anywhere on the page.`,
+        howToFix:  'Run AMASAMYA on an earlier step of the same flow to confirm which values are being asked twice, then pre-populate or expose a "use previous" / "same as" control.'
+      });
+    }
 
     return findings;
   }

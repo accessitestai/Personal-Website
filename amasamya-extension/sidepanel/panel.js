@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Side Panel v4.0.0
+ * AMASAMYA Extension - Side Panel v4.0.1
  *
  * Panels:
  *   1. WCAG Audit      - existing 13-engine results
@@ -14,11 +14,20 @@
      UTILITIES
   ================================================================ */
 
-  const liveRegion = document.getElementById('live-region');
+  const liveRegionPolite    = document.getElementById('live-region-polite');
+  const liveRegionAssertive = document.getElementById('live-region-assertive');
 
-  function announce(text) {
-    liveRegion.textContent = '';
-    setTimeout(() => { liveRegion.textContent = text; }, 50);
+  /*
+    announce(text)               -> polite (default, status messages).
+    announce(text, 'assertive')  -> interrupts current screen-reader speech,
+                                    use only for errors and security alerts.
+    The empty-string-then-setTimeout dance forces re-announcement when the
+    same message arrives twice in a row.
+  */
+  function announce(text, urgency) {
+    const region = (urgency === 'assertive') ? liveRegionAssertive : liveRegionPolite;
+    region.textContent = '';
+    setTimeout(() => { region.textContent = text; }, 50);
   }
 
   function escHtml(str) {
@@ -44,6 +53,32 @@
   }
 
   function $(id) { return document.getElementById(id); }
+
+  /*
+    Render the keyboard shortcut hint using the chord that actually
+    fires the action on the user's OS. The manifest binds
+    Ctrl+Shift+U on Windows/Linux and Command+Shift+U on Mac.
+    Showing Ctrl+Shift+U on Mac confused testers who pressed it and
+    got no audit. userAgentData is the modern API; navigator.platform
+    is the documented fallback for the few Chromium versions that
+    have not exposed it yet.
+  */
+  function platformShortcut() {
+    let isMac = false;
+    const uaData = navigator.userAgentData;
+    if (uaData && typeof uaData.platform === 'string') {
+      isMac = uaData.platform.toLowerCase() === 'macos';
+    } else if (typeof navigator.platform === 'string') {
+      isMac = /mac/i.test(navigator.platform);
+    }
+    return isMac ? 'Command+Shift+U' : 'Ctrl+Shift+U';
+  }
+
+  /* Patch any hardcoded shortcut strings in static markup. */
+  document.addEventListener('DOMContentLoaded', () => {
+    const empty = $('empty-state-row');
+    if (empty) empty.textContent = `Press ${platformShortcut()} on any page to run an audit.`;
+  });
 
   /* ================================================================
      PANEL TABS - WAI-ARIA Tabs Pattern (horizontal)
@@ -190,7 +225,7 @@
       };
       onAuditComplete();
     } else if (message.type === 'audit-error') {
-      announce(`AMASAMYA audit error: ${message.error}`);
+      announce(`AMASAMYA audit error: ${message.error}`, 'assertive');
       $('page-info').textContent = 'Error: ' + message.error;
 
     /* Focus Narrator */
@@ -209,12 +244,12 @@
     } else if (message.type === 'annotated-screenshot-ready') {
       downloadFile(message.dataUrl, 'AMASAMYA-annotated.png', 'image/png');
       $('export-annotated').disabled = false;
-      $('export-annotated').textContent = '📸 Screenshot';
+      $('export-annotated').textContent = 'Annotated screenshot';
       announce(`Annotated screenshot exported (${message.count} issues marked).`);
     } else if (message.type === 'annotated-screenshot-error') {
       $('export-annotated').disabled = false;
-      $('export-annotated').textContent = '📸 Screenshot';
-      announce('Screenshot failed: ' + message.message);
+      $('export-annotated').textContent = 'Annotated screenshot';
+      announce('Screenshot failed: ' + message.message, 'assertive');
     }
   });
 
@@ -242,7 +277,7 @@
         /* Surface restricted-URL or injection errors that were
            dispatched by background.js before the side panel had
            a chance to subscribe to chrome.runtime messages. */
-        announce(`AMASAMYA audit error: ${data.lastAudit.error}`);
+        announce(`AMASAMYA audit error: ${data.lastAudit.error}`, 'assertive');
         $('page-info').textContent = 'Error: ' + data.lastAudit.error;
         chrome.storage.session.remove('lastAudit');
       }
@@ -266,6 +301,13 @@
     $('count-pass').textContent  = pass;
     $('count-info').textContent  = info;
     $('count-total').textContent = allFindings.length;
+    /* Keep the focusable card's aria-label in sync so a screen-reader
+       Tab announces e.g. "Failures: 3" rather than just the number. */
+    $('card-fail').setAttribute('aria-label',  `Failures: ${fail}`);
+    $('card-warn').setAttribute('aria-label',  `Warnings: ${warn}`);
+    $('card-pass').setAttribute('aria-label',  `Passes: ${pass}`);
+    $('card-info').setAttribute('aria-label',  `Info: ${info}`);
+    $('card-total').setAttribute('aria-label', `Total: ${allFindings.length}`);
     $('sev-critical').textContent = critical;
     $('sev-serious').textContent  = serious;
     $('sev-moderate').textContent = moderate;
@@ -374,7 +416,7 @@
   /* Export */
   $('export-json').addEventListener('click', () => {
     downloadFile(JSON.stringify({
-      tool: 'AMASAMYA', version: '4.0.0', page: auditMeta.pageTitle,
+      tool: 'AMASAMYA', version: '4.0.1', page: auditMeta.pageTitle,
       url: auditMeta.pageUrl, timestamp: auditMeta.timestamp,
       summary: { total: allFindings.length, fail: allFindings.filter(f=>f.verdict==='Fail').length,
         warning: allFindings.filter(f=>f.verdict==='Warning').length,
@@ -469,7 +511,7 @@
         tool: {
           driver: {
             name: 'AMASAMYA',
-            version: '4.0.0',
+            version: '4.0.1',
             informationUri: 'https://amasamya.akhileshmalani.com',
             rules
           }
@@ -554,10 +596,15 @@
     // Show regression banner
     const banner = $('regression-banner');
     banner.hidden = false;
+    /* Plain text rather than ▲ / ✔ glyphs so NVDA and JAWS read the
+       intent rather than "black up-pointing triangle" and "heavy
+       check mark". CSS .reg-new and .reg-fixed still colour-code
+       sighted users via the class names. */
+    const sameCount = allFindings.filter(f => f.verdict === 'Fail').length - newCount;
     banner.innerHTML =
-      `<span class="reg-new">▲ ${newCount} new failure${newCount !== 1 ? 's' : ''}</span> &nbsp;` +
-      `<span class="reg-fixed">✔ ${fixedCount} fixed</span> &nbsp;` +
-      `<span class="reg-same">${allFindings.filter(f=>f.verdict==='Fail').length - newCount} unchanged</span>`;
+      `<span class="reg-new">New: ${newCount} failure${newCount !== 1 ? 's' : ''}</span> &nbsp;` +
+      `<span class="reg-fixed">Fixed: ${fixedCount}</span> &nbsp;` +
+      `<span class="reg-same">Unchanged: ${sameCount}</span>`;
 
     // Colour rows - wait for renderFindings to complete via setTimeout(0)
     setTimeout(() => {
@@ -639,10 +686,10 @@
 
   $('reaudit-btn').addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab) { announce('No active tab found.'); return; }
+    if (!tab) { announce('No active tab found.', 'assertive'); return; }
     const reason = restrictedUrlReason(tab.url);
     if (reason) {
-      announce(reason);
+      announce(reason, 'assertive');
       $('page-info').textContent = reason;
       return;
     }
@@ -650,7 +697,7 @@
     try {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content-script.js'] });
     } catch (err) {
-      announce('AMASAMYA could not run on this tab: ' + err.message);
+      announce('AMASAMYA could not run on this tab: ' + err.message, 'assertive');
     }
   });
 
@@ -694,7 +741,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 <div style="overflow-x:auto;"><table aria-label="Findings">
 <thead><tr><th>ID</th><th>Engine</th><th>Element</th><th>Criterion</th><th>Severity</th><th>Verdict</th><th>Detail</th></tr></thead>
 <tbody>${rows}</tbody></table></div></main>
-<footer>Generated by AMASAMYA v4.0.0 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
+<footer>Generated by AMASAMYA v4.0.1 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
 </body></html>`;
   }
 
@@ -760,7 +807,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       $('fn-run-btn').disabled = false;
       $('fn-progress-wrap').hidden = true;
       $('fn-progress-label').textContent = 'Error: ' + msg.message;
-      announce('Focus Narrator error: ' + msg.message);
+      announce('Focus Narrator error: ' + msg.message, 'assertive');
     }
   }
 
@@ -779,7 +826,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     const indicatorText = hasFocus ? `${indicator}${color ? ' ' + color : ''}${thickness ? ' ' + thickness : ''}` : 'None';
 
     const verdictClass = verdict === 'PASS' ? 'verdict-pass' : verdict === 'FAIL' ? 'verdict-fail' : 'verdict-warn';
-    const scToText = v => v === true ? '✓ Pass' : v === false ? '✗ Fail' : '?';
+    const scToText = v => v === true ? 'Pass' : v === false ? 'Fail' : 'Unknown';
 
     tr.innerHTML = `
       <td>${rowNum}</td>
@@ -882,7 +929,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       $('vla-run-btn').disabled = false;
       $('vla-progress-wrap').hidden = true;
       $('vla-progress-label').textContent = 'Error: ' + msg.message;
-      announce('Visual Layout Audit error: ' + msg.message);
+      announce('Visual Layout Audit error: ' + msg.message, 'assertive');
     }
   }
 
@@ -907,14 +954,14 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     card.innerHTML = `
       <h4 class="vla-bp-label">${escHtml(bp.label)}
         <span class="vla-issue-count ${hasIssues ? 'has-issues' : 'no-issues'}">
-          ${hasIssues ? issues.length + ' issue' + (issues.length !== 1 ? 's' : '') : '✓ No issues'}
+          ${hasIssues ? issues.length + ' issue' + (issues.length !== 1 ? 's' : '') : 'No issues'}
         </span>
       </h4>
       ${finding?.summary ? `<p class="vla-summary">${escHtml(finding.summary)}</p>` : ''}
       ${screenshot ? `
         <details class="vla-screenshot-details">
           <summary>View screenshot at ${escHtml(bp.label)}</summary>
-          <img src="${screenshot}" alt="Screenshot of page at ${escHtml(bp.label)}" class="vla-screenshot"
+          <img src="${escHtml(screenshot)}" alt="Screenshot of page at ${escHtml(bp.label)}" class="vla-screenshot"
                style="max-width:100%;margin-top:8px;border:1px solid #ccc;border-radius:4px;">
         </details>` : ''}
       ${hasIssues ? `
@@ -1049,7 +1096,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       $('scw-start-btn').disabled = false;
       $('scw-stop-btn').disabled  = true;
       $('scw-status').textContent = 'Error: ' + msg.message;
-      announce('State Change Watchdog error: ' + msg.message);
+      announce('State Change Watchdog error: ' + msg.message, 'assertive');
     }
   }
 
@@ -1065,7 +1112,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
                                   'verdict-info';
 
     tr.innerHTML = `
-      <td>${ev.id}</td>
+      <td>${escHtml(String(ev.id))}</td>
       <td>${escHtml(ev.time)}</td>
       <td class="${verdictClass}">${escHtml(ev.verdict)}</td>
       <td>${escHtml(ev.eventType)}</td>
