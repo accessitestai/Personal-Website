@@ -86,11 +86,14 @@ this project, ever, going forward.
 - **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
-  ID `blnfmiipkccpggpinjofhhglfcgglbif`. Currently at v3.4.2 with 19 audit
-  engines. (v3.4.1 was rejected by Chrome Web Store under rejection code
-  "Purple Nickel" for a privacy policy that lacked explicit per-category
-  data disclosures; v3.4.2 ships the rewritten policy plus side-panel UX
-  hardening described in the v3.4.2 commit.)
+  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v3.4.2 was the last shipped patch
+  and reached Published status without further reviewer pushback. Current
+  development branch targets v4.0.0 with 24 audit engines (five new ones
+  added on top of the 19 from v3.4.2: SC 1.3.5 Identify Input Purpose,
+  SC 2.5.7 Dragging Movements, SC 3.2.6 Consistent Help, SC 3.3.7
+  Redundant Entry, SC 3.3.8 Accessible Authentication Minimum). Audit
+  diff and history is planned for v4.1.0, offline-only Vision AI for
+  v5.0; see amasamya-extension/ROADMAP.md.
 - **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
   private at github.com/accessitestai/Personal-Website.

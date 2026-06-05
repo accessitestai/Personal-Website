@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Background Service Worker v3.4.2
+ * AMASAMYA Extension - Background Service Worker v4.0.0
  *
  * Orchestrates:
  *   A. WCAG Audit  - injects content-script.js, relays findings to side panel + platform

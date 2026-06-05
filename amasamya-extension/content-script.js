@@ -1,6 +1,6 @@
 /**
  * AMASAMYA Extension - Content Script
- * Injected into the active tab to run all 13 audit engines.
+ * Injected into the active tab to run all 24 audit engines.
  * Results are sent to the service worker via chrome.runtime.sendMessage.
  */
 
@@ -15,7 +15,7 @@
      PHASE 1 ENGINES + UTILITIES (inlined from phase1-engines.js)
   ================================================================ */
 
-  const TOOL_VERSION = '3.1.0';
+  const TOOL_VERSION = '4.0.0';
   const CONTRAST = { NORMAL_AA: 4.5, LARGE_AA: 3.0, NORMAL_AAA: 7.0, LARGE_AAA: 4.5, NON_TEXT: 3.0 };
   const LARGE_TEXT_PT_BOLD = 14;
   const LARGE_TEXT_PT_NORMAL = 18;
@@ -901,6 +901,409 @@
   }
 
   /* ================================================================
+     ENGINE 20: IDENTIFY INPUT PURPOSE (WCAG 2.2 SC 1.3.5 Level AA)
+     Standalone reference: engines/input-purpose.js (kept in sync).
+  ================================================================ */
+  function auditInputPurpose() {
+    const WCAG_TOKENS = new Set([
+      'name','honorific-prefix','given-name','additional-name','family-name',
+      'honorific-suffix','nickname','organization-title','username',
+      'new-password','current-password','organization',
+      'street-address','address-line1','address-line2','address-line3',
+      'address-level4','address-level3','address-level2','address-level1',
+      'country','country-name','postal-code',
+      'cc-name','cc-given-name','cc-additional-name','cc-family-name',
+      'cc-number','cc-exp','cc-exp-month','cc-exp-year','cc-csc','cc-type',
+      'transaction-currency','transaction-amount','language',
+      'bday','bday-day','bday-month','bday-year',
+      'sex','url','photo',
+      'tel','tel-country-code','tel-national','tel-area-code',
+      'tel-local','tel-local-prefix','tel-local-suffix','tel-extension',
+      'email','impp'
+    ]);
+    function labelTextFor(el) {
+      if (el.id) {
+        const lbl = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        if (lbl) return (lbl.textContent || '').trim();
+      }
+      return el.closest('label')?.textContent?.trim() || '';
+    }
+    function haystack(el) {
+      return [el.name||'', el.id||'', el.getAttribute('placeholder')||'',
+              labelTextFor(el), el.getAttribute('aria-label')||''].join(' ');
+    }
+    function classify(el) {
+      const t = (el.type||'text').toLowerCase();
+      if (t === 'email') return { purpose: 'email', confidence: 'high' };
+      if (t === 'tel')   return { purpose: 'tel',   confidence: 'high' };
+      if (t === 'url')   return { purpose: 'url',   confidence: 'high' };
+      if (t === 'password') {
+        const form = el.form;
+        const pws = form ? form.querySelectorAll('input[type="password"]') : [];
+        return { purpose: pws.length > 1 ? 'new-password' : 'current-password', confidence: 'high' };
+      }
+      const h = haystack(el);
+      const rules = [
+        [/\bemail\b|e-mail/i,                                'email',          'medium'],
+        [/\b(first[\s_-]?name|given[\s_-]?name|fname)\b/i,   'given-name',     'medium'],
+        [/\b(last[\s_-]?name|family[\s_-]?name|surname|lname)\b/i, 'family-name', 'medium'],
+        [/\b(full[\s_-]?name|your[\s_-]?name)\b/i,           'name',           'medium'],
+        [/\b(phone|mobile|telephone|cell)\b/i,               'tel',            'medium'],
+        [/\b(street|address1|addr1)\b/i,                     'street-address', 'medium'],
+        [/\b(city|town)\b/i,                                 'address-level2', 'medium'],
+        [/\b(state|province|region)\b/i,                     'address-level1', 'medium'],
+        [/\b(zip|postcode|postal[\s_-]?code|pincode)\b/i,    'postal-code',    'medium'],
+        [/\bcountry\b/i,                                     'country',        'medium'],
+        [/\b(card[\s_-]?number|cardnum|creditcard)\b/i,      'cc-number',      'high'],
+        [/\b(cvv|cvc|csc|security[\s_-]?code)\b/i,           'cc-csc',         'high'],
+        [/\b(expir(y|ation)|exp[\s_-]?date)\b/i,             'cc-exp',         'medium'],
+        [/\b(username|userid|login)\b/i,                     'username',       'low'],
+        [/\b(birth|bday|dob)\b/i,                            'bday',           'medium']
+      ];
+      for (const [re, purpose, confidence] of rules) {
+        if (re.test(h)) return { purpose, confidence };
+      }
+      return null;
+    }
+    function getTokens(el) {
+      const raw = el.getAttribute('autocomplete');
+      if (raw == null) return { kind: 'absent', tokens: [] };
+      const lc = raw.trim().toLowerCase();
+      if (lc === '' || lc === 'off') return { kind: 'off', tokens: [] };
+      if (lc === 'on') return { kind: 'on', tokens: [] };
+      return { kind: 'present', tokens: lc.split(/\s+/) };
+    }
+    const findings = [];
+    document.querySelectorAll('input').forEach(el => {
+      if (el.tagName !== 'INPUT') return;
+      const t = (el.type||'text').toLowerCase();
+      const skip = new Set(['search','hidden','submit','reset','button','image','checkbox','radio','file','color','range','number']);
+      if (skip.has(t)) return;
+      if (el.closest('[role="search"], form[role="search"]')) return;
+      const cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      const guess = classify(el);
+      if (!guess) return;
+      const decl = getTokens(el);
+      const base = {
+        id: generateId(), engine: 'Identify Input Purpose', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 1.3.5 Identify Input Purpose (Level AA)'
+      };
+      if (decl.kind === 'absent' || decl.kind === 'on') {
+        findings.push(Object.assign({}, base, {
+          issue: `Field collects ${guess.purpose} but has no autocomplete attribute.`,
+          computed: `autocomplete=${decl.kind}`, required: `autocomplete="${guess.purpose}"`,
+          verdict: 'Fail', severity: guess.confidence === 'high' ? SEV.SERIOUS : SEV.MODERATE,
+          howToFix: `Add autocomplete="${guess.purpose}" to this input.`
+        }));
+      } else if (decl.kind === 'off') {
+        findings.push(Object.assign({}, base, {
+          issue: `autocomplete="off" blocks SC 1.3.5 programmatic identification of ${guess.purpose}.`,
+          computed: 'autocomplete="off"', required: `autocomplete="${guess.purpose}"`,
+          verdict: 'Fail', severity: SEV.SERIOUS,
+          howToFix: `Replace autocomplete="off" with autocomplete="${guess.purpose}".`
+        }));
+      } else if (decl.tokens.includes(guess.purpose)) {
+        findings.push(Object.assign({}, base, {
+          issue: `Field correctly declares autocomplete="${guess.purpose}".`,
+          computed: `autocomplete="${decl.tokens.join(' ')}"`, required: `autocomplete="${guess.purpose}"`,
+          verdict: 'Pass', severity: SEV.MINOR, howToFix: ''
+        }));
+      } else if (decl.tokens.some(t => WCAG_TOKENS.has(t))) {
+        findings.push(Object.assign({}, base, {
+          issue: `Field declares "${decl.tokens.join(' ')}" but classifier expected "${guess.purpose}". Confirm which is correct.`,
+          computed: `autocomplete="${decl.tokens.join(' ')}"`, required: `autocomplete="${guess.purpose}"`,
+          verdict: 'Warning', severity: SEV.MINOR,
+          howToFix: `If the field truly collects ${guess.purpose}, change the autocomplete value.`
+        }));
+      } else {
+        findings.push(Object.assign({}, base, {
+          issue: `autocomplete="${decl.tokens.join(' ')}" is not a WCAG 2.2 input-purpose token.`,
+          computed: `autocomplete="${decl.tokens.join(' ')}"`, required: `autocomplete="${guess.purpose}"`,
+          verdict: 'Fail', severity: SEV.MODERATE,
+          howToFix: `Replace with autocomplete="${guess.purpose}".`
+        }));
+      }
+    });
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 21: DRAGGING MOVEMENTS (WCAG 2.2 SC 2.5.7 Level AA)
+     Production detection is attribute and ARIA based; runtime
+     listener probing requires document_start injection which the
+     extension does not currently use. Standalone reference module
+     engines/dragging-movements.js covers the listener-probe path
+     for unit tests.
+  ================================================================ */
+  function auditDraggingMovements() {
+    const findings = [];
+    const INLINE_DRAG = ['ondragstart','ondrag','onpointerdown','onpointermove','onmousedown','onmousemove','ontouchstart','ontouchmove'];
+    function hasInlineDrag(el) {
+      return INLINE_DRAG.some(a => el.hasAttribute(a));
+    }
+    function isDraggable(el) {
+      if (el.getAttribute('draggable') === 'true') return 'html5-draggable';
+      if (hasInlineDrag(el)) return 'inline-handler';
+      const role = (el.getAttribute('role')||'').toLowerCase();
+      if ((role === 'slider' || role === 'scrollbar') && el.hasAttribute('aria-valuenow')) return 'aria-' + role;
+      const cs = window.getComputedStyle(el);
+      if (cs.cursor === 'grab' || cs.cursor === 'grabbing') return 'cursor-grab';
+      return null;
+    }
+    function hasAlternative(el) {
+      const role = (el.getAttribute('role')||'').toLowerCase();
+      if ((role === 'slider' || role === 'scrollbar') && el.tabIndex >= 0) return true;
+      if (el.hasAttribute('onkeydown') || el.hasAttribute('onkeyup') || el.hasAttribute('onkeypress')) return true;
+      const scope = el.parentElement || el;
+      const buttons = scope.querySelectorAll('button, [role="button"]');
+      return Array.from(buttons).some(b => {
+        const n = (b.getAttribute('aria-label') || b.textContent || '').trim();
+        return n.length > 0;
+      });
+    }
+    document.querySelectorAll('*').forEach(el => {
+      const kind = isDraggable(el);
+      if (!kind) return;
+      const cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      const alt = hasAlternative(el);
+      const base = {
+        id: generateId(), engine: 'Dragging Movements', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 2.5.7 Dragging Movements (Level AA)'
+      };
+      if (alt) {
+        findings.push(Object.assign({}, base, {
+          issue: `Dragging detected (${kind}) and a single-pointer alternative is present.`,
+          computed: kind, required: 'Single-pointer alternative',
+          verdict: 'Pass', severity: SEV.MINOR, howToFix: ''
+        }));
+      } else {
+        findings.push(Object.assign({}, base, {
+          issue: `Dragging detected (${kind}) but no single-pointer alternative found in parent scope.`,
+          computed: kind, required: 'Single-pointer alternative',
+          verdict: 'Warning', severity: SEV.MODERATE,
+          howToFix: 'Add a labelled button alternative (Move up / Move down, +/-) or expose role=slider with aria-valuenow + tabindex + keydown handler.'
+        }));
+      }
+    });
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 22: CONSISTENT HELP (WCAG 2.2 SC 3.2.6 Level A)
+     Single-page detection emits Warnings only; cross-page comparison
+     comes in v4.1 audit-diff feature.
+  ================================================================ */
+  function auditConsistentHelp() {
+    function name(el) { return (el.getAttribute('aria-label')||el.textContent||'').trim(); }
+    const rules = [
+      ['human contact mechanism', el => el.tagName === 'A' && /^tel:/i.test(el.getAttribute('href')||'')],
+      ['human contact details',   el => el.tagName === 'A' && /^mailto:/i.test(el.getAttribute('href')||'')],
+      ['human contact mechanism', el => el.tagName === 'A' && /\bcontact\b/i.test(name(el))],
+      ['self-help option',        el => el.tagName === 'A' && /\b(faq|knowledge\s*base|documentation|docs|help center)\b/i.test(name(el))],
+      ['self-help option',        el => el.tagName === 'A' && /\b(help|support)\b/i.test(name(el))],
+      ['fully automated contact', el => (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button') && /\b(chat|message us|live chat|chatbot)\b/i.test(name(el))]
+    ];
+    const findings = [];
+    const ordered = [];
+    document.querySelectorAll('a, button, [role="button"]').forEach(el => {
+      const cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      let category = null;
+      for (const [cat, fn] of rules) { try { if (fn(el)) { category = cat; break; } } catch (_) {} }
+      if (!category) return;
+      ordered.push({ order: ordered.length+1, category, name: name(el).slice(0, 60) });
+      findings.push({
+        id: generateId(), engine: 'Consistent Help', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 3.2.6 Consistent Help (Level A)',
+        issue: `Help mechanism detected: ${category}. Single-page audit cannot verify "same relative order across pages".`,
+        computed: `${category} at position ${ordered.length}`,
+        required: 'Same relative order on every page where present',
+        verdict: 'Warning', severity: SEV.MINOR,
+        howToFix: `Re-run AMASAMYA on a second page of the same site and compare the order recorded here.`
+      });
+    });
+    try {
+      sessionStorage.setItem('__AMASAMYA_HelpOrder',
+        JSON.stringify({ url: location.href, taken: new Date().toISOString(), items: ordered }));
+    } catch (_) {}
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 23: REDUNDANT ENTRY (WCAG 2.2 SC 3.3.7 Level A)
+  ================================================================ */
+  function auditRedundantEntry() {
+    const STEP_SELECTORS = ['ol.step-indicator','ol.steps','ol.wizard-steps',
+      '[role="progressbar"][aria-valuemax]','[aria-current="step"]',
+      '.step-progress','.checkout-steps'];
+    const REENTRY = /\b(re[-\s]?enter|enter again|for verification|confirm your|reconfirm)\b/i;
+    const AUTOFILL = /\b(same(\s+\w+){0,3}\s+as|use\s+(same|shipping|previous|saved)|copy\s+from|auto[-\s]?fill)\b/i;
+    function isMultiStep() {
+      if (STEP_SELECTORS.some(s => document.querySelector(s))) return true;
+      const h1 = document.querySelector('h1');
+      return h1 && /step\s*\d+\s*of\s*\d+/i.test(h1.textContent||'');
+    }
+    function hasAutofill(scope) {
+      return Array.from((scope||document).querySelectorAll('label, button'))
+        .some(el => AUTOFILL.test((el.textContent||'').trim()));
+    }
+    function nearbyText(el) {
+      let bag = '';
+      if (el.id) bag += ' ' + (document.querySelector(`label[for="${CSS.escape(el.id)}"]`)?.textContent || '');
+      bag += ' ' + (el.closest('label')?.textContent || '');
+      let sib = el.previousElementSibling; let hops = 0;
+      while (sib && hops < 3) { bag += ' ' + (sib.textContent||''); sib = sib.previousElementSibling; hops++; }
+      return bag;
+    }
+    const findings = [];
+    if (hasAutofill(document)) {
+      const ctl = Array.from(document.querySelectorAll('label, button'))
+        .find(el => AUTOFILL.test((el.textContent||'').trim()));
+      if (ctl) findings.push({
+        id: generateId(), engine: 'Redundant Entry', element: describeEl(ctl),
+        criterion: 'WCAG 2.2 SC 3.3.7 Redundant Entry (Level A)',
+        issue: 'Auto-fill or "same as previous" control detected.',
+        computed: 'autofill control present', required: 'Auto-fill or selection for repeated values',
+        verdict: 'Pass', severity: SEV.MINOR, howToFix: ''
+      });
+    }
+    if (!isMultiStep()) return findings;
+    document.querySelectorAll('input[autocomplete]:not([autocomplete="off"])').forEach(el => {
+      const cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      const reentry = REENTRY.test(nearbyText(el));
+      const af = hasAutofill(el.closest('form, fieldset, section'));
+      const ac = el.getAttribute('autocomplete');
+      const base = {
+        id: generateId(), engine: 'Redundant Entry', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 3.3.7 Redundant Entry (Level A)'
+      };
+      if (reentry && !af) {
+        findings.push(Object.assign({}, base, {
+          issue: `Multi-step flow asks the user to re-enter ${ac} without an auto-fill option.`,
+          computed: 're-entry wording near field, no autofill', required: 'Auto-fill or "use previous" control',
+          verdict: 'Fail', severity: SEV.MODERATE,
+          howToFix: 'Pre-populate the field or provide a "use previous"/"same as" control.'
+        }));
+      } else {
+        findings.push(Object.assign({}, base, {
+          issue: `Multi-step flow detected. Field collects ${ac}; cannot confirm whether the value was already requested earlier.`,
+          computed: 'multi-step + field with known purpose', required: 'Verify against prior steps',
+          verdict: 'Warning', severity: SEV.MINOR,
+          howToFix: 'If this value was already collected earlier in the flow, pre-populate or expose a "use previous" control.'
+        }));
+      }
+    });
+    return findings;
+  }
+
+  /* ================================================================
+     ENGINE 24: ACCESSIBLE AUTHENTICATION, MINIMUM
+                (WCAG 2.2 SC 3.3.8 Level AA)
+  ================================================================ */
+  function auditAccessibleAuth() {
+    const CAPTCHA_SRC  = /(google\.com\/recaptcha|hcaptcha\.com|turnstile\.cloudflare|captcha\.com)/i;
+    const CAPTCHA_TXT  = /\b(captcha|recaptcha|hcaptcha|i'?m not a robot|prove you are human)\b/i;
+    const PUZZLE_TXT   = /\b(select all|identify (the )?(images|pictures) (with|containing)|click each|drag the slider to)\b/i;
+    const MAGIC_LINK   = /\b(magic\s*link|sign\s*in\s*with\s*a\s*link|email\s*link|passwordless|email me a link)\b/i;
+    const MEMORABLE    = /\b(memorable|memorise|memorize|recall your)\s+(password|word)\b/i;
+    function name(el) { return (el.getAttribute('aria-label')||el.textContent||el.getAttribute('alt')||'').trim(); }
+    function isVis(el) {
+      const cs = window.getComputedStyle(el);
+      return !(cs.display === 'none' || cs.visibility === 'hidden');
+    }
+    const magicLink = Array.from(document.querySelectorAll('a, button'))
+      .some(l => MAGIC_LINK.test(name(l)));
+    const findings = [];
+
+    document.querySelectorAll('iframe').forEach(el => {
+      if (!isVis(el)) return;
+      const src = el.getAttribute('src')||'';
+      const title = el.getAttribute('title')||'';
+      if (!(CAPTCHA_SRC.test(src) || CAPTCHA_TXT.test(title))) return;
+      const base = {
+        id: generateId(), engine: 'Accessible Authentication', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 3.3.8 Accessible Authentication Minimum (Level AA)'
+      };
+      if (magicLink) {
+        findings.push(Object.assign({}, base, {
+          issue: 'CAPTCHA present but magic-link alternative is available on the same page.',
+          computed: 'CAPTCHA + alternative', required: 'Alternative authentication method',
+          verdict: 'Pass', severity: SEV.MINOR, howToFix: ''
+        }));
+      } else {
+        findings.push(Object.assign({}, base, {
+          issue: 'CAPTCHA iframe with no alternative authentication method on the page.',
+          computed: 'CAPTCHA, no alternative', required: 'Alternative method',
+          verdict: 'Fail', severity: SEV.SERIOUS,
+          howToFix: 'Provide magic-link / email-link sign-in, WebAuthn, or an object-recognition CAPTCHA.'
+        }));
+      }
+    });
+
+    document.querySelectorAll('input[type="password"]').forEach(el => {
+      if (!isVis(el)) return;
+      const onpaste = el.getAttribute('onpaste')||'';
+      const ac = (el.getAttribute('autocomplete')||'').toLowerCase();
+      const blocksPaste = /false|return\s*false|preventdefault/i.test(onpaste);
+      const blocksAc = ac === 'off';
+      const labelText = (el.id ? document.querySelector(`label[for="${CSS.escape(el.id)}"]`)?.textContent : '') || el.closest('label')?.textContent || '';
+      const memorable = MEMORABLE.test(labelText);
+      const base = {
+        id: generateId(), engine: 'Accessible Authentication', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 3.3.8 Accessible Authentication Minimum (Level AA)'
+      };
+      if (blocksPaste || blocksAc || memorable) {
+        findings.push(Object.assign({}, base, {
+          issue: 'Password field blocks password-manager assistance, forcing recall (cognitive function test).',
+          computed: `${blocksPaste?'paste blocked, ':''}${blocksAc?'autocomplete=off, ':''}${memorable?'memorable wording':''}`.replace(/,\s*$/,''),
+          required: 'Allow paste + autocomplete="current-password" / "new-password"',
+          verdict: 'Fail', severity: SEV.SERIOUS,
+          howToFix: 'Remove onpaste blockers, replace autocomplete="off" with the correct token, drop "memorable password" wording.'
+        }));
+      } else if (ac.includes('current-password') || ac.includes('new-password')) {
+        findings.push(Object.assign({}, base, {
+          issue: 'Password field allows password-manager assistance.',
+          computed: `autocomplete="${ac}", paste allowed`,
+          required: 'autocomplete + paste enabled',
+          verdict: 'Pass', severity: SEV.MINOR, howToFix: ''
+        }));
+      }
+    });
+
+    document.querySelectorAll('fieldset').forEach(el => {
+      if (!isVis(el)) return;
+      const legend = el.querySelector('legend');
+      if (!legend || !PUZZLE_TXT.test(legend.textContent||'')) return;
+      if (el.querySelectorAll('img').length < 2) return;
+      findings.push({
+        id: generateId(), engine: 'Accessible Authentication', element: describeEl(el),
+        criterion: 'WCAG 2.2 SC 3.3.8 Accessible Authentication Minimum (Level AA)',
+        issue: 'Image-selection puzzle pattern detected. May be CAPTCHA or legitimate UI.',
+        computed: 'fieldset with image grid + selection wording',
+        required: 'If CAPTCHA, provide alternative',
+        verdict: 'Warning', severity: SEV.MODERATE,
+        howToFix: 'If this is authentication, replace with object-recognition or provide a magic-link alternative.'
+      });
+    });
+
+    if (magicLink) {
+      const ml = Array.from(document.querySelectorAll('a, button'))
+        .find(l => MAGIC_LINK.test(name(l)));
+      if (ml) findings.push({
+        id: generateId(), engine: 'Accessible Authentication', element: describeEl(ml),
+        criterion: 'WCAG 2.2 SC 3.3.8 Accessible Authentication Minimum (Level AA)',
+        issue: 'Magic-link / passwordless sign-in alternative detected.',
+        computed: 'magic-link link present', required: 'Non-cognitive alternative',
+        verdict: 'Pass', severity: SEV.MINOR, howToFix: ''
+      });
+    }
+    return findings;
+  }
+
+  /* ================================================================
      MAIN RUNNER
   ================================================================ */
   try {
@@ -924,7 +1327,13 @@
       { name: 'Resize Text', fn: auditResizeText },
       { name: 'Dark Mode Contrast', fn: auditDarkModeContrast },
       { name: 'Colour-Only Meaning', fn: auditColourOnlyMeaning },
-      { name: 'Target Size AAA', fn: auditTargetSizeAAA }
+      { name: 'Target Size AAA', fn: auditTargetSizeAAA },
+      /* v4.0.0 additions: SCs 1.3.5, 2.5.7, 3.2.6, 3.3.7, 3.3.8. */
+      { name: 'Identify Input Purpose', fn: auditInputPurpose },
+      { name: 'Dragging Movements', fn: auditDraggingMovements },
+      { name: 'Consistent Help', fn: auditConsistentHelp },
+      { name: 'Redundant Entry', fn: auditRedundantEntry },
+      { name: 'Accessible Authentication', fn: auditAccessibleAuth }
     ];
 
     const findings = [];

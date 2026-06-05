@@ -1,20 +1,27 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-05-20.
+Last reviewed: 2026-06-04.
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
 If a feature is not on this list, it is not planned.
 
-## Current release: v3.4.1
+## Current release: v3.4.2 (Published)
 
 Shipping with 19 WCAG 2.2 audit engines, three Vision AI providers
 (Gemini, Anthropic, OpenAI), Focus Indicator Narrator, Visual Layout
 Auditor, State Change Watchdog, baseline regression detection,
-side-panel UI, and exports to JSON, HTML, CSV, Text, SARIF, and
-annotated PNG.
+side-panel UI with Close button + Escape-key focus trap +
+restricted-URL guard, and exports to JSON, HTML, CSV, Text, SARIF,
+and annotated PNG. Privacy policy rewritten to satisfy Chrome Web
+Store per-category disclosure requirements.
 
-Status: audited, ZIP built, awaiting upload to Chrome Web Store.
+Status: Published on the Chrome Web Store; no open reviewer issues.
+
+## In development: v4.0.0
+
+The five new engines below are now wired into content-script.js.
+Engine count moves from 19 to 24.
 
 ## v4.0 - "Coverage and continuity"
 
