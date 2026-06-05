@@ -36,6 +36,7 @@ function makeFakeDeps(opts) {
     removeTab: async (tabId) => { events.push({ op: 'removeTab', tabId: tabId }); },
     getTab:    async (tabId) => ({ id: tabId, url: opts.finalUrl || 'https://example.com/p', title: opts.finalTitle || 'Example' }),
     executeScript: async (tabId, files) => { events.push({ op: 'executeScript', tabId: tabId, files: files }); },
+    awaitAuditResults: async (tabId) => opts.findings || [],
     onTabUpdated: {
       addListener:    (fn) => { listenerHolder.listener = fn; },
       removeListener: ()   => { listenerHolder.listener = null; }

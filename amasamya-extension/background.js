@@ -29,6 +29,21 @@ const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
    ──────────────────────────────────────────────────────── */
 const SITE_CRAWL_ENABLED = false;
 
+/* Pull the crawler + sitemap parser into the service worker
+   scope. importScripts is the only way to share code between
+   files in an MV3 classic service worker; module-type SWs
+   would allow ESM imports but we have not migrated. The
+   modules guard their exports behind `self.AMASAMYA*` globals,
+   so this is safe to evaluate even while the feature flag is
+   off (they just sit dormant). */
+try {
+  if (typeof self.importScripts === 'function') {
+    self.importScripts('engines/site-crawler.js', 'engines/sitemap-parser.js');
+  }
+} catch (e) {
+  console.warn('AMASAMYA: site crawl modules not loaded:', e && e.message);
+}
+
 /* ════════════════════════════════════════════════════════
    A. WCAG AUDIT - existing behaviour (unchanged)
 ════════════════════════════════════════════════════════ */
@@ -85,7 +100,168 @@ chrome.action.onClicked.addListener(async (tab) => {
   }
 });
 
+/* ════════════════════════════════════════════════════════
+   SITE CRAWL ORCHESTRATOR (v4.2.0)
+   ────────────────────────────────────────────────────────
+   Lives in the service worker. Receives `site-crawl-start`
+   from the side panel, resolves the URL list (via the
+   sitemap parser if requested), constructs SiteCrawler with
+   chrome deps + an awaitAuditResults implementation that
+   intercepts the standard `audit-results` message bus, runs
+   the crawl, broadcasts `site-crawl-ui` phase updates back
+   to the panel, and forwards each page's findings to the
+   platform tab via a new `AMASAMYA_crawl_page_result`
+   message.
+
+   All access is gated by SITE_CRAWL_ENABLED. If the flag is
+   off the message handlers are still registered but reject
+   immediately with a clear reason.
+═════════════════════════════════════════════════════════ */
+
+let __crawlCurrent  = null; /* { crawler, waiters: Map<tabId, resolve> } */
+const CRAWL_WAIT_TIMEOUT = 25000; /* match the per-page audit budget */
+
+function broadcastCrawlUi(message) {
+  /* The side panel may not be open. Swallow disconnected-port errors. */
+  chrome.runtime.sendMessage(Object.assign({ type: 'site-crawl-ui' }, message)).catch(() => {});
+}
+
+async function sendCrawlPageToPlatform(record) {
+  /* Forward a single page's findings to the AMASAMYA platform tab if
+     one is open. Mirrors the silent-when-absent behaviour of
+     sendResultsToPlatform: we never auto-open the platform; if it is
+     not already in a tab, the crawl results stay on-device for
+     export. */
+  try {
+    const existingTabs = await chrome.tabs.query({ url: PLATFORM_URL + '/*' });
+    if (existingTabs.length === 0) return;
+    const platformTab = existingTabs[0];
+    await chrome.tabs.sendMessage(platformTab.id, {
+      type:      'AMASAMYA_crawl_page_result',
+      url:       record.url,
+      finalUrl:  record.finalUrl,
+      title:     record.finalTitle,
+      status:    record.status,
+      index:     record.index,
+      findings:  record.findings || [],
+      durationMs: record.durationMs,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    console.warn('AMASAMYA platform crawl bridge:', err && err.message);
+  }
+}
+
+async function startSiteCrawl(input) {
+  if (!SITE_CRAWL_ENABLED) {
+    broadcastCrawlUi({ phase: 'error', message: 'Site Crawl is disabled in this build.' });
+    return;
+  }
+  if (__crawlCurrent) {
+    broadcastCrawlUi({ phase: 'error', message: 'A crawl is already running.' });
+    return;
+  }
+  if (typeof self.AMASAMYASiteCrawler === 'undefined') {
+    broadcastCrawlUi({ phase: 'error', message: 'Site Crawl modules failed to load.' });
+    return;
+  }
+
+  /* Resolve the URL list. */
+  let urls = [];
+  try {
+    if (input && input.source === 'sitemap') {
+      const parsed = await self.AMASAMYASitemapParser.resolveSiteUrls(input.root, {});
+      urls = parsed.urls.map(u => u.loc);
+      if (parsed.capped) {
+        broadcastCrawlUi({ phase: 'progress', index: 0, total: urls.length,
+          url: `Sitemap had ${parsed.total} URLs; crawling top ${urls.length} by priority.` });
+      }
+    } else if (input && input.source === 'list') {
+      urls = Array.isArray(input.urls) ? input.urls : [];
+    } else {
+      broadcastCrawlUi({ phase: 'error', message: 'No URL source provided.' });
+      return;
+    }
+  } catch (err) {
+    broadcastCrawlUi({ phase: 'error', message: 'URL resolution failed: ' + (err && err.message ? err.message : String(err)) });
+    return;
+  }
+
+  if (!urls.length) {
+    broadcastCrawlUi({ phase: 'error', message: 'No URLs to crawl after resolution.' });
+    return;
+  }
+
+  /* Construct crawler with real chrome deps + an awaitAuditResults
+     impl that intercepts the standard audit-results message for the
+     specific tab id we just injected. */
+  const waiters = new Map(); /* tabId -> { resolve, reject, timer } */
+  const crawler = new self.AMASAMYASiteCrawler.SiteCrawler({
+    createTab:        (url) => chrome.tabs.create({ url: url, active: false }),
+    removeTab:        (tabId) => chrome.tabs.remove(tabId),
+    getTab:           (tabId) => chrome.tabs.get(tabId),
+    executeScript:    (tabId, files) => chrome.scripting.executeScript({ target: { tabId: tabId }, files: files }),
+    onTabUpdated:     chrome.tabs && chrome.tabs.onUpdated,
+    onAuditMessage:   chrome.runtime && chrome.runtime.onMessage,
+    awaitAuditResults: (tabId, timeoutMs) => new Promise((resolve) => {
+      const ms = (typeof timeoutMs === 'number' ? timeoutMs : CRAWL_WAIT_TIMEOUT);
+      const timer = setTimeout(() => { waiters.delete(tabId); resolve(null); }, ms);
+      waiters.set(tabId, { resolve: resolve, timer: timer });
+    }),
+    delay:            (ms) => new Promise((r) => setTimeout(r, ms)),
+    now:              () => Date.now()
+  });
+
+  __crawlCurrent = { crawler: crawler, waiters: waiters };
+
+  crawler
+    .on('progress',     (p) => broadcastCrawlUi({ phase: 'progress', index: p.index, total: p.total, url: p.url }))
+    .on('pageComplete', async (rec) => {
+      broadcastCrawlUi({ phase: 'pageComplete', record: rec });
+      if (rec.status === 'audited' && Array.isArray(rec.findings) && rec.findings.length > 0) {
+        await sendCrawlPageToPlatform(rec);
+      }
+    })
+    .on('complete',     (summary) => {
+      broadcastCrawlUi({ phase: 'complete', summary: summary });
+      __crawlCurrent = null;
+    });
+
+  broadcastCrawlUi({ phase: 'queued', total: urls.length });
+  await crawler.start(urls);
+}
+
+function cancelSiteCrawl() {
+  if (__crawlCurrent && __crawlCurrent.crawler) {
+    __crawlCurrent.crawler.cancel();
+    broadcastCrawlUi({ phase: 'cancelled' });
+  }
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  /* ── Site Crawl control ── */
+  if (message && message.type === 'site-crawl-start') {
+    startSiteCrawl(message.input);
+    return false;
+  }
+  if (message && message.type === 'site-crawl-cancel') {
+    cancelSiteCrawl();
+    return false;
+  }
+
+  /* ── Crawl-internal: an audit-results message that arrives from a
+        crawler-managed tab should be routed to the waiter that the
+        crawler installed, NOT broadcast to the side panel as a
+        standalone audit result. Detect by checking the waiters
+        map for the sender's tab id. ──────────────────────────── */
+  if (message && message.type === 'audit-results' && __crawlCurrent && sender && sender.tab && __crawlCurrent.waiters.has(sender.tab.id)) {
+    const w = __crawlCurrent.waiters.get(sender.tab.id);
+    __crawlCurrent.waiters.delete(sender.tab.id);
+    clearTimeout(w.timer);
+    w.resolve(Array.isArray(message.findings) ? message.findings : []);
+    return false;
+  }
 
   /* ── WCAG audit results → side panel + platform ── */
   if (message.type === 'audit-results' || message.type === 'audit-error') {

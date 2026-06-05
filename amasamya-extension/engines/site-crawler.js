@@ -61,17 +61,26 @@
 
   /* Default dependencies for the production browser. Wired into a real
      chrome service worker. A test harness passes its own object so we
-     never reach the actual browser APIs. */
+     never reach the actual browser APIs.
+
+     awaitAuditResults(tabId, timeoutMs) is the one piece of glue
+     between the runner and the page-side content-script.js. It must
+     resolve with the findings array (possibly empty) when
+     content-script.js posts its audit-results message for `tabId`,
+     or with null on timeout. Default implementation lives in
+     background.js so it can hook the real chrome.runtime.onMessage
+     bus; tests pass a noop. */
   function makeDefaultDeps() {
     return {
-      createTab:        (url) => chrome.tabs.create({ url: url, active: false }),
-      removeTab:        (tabId) => chrome.tabs.remove(tabId),
-      getTab:           (tabId) => chrome.tabs.get(tabId),
-      executeScript:    (tabId, files) => chrome.scripting.executeScript({ target: { tabId: tabId }, files: files }),
-      onTabUpdated:     chrome.tabs && chrome.tabs.onUpdated,
-      onAuditMessage:   chrome.runtime && chrome.runtime.onMessage,
-      delay:            (ms) => new Promise((r) => setTimeout(r, ms)),
-      now:              () => Date.now()
+      createTab:         (url) => chrome.tabs.create({ url: url, active: false }),
+      removeTab:         (tabId) => chrome.tabs.remove(tabId),
+      getTab:            (tabId) => chrome.tabs.get(tabId),
+      executeScript:     (tabId, files) => chrome.scripting.executeScript({ target: { tabId: tabId }, files: files }),
+      onTabUpdated:      chrome.tabs && chrome.tabs.onUpdated,
+      onAuditMessage:    chrome.runtime && chrome.runtime.onMessage,
+      awaitAuditResults: (tabId, timeoutMs) => Promise.resolve(null),
+      delay:             (ms) => new Promise((r) => setTimeout(r, ms)),
+      now:               () => Date.now()
     };
   }
 
@@ -198,13 +207,19 @@
           return { url: url, index: index, status: STATUS.AUTH_WALL, durationMs: this.deps.now() - start, finalUrl: finalUrl, finalTitle: finalTitle, findings: [] };
         }
 
-        /* Inject the audit engine. The engine posts results via
-           chrome.runtime.sendMessage which our background.js routes
-           to the platform bridge in commit E. For this commit we
-           just record the executeScript call succeeded. */
+        /* Inject the audit engine, then await the findings message
+           it posts back via chrome.runtime.sendMessage. The waiter
+           is dep-injected so unit tests can resolve it
+           deterministically. Production wires the dep to a one-shot
+           runtime listener filtered by sender.tab.id. */
         await this.deps.executeScript(tabId, ['content-script.js']);
+        let findings = [];
+        try {
+          const fromPage = await this.deps.awaitAuditResults(tabId, this.options.timeoutMs);
+          if (Array.isArray(fromPage)) findings = fromPage;
+        } catch (_) { /* keep findings empty */ }
 
-        return { url: url, index: index, status: STATUS.PASS, durationMs: this.deps.now() - start, finalUrl: finalUrl, finalTitle: finalTitle, findings: [] };
+        return { url: url, index: index, status: STATUS.PASS, durationMs: this.deps.now() - start, finalUrl: finalUrl, finalTitle: finalTitle, findings: findings };
       } catch (err) {
         return { url: url, index: index, status: STATUS.LOAD_ERROR, durationMs: this.deps.now() - start, finalUrl: null, finalTitle: null, findings: [], error: (err && err.message) ? err.message : String(err) };
       } finally {
