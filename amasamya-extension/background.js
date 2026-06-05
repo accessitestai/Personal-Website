@@ -13,6 +13,23 @@
 const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
 
 /* ════════════════════════════════════════════════════════
+   FEATURE FLAGS
+   ────────────────────────────────────────────────────────
+   Off-by-default booleans that let in-development features
+   ship code to users without changing what those users
+   actually see. Flip to true only on the release commit that
+   ships the feature.
+
+   SITE_CRAWL_ENABLED gates v4.2.0 Site Crawl. While false, no
+   crawl UI is exposed in the side panel, no crawl messages
+   are routed, and the new modules (engines/site-crawler.js,
+   engines/sitemap-parser.js) are dead code from the user's
+   perspective. Their tests still run on Playwright because
+   tests load the modules directly.
+   ──────────────────────────────────────────────────────── */
+const SITE_CRAWL_ENABLED = false;
+
+/* ════════════════════════════════════════════════════════
    A. WCAG AUDIT - existing behaviour (unchanged)
 ════════════════════════════════════════════════════════ */
 
