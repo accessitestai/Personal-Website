@@ -1,56 +1,37 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-06-04.
+Last reviewed: 2026-06-05.
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
 If a feature is not on this list, it is not planned.
 
-## Current release: v3.4.2 (Published)
+## Current release: v4.0.0 (in Chrome Web Store review)
 
-Shipping with 19 WCAG 2.2 audit engines, three Vision AI providers
+Shipping with 24 WCAG 2.2 audit engines, three Vision AI providers
 (Gemini, Anthropic, OpenAI), Focus Indicator Narrator, Visual Layout
 Auditor, State Change Watchdog, baseline regression detection,
 side-panel UI with Close button + Escape-key focus trap +
 restricted-URL guard, and exports to JSON, HTML, CSV, Text, SARIF,
-and annotated PNG. Privacy policy rewritten to satisfy Chrome Web
-Store per-category disclosure requirements.
+and annotated PNG.
 
-Status: Published on the Chrome Web Store; no open reviewer issues.
+Status: uploaded to Chrome Web Store, awaiting reviewer approval.
 
-## In development: v4.0.0
+## Built locally, awaiting v4.0.0 publish before upload: v4.0.1
 
-The five new engines below are now wired into content-script.js.
-Engine count moves from 19 to 24.
+Internal-audit patch pass. No new features. No permission changes.
+Live-region politeness split, emoji noise removed, Redundant-Entry
+warning flood capped, Dragging-Movements pre-filtered for perf,
+Mac shortcut text fixed, `minimum_chrome_version: 114` declared,
+remaining unescaped innerHTML writes hardened, summary cards made
+keyboard-focusable, main landmark made programmatically focusable.
 
-## v4.0 - "Coverage and continuity"
+Status: committed and pushed to both repos. ZIP built at
+`AMASAMYA-extension-v4.0.1.zip`. Hold upload until v4.0.0 reaches
+Published status, to avoid two simultaneous reviews on the same
+listing.
 
-Target window: 4 to 6 weeks after v3.4.1 reaches stable on the Chrome
-Web Store. Theme is broader WCAG 2.2 coverage plus the regression-tracking
-workflow that beta testers have asked for.
-
-### v4.0 - Item 1: Five new WCAG 2.2 audit engines
-
-Brings the engine count from 19 to 24. Each engine ships with a header
-comment that links to the WCAG SC, a fixture page under
-`test-fixtures/`, and a Playwright test that confirms expected fail and
-pass cases.
-
-| # | Engine | WCAG SC | Level | Notes |
-|---|---|---|---|---|
-| 20 | Identify Input Purpose | 1.3.5 | AA | Checks `autocomplete` tokens on form fields against the WCAG-listed set of 53 input-purpose tokens. |
-| 21 | Dragging Movements | 2.5.7 | AA | Flags elements with `pointerdown` plus `pointermove` handlers that have no equivalent single-pointer activation. |
-| 22 | Consistent Help | 3.2.6 | A | Detects help mechanisms (contact link, help link, chat widget, FAQ) and checks they appear in the same relative order across pages of the same site. Requires a multi-page audit context (see v4.0 - Item 2). |
-| 23 | Redundant Entry | 3.3.7 | A | Detects forms in a multi-step flow that ask for information the user has already provided, without an auto-populate or auto-select control. |
-| 24 | Accessible Authentication (Minimum) | 3.3.8 | AA | Flags authentication flows that require a cognitive function test (CAPTCHA, memorise-this-pattern, transcribe-this) without an alternative. |
-
-Engines 22, 23, 24 are partial-only. We can detect the *signal* of a
-violation (presence of CAPTCHA, presence of multi-step flow) but
-cannot fully judge correctness without crawling. We mark these as
-**Warning** verdicts with a clear "manual review needed" note rather
-than **Fail**.
-
-### v4.0 - Item 2: Audit diff and history
+## Next release: v4.1.0 - Audit diff and history
 
 Build on top of the existing baseline feature so a user can see what
 changed between any two audits of the same URL.
@@ -71,9 +52,83 @@ Screen-reader specifics:
 - The diff itself uses the same findings-table pattern as the WCAG
   audit, so existing NVDA/JAWS muscle memory carries over.
 
+## v4.2.0 - "Site Crawl" (audit a whole site in one shot)
+
+Theme: developers and managers will not audit pages one at a time.
+The hybrid architecture documented below keeps the crawl on the
+user's device (preserves the no-backend privacy story) while moving
+aggregation into the platform so the output is manager-readable.
+
+### Architecture (hybrid: extension crawls, platform aggregates)
+
+The extension acquires a URL list, walks it sequentially in the user's
+already-authenticated browser session, runs the 24 engines on each
+page, and forwards per-page findings to the platform over the existing
+`content-script-platform.js` bridge. The platform's Reports panel
+ingests per-page reports into a single aggregated view.
+
+No server-side crawl. No new backend. The privacy policy stays valid
+as written. CORS is bypassed because the audit happens inside the
+user's browser session, not from `amasamya.akhileshmalani.com`.
+
+### Authentication
+
+In scope, but passively. The extension runs in the user's existing
+browser session, so any site the user is signed into on Chrome is
+also signed in when the crawler walks it. The extension does not
+store credentials, does not handle multi-factor, does not replay
+sessions. A page that redirects to a login screen mid-crawl is
+logged as "auth wall" and skipped, not retried.
+
+### URL list source (v1 ships with two, defers the third)
+
+1. **`sitemap.xml` ingestion** (v1): user enters the site root,
+   crawler fetches `/sitemap.xml`, parses it, walks every URL listed.
+   Covers most marketing and content sites.
+2. **User-pasted URL list** (v1): textarea, one URL per line. The
+   escape hatch when sitemap is missing, gated, or wrong.
+3. **Recursive link following** (v4.2.1 or v4.3): start at one URL
+   and follow internal `<a href>` links to a configurable depth.
+   Deferred because cycle detection, query-string deduplication, and
+   "trap" pages (infinite calendars, infinite scroll) need real
+   calibration before shipping.
+
+### Cap per run
+
+200 pages in v1. Hard cap enforced both in code and in the UI,
+never silent truncation. A 200-page crawl is roughly 7 to 13
+minutes wall time. Push to 500 in v4.3 only if real users hit
+the limit.
+
+### Output
+
+The platform's Reports panel gains an **Aggregated** mode that
+groups findings by `{engine, criterion, selector pattern}` and
+reports "this issue appears on N of M pages". Per-page detail
+remains accessible by drilling into the group. Export formats
+extend to include "by template" and "by page" views.
+
+### Privacy implications
+
+None. The crawl runs in the user's browser session. Findings are
+forwarded to the platform via the existing content-script-platform
+bridge that the user already trusts. No new data leaves the device
+that does not already leave it today.
+
+### Acceptance criteria
+
+- Sitemap-driven crawl of a 100-page WordPress site completes
+  cleanly with no hung tabs.
+- Aggregated report identifies template-level issues (one finding
+  per template, not 100 duplicates).
+- Auth-walled pages are clearly labelled as skipped, not as Pass.
+- Memory: no Chrome tab over 200 MB during a 200-page crawl.
+- Cancellable mid-run with a clean partial report.
+
 ## v5.0 - "Privacy-first"
 
-Target window: 4 to 6 weeks after v4.0 ships, assuming v4.0 stabilises.
+Target window: 4 to 6 weeks after v4.2 ships, assuming the
+intermediate releases stabilise.
 
 ### v5.0 - Item 1: Offline-only mode
 
