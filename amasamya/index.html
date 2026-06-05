@@ -4583,6 +4583,79 @@ window.addEventListener('message', function (e) {
 });
 
 /* ══════════════════════════════════════════════════════════════
+   SITE CRAWL INGEST (v4.2.0)
+
+   The AMASAMYA Chrome extension's Site Crawl feature posts one
+   AMASAMYA_extension_crawl_page event per audited page. The
+   platform accumulates them into a session record so the
+   Aggregated Reports mode (commit H) can later present
+   "this finding affects 47 of 52 pages".
+
+   The accumulator lives entirely in memory until commit H
+   wires it to the Reports tab. While that wiring lands, this
+   listener does two things visible to the user:
+
+     1. Announces the first page received so screen-reader users
+        know the bridge is alive ("Site Crawl ingest active.").
+     2. Updates a discreet on-page counter when present.
+
+   No backend write. No localStorage write. Same privacy story
+   as the rest of the platform.
+══════════════════════════════════════════════════════════════ */
+window.__AMASAMYA_crawlSession = null;
+
+function _crawlEnsureSession() {
+  if (!window.__AMASAMYA_crawlSession) {
+    window.__AMASAMYA_crawlSession = {
+      startedAt: new Date().toISOString(),
+      pages:     [],
+      bySite:    null,
+      bySiteUrl: null
+    };
+  }
+  return window.__AMASAMYA_crawlSession;
+}
+
+window.addEventListener('message', function (e) {
+  if (!e.data || e.data.type !== 'AMASAMYA_extension_crawl_page') return;
+  if (e.origin !== window.location.origin) return;
+
+  const session = _crawlEnsureSession();
+  const record = {
+    url:        e.data.url,
+    finalUrl:   e.data.finalUrl,
+    title:      e.data.title || '',
+    status:     e.data.status,
+    index:      e.data.index | 0,
+    findings:   Array.isArray(e.data.findings) ? e.data.findings : [],
+    durationMs: e.data.durationMs | 0,
+    timestamp:  e.data.timestamp || new Date().toISOString()
+  };
+
+  /* Derive the site root from the first URL we see so the
+     aggregator in commit H can group by site. */
+  if (!session.bySite && record.url) {
+    try {
+      const u = new URL(record.url);
+      session.bySite    = u.host;
+      session.bySiteUrl = u.protocol + '//' + u.host;
+    } catch (_) { /* malformed URL, leave bySite null */ }
+  }
+
+  const isFirst = session.pages.length === 0;
+  session.pages.push(record);
+
+  /* Cheap on-page counter update if the UI has the slot. The
+     real aggregated view lands in commit H. */
+  const counterEl = document.getElementById('crawl-ingest-count');
+  if (counterEl) counterEl.textContent = String(session.pages.length);
+
+  if (isFirst) {
+    announce('Site Crawl ingest active. ' + (session.bySite || 'unknown site') + '. Pages will accumulate as the crawler completes them.');
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════
    PHASE 4 JAVASCRIPT
    4.2 DOCX Document Audit
    4.3 Champions Tracker
