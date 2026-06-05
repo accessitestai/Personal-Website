@@ -84,7 +84,39 @@
      PANEL TABS - WAI-ARIA Tabs Pattern (horizontal)
   ================================================================ */
 
-  const PANEL_TABS = ['wcag', 'visual', 'settings'];
+  /*
+    v4.2.0 feature flag for Site Crawl. Mirrors the same constant in
+    background.js. When false (default in v4.0.x) the Site Crawl tab
+    is hidden from the tab list, removed from PANEL_TABS so arrow-key
+    navigation skips it, and the panel content stays display:none.
+    Single-source-of-truth is enforced at release time by flipping
+    both occurrences together; commit L of the v4.2.0 plan does this.
+  */
+  const SITE_CRAWL_ENABLED = false;
+  const PANEL_TABS = SITE_CRAWL_ENABLED
+    ? ['wcag', 'visual', 'settings', 'crawl']
+    : ['wcag', 'visual', 'settings'];
+
+  /* Hide the Site Crawl tab list item, the tab button itself, and
+     the tabpanel while the flag is off. Hiding only the parent <li>
+     would still leave the .panel-tab button discoverable by
+     document.querySelectorAll, which would distort the arrow-key
+     navigation cycle (ArrowLeft from WCAG would wrap to the hidden
+     Site Crawl tab instead of Settings). Setting `hidden` on the
+     button itself lets the keyboard handler filter cleanly. */
+  if (!SITE_CRAWL_ENABLED) {
+    const crawlItem  = $('ptab-crawl-item');
+    const crawlBtn   = $('ptab-crawl');
+    const crawlPanel = $('ppanel-crawl');
+    if (crawlItem)  crawlItem.hidden = true;
+    if (crawlBtn)   crawlBtn.hidden  = true;
+    if (crawlPanel) crawlPanel.hidden = true;
+  } else {
+    const crawlItem = $('ptab-crawl-item');
+    const crawlBtn  = $('ptab-crawl');
+    if (crawlItem) crawlItem.hidden = false;
+    if (crawlBtn)  crawlBtn.hidden  = false;
+  }
 
   function switchPanel(name) {
     PANEL_TABS.forEach(p => {
@@ -100,8 +132,11 @@
   document.querySelectorAll('.panel-tab').forEach(tab => {
     tab.addEventListener('click', () => switchPanel(tab.id.replace('ptab-', '')));
     tab.addEventListener('keydown', e => {
-      const all = Array.from(document.querySelectorAll('.panel-tab'));
+      /* Filter to currently-visible tabs only so the Site Crawl tab
+         is not in the arrow-key cycle while its feature flag is off. */
+      const all = Array.from(document.querySelectorAll('.panel-tab')).filter(t => !t.hidden);
       const cur = all.indexOf(tab);
+      if (cur < 0) return;
       let next  = null;
       if (e.key === 'ArrowRight') next = all[(cur + 1) % all.length];
       if (e.key === 'ArrowLeft')  next = all[(cur - 1 + all.length) % all.length];
@@ -1136,5 +1171,220 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 
   /* ── Route state-watchdog-ui messages ── */
   /* (Wired into the global message listener above) */
+
+
+  /* ════════════════════════════════════════════════════════
+     SITE CRAWL (v4.2.0)
+     ────────────────────────────────────────────────────────
+     Source-toggle, validation, start, cancel, progress, results.
+     The actual crawl is driven by background.js using the
+     site-crawler module; this panel only sends a "site-crawl-start"
+     message and listens for status updates.
+
+     Wiring runs unconditionally so the listener is present even
+     while the flag is off (so a developer can flip the flag at
+     runtime without reloading the panel). The user-visible
+     elements remain hidden via the flag block at the top of this
+     file.
+  ════════════════════════════════════════════════════════ */
+
+  const crawlSrcSitemap = $('crawl-src-sitemap');
+  const crawlSrcList    = $('crawl-src-list');
+  if (crawlSrcSitemap && crawlSrcList) {
+    function syncCrawlSourceUi() {
+      const useSitemap = crawlSrcSitemap.checked;
+      $('crawl-sitemap-wrap').hidden = !useSitemap;
+      $('crawl-list-wrap').hidden    =  useSitemap;
+    }
+    crawlSrcSitemap.addEventListener('change', syncCrawlSourceUi);
+    crawlSrcList.addEventListener('change',    syncCrawlSourceUi);
+    syncCrawlSourceUi();
+  }
+
+  let crawlRunning = false;
+  let crawlResults = [];
+
+  function crawlReadInputs() {
+    const useSitemap = $('crawl-src-sitemap')?.checked;
+    if (useSitemap) {
+      const root = ($('crawl-sitemap-url')?.value || '').trim();
+      if (!root) return { error: 'Enter a site root URL (for example https://example.com).' };
+      if (!/^https?:\/\//i.test(root)) return { error: 'URL must start with http:// or https://' };
+      return { source: 'sitemap', root: root };
+    } else {
+      const raw = ($('crawl-url-list')?.value || '').trim();
+      if (!raw) return { error: 'Paste at least one URL.' };
+      const urls = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      if (urls.length === 0) return { error: 'Paste at least one URL.' };
+      const bad = urls.find(u => !/^https?:\/\//i.test(u));
+      if (bad) return { error: 'Every URL must start with http:// or https://. First bad line: ' + bad };
+      return { source: 'list', urls: urls };
+    }
+  }
+
+  function crawlSetRunningUi(running) {
+    crawlRunning = running;
+    if ($('crawl-start-btn'))  $('crawl-start-btn').hidden  =  running;
+    if ($('crawl-cancel-btn')) $('crawl-cancel-btn').hidden = !running;
+    if ($('crawl-progress-wrap')) $('crawl-progress-wrap').hidden = !running;
+  }
+
+  function crawlResetSummary() {
+    crawlResults = [];
+    if ($('crawl-results-wrap')) $('crawl-results-wrap').hidden = true;
+    if ($('crawl-results-body')) $('crawl-results-body').innerHTML = '';
+    if ($('crawl-pages-completed')) $('crawl-pages-completed').textContent = '0';
+    if ($('crawl-pages-total'))     $('crawl-pages-total').textContent     = '0';
+    ['audited', 'auth', 'timeout', 'error'].forEach(k => {
+      const el = $('crawl-count-' + k);
+      if (el) el.textContent = '0 ' + (k === 'audited' ? 'Audited' : k === 'auth' ? 'Auth wall' : k === 'timeout' ? 'Timed out' : 'Errors');
+    });
+    if ($('crawl-progress-fill')) {
+      $('crawl-progress-fill').style.width = '0%';
+      $('crawl-progress-bar').setAttribute('aria-valuenow', '0');
+    }
+    if ($('crawl-progress-label')) $('crawl-progress-label').textContent = 'Starting...';
+  }
+
+  if ($('crawl-start-btn')) {
+    $('crawl-start-btn').addEventListener('click', () => {
+      if (!SITE_CRAWL_ENABLED) {
+        announce('Site Crawl is disabled in this build.', 'assertive');
+        return;
+      }
+      const input = crawlReadInputs();
+      if (input.error) {
+        $('crawl-status').textContent = input.error;
+        announce(input.error, 'assertive');
+        return;
+      }
+      crawlResetSummary();
+      crawlSetRunningUi(true);
+      $('crawl-status').textContent = 'Starting crawl...';
+      announce('Site Crawl starting.');
+      /* Hand off to background.js. Implementation lands in commit F.
+         Until then the message is dispatched but the runner does not
+         yet exist, so we surface a clear progress message rather
+         than silently doing nothing. */
+      try {
+        chrome.runtime.sendMessage({ type: 'site-crawl-start', input: input }).catch(() => {});
+      } catch (_) { /* extension context disconnected */ }
+    });
+  }
+
+  if ($('crawl-cancel-btn')) {
+    $('crawl-cancel-btn').addEventListener('click', () => {
+      if (!crawlRunning) return;
+      announce('Cancelling crawl.');
+      try {
+        chrome.runtime.sendMessage({ type: 'site-crawl-cancel' }).catch(() => {});
+      } catch (_) {}
+    });
+  }
+
+  /*
+    Crawl status messages from background.js. The phase vocabulary
+    mirrors the existing focus-narrator-ui and visual-layout-ui
+    message patterns so the side panel uses one consistent shape.
+  */
+  function handleCrawlUi(msg) {
+    if (msg.phase === 'queued') {
+      $('crawl-pages-total').textContent = String(msg.total);
+      $('crawl-results-wrap').hidden = false;
+      $('crawl-progress-label').textContent = `Queued ${msg.total} URL${msg.total === 1 ? '' : 's'}.`;
+      announce(`Crawl queued. ${msg.total} pages will be audited.`);
+    } else if (msg.phase === 'progress') {
+      const pct = msg.total ? Math.round((msg.index / msg.total) * 100) : 0;
+      $('crawl-progress-fill').style.width = pct + '%';
+      $('crawl-progress-bar').setAttribute('aria-valuenow', String(pct));
+      $('crawl-progress-label').textContent = `Auditing ${msg.index + 1} of ${msg.total}: ${msg.url || ''}`;
+    } else if (msg.phase === 'pageComplete') {
+      crawlResults.push(msg.record);
+      crawlAppendRow(msg.record);
+      crawlUpdateSummary();
+      $('crawl-pages-completed').textContent = String(crawlResults.length);
+    } else if (msg.phase === 'complete') {
+      crawlSetRunningUi(false);
+      $('crawl-status').textContent = `Crawl complete. ${crawlResults.length} pages audited.`;
+      $('crawl-progress-fill').style.width = '100%';
+      $('crawl-progress-bar').setAttribute('aria-valuenow', '100');
+      announce(`Crawl complete. ${crawlResults.length} pages audited.`);
+    } else if (msg.phase === 'cancelled') {
+      crawlSetRunningUi(false);
+      $('crawl-status').textContent = `Crawl cancelled after ${crawlResults.length} pages.`;
+      announce(`Crawl cancelled. ${crawlResults.length} pages audited before stop.`);
+    } else if (msg.phase === 'error') {
+      crawlSetRunningUi(false);
+      $('crawl-status').textContent = `Crawl error: ${msg.message || 'unknown'}`;
+      announce(`Crawl error: ${msg.message || 'unknown'}`, 'assertive');
+    }
+  }
+
+  function crawlAppendRow(rec) {
+    const tbody = $('crawl-results-body');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    const statusLabel = ({
+      'audited':    'Audited',
+      'auth-wall':  'Auth wall',
+      'timeout':    'Timed out',
+      'load-error': 'Load error',
+      'cancelled':  'Cancelled',
+      'skipped':    'Skipped'
+    })[rec.status] || rec.status;
+    const verdictClass =
+      rec.status === 'audited'   ? 'verdict-pass' :
+      rec.status === 'auth-wall' ? 'verdict-warning' :
+                                   'verdict-fail';
+    tr.innerHTML = `
+      <td>${escHtml(String((rec.index|0) + 1))}</td>
+      <td><code>${escHtml(rec.url)}</code></td>
+      <td class="${verdictClass}">${escHtml(statusLabel)}</td>
+      <td>${escHtml(((rec.durationMs|0) / 1000).toFixed(1))} s</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function crawlUpdateSummary() {
+    const counts = { 'audited': 0, 'auth-wall': 0, 'timeout': 0, 'error': 0 };
+    crawlResults.forEach(r => {
+      if (r.status === 'audited')        counts.audited++;
+      else if (r.status === 'auth-wall') counts['auth-wall']++;
+      else if (r.status === 'timeout')   counts.timeout++;
+      else                                counts.error++;
+    });
+    $('crawl-count-audited').textContent = counts.audited  + ' Audited';
+    $('crawl-count-auth').textContent    = counts['auth-wall'] + ' Auth wall';
+    $('crawl-count-timeout').textContent = counts.timeout  + ' Timed out';
+    $('crawl-count-error').textContent   = counts.error    + ' Errors';
+  }
+
+  if ($('crawl-export-btn')) {
+    $('crawl-export-btn').addEventListener('click', () => {
+      if (crawlResults.length === 0) {
+        announce('No crawl results yet to export.', 'assertive');
+        return;
+      }
+      const payload = {
+        tool:    'AMASAMYA',
+        version: '4.0.1',
+        kind:    'site-crawl-report',
+        taken:   new Date().toISOString(),
+        results: crawlResults
+      };
+      downloadFile(JSON.stringify(payload, null, 2), 'AMASAMYA-site-crawl.json', 'application/json');
+      announce('Crawl report exported.');
+    });
+  }
+
+  /* Plug crawl status messages into the global runtime onMessage
+     listener. The listener already routes by message.type, so add
+     a branch for site-crawl-ui. */
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message && message.type === 'site-crawl-ui') {
+      try { handleCrawlUi(message); } catch (_) {}
+    }
+    return false;
+  });
 
 })();

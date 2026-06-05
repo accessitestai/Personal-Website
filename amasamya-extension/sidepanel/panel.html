@@ -52,6 +52,19 @@
               aria-controls="ppanel-settings" aria-selected="false" tabindex="-1"
               type="button">Settings</button>
     </li>
+    <!--
+      Site Crawl tab. Visibility is gated by SITE_CRAWL_ENABLED in
+      panel.js. While the flag is false (default in v4.0.x) panel.js
+      sets the li to hidden and removes the tab from the keyboard
+      navigation cycle, so users see and Tab through only three tabs.
+      Markup lives here so the v4.2.0 UI ships alongside the engine
+      modules and can be light-switched on by flipping the flag.
+    -->
+    <li role="presentation" id="ptab-crawl-item" hidden>
+      <button class="panel-tab" role="tab" id="ptab-crawl"
+              aria-controls="ppanel-crawl" aria-selected="false" tabindex="-1"
+              type="button">Site Crawl</button>
+    </li>
   </ul>
 </nav>
 
@@ -424,6 +437,114 @@
     </section>
 
   </div><!-- /ppanel-settings -->
+
+
+  <!-- ═══════════════════════════════════════════════
+       PANEL 4: SITE CRAWL (v4.2.0)
+       Hidden by default. panel.js exposes this when
+       SITE_CRAWL_ENABLED is true. Auditor flow:
+         1. Pick URL source (sitemap.xml or paste list)
+         2. Press Start crawl
+         3. Watch progress, with per-page status
+         4. On completion, results summary + export
+  ═══════════════════════════════════════════════ -->
+  <div role="tabpanel" id="ppanel-crawl" aria-labelledby="ptab-crawl" tabindex="-1" hidden>
+
+    <section aria-labelledby="crawl-heading">
+      <h2 id="crawl-heading">Site Crawl</h2>
+      <p class="section-desc">
+        Audit a whole website in one run. The crawler walks each URL in
+        your already-signed-in browser session, runs all 24 WCAG 2.2
+        audit engines per page, and forwards the findings to the
+        AMASAMYA Platform for aggregated reporting. Cap is 200 pages
+        per run.
+      </p>
+
+      <fieldset class="settings-fieldset">
+        <legend>URL source</legend>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="crawl-source" id="crawl-src-sitemap" value="sitemap" checked>
+            Sitemap.xml (recommended): point me at a site root, I will read its sitemap.
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="crawl-source" id="crawl-src-list" value="list">
+            Paste a URL list, one per line.
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="settings-field" id="crawl-sitemap-wrap">
+        <label for="crawl-sitemap-url">Site root URL</label>
+        <input type="url" id="crawl-sitemap-url" class="key-input"
+               placeholder="https://example.com"
+               aria-describedby="crawl-sitemap-hint">
+        <p id="crawl-sitemap-hint" class="field-hint">
+          AMASAMYA will fetch /sitemap.xml from this root. If the site uses
+          /sitemap_index.xml or /sitemap-index.xml instead, that is also
+          tried automatically.
+        </p>
+      </div>
+
+      <div class="settings-field" id="crawl-list-wrap" hidden>
+        <label for="crawl-url-list">URLs to audit, one per line</label>
+        <textarea id="crawl-url-list" rows="8" class="key-input"
+                  placeholder="https://example.com/&#10;https://example.com/about&#10;https://example.com/contact"
+                  aria-describedby="crawl-list-hint"></textarea>
+        <p id="crawl-list-hint" class="field-hint">
+          Up to 200 URLs. Lines beyond 200 are ignored with a warning at
+          the start of the crawl.
+        </p>
+      </div>
+
+      <div class="settings-actions">
+        <button id="crawl-start-btn"  type="button" class="btn btn-primary">Start crawl</button>
+        <button id="crawl-cancel-btn" type="button" class="btn btn-danger" hidden>Cancel crawl</button>
+      </div>
+
+      <p id="crawl-status" class="settings-status" aria-live="polite"></p>
+
+      <!-- Progress -->
+      <div id="crawl-progress-wrap" hidden class="progress-wrap">
+        <div class="progress-bar-track" role="progressbar"
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+             aria-label="Crawl progress" id="crawl-progress-bar">
+          <div class="progress-bar-fill" id="crawl-progress-fill" style="width:0%"></div>
+        </div>
+        <p id="crawl-progress-label" class="progress-label">Starting...</p>
+      </div>
+
+      <!-- Results -->
+      <div id="crawl-results-wrap" hidden>
+        <h3 id="crawl-results-heading" class="results-subheading">
+          Crawl results - <span id="crawl-pages-completed">0</span> of <span id="crawl-pages-total">0</span> pages audited
+        </h3>
+        <div id="crawl-summary-strip" class="fn-summary-strip" role="region" aria-label="Crawl summary">
+          <span id="crawl-count-audited"  class="fn-badge fn-pass">0 Audited</span>
+          <span id="crawl-count-auth"     class="fn-badge fn-warn">0 Auth wall</span>
+          <span id="crawl-count-timeout"  class="fn-badge fn-fail">0 Timed out</span>
+          <span id="crawl-count-error"    class="fn-badge fn-fail">0 Errors</span>
+        </div>
+        <div role="region" aria-labelledby="crawl-results-heading" style="overflow-x:auto;">
+          <table class="findings-table" aria-label="Per-page crawl results">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">URL</th>
+                <th scope="col">Status</th>
+                <th scope="col">Duration</th>
+              </tr>
+            </thead>
+            <tbody id="crawl-results-body"></tbody>
+          </table>
+        </div>
+        <div class="settings-actions">
+          <button id="crawl-export-btn" type="button" class="btn">Export crawl report (JSON)</button>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /ppanel-crawl -->
 
 </main>
 

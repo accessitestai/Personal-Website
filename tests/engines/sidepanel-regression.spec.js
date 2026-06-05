@@ -63,8 +63,11 @@ test.describe('Side panel: existing structure regression safety net', () => {
     await expect(close).toHaveAttribute('aria-label', /Close/i);
   });
 
-  test('three tabs are present and named WCAG / Visual / Settings', async ({ page }) => {
-    const tabs = await page.locator('.panel-tab').allTextContents();
+  test('three visible tabs in the user-facing cycle: WCAG / Visual / Settings', async ({ page }) => {
+    /* Hidden tabs (such as the v4.2.0 Site Crawl tab while its flag is
+       off) must not appear in the user-facing tab cycle. Use the same
+       :not([hidden]) filter the panel.js keydown handler uses. */
+    const tabs = await page.locator('.panel-tab:not([hidden])').allTextContents();
     expect(tabs).toEqual(['WCAG Audit', 'Visual Audit', 'Settings']);
   });
 
