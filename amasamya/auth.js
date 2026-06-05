@@ -13,8 +13,15 @@
   /* ════════════════════════════════════════════════════
      ACCESSIBILITY HELPERS
   ════════════════════════════════════════════════════ */
-  function announce(msg) {
-    var el = document.getElementById('sr-live');
+  /*
+    announce(msg)               -> polite (default). Status updates.
+    announce(msg, 'assertive')  -> interrupts current screen-reader
+                                   speech. Reserve for errors and
+                                   security alerts.
+  */
+  function announce(msg, urgency) {
+    var id = urgency === 'assertive' ? 'sr-live-assertive' : 'sr-live';
+    var el = document.getElementById(id);
     if (!el) return;
     el.textContent = '';
     window.requestAnimationFrame(function () { el.textContent = msg; });
@@ -241,7 +248,7 @@
       var ok = true;
       if (!email)    { showFieldError('signin-email-err', 'Email address is required.'); ok = false; }
       if (!password) { showFieldError('signin-pass-err',  'Password is required.'); ok = false; }
-      if (!ok) { announce('Please fix the errors highlighted on screen.'); return; }
+      if (!ok) { announce('Please fix the errors highlighted on screen.', 'assertive'); return; }
 
       btn.disabled    = true;
       btn.textContent = 'Signing in\u2026';
@@ -267,7 +274,7 @@
             document.getElementById('signin-password').focus();
           } else {
             document.getElementById('signin-general-err').textContent = msg;
-            announce(msg);
+            announce(msg, 'assertive');
           }
         });
     });
@@ -370,7 +377,7 @@
         document.getElementById('signup-password').focus();
         ok = false;
       }
-      if (!ok) { announce('Please fix the errors highlighted on screen.'); return; }
+      if (!ok) { announce('Please fix the errors highlighted on screen.', 'assertive'); return; }
 
       btn.disabled    = true;
       btn.textContent = 'Creating account\u2026';
@@ -399,7 +406,7 @@
             document.getElementById('signup-password').focus();
           } else {
             document.getElementById('signup-general-err').textContent = msg;
-            announce(msg);
+            announce(msg, 'assertive');
           }
         });
     });
@@ -487,7 +494,7 @@
 
       if (!email) {
         errEl.textContent = 'Email address is required.';
-        announce('Email address is required.');
+        announce('Email address is required.', 'assertive');
         return;
       }
 
@@ -509,7 +516,7 @@
           btn.textContent = 'Send Reset Link';
           var msg = friendlyError(err.code, err.message);
           genErr.textContent = msg;
-          announce(msg);
+          announce(msg, 'assertive');
         });
     });
   }

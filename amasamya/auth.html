@@ -13,7 +13,16 @@
 <body>
 
 <a class="skip-link" href="#auth-main">Skip to main content</a>
-<div id="sr-live" aria-live="assertive" aria-atomic="true"></div>
+<!--
+  Two live regions instead of one assertive bucket. Routine
+  status messages (PIN saved, account created, link sent) route
+  through sr-live which is polite. Errors and security alerts
+  route through sr-live-assertive which interrupts. Auth flow
+  has lots of small "PIN saved" / "Code sent" updates that
+  previously interrupted whatever NVDA was reading.
+-->
+<div id="sr-live"           aria-live="polite"    aria-atomic="true"></div>
+<div id="sr-live-assertive" aria-live="assertive" aria-atomic="true"></div>
 
 <div class="auth-layout">
 
