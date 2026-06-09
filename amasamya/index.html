@@ -1752,6 +1752,25 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
       <div id="crawl-aggregate-section" style="display:none;" role="region"
            aria-labelledby="crawl-aggregate-heading">
         <h2 class="section-heading" id="crawl-aggregate-heading">Site Crawl Results</h2>
+
+        <!-- v4.2.0 commit J: session metadata card. Shows what was
+             actually crawled at a glance: site, time window, page
+             counts by status. Header is built into a definition list
+             so a screen-reader user can navigate it with NVDA's term
+             quick-key. -->
+        <dl id="crawl-session-meta" class="filter-bar" role="group"
+            aria-label="Crawl session metadata"
+            style="display:flex;flex-wrap:wrap;gap:18px;margin-bottom:12px;">
+          <div><dt class="filter-label">Site</dt> <dd id="crawl-meta-site" style="margin:0;">-</dd></div>
+          <div><dt class="filter-label">Started</dt> <dd id="crawl-meta-started" style="margin:0;">-</dd></div>
+          <div><dt class="filter-label">Finished</dt> <dd id="crawl-meta-finished" style="margin:0;">-</dd></div>
+          <div><dt class="filter-label">Duration</dt> <dd id="crawl-meta-duration" style="margin:0;">-</dd></div>
+          <div><dt class="filter-label">Pages audited</dt> <dd id="crawl-meta-audited" style="margin:0;">0</dd></div>
+          <div><dt class="filter-label">Auth walls</dt> <dd id="crawl-meta-auth" style="margin:0;">0</dd></div>
+          <div><dt class="filter-label">Timeouts</dt> <dd id="crawl-meta-timeout" style="margin:0;">0</dd></div>
+          <div><dt class="filter-label">Errors</dt> <dd id="crawl-meta-errors" style="margin:0;">0</dd></div>
+        </dl>
+
         <div id="crawl-aggregate-meta" class="filter-bar" role="group"
              aria-label="Crawl summary">
           <span class="filter-label" id="crawl-aggregate-site">Site: -</span>
@@ -4828,12 +4847,62 @@ function _crawlGroupFindings(session) {
   return groups;
 }
 
+function _crawlFormatDuration(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return '-';
+  if (ms < 1000) return ms + ' ms';
+  const sec = Math.round(ms / 1000);
+  if (sec < 60) return sec + ' s';
+  const min = Math.floor(sec / 60);
+  const rem = sec % 60;
+  return min + ' min ' + (rem < 10 ? '0' : '') + rem + ' s';
+}
+
+function _crawlFormatTime(iso) {
+  if (!iso) return '-';
+  try {
+    return new Date(iso).toLocaleString('en-GB');
+  } catch (_) { return iso; }
+}
+
+function _crawlRenderSessionMeta(session) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('crawl-meta-site',     session.bySite || 'unknown');
+  set('crawl-meta-started',  _crawlFormatTime(session.startedAt));
+
+  /* End-of-crawl signals: the latest record's timestamp serves as a
+     proxy for "finished" while the crawl is in flight. Once the
+     background broadcasts a 'complete' phase (commit F), we capture
+     it on the session below for accuracy. */
+  const finishedIso = session.finishedAt
+    || (session.pages.length ? session.pages[session.pages.length - 1].timestamp : null);
+  set('crawl-meta-finished', _crawlFormatTime(finishedIso));
+
+  let durationMs = null;
+  try {
+    if (session.startedAt && finishedIso) {
+      durationMs = new Date(finishedIso).getTime() - new Date(session.startedAt).getTime();
+    }
+  } catch (_) {}
+  set('crawl-meta-duration', _crawlFormatDuration(durationMs));
+
+  const counts = { audited: 0, 'auth-wall': 0, timeout: 0, 'load-error': 0, other: 0 };
+  session.pages.forEach(p => {
+    if (counts[p.status] !== undefined) counts[p.status]++;
+    else counts.other++;
+  });
+  set('crawl-meta-audited', counts.audited);
+  set('crawl-meta-auth',    counts['auth-wall']);
+  set('crawl-meta-timeout', counts.timeout);
+  set('crawl-meta-errors',  counts['load-error'] + counts.other);
+}
+
 function crawlRenderAggregated() {
   const session = window.__AMASAMYA_crawlSession;
   if (!session || !session.pages || session.pages.length === 0) return;
   const section = document.getElementById('crawl-aggregate-section');
   if (!section) return;
   section.style.display = '';
+  _crawlRenderSessionMeta(session);
 
   /* Meta strip. */
   const siteEl  = document.getElementById('crawl-aggregate-site');
