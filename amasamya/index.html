@@ -1804,6 +1804,19 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
             <tbody id="crawl-perpage-body"></tbody>
           </table>
         </div>
+
+        <!-- Export controls. HTML report = manager-friendly grouped view;
+             CSV by-template = data table for spreadsheets / ticket
+             import; CSV by-page = the same data sliced for engineers
+             who want to know which pages fail. JSON = raw machine-
+             readable for downstream automation. -->
+        <div class="settings-actions" id="crawl-export-actions"
+             role="group" aria-label="Export crawl results">
+          <button id="crawl-export-html"      type="button" class="btn">Export HTML report (aggregated)</button>
+          <button id="crawl-export-csv-tmpl"  type="button" class="btn">Export CSV (by template)</button>
+          <button id="crawl-export-csv-page"  type="button" class="btn">Export CSV (by page)</button>
+          <button id="crawl-export-json-raw"  type="button" class="btn">Export JSON (raw)</button>
+        </div>
       </div>
 
       <div id="report-section" style="display:none;">
@@ -4927,6 +4940,204 @@ document.addEventListener('change', function (ev) {
   if (ev.target.name !== 'crawl-mode') return;
   crawlRenderAggregated();
 });
+
+/* ══════════════════════════════════════════════════════════════
+   SITE CRAWL EXPORTS (v4.2.0 commit I)
+
+   Four export shapes off the same in-memory session record:
+
+     - HTML report (aggregated): manager-readable, headers + table
+       grouped by {engine, criterion, selector pattern}.
+     - CSV by template: one row per group, columns for engine,
+       criterion, selector pattern, severity, pages affected, sample
+       issue, sample fix.
+     - CSV by page: one row per (page, finding), spreadsheet-friendly
+       slice for engineers who want to filter by URL.
+     - JSON raw: the full session record, for downstream automation
+       and round-tripping back into the platform.
+
+   All exports use the existing PLATFORM_LABEL constant from commit
+   "platform: stabilise for usage" (Sev 1), so version stamping is
+   consistent across the whole platform without a per-feature copy.
+══════════════════════════════════════════════════════════════ */
+
+function _crawlSafe(s) { return String(s == null ? '' : s); }
+
+function _crawlCsvCell(v) {
+  var s = _crawlSafe(v);
+  if (s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf('\n') >= 0) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function _crawlDownload(filename, mimeType, content) {
+  var blob = new Blob([content], { type: mimeType });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 0);
+}
+
+function _crawlSlug(s) {
+  return _crawlSafe(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'site';
+}
+
+function crawlExportHtml() {
+  var session = window.__AMASAMYA_crawlSession;
+  if (!session || !session.pages.length) {
+    announce('No crawl data to export.', 'assertive');
+    return;
+  }
+  var groups = _crawlGroupFindings(session);
+  var site   = _crawlSafe(session.bySite || 'unknown-site');
+  var taken  = new Date().toLocaleString('en-GB');
+  var rows = groups.map(function (g) {
+    return '<tr>' +
+      '<td>' + escHtml(g.engine) + '</td>' +
+      '<td>' + escHtml(g.criterion) + '</td>' +
+      '<td><code>' + escHtml(g.selectorPattern || '(page-level)') + '</code></td>' +
+      '<td>' + escHtml(g.severity) + '</td>' +
+      '<td>' + g.pagesAffected + ' of ' + session.pages.length + '</td>' +
+      '<td>' + escHtml(g.sampleIssue) + '</td>' +
+      '<td>' + escHtml(g.sampleHowToFix) + '</td>' +
+      '</tr>';
+  }).join('');
+  var html =
+    '<!DOCTYPE html>\n' +
+    '<html lang="en"><head>\n' +
+    '<meta charset="UTF-8">\n' +
+    '<title>AMASAMYA Site Crawl Report - ' + escHtml(site) + '</title>\n' +
+    '<style>\n' +
+    'body{font-family:"Segoe UI",system-ui,sans-serif;color:#1a1a1a;background:#fff;margin:0;}\n' +
+    'header{background:#003366;color:#fff;padding:24px 32px;}\n' +
+    'header h1{font-size:1.6rem;margin:0 0 4px;}\n' +
+    'header p{font-size:.9rem;opacity:.8;margin:0;}\n' +
+    'main{max-width:1100px;margin:0 auto;padding:32px;}\n' +
+    'h2{font-size:1.2rem;color:#003366;margin:28px 0 12px;border-bottom:2px solid #e0e8f0;padding-bottom:6px;}\n' +
+    'table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:18px;}\n' +
+    'th{background:#003366;color:#fff;padding:10px;text-align:left;}\n' +
+    'td{padding:10px;border-bottom:1px solid #e8eef5;vertical-align:top;}\n' +
+    'code{font-family:Consolas,monospace;font-size:.8rem;background:#eef2f7;padding:1px 5px;}\n' +
+    'footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-top:1px solid #dde;}\n' +
+    '</style></head>\n' +
+    '<body>\n' +
+    '<header role="banner">\n' +
+    '<h1>AMASAMYA Site Crawl Report</h1>\n' +
+    '<p>' + escHtml(site) + ' &middot; ' + session.pages.length + ' pages audited &middot; ' + groups.length + ' distinct issues &middot; Generated ' + escHtml(taken) + ' &middot; ' + escHtml(PLATFORM_LABEL) + '</p>\n' +
+    '</header>\n' +
+    '<main>\n' +
+    '<h2>Summary</h2>\n' +
+    '<p>The table below aggregates findings by template-level issue. Each row represents one distinct combination of engine, WCAG criterion, and selector pattern; the Pages Affected column shows how many of the audited pages exhibit it.</p>\n' +
+    '<h2>Aggregated Findings</h2>\n' +
+    '<table aria-label="Aggregated crawl findings">\n' +
+    '<thead><tr>\n' +
+    '<th scope="col">Engine</th>\n' +
+    '<th scope="col">Criterion</th>\n' +
+    '<th scope="col">Selector pattern</th>\n' +
+    '<th scope="col">Severity</th>\n' +
+    '<th scope="col">Pages affected</th>\n' +
+    '<th scope="col">Sample issue</th>\n' +
+    '<th scope="col">Sample fix</th>\n' +
+    '</tr></thead><tbody>\n' +
+    rows +
+    '</tbody></table>\n' +
+    '</main>\n' +
+    '<footer role="contentinfo"><p>Generated by ' + escHtml(PLATFORM_LABEL) + ' - AMASAMYA.akhileshmalani.com - Akhilesh Malani - Private and Confidential</p></footer>\n' +
+    '</body></html>';
+  _crawlDownload('AMASAMYA-site-crawl-' + _crawlSlug(site) + '.html', 'text/html', html);
+  announce('Site Crawl HTML report exported.');
+}
+
+function crawlExportCsvByTemplate() {
+  var session = window.__AMASAMYA_crawlSession;
+  if (!session || !session.pages.length) {
+    announce('No crawl data to export.', 'assertive');
+    return;
+  }
+  var groups = _crawlGroupFindings(session);
+  var headers = ['Engine', 'Criterion', 'Selector pattern', 'Severity', 'Verdict', 'Pages affected', 'Total pages', 'Sample issue', 'Sample fix'];
+  var rows = groups.map(function (g) {
+    return [
+      g.engine, g.criterion, g.selectorPattern, g.severity, g.verdict,
+      g.pagesAffected, session.pages.length, g.sampleIssue, g.sampleHowToFix
+    ].map(_crawlCsvCell).join(',');
+  });
+  var csv = headers.map(_crawlCsvCell).join(',') + '\r\n' + rows.join('\r\n');
+  _crawlDownload('AMASAMYA-site-crawl-by-template.csv', 'text/csv;charset=utf-8', csv);
+  announce('Site Crawl CSV by template exported.');
+}
+
+function crawlExportCsvByPage() {
+  var session = window.__AMASAMYA_crawlSession;
+  if (!session || !session.pages.length) {
+    announce('No crawl data to export.', 'assertive');
+    return;
+  }
+  var headers = ['Page index', 'URL', 'Status', 'Engine', 'Criterion', 'Selector', 'Severity', 'Verdict', 'Issue', 'How to fix'];
+  var rows = [];
+  session.pages.forEach(function (p, i) {
+    if (p.status !== 'audited' || !Array.isArray(p.findings) || p.findings.length === 0) {
+      rows.push([i + 1, p.url, p.status, '', '', '', '', '', '', ''].map(_crawlCsvCell).join(','));
+      return;
+    }
+    p.findings.forEach(function (f) {
+      rows.push([
+        i + 1, p.url, p.status,
+        f.engine, f.criterion, f.selector || f.element || '',
+        f.severity, f.verdict, f.issue, f.howToFix
+      ].map(_crawlCsvCell).join(','));
+    });
+  });
+  var csv = headers.map(_crawlCsvCell).join(',') + '\r\n' + rows.join('\r\n');
+  _crawlDownload('AMASAMYA-site-crawl-by-page.csv', 'text/csv;charset=utf-8', csv);
+  announce('Site Crawl CSV by page exported.');
+}
+
+function crawlExportJsonRaw() {
+  var session = window.__AMASAMYA_crawlSession;
+  if (!session || !session.pages.length) {
+    announce('No crawl data to export.', 'assertive');
+    return;
+  }
+  var payload = {
+    tool:           'AMASAMYA',
+    version:        PLATFORM_VERSION,
+    kind:           'site-crawl-session',
+    site:           session.bySite || null,
+    siteUrl:        session.bySiteUrl || null,
+    startedAt:      session.startedAt,
+    exportedAt:     new Date().toISOString(),
+    totalPages:     session.pages.length,
+    groups:         _crawlGroupFindings(session).map(function (g) {
+      return {
+        engine: g.engine, criterion: g.criterion, selectorPattern: g.selectorPattern,
+        severity: g.severity, verdict: g.verdict, pagesAffected: g.pagesAffected,
+        sampleIssue: g.sampleIssue, sampleHowToFix: g.sampleHowToFix,
+        affectedUrls: Array.from(new Set(g.findings.map(function (x) { return x.pageUrl; })))
+      };
+    }),
+    pages:          session.pages
+  };
+  _crawlDownload('AMASAMYA-site-crawl.json', 'application/json', JSON.stringify(payload, null, 2));
+  announce('Site Crawl raw JSON exported.');
+}
+
+(function _wireCrawlExportButtons() {
+  var pairs = [
+    ['crawl-export-html',     crawlExportHtml],
+    ['crawl-export-csv-tmpl', crawlExportCsvByTemplate],
+    ['crawl-export-csv-page', crawlExportCsvByPage],
+    ['crawl-export-json-raw', crawlExportJsonRaw]
+  ];
+  pairs.forEach(function (pair) {
+    var btn = document.getElementById(pair[0]);
+    if (btn) btn.addEventListener('click', pair[1]);
+  });
+})();
 
 /* ══════════════════════════════════════════════════════════════
    PHASE 4 JAVASCRIPT
