@@ -1742,6 +1742,70 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 
       <div id="findings-loaded-info" role="region" aria-label="Loaded findings information" aria-live="polite"></div>
 
+      <!-- ═══ SITE CRAWL AGGREGATED VIEW (v4.2.0) ═══
+           Hidden by default. Activates automatically when a Site
+           Crawl session arrives via the AMASAMYA_extension_crawl_page
+           listener (commit G), or when an imported JSON file
+           contains a per-page records array. The toggle lets the
+           user fall back to the existing per-page view if they
+           need it. -->
+      <div id="crawl-aggregate-section" style="display:none;" role="region"
+           aria-labelledby="crawl-aggregate-heading">
+        <h2 class="section-heading" id="crawl-aggregate-heading">Site Crawl Results</h2>
+        <div id="crawl-aggregate-meta" class="filter-bar" role="group"
+             aria-label="Crawl summary">
+          <span class="filter-label" id="crawl-aggregate-site">Site: -</span>
+          <span class="filter-label" id="crawl-aggregate-pages">Pages audited: <span id="crawl-ingest-count">0</span></span>
+          <span class="filter-label" id="crawl-aggregate-groups">Distinct issues: 0</span>
+          <span class="filter-label">Mode:</span>
+          <label class="radio-label" style="margin:0 8px;">
+            <input type="radio" name="crawl-mode" id="crawl-mode-agg"     value="aggregated" checked>
+            Aggregated by issue
+          </label>
+          <label class="radio-label" style="margin:0;">
+            <input type="radio" name="crawl-mode" id="crawl-mode-perpage" value="perpage">
+            Per page
+          </label>
+        </div>
+
+        <!-- Aggregated table: one row per (engine, criterion, selector pattern).
+             Drill-down expands to show the affected pages.            -->
+        <div id="crawl-aggregate-table-wrap" role="region"
+             aria-labelledby="crawl-aggregate-heading" style="overflow-x:auto;">
+          <table class="findings-table" aria-label="Aggregated crawl findings">
+            <thead>
+              <tr>
+                <th scope="col">Engine</th>
+                <th scope="col">Criterion</th>
+                <th scope="col">Selector pattern</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Pages affected</th>
+                <th scope="col">Sample issue</th>
+              </tr>
+            </thead>
+            <tbody id="crawl-aggregate-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Per-page fallback table, hidden unless mode-perpage selected. -->
+        <div id="crawl-perpage-table-wrap" role="region"
+             aria-label="Per-page crawl findings" style="overflow-x:auto;display:none;">
+          <table class="findings-table" aria-label="Per-page crawl findings">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">URL</th>
+                <th scope="col">Status</th>
+                <th scope="col">Findings</th>
+                <th scope="col">Failures</th>
+                <th scope="col">Warnings</th>
+              </tr>
+            </thead>
+            <tbody id="crawl-perpage-body"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div id="report-section" style="display:none;">
         <h2 class="section-heading">Step 2 - Generate Report</h2>
 
@@ -4653,6 +4717,215 @@ window.addEventListener('message', function (e) {
   if (isFirst) {
     announce('Site Crawl ingest active. ' + (session.bySite || 'unknown site') + '. Pages will accumulate as the crawler completes them.');
   }
+
+  /* Auto-activate the Aggregated view on first page and re-render
+     on every subsequent page. The view lives in the Reports tab
+     which the user may not be looking at yet; we do NOT switch the
+     tab for them, just keep the panel up to date so it is ready
+     when they navigate over. */
+  try { crawlRenderAggregated(); } catch (err) { /* keep ingest running */ }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   SITE CRAWL AGGREGATED VIEW (v4.2.0 commit H)
+
+   Two visual modes:
+     - Aggregated by issue (default when a crawl session exists)
+     - Per page (fallback for managers who want the raw breakdown)
+
+   Aggregation key: {engine, criterion, selectorPattern}. The
+   selector pattern normalises dynamic ids and array indices so
+   "#user-123" and "#user-456" collapse into "#user-N", which is
+   how a template-driven site becomes one finding instead of N
+   identical ones. Without this normalisation a 100-page crawl
+   produces 100 "missing alt" rows, which is exactly the noise the
+   feature exists to remove.
+══════════════════════════════════════════════════════════════ */
+
+function _crawlNormaliseSelector(sel) {
+  if (!sel) return '';
+  let s = String(sel);
+  /* Replace numeric segments embedded in ids: #user-123 -> #user-N */
+  s = s.replace(/(-)\d+\b/g, '$1N');
+  /* Replace :nth-child(123) -> :nth-child(N) */
+  s = s.replace(/:nth-(?:child|of-type)\(\d+\)/gi, ':nth-child(N)');
+  /* Collapse [data-id="abc-3a92"] -> [data-id="..."] (any value) */
+  s = s.replace(/\[([^=\s\]]+)=("|')[^"']*\2\]/g, '[$1="..."]');
+  /* Trim whitespace duplicates */
+  s = s.replace(/\s+/g, ' ').trim();
+  return s;
+}
+
+function _crawlGroupFindings(session) {
+  /* Returns array of group objects sorted by pagesAffected desc,
+     then by severity, then by engine. */
+  const map = new Map();
+  const sevRank = { 'Critical': 4, 'Serious': 3, 'Moderate': 2, 'Minor': 1 };
+  (session.pages || []).forEach(page => {
+    if (page.status !== 'audited') return;
+    (page.findings || []).forEach(f => {
+      if (!f) return;
+      const engine    = f.engine    || '(unknown)';
+      const criterion = f.criterion || '(unknown)';
+      const pattern   = _crawlNormaliseSelector(f.selector || f.element || '');
+      const key       = engine + '|' + criterion + '|' + pattern;
+      let g = map.get(key);
+      if (!g) {
+        g = {
+          engine:        engine,
+          criterion:     criterion,
+          selectorPattern: pattern,
+          severity:      f.severity || 'Minor',
+          verdict:       f.verdict  || 'Fail',
+          sampleIssue:   f.issue    || '',
+          sampleHowToFix: f.howToFix || '',
+          pageUrls:      new Set(),
+          findings:      []
+        };
+        map.set(key, g);
+      }
+      g.findings.push({ pageUrl: page.url, pageTitle: page.title, finding: f });
+      g.pageUrls.add(page.url);
+      /* Keep the highest severity sample. */
+      if ((sevRank[f.severity] || 0) > (sevRank[g.severity] || 0)) {
+        g.severity     = f.severity;
+        g.sampleIssue  = f.issue || g.sampleIssue;
+        g.sampleHowToFix = f.howToFix || g.sampleHowToFix;
+      }
+    });
+  });
+  const groups = Array.from(map.values()).map(g => ({
+    engine:          g.engine,
+    criterion:       g.criterion,
+    selectorPattern: g.selectorPattern,
+    severity:        g.severity,
+    verdict:         g.verdict,
+    sampleIssue:     g.sampleIssue,
+    sampleHowToFix:  g.sampleHowToFix,
+    pagesAffected:   g.pageUrls.size,
+    findings:        g.findings
+  }));
+  groups.sort((a, b) => {
+    if (b.pagesAffected !== a.pagesAffected) return b.pagesAffected - a.pagesAffected;
+    const sa = sevRank[a.severity] || 0;
+    const sb = sevRank[b.severity] || 0;
+    if (sb !== sa) return sb - sa;
+    return a.engine.localeCompare(b.engine);
+  });
+  return groups;
+}
+
+function crawlRenderAggregated() {
+  const session = window.__AMASAMYA_crawlSession;
+  if (!session || !session.pages || session.pages.length === 0) return;
+  const section = document.getElementById('crawl-aggregate-section');
+  if (!section) return;
+  section.style.display = '';
+
+  /* Meta strip. */
+  const siteEl  = document.getElementById('crawl-aggregate-site');
+  const countEl = document.getElementById('crawl-ingest-count');
+  if (siteEl)  siteEl.textContent  = 'Site: ' + (session.bySite || 'unknown');
+  if (countEl) countEl.textContent = String(session.pages.length);
+
+  const groups = _crawlGroupFindings(session);
+  const groupsEl = document.getElementById('crawl-aggregate-groups');
+  if (groupsEl) groupsEl.textContent = 'Distinct issues: ' + groups.length;
+
+  /* Mode selection. */
+  const aggChecked = document.getElementById('crawl-mode-agg');
+  const showAgg = !aggChecked || aggChecked.checked;
+
+  const aggWrap     = document.getElementById('crawl-aggregate-table-wrap');
+  const perPageWrap = document.getElementById('crawl-perpage-table-wrap');
+  if (aggWrap)     aggWrap.style.display     = showAgg ? '' : 'none';
+  if (perPageWrap) perPageWrap.style.display = showAgg ? 'none' : '';
+
+  if (showAgg) {
+    crawlRenderAggregatedTable(groups);
+  } else {
+    crawlRenderPerPageTable(session.pages);
+  }
+}
+
+function crawlRenderAggregatedTable(groups) {
+  const body = document.getElementById('crawl-aggregate-body');
+  if (!body) return;
+  body.innerHTML = '';
+  groups.forEach((g, idx) => {
+    const tr = document.createElement('tr');
+    const sevClass = 'severity-' + (g.severity || 'Minor');
+    tr.innerHTML =
+      '<td>' + escHtml(g.engine) + '</td>' +
+      '<td>' + escHtml(g.criterion) + '</td>' +
+      '<td><code>' + escHtml(g.selectorPattern || '(page-level)') + '</code></td>' +
+      '<td class="' + sevClass + '">' + escHtml(g.severity || '') + '</td>' +
+      '<td><strong>' + g.pagesAffected + '</strong> of ' +
+        ((window.__AMASAMYA_crawlSession && window.__AMASAMYA_crawlSession.pages.length) || 0) + '</td>' +
+      '<td>' + escHtml(g.sampleIssue || '') + '</td>';
+    tr.style.cursor = 'pointer';
+    tr.setAttribute('tabindex', '0');
+    tr.setAttribute('role', 'button');
+    tr.setAttribute('aria-expanded', 'false');
+    tr.setAttribute('aria-label',
+      g.engine + ', ' + g.criterion + ', affects ' + g.pagesAffected + ' page' +
+      (g.pagesAffected === 1 ? '' : 's') + ', press Enter to expand');
+    body.appendChild(tr);
+
+    /* Drill-down row, hidden until the parent row is activated. */
+    const drillTr = document.createElement('tr');
+    drillTr.style.display = 'none';
+    const drillTd = document.createElement('td');
+    drillTd.setAttribute('colspan', '6');
+    drillTd.style.background = 'var(--card, #f5f7fb)';
+    const urls = g.findings.map(x => x.pageUrl);
+    const uniq = Array.from(new Set(urls));
+    drillTd.innerHTML =
+      '<div style="padding:8px 12px;">' +
+      '<p style="margin:0 0 6px;"><strong>How to fix (sample):</strong> ' + escHtml(g.sampleHowToFix || '(none)') + '</p>' +
+      '<p style="margin:0 0 4px;"><strong>Affected pages (' + uniq.length + '):</strong></p>' +
+      '<ul style="margin:0 0 0 18px;">' +
+      uniq.map(u => '<li><code>' + escHtml(u) + '</code></li>').join('') +
+      '</ul></div>';
+    drillTr.appendChild(drillTd);
+    body.appendChild(drillTr);
+
+    function toggle() {
+      const open = drillTr.style.display !== 'none';
+      drillTr.style.display = open ? 'none' : '';
+      tr.setAttribute('aria-expanded', open ? 'false' : 'true');
+    }
+    tr.addEventListener('click', toggle);
+    tr.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(); }
+    });
+  });
+}
+
+function crawlRenderPerPageTable(pages) {
+  const body = document.getElementById('crawl-perpage-body');
+  if (!body) return;
+  body.innerHTML = '';
+  pages.forEach((p, i) => {
+    const findings = Array.isArray(p.findings) ? p.findings : [];
+    const fails = findings.filter(f => f && f.verdict === 'Fail').length;
+    const warns = findings.filter(f => f && f.verdict === 'Warning').length;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + (i + 1) + '</td>' +
+      '<td><code>' + escHtml(p.url) + '</code></td>' +
+      '<td>' + escHtml(p.status || '') + '</td>' +
+      '<td>' + findings.length + '</td>' +
+      '<td>' + fails + '</td>' +
+      '<td>' + warns + '</td>';
+    body.appendChild(tr);
+  });
+}
+
+document.addEventListener('change', function (ev) {
+  if (!ev.target) return;
+  if (ev.target.name !== 'crawl-mode') return;
+  crawlRenderAggregated();
 });
 
 /* ══════════════════════════════════════════════════════════════
