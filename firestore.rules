@@ -19,6 +19,30 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Feedback form (amasamya/feedback.html, v4.2.0 pre-marketing).
+    // Anyone signed in (including via anonymous auth from the form
+    // itself) can CREATE a single feedback doc with a validated
+    // shape. Nobody can read, update, or delete from the client; the
+    // developer reads submissions in the Firebase Console.
+    match /feedback/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+             'kind', 'name', 'email', 'url', 'message',
+             'at', 'ua', 'anonUid', 'createdAt', 'source'
+           ])
+        && request.resource.data.kind in ['bug', 'feature', 'accessibility', 'other']
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 10
+        && request.resource.data.message.size() <= 5000
+        && (request.resource.data.name == null  || request.resource.data.name.size()  <= 120)
+        && (request.resource.data.email == null || request.resource.data.email.size() <= 200)
+        && (request.resource.data.url == null   || request.resource.data.url.size()   <= 500)
+        && request.resource.data.at is list
+        && request.resource.data.at.size() <= 10;
+
+      allow read, update, delete: if false;
+    }
+
     // Deny everything else
     match /{document=**} {
       allow read, write: if false;
