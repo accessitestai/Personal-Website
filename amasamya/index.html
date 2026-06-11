@@ -2882,8 +2882,37 @@ $('json-file-input').addEventListener('change', e => {
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
+
+      /*
+        v4.2.0 cross-shape import:
+
+        The AMASAMYA extension produces two different JSON export
+        shapes depending on what was being exported:
+
+          a) Single-page WCAG audit:
+               { tool, version, findings: [ ... ] }
+             handled below the branch as the legacy path.
+
+          b) Site Crawl report (multiple pages):
+               { tool, version, kind: 'site-crawl-report',
+                 taken, results: [ { url, status, findings, ... } ] }
+             routed here through the same crawl-session pipeline
+             that the live ingest in commit G uses, so the
+             Aggregated Reports view (commit H), the session
+             metadata header (commit J), and the exports (commit I)
+             all just work on imported data exactly the same way
+             they work on a live crawl.
+
+        Importing a Site Crawl file clears the previous session
+        first so the aggregator counts are not double-applied.
+      */
+      if (data && data.kind === 'site-crawl-report' && Array.isArray(data.results)) {
+        importSiteCrawlReport(data);
+        return;
+      }
+
       if (!data.findings || !Array.isArray(data.findings)) {
-        throw new Error('File does not contain a valid AMASAMYA findings array.');
+        throw new Error('File does not contain a valid AMASAMYA findings array. Expected either a single-page audit export with a "findings" array, or a Site Crawl export with kind="site-crawl-report" and a "results" array.');
       }
       currentFindings = data.findings;
 
@@ -4710,6 +4739,98 @@ function _crawlEnsureSession() {
     };
   }
   return window.__AMASAMYA_crawlSession;
+}
+
+/*
+  Import a Site Crawl JSON export and route it through the same
+  session-render pipeline that a live crawl uses. The extension's
+  Site Crawl tab emits documents shaped:
+
+    { tool: 'AMASAMYA', version, kind: 'site-crawl-report',
+      taken, results: [ { url, finalUrl, title, status, index,
+                          findings, durationMs, timestamp } ] }
+
+  The live-ingest listener (commit G) expects
+  AMASAMYA_extension_crawl_page window-messages that carry
+  per-page records. So the cleanest cross-shape route is to:
+
+    1. Reset the in-memory crawl session so old + new do not mix.
+    2. Replay each result as a synthetic message-event so the
+       existing listener handles dedup + bySite derivation +
+       counter update.
+    3. Stamp the imported startedAt / finishedAt explicitly so the
+       session-metadata header (commit J) shows the original crawl
+       window, not the replay time.
+    4. Render once at the end.
+
+  Side effect: anything the live listener does (announce, counter
+  update) also fires on import, which is correct because from the
+  user's perspective an imported crawl behaves the same as a fresh
+  one once it loads.
+*/
+function importSiteCrawlReport(data) {
+  /* 1. Clear any previous crawl so the aggregator does not double
+     count if the user imports two reports in a row. */
+  window.__AMASAMYA_crawlSession = null;
+
+  /* 2. Replay each result as the listener would receive it. */
+  const results = Array.isArray(data.results) ? data.results : [];
+  results.forEach((r, i) => {
+    try {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type:       'AMASAMYA_extension_crawl_page',
+          url:        r.url || '',
+          finalUrl:   r.finalUrl || r.url || '',
+          title:      r.title || '',
+          status:     r.status || 'audited',
+          index:      typeof r.index === 'number' ? r.index : i,
+          findings:   Array.isArray(r.findings) ? r.findings : [],
+          durationMs: typeof r.durationMs === 'number' ? r.durationMs : 0,
+          timestamp:  r.timestamp || data.taken || new Date().toISOString()
+        },
+        origin: window.location.origin
+      }));
+    } catch (_) { /* keep replaying the rest */ }
+  });
+
+  /* 3. Stamp the session window so the metadata header reads
+     correctly. The listener sets startedAt to the moment the first
+     event arrived; override with the export's own timestamps. */
+  const session = window.__AMASAMYA_crawlSession;
+  if (session) {
+    const firstRec = results[0];
+    const lastRec  = results[results.length - 1];
+    session.startedAt  = (firstRec && firstRec.timestamp) || data.taken || session.startedAt;
+    session.finishedAt = (lastRec  && lastRec.timestamp)  || data.taken || session.finishedAt || null;
+    session.imported   = true;
+    session.importedAt = new Date().toISOString();
+  }
+
+  /* 4. Render so the aggregator / per-page table / metadata header
+     all reflect the imported session. */
+  try { crawlRenderAggregated(); } catch (_) {}
+
+  /* 5. Tell the user what happened, both visibly and through the
+     polite live region. Cleared the import error display because
+     the import succeeded. */
+  const audited = results.filter(r => (r.status || 'audited') === 'audited').length;
+  const msg = 'Site Crawl report imported. ' + results.length +
+              ' page' + (results.length === 1 ? '' : 's') + ' loaded. ' +
+              audited + ' audited.';
+  try { announce(msg); } catch (_) {}
+  try {
+    const info = document.getElementById('findings-loaded-info');
+    if (info) {
+      info.style.display = 'block';
+      info.innerHTML = '<strong>Site Crawl report imported.</strong><br>' +
+        escHtml(String(results.length)) + ' page' + (results.length === 1 ? '' : 's') + ' loaded.<br>' +
+        'Site: ' + escHtml(session && session.bySite ? session.bySite : 'unknown') + ' &nbsp;|&nbsp; ' +
+        'Audited: ' + escHtml(String(audited)) + ' &nbsp;|&nbsp; ' +
+        'Tool: ' + escHtml(PLATFORM_LABEL) + '<br>' +
+        'Scroll down to the Site Crawl Results section to see the aggregated view.';
+    }
+  } catch (_) {}
 }
 
 window.addEventListener('message', function (e) {
