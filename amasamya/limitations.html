@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Known Limitations - AMASAMYA Accessibility Audit Platform</title>
+  <meta name="description" content="An honest list of what AMASAMYA does not currently catch, why, and what to use alongside it.">
+  <meta name="author" content="Akhilesh Malani">
+  <link rel="canonical" href="https://amasamya.akhileshmalani.com/limitations.html">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1a2a3a;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    .skip-link {
+      position: absolute; top: -40px; left: 0;
+      background: #003366; color: #fff;
+      padding: 10px 18px; z-index: 9999;
+      text-decoration: none; font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+    a { color: #0369a1; }
+    a:focus { outline: 2px solid #0369a1; outline-offset: 2px; }
+    header {
+      background: linear-gradient(135deg, #0d2240 0%, #003366 100%);
+      color: #fff;
+      padding: 40px 0;
+      border-bottom: 4px solid #7ec8e3;
+    }
+    header .inner { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+    header h1 { font-size: 1.8rem; color: #7ec8e3; margin-bottom: 6px; }
+    header p { font-size: 0.95rem; color: #cfd8e3; }
+    nav.platform-nav {
+      max-width: 760px; margin: 0 auto; padding: 14px 24px;
+      display: flex; flex-wrap: wrap; gap: 14px;
+      border-bottom: 1px solid #e2eaf4; background: #fff;
+    }
+    nav.platform-nav a { font-size: 0.92rem; font-weight: 600; text-decoration: none; }
+    main { max-width: 760px; margin: 0 auto; padding: 32px 24px 64px; }
+    h2 {
+      font-size: 1.15rem;
+      color: #003366;
+      margin: 32px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2eaf4;
+    }
+    h3 {
+      font-size: 1.0rem;
+      color: #003366;
+      margin: 20px 0 6px;
+    }
+    p { margin-bottom: 12px; color: #2a3a4a; }
+    ul { margin: 0 0 14px 22px; }
+    ul li { margin-bottom: 6px; color: #2a3a4a; }
+    strong { color: #003366; }
+    .updated {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-bottom: 22px;
+      padding: 10px 16px;
+      background: #e8f0fb;
+      border-left: 4px solid #7ec8e3;
+      border-radius: 0 4px 4px 0;
+    }
+    .callout {
+      background: #fff5e6;
+      border-left: 4px solid #d97706;
+      padding: 14px 18px;
+      border-radius: 0 4px 4px 0;
+      margin: 18px 0 22px;
+    }
+    .callout p { margin: 0; color: #6b4108; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 18px;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #e8f0fb; color: #003366; }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.85rem;
+      color: #475569;
+      border-top: 1px solid #e2eaf4;
+      background: #fff;
+    }
+    footer a { color: #0369a1; }
+    footer p { margin: 0 0 6px; }
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header role="banner">
+  <div class="inner">
+    <h1>Known Limitations</h1>
+    <p>What AMASAMYA does not catch today, and what to use alongside it.</p>
+  </div>
+</header>
+
+<nav class="platform-nav" aria-label="Platform">
+  <a href="/landing.html">Home</a>
+  <a href="/faq.html">FAQ</a>
+  <a href="/limitations.html" aria-current="page">Known limitations</a>
+  <a href="/about.html">About Akhilesh</a>
+  <a href="/feedback.html">Send feedback</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="https://akhileshmalani.com/" rel="noopener">akhileshmalani.com</a>
+</nav>
+
+<main id="main">
+
+  <p class="updated">Last updated: 11 June 2026. Updated when limitations are removed or added.</p>
+
+  <p>
+    No automated accessibility tool, including AMASAMYA, catches every
+    accessibility issue. Public research from Deque (the makers of
+    axe-core) and from WebAIM puts the upper bound of automatable
+    detection at roughly thirty to forty percent of WCAG conformance
+    issues. The remaining sixty to seventy percent require manual
+    testing, ideally including a real screen-reader user.
+  </p>
+
+  <p>
+    This page is the honest version of that statement for AMASAMYA
+    specifically. The goal is that you finish reading it knowing
+    exactly when AMASAMYA is enough on its own and when you need to
+    pair it with something else.
+  </p>
+
+  <div class="callout" role="note">
+    <p>
+      <strong>Reminder.</strong> Passing every check AMASAMYA can make
+      does not mean a page is WCAG conformant. It means AMASAMYA found
+      nothing in the parts it can check. Manual testing remains
+      required for full conformance claims.
+    </p>
+  </div>
+
+  <h2>Coverage of WCAG 2.2 today</h2>
+
+  <p>
+    The Chrome extension ships with 24 automated audit engines covering
+    a meaningful subset of WCAG 2.2 success criteria at Level A and
+    Level AA. The single-page audit cannot, by design, decide criteria
+    that require cross-page comparison, real media inspection, or
+    simulated user interaction.
+  </p>
+
+  <h3>What AMASAMYA does not currently auto-check</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">WCAG SC</th>
+        <th scope="col">Why it is hard to automate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1.2.4 Captions, Live</td>
+        <td>Requires inspecting a live audio stream as it plays.</td>
+      </tr>
+      <tr>
+        <td>1.2.5 Audio Description, Prerecorded</td>
+        <td>Requires comparing video content against an audio-description track.</td>
+      </tr>
+      <tr>
+        <td>1.4.5 Images of Text</td>
+        <td>Requires OCR or vision analysis to know if an image contains text rather than just a graphic.</td>
+      </tr>
+      <tr>
+        <td>1.4.13 Content on Hover or Focus</td>
+        <td>Requires simulating mouse hover and keyboard focus on every element and timing dismissals.</td>
+      </tr>
+      <tr>
+        <td>2.4.5 Multiple Ways</td>
+        <td>Requires comparing site-wide navigation, search, and sitemap availability across pages.</td>
+      </tr>
+      <tr>
+        <td>3.1.2 Language of Parts</td>
+        <td>Requires deciding whether mixed-language inline content is correctly marked.</td>
+      </tr>
+      <tr>
+        <td>3.2.3 Consistent Navigation, 3.2.4 Consistent Identification</td>
+        <td>Single-page audit cannot verify consistency across the page set.</td>
+      </tr>
+      <tr>
+        <td>3.3.3 Error Suggestion, 3.3.4 Error Prevention</td>
+        <td>Requires actually submitting forms and inspecting the error UX that comes back.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Some of these are on the roadmap. Site Crawl in the v4.2 extension
+    release will add partial coverage for SC 3.2.3, 3.2.4, and 3.2.6
+    by comparing audits across pages. Vision AI integration already
+    helps with SC 1.4.5 and SC 1.4.11 when the user has configured an
+    API key.
+  </p>
+
+  <h2>Specific things to manually verify</h2>
+
+  <p>
+    Even within the criteria AMASAMYA does auto-check, certain edge
+    cases produce false positives or false negatives. These are the
+    ones to verify manually if your audit will be used for a
+    conformance claim.
+  </p>
+
+  <h3>Colour contrast on layered backgrounds</h3>
+  <p>
+    The contrast engine reads the effective background of an element
+    by walking the ancestor tree and blending semi-transparent layers.
+    On heavily layered designs (cards stacked over hero images stacked
+    over gradients), the computed background may not match what a
+    human sees. Manually verify any borderline finding before
+    reporting it as a definitive fail.
+  </p>
+
+  <h3>Form labels that are not nearby in the DOM</h3>
+  <p>
+    The forms engine prefers <code>&lt;label for&gt;</code>
+    associations and falls back to ancestor <code>&lt;label&gt;</code>
+    wrappers. Custom widgets that label inputs via
+    <code>aria-labelledby</code> pointing at distant elements are
+    correctly recognised; widgets that use ARIA live regions to
+    announce labels at runtime are not.
+  </p>
+
+  <h3>Dynamic content and SPAs</h3>
+  <p>
+    AMASAMYA audits the DOM at the moment you trigger the run. Single-
+    page apps that load content lazily, virtualised lists that render
+    only the visible window, and modals that open after user
+    interaction are evaluated only in their current visible state.
+    Trigger the audit again after each significant state change.
+  </p>
+
+  <h3>Custom focus indicators</h3>
+  <p>
+    The Focus Indicator Narrator module uses Vision AI to compare the
+    focused and unfocused screenshots of each element. Without a
+    Vision AI key configured, the focus-visibility engine falls back
+    to CSS heuristics that miss visually rich custom focus rings.
+    Configure a Vision AI key for accurate focus checks.
+  </p>
+
+  <h3>Mobile breakpoints</h3>
+  <p>
+    The Visual Layout Auditor emulates four viewport widths (320px,
+    375px, 768px, 1280px) and only one orientation. Tablet landscape,
+    foldable phones, and ultra-wide monitors are not in the default
+    sweep.
+  </p>
+
+  <h2>Limitations that come from the deployment model</h2>
+
+  <h3>Authenticated and CORS-strict sites</h3>
+  <p>
+    The platform's Web Audit feature cannot inject the audit engine
+    into pages that strictly disable inline scripts via Content
+    Security Policy, and cannot reach pages that block cross-origin
+    access. On those sites, use the Chrome extension directly: it
+    runs through a Manifest V3 service worker that bypasses page CSP.
+  </p>
+
+  <h3>iOS Safari and Firefox</h3>
+  <p>
+    The Chrome extension targets Chromium browsers (Chrome, Edge,
+    Brave, Arc, Opera). A Firefox port would require API translation
+    because Firefox does not implement <code>chrome.sidePanel</code>
+    or the same <code>chrome.debugger</code> semantics. iOS Safari
+    does not support extensions of this shape at all.
+  </p>
+
+  <h3>Languages and locales</h3>
+  <p>
+    The user interface, audit findings, remediation guidance, and
+    export reports are in English only at present. Engines run
+    correctly on pages written in any language, but the finding text
+    will still be in English.
+  </p>
+
+  <h2>What this means in practice</h2>
+
+  <p>
+    For a credible accessibility audit of a production site or
+    application, the realistic workflow is:
+  </p>
+
+  <ul>
+    <li>Run AMASAMYA on representative pages (homepage, search results, product detail, checkout, account, error page).</li>
+    <li>Run a second automated tool such as axe DevTools or WAVE on the same pages to catch what AMASAMYA misses and vice versa.</li>
+    <li>Manually test with a screen reader (NVDA on Windows, VoiceOver on macOS / iOS, TalkBack on Android).</li>
+    <li>Run a keyboard-only navigation pass without a mouse.</li>
+    <li>Verify colour, motion, and timing-sensitive checks by hand.</li>
+  </ul>
+
+  <p>
+    AMASAMYA accelerates step one. The other steps remain. If a
+    competitor product is telling you that step one alone is enough,
+    they are selling you a story, not an audit.
+  </p>
+
+  <h2>How this list changes</h2>
+
+  <p>
+    Items move off this page when an AMASAMYA release adds coverage
+    for them. The "Last updated" date at the top reflects the most
+    recent change. The full release history lives in the ROADMAP file
+    at <a href="https://github.com/accessitestai/AMASAMYA/blob/main/extension/ROADMAP.md" rel="noopener">github.com/accessitestai/AMASAMYA</a>.
+    If something is here that is no longer true, tell us on the
+    <a href="/feedback.html">feedback page</a>.
+  </p>
+
+</main>
+
+<footer>
+  <p>AMASAMYA v5.0 - Built by <a href="https://akhileshmalani.com/" rel="noopener">Akhilesh Malani</a>, accessibility architect and digital inclusion strategist.</p>
+  <p><a href="/landing.html">Home</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/feedback.html">Feedback</a> &middot; <a href="https://github.com/accessitestai/AMASAMYA" rel="noopener">Source on GitHub</a></p>
+</footer>
+
+</body>
+</html>

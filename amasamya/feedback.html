@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Feedback - AMASAMYA</title>
+  <meta name="description" content="Tell Akhilesh what is working, what is broken, or what you wish AMASAMYA could do. Every submission is read.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://amasamya.akhileshmalani.com/feedback.html">
+
+  <!-- Firebase compat SDKs. Loaded the same way as auth.html so we
+       can write to Firestore with anonymous auth: the user does not
+       have to sign in to send feedback. -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="./firebase-config.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1a2a3a;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    .skip-link {
+      position: absolute; top: -40px; left: 0;
+      background: #003366; color: #fff;
+      padding: 10px 18px; z-index: 9999;
+      text-decoration: none; font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+    a { color: #0369a1; }
+    a:focus { outline: 2px solid #0369a1; outline-offset: 2px; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+    header {
+      background: linear-gradient(135deg, #0d2240 0%, #003366 100%);
+      color: #fff;
+      padding: 40px 0;
+      border-bottom: 4px solid #7ec8e3;
+    }
+    header .inner { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+    header h1 { font-size: 1.8rem; color: #7ec8e3; margin-bottom: 6px; }
+    header p { font-size: 0.95rem; color: #cfd8e3; }
+    nav.platform-nav {
+      max-width: 720px; margin: 0 auto; padding: 14px 24px;
+      display: flex; flex-wrap: wrap; gap: 14px;
+      border-bottom: 1px solid #e2eaf4; background: #fff;
+    }
+    nav.platform-nav a { font-size: 0.92rem; font-weight: 600; text-decoration: none; }
+    main { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
+    h2 {
+      font-size: 1.15rem;
+      color: #003366;
+      margin: 28px 0 12px;
+    }
+    p { margin-bottom: 14px; color: #2a3a4a; }
+    strong { color: #003366; }
+
+    form { margin-top: 18px; }
+    fieldset { border: none; margin-bottom: 20px; }
+    legend { font-weight: 600; color: #003366; margin-bottom: 8px; padding: 0; }
+
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-weight: 600; color: #003366; margin-bottom: 4px; }
+    .field .hint { font-size: 0.85rem; color: #475569; margin: 0 0 6px; }
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="url"],
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      color: #1a2a3a;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      outline: 2px solid #0369a1;
+      outline-offset: 1px;
+      border-color: #0369a1;
+    }
+    .field textarea { min-height: 140px; resize: vertical; }
+    .field-error {
+      color: #b91c1c;
+      font-size: 0.85rem;
+      margin: 4px 0 0;
+      font-weight: 600;
+    }
+
+    .radio-group { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .radio-label {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0; cursor: pointer;
+    }
+    .radio-label input { margin-top: 4px; }
+
+    .submit-row {
+      display: flex; gap: 12px; align-items: center; margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    button.btn {
+      background: #003366; color: #fff;
+      padding: 11px 22px; border: none; border-radius: 6px;
+      font-size: 1rem; font-weight: 600;
+      cursor: pointer;
+    }
+    button.btn:focus, button.btn:hover {
+      background: #0d2240;
+      outline: 2px solid #7ec8e3; outline-offset: 2px;
+    }
+    button.btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .form-status {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .form-status.is-success { background: #e8f8ef; color: #156435; border-left: 4px solid #16a34a; }
+    .form-status.is-error   { background: #fee2e2; color: #7f1d1d; border-left: 4px solid #b91c1c; }
+
+    .alt-paths {
+      background: #fff;
+      border: 1px solid #e2eaf4;
+      padding: 18px 22px;
+      border-radius: 6px;
+      margin-top: 28px;
+    }
+    .alt-paths h2 { margin-top: 0; }
+    .alt-paths ul { margin: 0 0 0 22px; }
+    .alt-paths li { margin-bottom: 6px; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.85rem;
+      color: #475569;
+      border-top: 1px solid #e2eaf4;
+      background: #fff;
+    }
+    footer a { color: #0369a1; }
+    footer p { margin: 0 0 6px; }
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<!--
+  Live regions. Polite for routine status (Sending..., Sent),
+  assertive for errors. Same pattern as the rest of the platform.
+-->
+<div id="sr-live"           aria-live="polite"    aria-atomic="true" class="sr-only"></div>
+<div id="sr-live-assertive" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<header role="banner">
+  <div class="inner">
+    <h1>Send Feedback</h1>
+    <p>What is working, what is broken, what you wish AMASAMYA could do. Every submission is read.</p>
+  </div>
+</header>
+
+<nav class="platform-nav" aria-label="Platform">
+  <a href="/landing.html">Home</a>
+  <a href="/faq.html">FAQ</a>
+  <a href="/limitations.html">Known limitations</a>
+  <a href="/about.html">About Akhilesh</a>
+  <a href="/feedback.html" aria-current="page">Send feedback</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="https://akhileshmalani.com/" rel="noopener">akhileshmalani.com</a>
+</nav>
+
+<main id="main">
+
+  <h2>Before you send</h2>
+  <p>
+    For a bug, the most useful thing you can include is: which page you
+    were on, what you tried to do, what happened instead, and whether
+    you were using the Chrome extension or the platform. Screenshots
+    are welcome but not required. If you are blind or use a screen
+    reader, please say which one so I can reproduce.
+  </p>
+  <p>
+    Name and email are optional. If you leave them blank the message
+    is anonymous and I cannot reply. If you include an email I will
+    only use it to respond to this specific message.
+  </p>
+
+  <form id="feedback-form" novalidate aria-describedby="form-help">
+    <p id="form-help" class="sr-only">
+      All fields marked optional can be left blank. Message is the
+      only required field.
+    </p>
+
+    <fieldset>
+      <legend>What is this about?</legend>
+      <div class="radio-group" role="radiogroup" aria-required="true">
+        <label class="radio-label">
+          <input type="radio" name="kind" value="bug" required>
+          A bug report (something is broken or behaves wrongly)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="kind" value="feature">
+          A feature request (something you wish AMASAMYA could do)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="kind" value="accessibility">
+          An accessibility issue with AMASAMYA itself
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="kind" value="other">
+          General feedback or a question
+        </label>
+      </div>
+      <p class="field-error" id="kind-err" role="alert" aria-live="polite"></p>
+    </fieldset>
+
+    <div class="field">
+      <label for="fb-name">Your name (optional)</label>
+      <input type="text" id="fb-name" name="name" autocomplete="name" maxlength="120">
+    </div>
+
+    <div class="field">
+      <label for="fb-email">Your email (optional)</label>
+      <p class="hint" id="fb-email-hint">
+        Only used to reply to your message. Not added to any mailing list.
+      </p>
+      <input type="email" id="fb-email" name="email" autocomplete="email"
+             maxlength="200" aria-describedby="fb-email-hint">
+      <p class="field-error" id="email-err" role="alert" aria-live="polite"></p>
+    </div>
+
+    <div class="field">
+      <label for="fb-url">Page or URL this is about (optional)</label>
+      <p class="hint" id="fb-url-hint">
+        For example https://amasamya.akhileshmalani.com/faq.html or the
+        site you were auditing when the bug happened.
+      </p>
+      <input type="url" id="fb-url" name="url" maxlength="500"
+             placeholder="https://"
+             aria-describedby="fb-url-hint">
+    </div>
+
+    <div class="field">
+      <label for="fb-message">
+        Your message <span aria-hidden="true">*</span>
+        <span class="sr-only">(required)</span>
+      </label>
+      <p class="hint" id="fb-message-hint">
+        What happened, what you tried, what you expected. Plain English
+        is fine. Minimum 10 characters.
+      </p>
+      <textarea id="fb-message" name="message" required minlength="10"
+                maxlength="5000" aria-describedby="fb-message-hint"></textarea>
+      <p class="field-error" id="message-err" role="alert" aria-live="polite"></p>
+    </div>
+
+    <fieldset>
+      <legend>Assistive technology you use (optional, helps reproduction)</legend>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="nvda"> NVDA on Windows
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="jaws"> JAWS on Windows
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="voiceover-mac"> VoiceOver on macOS
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="voiceover-ios"> VoiceOver on iOS
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="talkback"> TalkBack on Android
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="narrator"> Windows Narrator
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="keyboard-only"> Keyboard only, no screen reader
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="zoom"> Screen zoom or magnification
+        </label>
+        <label class="radio-label">
+          <input type="checkbox" name="at" value="none"> None of the above
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <button type="submit" class="btn" id="fb-submit">Send feedback</button>
+      <span id="fb-status" class="form-status" hidden></span>
+    </div>
+  </form>
+
+  <div class="alt-paths">
+    <h2>Other ways to reach out</h2>
+    <ul>
+      <li>Open an issue at <a href="https://github.com/accessitestai/AMASAMYA/issues" rel="noopener">github.com/accessitestai/AMASAMYA</a>. Public, traceable, good for technical bugs.</li>
+      <li>For engagement and consulting enquiries, contact details on <a href="https://akhileshmalani.com/" rel="noopener">akhileshmalani.com</a>.</li>
+      <li>If the form is broken, email akhilesh.malani at gmail.com directly. Type "AMASAMYA feedback" in the subject so I find it quickly.</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer>
+  <p>AMASAMYA v5.0 - Built by <a href="https://akhileshmalani.com/" rel="noopener">Akhilesh Malani</a>, accessibility architect and digital inclusion strategist.</p>
+  <p><a href="/landing.html">Home</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/faq.html">FAQ</a> &middot; <a href="https://github.com/accessitestai/AMASAMYA" rel="noopener">Source on GitHub</a></p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Accessibility helpers ────────────────────────────────────── */
+  function announce(msg, urgency) {
+    var id = urgency === 'assertive' ? 'sr-live-assertive' : 'sr-live';
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = '';
+    window.requestAnimationFrame(function () { el.textContent = msg; });
+  }
+
+  function setStatus(text, kind) {
+    var el = document.getElementById('fb-status');
+    el.hidden = false;
+    el.textContent = text;
+    el.className = 'form-status ' + (kind === 'error' ? 'is-error' : 'is-success');
+  }
+
+  function clearError(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = '';
+  }
+  function setError(id, msg) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = msg;
+  }
+
+  /* ── Validation ────────────────────────────────────────────────── */
+  function readForm(form) {
+    var kindRadio = form.querySelector('input[name="kind"]:checked');
+    var atBoxes   = Array.prototype.slice.call(form.querySelectorAll('input[name="at"]:checked'));
+    return {
+      kind:    kindRadio ? kindRadio.value : '',
+      name:    (form.querySelector('#fb-name').value    || '').trim(),
+      email:   (form.querySelector('#fb-email').value   || '').trim(),
+      url:     (form.querySelector('#fb-url').value     || '').trim(),
+      message: (form.querySelector('#fb-message').value || '').trim(),
+      at:      atBoxes.map(function (b) { return b.value; })
+    };
+  }
+
+  function validate(data) {
+    var errors = [];
+    clearError('kind-err');
+    clearError('email-err');
+    clearError('message-err');
+    if (!data.kind) {
+      setError('kind-err', 'Please choose what this is about.');
+      errors.push('kind');
+    }
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      setError('email-err', 'That does not look like a valid email address.');
+      errors.push('email');
+    }
+    if (!data.message || data.message.length < 10) {
+      setError('message-err', 'Please write at least 10 characters describing the issue.');
+      errors.push('message');
+    }
+    return errors;
+  }
+
+  /* ── Submission via Firestore + anonymous auth ─────────────────── */
+  async function submitFeedback(data) {
+    if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
+      throw new Error('FIREBASE_UNAVAILABLE');
+    }
+    /* Sign in anonymously so the Firestore rule (request.auth != null)
+       is satisfied without forcing the user to create an account. */
+    if (!firebase.auth().currentUser) {
+      await firebase.auth().signInAnonymously();
+    }
+    var uid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : null;
+    var doc = {
+      kind:      data.kind,
+      name:      data.name || null,
+      email:     data.email || null,
+      url:       data.url || null,
+      message:   data.message,
+      at:        data.at,
+      ua:        (navigator.userAgent || '').slice(0, 400),
+      anonUid:   uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      source:    'amasamya.akhileshmalani.com/feedback.html'
+    };
+    return firebase.firestore().collection('feedback').add(doc);
+  }
+
+  /* ── Wire the form ─────────────────────────────────────────────── */
+  var form = document.getElementById('feedback-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    var data = readForm(form);
+    var errors = validate(data);
+    if (errors.length) {
+      announce('Form has ' + errors.length + ' error' + (errors.length === 1 ? '' : 's') + '. Please fix the highlighted fields.', 'assertive');
+      var firstId = ({ kind: 'fb-submit', email: 'fb-email', message: 'fb-message' })[errors[0]];
+      var first = document.getElementById(firstId);
+      if (first) first.focus();
+      return;
+    }
+
+    var btn = document.getElementById('fb-submit');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    announce('Sending feedback. Please wait.');
+    setStatus('Sending...', 'success');
+
+    try {
+      await submitFeedback(data);
+      btn.textContent = 'Sent';
+      setStatus('Thank you. Your feedback has been received. If you provided an email, expect a reply when there is something concrete to say back.', 'success');
+      announce('Feedback sent. Thank you.');
+      form.reset();
+      /* Keep the button disabled briefly so accidental double-clicks
+         do not double-send. */
+      setTimeout(function () {
+        btn.disabled = false;
+        btn.textContent = 'Send feedback';
+      }, 4000);
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Send feedback';
+      var msg = 'Could not send feedback. ';
+      if (err && err.message === 'FIREBASE_UNAVAILABLE') {
+        msg += 'The feedback service is offline right now. Please email akhilesh.malani at gmail.com with the subject "AMASAMYA feedback".';
+      } else if (err && err.code === 'permission-denied') {
+        msg += 'The form was rejected by the server. Please try again in a minute, or email akhilesh.malani at gmail.com with the subject "AMASAMYA feedback".';
+      } else {
+        msg += 'Please try again in a moment. If it keeps failing, email akhilesh.malani at gmail.com.';
+      }
+      setStatus(msg, 'error');
+      announce(msg, 'assertive');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
