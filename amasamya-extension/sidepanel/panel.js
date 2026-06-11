@@ -92,7 +92,7 @@
     Single-source-of-truth is enforced at release time by flipping
     both occurrences together; commit L of the v4.2.0 plan does this.
   */
-  const SITE_CRAWL_ENABLED = false;
+  const SITE_CRAWL_ENABLED = true; /* v4.2.0 K calibration in progress */
   const PANEL_TABS = SITE_CRAWL_ENABLED
     ? ['wcag', 'visual', 'settings', 'crawl']
     : ['wcag', 'visual', 'settings'];
@@ -1287,37 +1287,141 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     mirrors the existing focus-narrator-ui and visual-layout-ui
     message patterns so the side panel uses one consistent shape.
   */
+  /*
+    v4.2.0 K calibration accessibility pass:
+
+    Real-world test 1 surfaced two failures:
+
+      1. Audit numbers were silent. The progress label updated, but
+         crawl-progress-wrap had no aria-live, so screen readers
+         never announced "Auditing 3 of 5". Fixed in panel.html by
+         moving aria-live="polite" + aria-atomic="true" onto the
+         label itself.
+
+      2. Per-page completion was silent. New rows were appended to
+         the results table, but table-row insertion is not
+         announced by NVDA / JAWS unless the user is actively
+         table-navigating. Fixed here by emitting a short polite
+         announcement on every page completion that includes the
+         URL path so pages can be told apart by ear.
+
+    Phrasing is short and verb-first to keep the live-region queue
+    flowing on fast crawls. URL is reduced to its path so two-second
+    intervals can carry the spoken sentence without backing up.
+  */
+
+  /* Strip protocol + host so the announcement is short and the
+     audible difference between adjacent pages is the path. Falls
+     back to the full URL if parsing fails. */
+  function crawlPathOnly(rawUrl) {
+    if (!rawUrl) return '';
+    try {
+      const u = new URL(rawUrl);
+      let path = u.pathname || '/';
+      if (u.search) path += u.search;
+      return path;
+    } catch (_) { return String(rawUrl); }
+  }
+
+  /* Short human label for status, used in both the polite live
+     announcement and the aria-label on each results-table row so
+     the row reads as a single sentence when reviewed later. */
+  function crawlStatusSentence(status) {
+    return ({
+      'audited':    'Audited successfully',
+      'auth-wall':  'Skipped, page is behind a sign in',
+      'timeout':    'Timed out',
+      'load-error': 'Load error',
+      'cancelled':  'Cancelled',
+      'skipped':    'Skipped'
+    })[status] || (status || 'Unknown');
+  }
+
   function handleCrawlUi(msg) {
     if (msg.phase === 'queued') {
       $('crawl-pages-total').textContent = String(msg.total);
       $('crawl-results-wrap').hidden = false;
-      $('crawl-progress-label').textContent = `Queued ${msg.total} URL${msg.total === 1 ? '' : 's'}.`;
-      announce(`Crawl queued. ${msg.total} pages will be audited.`);
+      $('crawl-progress-label').textContent = `${msg.total} page${msg.total === 1 ? '' : 's'} queued. Crawl starting now.`;
+      $('crawl-progress-bar').setAttribute('aria-valuetext', `0 of ${msg.total} pages audited.`);
+      announce(`Crawl queued. ${msg.total} page${msg.total === 1 ? '' : 's'} will be audited.`);
+
     } else if (msg.phase === 'progress') {
       const pct = msg.total ? Math.round((msg.index / msg.total) * 100) : 0;
+      const oneBased = (msg.index | 0) + 1;
+      const path     = crawlPathOnly(msg.url);
       $('crawl-progress-fill').style.width = pct + '%';
-      $('crawl-progress-bar').setAttribute('aria-valuenow', String(pct));
-      $('crawl-progress-label').textContent = `Auditing ${msg.index + 1} of ${msg.total}: ${msg.url || ''}`;
+      $('crawl-progress-bar').setAttribute('aria-valuenow',  String(pct));
+      /* aria-valuetext overrides the bare percent reading so users
+         landing on the progress bar hear context, not just "23 %". */
+      $('crawl-progress-bar').setAttribute('aria-valuetext',
+        `Page ${oneBased} of ${msg.total}, ${pct} percent complete.`);
+      /* Label is on a polite live region (see panel.html) so this
+         assignment is what the user hears mid-crawl. */
+      $('crawl-progress-label').textContent =
+        `Auditing page ${oneBased} of ${msg.total}. ${path}`;
+
     } else if (msg.phase === 'pageComplete') {
       crawlResults.push(msg.record);
       crawlAppendRow(msg.record);
       crawlUpdateSummary();
       $('crawl-pages-completed').textContent = String(crawlResults.length);
+      /* Polite per-page announcement. Short enough to drain before
+         the next page completes on a typical 2-to-4-second cadence. */
+      const rec = msg.record || {};
+      const oneBased = (rec.index | 0) + 1;
+      const path     = crawlPathOnly(rec.url);
+      const status   = crawlStatusSentence(rec.status);
+      const findings = Array.isArray(rec.findings) ? rec.findings.length : 0;
+      const seconds  = ((rec.durationMs | 0) / 1000).toFixed(1);
+      const findingsClause = rec.status === 'audited'
+        ? `${findings} finding${findings === 1 ? '' : 's'}. `
+        : '';
+      announce(`Page ${oneBased} complete. ${path}. ${status}. ${findingsClause}${seconds} seconds.`);
+
     } else if (msg.phase === 'complete') {
       crawlSetRunningUi(false);
-      $('crawl-status').textContent = `Crawl complete. ${crawlResults.length} pages audited.`;
+      const summary = crawlBuildSummarySentence();
+      $('crawl-status').textContent = `Crawl complete. ${summary}`;
       $('crawl-progress-fill').style.width = '100%';
       $('crawl-progress-bar').setAttribute('aria-valuenow', '100');
-      announce(`Crawl complete. ${crawlResults.length} pages audited.`);
+      $('crawl-progress-bar').setAttribute('aria-valuetext',
+        `Crawl complete. ${summary}`);
+      $('crawl-progress-label').textContent = `Crawl complete. ${summary}`;
+      announce(`Crawl complete. ${summary}`);
+
     } else if (msg.phase === 'cancelled') {
       crawlSetRunningUi(false);
-      $('crawl-status').textContent = `Crawl cancelled after ${crawlResults.length} pages.`;
-      announce(`Crawl cancelled. ${crawlResults.length} pages audited before stop.`);
+      const summary = crawlBuildSummarySentence();
+      $('crawl-status').textContent = `Crawl cancelled after ${crawlResults.length} page${crawlResults.length === 1 ? '' : 's'}. ${summary}`;
+      $('crawl-progress-label').textContent = `Crawl cancelled.`;
+      announce(`Crawl cancelled. ${summary}`, 'assertive');
+
     } else if (msg.phase === 'error') {
       crawlSetRunningUi(false);
-      $('crawl-status').textContent = `Crawl error: ${msg.message || 'unknown'}`;
-      announce(`Crawl error: ${msg.message || 'unknown'}`, 'assertive');
+      const message = msg.message || 'unknown error';
+      $('crawl-status').textContent = `Crawl error: ${message}`;
+      $('crawl-progress-label').textContent = `Crawl stopped because of an error.`;
+      announce(`Crawl error: ${message}`, 'assertive');
     }
+  }
+
+  /* Build a single sentence summary of the current results buffer.
+     Used by complete / cancelled phases so the user hears one
+     consolidated count rather than four badge values in a row. */
+  function crawlBuildSummarySentence() {
+    let audited = 0, auth = 0, timeout = 0, errors = 0;
+    crawlResults.forEach(r => {
+      if (r.status === 'audited')        audited++;
+      else if (r.status === 'auth-wall') auth++;
+      else if (r.status === 'timeout')   timeout++;
+      else                                errors++;
+    });
+    const parts = [];
+    parts.push(`${audited} audited`);
+    if (auth)    parts.push(`${auth} skipped at sign in`);
+    if (timeout) parts.push(`${timeout} timed out`);
+    if (errors)  parts.push(`${errors} error${errors === 1 ? '' : 's'}`);
+    return parts.join(', ') + '.';
   }
 
   function crawlAppendRow(rec) {
@@ -1336,11 +1440,23 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       rec.status === 'audited'   ? 'verdict-pass' :
       rec.status === 'auth-wall' ? 'verdict-warning' :
                                    'verdict-fail';
+    const oneBased   = (rec.index | 0) + 1;
+    const seconds    = ((rec.durationMs | 0) / 1000).toFixed(1);
+    const findings   = Array.isArray(rec.findings) ? rec.findings.length : 0;
+    const statusSent = crawlStatusSentence(rec.status);
+    /* Row-level aria-label so NVDA / JAWS "read current row" speaks
+       the full record in one breath instead of cell-by-cell. Cell
+       navigation still works for users who prefer it because the
+       individual <td> contents are unchanged. */
+    tr.setAttribute('aria-label',
+      `Row ${oneBased}. ${rec.url}. ${statusSent}. ` +
+      (rec.status === 'audited' ? `${findings} finding${findings === 1 ? '' : 's'}. ` : '') +
+      `${seconds} seconds.`);
     tr.innerHTML = `
-      <td>${escHtml(String((rec.index|0) + 1))}</td>
+      <td>${escHtml(String(oneBased))}</td>
       <td><code>${escHtml(rec.url)}</code></td>
       <td class="${verdictClass}">${escHtml(statusLabel)}</td>
-      <td>${escHtml(((rec.durationMs|0) / 1000).toFixed(1))} s</td>
+      <td>${escHtml(seconds)} s</td>
     `;
     tbody.appendChild(tr);
   }

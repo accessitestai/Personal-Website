@@ -504,14 +504,28 @@
 
       <p id="crawl-status" class="settings-status" aria-live="polite"></p>
 
-      <!-- Progress -->
-      <div id="crawl-progress-wrap" hidden class="progress-wrap">
+      <!--
+        Progress region. The visual bar is decorative for sighted
+        users. The accessible state is carried by:
+          1. role="progressbar" with aria-valuenow + aria-valuetext on
+             the track, so NVDA / JAWS announce the percent + context
+             when the user navigates to it directly.
+          2. aria-live="polite" + aria-atomic="true" on the label, so
+             updates are spoken without the user having to seek out
+             the control.
+        The label phrasing is short enough that polite queues do not
+        back up on fast crawls.
+      -->
+      <div id="crawl-progress-wrap" hidden class="progress-wrap"
+           role="region" aria-label="Crawl progress">
         <div class="progress-bar-track" role="progressbar"
              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+             aria-valuetext="Not started"
              aria-label="Crawl progress" id="crawl-progress-bar">
           <div class="progress-bar-fill" id="crawl-progress-fill" style="width:0%"></div>
         </div>
-        <p id="crawl-progress-label" class="progress-label">Starting...</p>
+        <p id="crawl-progress-label" class="progress-label"
+           aria-live="polite" aria-atomic="true">Starting.</p>
       </div>
 
       <!-- Results -->
