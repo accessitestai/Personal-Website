@@ -57,11 +57,14 @@
   /*
     Render the keyboard shortcut hint using the chord that actually
     fires the action on the user's OS. The manifest binds
-    Ctrl+Shift+U on Windows/Linux and Command+Shift+U on Mac.
-    Showing Ctrl+Shift+U on Mac confused testers who pressed it and
-    got no audit. userAgentData is the modern API; navigator.platform
-    is the documented fallback for the few Chromium versions that
-    have not exposed it yet.
+    Ctrl+Shift+Y on Windows/Linux and Command+Shift+Y on Mac.
+    Moved from Ctrl+Shift+U because that chord is reserved by
+    Linux/ChromeOS for Unicode IME entry and Chrome leaves it
+    unbound on a non-trivial fraction of Windows installs too;
+    real users were getting silent shortcuts. Users can override
+    via chrome://extensions/shortcuts. userAgentData is the
+    modern API; navigator.platform is the documented fallback
+    for the few Chromium versions that have not exposed it yet.
   */
   function platformShortcut() {
     let isMac = false;
@@ -71,7 +74,7 @@
     } else if (typeof navigator.platform === 'string') {
       isMac = /mac/i.test(navigator.platform);
     }
-    return isMac ? 'Command+Shift+U' : 'Ctrl+Shift+U';
+    return isMac ? 'Command+Shift+Y' : 'Ctrl+Shift+Y';
   }
 
   /* Patch any hardcoded shortcut strings in static markup. */
@@ -699,7 +702,7 @@
 
   /* Mirror of background.js restrictedUrlReason(). Kept in sync
      so the panel's "Re-run Audit" button shows the same screen-
-     reader-friendly explanation as the Ctrl+Shift+U path. */
+     reader-friendly explanation as the keyboard-shortcut path. */
   function restrictedUrlReason(url) {
     if (!url) return 'No active tab URL is available.';
     const u = url.toLowerCase();
