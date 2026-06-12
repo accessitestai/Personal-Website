@@ -55,18 +55,26 @@
   function $(id) { return document.getElementById(id); }
 
   /*
-    Render the keyboard shortcut hint using the chord that actually
-    fires the action on the user's OS. The manifest binds
-    Ctrl+Shift+Y on Windows/Linux and Command+Shift+Y on Mac.
-    Moved from Ctrl+Shift+U because that chord is reserved by
-    Linux/ChromeOS for Unicode IME entry and Chrome leaves it
-    unbound on a non-trivial fraction of Windows installs too;
-    real users were getting silent shortcuts. Users can override
-    via chrome://extensions/shortcuts. userAgentData is the
-    modern API; navigator.platform is the documented fallback
-    for the few Chromium versions that have not exposed it yet.
+    Render the keyboard shortcut hint using the chord that is
+    actually bound on the user's machine, not the manifest's
+    suggested default. Chrome leaves shortcuts unbound at install
+    time more often than the docs admit, especially for unpacked
+    extensions and for chords that look like they might conflict
+    with the host OS (Ctrl+Shift+U on ChromeOS/Linux being the
+    canonical example).
+
+    chrome.commands.getAll() returns the current bound shortcut
+    for every registered command. If the action is unbound we
+    tell the user how to bind one rather than promising a chord
+    that does nothing.
+
+    The manifest now suggests Alt+Shift+Period as the default
+    because that is the closest to globally-safe across Windows,
+    Mac, Linux, ChromeOS, Chrome, Edge, and Firefox. Users on
+    machines where it still conflicts can remap via
+    chrome://extensions/shortcuts.
   */
-  function platformShortcut() {
+  function platformShortcutFallback() {
     let isMac = false;
     const uaData = navigator.userAgentData;
     if (uaData && typeof uaData.platform === 'string') {
@@ -74,14 +82,36 @@
     } else if (typeof navigator.platform === 'string') {
       isMac = /mac/i.test(navigator.platform);
     }
-    return isMac ? 'Command+Shift+Y' : 'Ctrl+Shift+Y';
+    /* Alt is "Option" on Mac. Render with the on-platform name so a
+       Mac user is not searching the keyboard for a key labelled Alt. */
+    return isMac ? 'Option+Shift+Period' : 'Alt+Shift+Period';
   }
 
-  /* Patch any hardcoded shortcut strings in static markup. */
-  document.addEventListener('DOMContentLoaded', () => {
+  function updateShortcutHint() {
     const empty = $('empty-state-row');
-    if (empty) empty.textContent = `Press ${platformShortcut()} on any page to run an audit.`;
-  });
+    if (!empty) return;
+    /* Try the live binding first. If chrome.commands is unavailable
+       (e.g. running the panel as a file:// preview), fall back to
+       the platform-aware suggested chord. */
+    try {
+      if (chrome.commands && typeof chrome.commands.getAll === 'function') {
+        chrome.commands.getAll().then((cmds) => {
+          const cmd = (cmds || []).find(c => c.name === '_execute_action');
+          if (cmd && cmd.shortcut) {
+            empty.textContent = `Press ${cmd.shortcut} on any page to run an audit. You can change this at chrome://extensions/shortcuts.`;
+          } else {
+            empty.textContent = `No keyboard shortcut is set. Click the AMASAMYA toolbar icon, or assign a shortcut at chrome://extensions/shortcuts. The suggested default is ${platformShortcutFallback()}.`;
+          }
+        }).catch(() => {
+          empty.textContent = `Press ${platformShortcutFallback()} on any page to run an audit, or click the AMASAMYA toolbar icon. You can change the shortcut at chrome://extensions/shortcuts.`;
+        });
+        return;
+      }
+    } catch (_) { /* chrome.commands might throw in unusual contexts */ }
+    empty.textContent = `Press ${platformShortcutFallback()} on any page to run an audit, or click the AMASAMYA toolbar icon. You can change the shortcut at chrome://extensions/shortcuts.`;
+  }
+
+  document.addEventListener('DOMContentLoaded', updateShortcutHint);
 
   /* ================================================================
      PANEL TABS - WAI-ARIA Tabs Pattern (horizontal)

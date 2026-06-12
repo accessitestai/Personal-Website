@@ -2297,7 +2297,7 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
 
       <div class="copilot-status" role="status">
         <div class="copilot-dot" id="copilot-dot" aria-hidden="true"></div>
-        <span class="copilot-status-text" id="copilot-status-text">Waiting for extension - press Ctrl+Shift+Y on the target page to connect</span>
+        <span class="copilot-status-text" id="copilot-status-text">Waiting for extension - press your configured shortcut (default Alt+Shift+Period) on the target page to connect</span>
       </div>
 
       <div aria-live="polite" aria-atomic="false" id="copilot-live" class="sr-only"></div>
@@ -4466,7 +4466,7 @@ $('wa-run-btn').addEventListener('click', () => {
             s.textContent = injection;
             waAuditWindow.document.head.appendChild(s);
           } catch(scriptErr) {
-            window.postMessage({ type:'AMASAMYA_error', message:'This page blocks script injection (Content Security Policy). Install the AMASAMYA Chrome extension and press Ctrl+Shift+Y (Command+Shift+Y on Mac) on the page instead. The extension is at https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif and uses a service worker that bypasses page CSP. You can also set a different shortcut at chrome://extensions/shortcuts if Ctrl+Shift+Y is unavailable on your system.' },'*');
+            window.postMessage({ type:'AMASAMYA_error', message:'This page blocks script injection (Content Security Policy). Install the AMASAMYA Chrome extension and press its keyboard shortcut on the page instead (default Alt+Shift+Period; the extension also opens via its toolbar icon). The extension is at https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif and uses a service worker that bypasses page CSP. You can set or change the shortcut at chrome://extensions/shortcuts.' },'*');
           }
         }
       }
@@ -4477,7 +4477,7 @@ $('wa-run-btn').addEventListener('click', () => {
       $('wa-run-btn').disabled = false;
       $('wa-progress-wrap').style.display = 'none';
       if (waAuditWindow && !waAuditWindow.closed) waAuditWindow.close();
-      $('wa-status').textContent = 'This page cannot be audited from the platform because it blocks cross-origin access. Install the AMASAMYA Chrome extension and press Ctrl+Shift+Y on the page; the extension runs the same engines through a service-worker path that bypasses cross-origin restrictions. You can also assign a different shortcut at chrome://extensions/shortcuts if Ctrl+Shift+Y conflicts with anything on your system.';
+      $('wa-status').textContent = 'This page cannot be audited from the platform because it blocks cross-origin access. Install the AMASAMYA Chrome extension and trigger it on the page (default shortcut Alt+Shift+Period, or click the AMASAMYA toolbar icon). The extension runs the same engines through a service-worker path that bypasses cross-origin restrictions. You can set or change the keyboard shortcut at chrome://extensions/shortcuts.';
       announce('Cross-origin access blocked. Install the AMASAMYA Chrome extension and run it on the page instead.', 'assertive');
     }
   }, 500);
@@ -7508,7 +7508,7 @@ if ($('mob-export-txt')) {
       var dot = document.getElementById('copilot-dot');
       if (dot) dot.classList.remove('active');
       var st = document.getElementById('copilot-status-text');
-      if (st) st.textContent = 'Waiting for extension - press Ctrl+Shift+Y on the target page to connect';
+      if (st) st.textContent = 'Waiting for extension - press your configured shortcut (default Alt+Shift+Period) on the target page to connect';
       var endBtn = document.getElementById('copilot-end');
       if (endBtn) endBtn.disabled = true;
       var summaryWrap = document.getElementById('copilot-summary-wrap');

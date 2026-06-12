@@ -21,7 +21,7 @@
   ],
 
   "action": {
-    "default_title": "Run AMASAMYA Audit (Ctrl+Shift+Y)",
+    "default_title": "Run AMASAMYA Audit (Alt+Shift+Period). You can change the shortcut at chrome://extensions/shortcuts.",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
@@ -37,9 +37,11 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Ctrl+Shift+Y",
-        "windows": "Ctrl+Shift+Y",
-        "mac": "Command+Shift+Y"
+        "default": "Alt+Shift+Period",
+        "windows": "Alt+Shift+Period",
+        "linux":   "Alt+Shift+Period",
+        "chromeos": "Alt+Shift+Period",
+        "mac":     "Alt+Shift+Period"
       },
       "description": "Run AMASAMYA accessibility audit on the current page"
     }
