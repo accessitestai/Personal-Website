@@ -1,37 +1,64 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-06-05.
+Last reviewed: 2026-06-14.
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
 If a feature is not on this list, it is not planned.
 
-## Current release: v4.0.0 (in Chrome Web Store review)
+## Published: v4.0.0, v4.0.1
 
-Shipping with 24 WCAG 2.2 audit engines, three Vision AI providers
-(Gemini, Anthropic, OpenAI), Focus Indicator Narrator, Visual Layout
-Auditor, State Change Watchdog, baseline regression detection,
-side-panel UI with Close button + Escape-key focus trap +
-restricted-URL guard, and exports to JSON, HTML, CSV, Text, SARIF,
-and annotated PNG.
+Both Live on the Chrome Web Store. v4.0.0 shipped the 24 audit
+engines, three Vision AI providers, Focus Indicator Narrator,
+Visual Layout Auditor, State Change Watchdog, baseline regression
+detection. v4.0.1 was the internal-audit patch pass (live-region
+politeness, emoji noise removal, Redundant-Entry warning flood cap,
+Dragging-Movements pre-filter, Mac shortcut text, summary cards
+keyboard-focusable, main landmark programmatically focusable,
+minimum_chrome_version 114).
 
-Status: uploaded to Chrome Web Store, awaiting reviewer approval.
+## In flight: v4.2.0 "Site Crawl" (uploading)
 
-## Built locally, awaiting v4.0.0 publish before upload: v4.0.1
+ZIP built at `AMASAMYA-extension-v4.2.0.zip`. Feature flag
+SITE_CRAWL_ENABLED flipped to true in both background.js and
+panel.js. Manifest at 4.2.0. Pending upload to the Chrome Web
+Store.
 
-Internal-audit patch pass. No new features. No permission changes.
-Live-region politeness split, emoji noise removed, Redundant-Entry
-warning flood capped, Dragging-Movements pre-filtered for perf,
-Mac shortcut text fixed, `minimum_chrome_version: 114` declared,
-remaining unescaped innerHTML writes hardened, summary cards made
-keyboard-focusable, main landmark made programmatically focusable.
+Ships:
 
-Status: committed and pushed to both repos. ZIP built at
-`AMASAMYA-extension-v4.0.1.zip`. Hold upload until v4.0.0 reaches
-Published status, to avoid two simultaneous reviews on the same
-listing.
+- Crawl queue + sequential audit runner module
+  (engines/site-crawler.js).
+- Sitemap.xml parser with sitemap-index recursion and 200-page cap
+  (engines/sitemap-parser.js).
+- Side-panel Site Crawl tab with sitemap and paste-URLs input,
+  start/cancel, progress, results table.
+- Background service-worker driver that hooks audit results from
+  injected pages and forwards per-page records to the platform tab
+  when one is open.
+- Platform-side Aggregated Reports mode with per-template grouping
+  and drill-down to affected pages.
+- Four crawl exports: HTML grouped report, CSV by template, CSV by
+  page, JSON raw.
+- Crawl session metadata header (start, finish, duration,
+  per-status page counts) as a definition list for screen-reader
+  navigation.
+- Platform import of the crawl JSON shape, routed through the live
+  ingest pipeline so imported sessions behave like live ones.
 
-## Next release: v4.1.0 - Audit diff and history
+Accessibility:
+
+- Per-page completion announcements via the polite live region
+  ("Page 3 complete. /checkout. Audited successfully. 5 findings.
+  2.4 seconds.") so screen-reader users hear progress without
+  navigating the table.
+- aria-valuetext on the progressbar reads as a sentence rather
+  than a bare percent.
+- Default keyboard shortcut moved to Alt+Shift+1 after Akhilesh
+  reported JAWS table-cell conflicts on Alt+Shift+Period and
+  Alt+Shift+Comma. Side panel queries chrome.commands.getAll() at
+  load time and renders the actual bound chord.
+
+## Next release: v4.3.0 - Audit diff and history
 
 Build on top of the existing baseline feature so a user can see what
 changed between any two audits of the same URL.

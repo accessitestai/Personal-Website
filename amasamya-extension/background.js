@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Background Service Worker v4.0.1
+ * AMASAMYA Extension - Background Service Worker v4.2.0
  *
  * Orchestrates:
  *   A. WCAG Audit  - injects content-script.js, relays findings to side panel + platform
@@ -27,7 +27,7 @@ const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
    perspective. Their tests still run on Playwright because
    tests load the modules directly.
    ──────────────────────────────────────────────────────── */
-const SITE_CRAWL_ENABLED = false;
+const SITE_CRAWL_ENABLED = true; /* v4.2.0 release - flag flipped at commit L */
 
 /* Pull the crawler + sitemap parser into the service worker
    scope. importScripts is the only way to share code between

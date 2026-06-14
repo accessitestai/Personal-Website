@@ -15,7 +15,7 @@
      PHASE 1 ENGINES + UTILITIES (inlined from phase1-engines.js)
   ================================================================ */
 
-  const TOOL_VERSION = '4.0.1';
+  const TOOL_VERSION = '4.2.0';
   const CONTRAST = { NORMAL_AA: 4.5, LARGE_AA: 3.0, NORMAL_AAA: 7.0, LARGE_AAA: 4.5, NON_TEXT: 3.0 };
   const LARGE_TEXT_PT_BOLD = 14;
   const LARGE_TEXT_PT_NORMAL = 18;

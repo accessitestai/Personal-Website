@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AMASAMYA - Accessibility Audit Tool",
-  "version": "4.0.1",
+  "version": "4.2.0",
   "description": "Blind-first WCAG 2.2 audit tool with Vision AI modules: Focus Indicator Narrator, Visual Layout Auditor, and State Change Watchdog.",
   "author": "Akhilesh Malani",
   "homepage_url": "https://amasamya.akhileshmalani.com",
@@ -21,7 +21,7 @@
   ],
 
   "action": {
-    "default_title": "Run AMASAMYA Audit (Alt+Shift+Period). You can change the shortcut at chrome://extensions/shortcuts.",
+    "default_title": "Run AMASAMYA Audit (Alt+Shift+1). You can change the shortcut at chrome://extensions/shortcuts.",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
@@ -37,11 +37,11 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Alt+Shift+Period",
-        "windows": "Alt+Shift+Period",
-        "linux":   "Alt+Shift+Period",
-        "chromeos": "Alt+Shift+Period",
-        "mac":     "Alt+Shift+Period"
+        "default":  "Alt+Shift+1",
+        "windows":  "Alt+Shift+1",
+        "linux":    "Alt+Shift+1",
+        "chromeos": "Alt+Shift+1",
+        "mac":      "Alt+Shift+1"
       },
       "description": "Run AMASAMYA accessibility audit on the current page"
     }

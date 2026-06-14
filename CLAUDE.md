@@ -86,16 +86,19 @@ this project, ever, going forward.
 - **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
-  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0 reached Published status
-  with 24 engines. v4.0.1 patch built and committed (10 internal-audit
-  fixes) but ZIP not yet uploaded; safe to upload at any time. v4.2.0
-  Site Crawl is in active development behind the SITE_CRAWL_ENABLED
-  feature flag in background.js + panel.js; commits A through G have
-  shipped to the repo invisibly. Remaining v4.2.0 work: commit H
-  (platform Reports panel Aggregated mode), I (aggregated exports), J
-  (crawl session metadata), K (real-world calibration pass), L (release
-  flip the flag, bump manifest to 4.2.0). Audit diff and history
-  remains planned for v4.1.0 (slotted after v4.2.0 ships); offline-only
+  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0 and v4.0.1 are both
+  Published. Current development is v4.2.0 "Site Crawl" - the feature
+  flag is flipped on, the manifest is at 4.2.0, ZIP is built. Pending
+  upload to CWS. Site Crawl ships the crawl queue + sitemap.xml
+  parser + side-panel Site Crawl tab + platform Aggregated Reports
+  + four export shapes (HTML, two CSV flavours, JSON) + crawl session
+  metadata header + platform import of the crawl JSON shape. Default
+  keyboard shortcut moved from Ctrl+Shift+U to Alt+Shift+1 after Akhilesh
+  reported JAWS table-cell command conflicts on Alt+Shift+Period and
+  Alt+Shift+Comma. The side panel queries chrome.commands.getAll() at
+  load time and renders the actual bound chord, with a fallback when
+  Chrome left the shortcut unbound. Audit diff and history is still
+  planned for v4.3.0 (slotted after v4.2.0 publishes); offline-only
   Vision AI for v5.0. See amasamya-extension/ROADMAP.md.
 - **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
