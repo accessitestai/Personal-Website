@@ -63,12 +63,19 @@ test.describe('Side panel: existing structure regression safety net', () => {
     await expect(close).toHaveAttribute('aria-label', /Close/i);
   });
 
-  test('three visible tabs in the user-facing cycle: WCAG / Visual / Settings', async ({ page }) => {
-    /* Hidden tabs (such as the v4.2.0 Site Crawl tab while its flag is
-       off) must not appear in the user-facing tab cycle. Use the same
-       :not([hidden]) filter the panel.js keydown handler uses. */
+  test('visible tabs include WCAG / Visual / Settings (Site Crawl present when v4.2.0 flag is on)', async ({ page }) => {
+    /* Hidden tabs must not appear in the user-facing tab cycle.
+       Use the same :not([hidden]) filter the panel.js keydown
+       handler uses. The Site Crawl tab is visible iff
+       SITE_CRAWL_ENABLED is true in panel.js. Both states are
+       acceptable; the assertion below tolerates either. */
     const tabs = await page.locator('.panel-tab:not([hidden])').allTextContents();
-    expect(tabs).toEqual(['WCAG Audit', 'Visual Audit', 'Settings']);
+    /* Pre-v4.2.0 (flag off): three tabs.
+       v4.2.0 (flag on): four tabs, Site Crawl at the end. */
+    expect([
+      ['WCAG Audit', 'Visual Audit', 'Settings'],
+      ['WCAG Audit', 'Visual Audit', 'Settings', 'Site Crawl']
+    ]).toContainEqual(tabs);
   });
 
   test('only the WCAG tab is selected by default', async ({ page }) => {
@@ -93,16 +100,29 @@ test.describe('Side panel: existing structure regression safety net', () => {
     await expect(page.locator('#ppanel-wcag')).toBeHidden();
   });
 
-  test('ArrowLeft wraps from WCAG back to Settings', async ({ page }) => {
+  test('ArrowLeft wraps from WCAG to the last visible tab', async ({ page }) => {
+    /* Last visible tab depends on whether the v4.2.0 Site Crawl flag
+       is on. With flag off the last visible tab is Settings. With
+       flag on the last visible tab is Site Crawl. Either is acceptable
+       so long as ArrowLeft from WCAG lands on the actual last visible
+       tab the keyboard handler sees. */
     await page.locator('#ptab-wcag').focus();
     await page.keyboard.press('ArrowLeft');
-    expect(await page.locator('#ptab-settings').getAttribute('aria-selected')).toBe('true');
+    const expectedLast = await page.evaluate(() => {
+      const visible = Array.from(document.querySelectorAll('.panel-tab')).filter(t => !t.hidden);
+      return visible[visible.length - 1].id;
+    });
+    expect(await page.locator('#' + expectedLast).getAttribute('aria-selected')).toBe('true');
   });
 
-  test('End key jumps to the last tab', async ({ page }) => {
+  test('End key jumps to the last visible tab', async ({ page }) => {
     await page.locator('#ptab-wcag').focus();
     await page.keyboard.press('End');
-    expect(await page.locator('#ptab-settings').getAttribute('aria-selected')).toBe('true');
+    const expectedLast = await page.evaluate(() => {
+      const visible = Array.from(document.querySelectorAll('.panel-tab')).filter(t => !t.hidden);
+      return visible[visible.length - 1].id;
+    });
+    expect(await page.locator('#' + expectedLast).getAttribute('aria-selected')).toBe('true');
   });
 
   test('summary count cards are keyboard-focusable with role=group', async ({ page }) => {
