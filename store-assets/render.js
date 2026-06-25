@@ -29,6 +29,9 @@ const ASSETS = [
   { html: 'ss3-layout.html',   out: 'ss3-layout.png',   width: 1280, height: 800  },
   { html: 'ss4-watchdog.html', out: 'ss4-watchdog.png', width: 1280, height: 800  },
   { html: 'ss5-settings.html', out: 'ss5-settings.png', width: 1280, height: 800  },
+  /* Google Play Console public-developer-profile header. 4K landscape,
+     brand-only (no marketing text per Google's reviewer guidance). */
+  { html: 'play-header.html',  out: 'play-header.png',  width: 4096, height: 2304 },
 ];
 
 (async () => {

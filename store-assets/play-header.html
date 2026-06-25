@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+/*
+  AMASAMYA Google Play Console developer-profile header.
+
+  Spec (from the Play Console "Public developer profile" section):
+    - Exactly 4096 x 2304 pixels (16:9 landscape).
+    - PNG or JPG, max 1 MB.
+    - No promotional copy, marketing slogans, or call-to-action text
+      (Google's reviewer-facing policy: the header should evoke the
+      developer brand, not serve as an advertisement).
+    - Square corners (Google applies any rounded crop itself).
+
+  Design choices:
+    - Solid dark-navy background matching the AMASAMYA palette used
+      on the Chrome Web Store marquee (#07111f) so the developer
+      profile and the Chrome Web Store listing read as one brand.
+    - Faint 80px grid pattern (the same accent we use on marquee.html)
+      to give the canvas visual texture without distracting from the
+      wordmark.
+    - Single centred wordmark "AMASAMYA" in the accent cyan
+      (#7ec8e3, the brand colour). No tagline, no version badge,
+      no icons.
+    - Generous breathing room on all sides so the wordmark survives
+      Google's potential crop / overlay treatments.
+
+  Rendered by store-assets/render.js via Playwright. The body
+  width/height must match the render.js entry exactly.
+*/
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  width:4096px; height:2304px; overflow:hidden;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:#07111f;
+  position:relative;
+}
+/* Faint grid pattern, same accent + spacing ratio as marquee.html
+   but scaled up so the grid feels proportional at 4K. */
+body::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(126,200,227,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126,200,227,0.05) 1px, transparent 1px);
+  background-size:128px 128px;
+  pointer-events:none;
+}
+/* No radial gradient. We tried one and the resulting PNG came in
+   at 1.5 MB, over Google's 1 MB ceiling. PNG cannot compress
+   continuous-tone gradients efficiently; switching to flat fills
+   keeps the file well under the limit. The wordmark provides
+   enough visual centre on its own. */
+.wordmark{
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%, -50%);
+  font-size:340px;
+  font-weight:900;
+  color:#7ec8e3;
+  letter-spacing:-0.015em;
+  line-height:1;
+  z-index:1;
+}
+/* A thin accent rule under the wordmark, sized to match the
+   wordmark width visually, in a slightly muted cyan. */
+.rule{
+  position:absolute;
+  left:50%; top:calc(50% + 200px);
+  transform:translateX(-50%);
+  width:1200px; height:4px;
+  background:linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(126,200,227,0.6) 25%,
+    rgba(126,200,227,0.6) 75%,
+    transparent 100%
+  );
+  z-index:1;
+}
+</style>
+</head>
+<body>
+  <div class="wordmark">AMASAMYA</div>
+  <div class="rule" aria-hidden="true"></div>
+</body>
+</html>
