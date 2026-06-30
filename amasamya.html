@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AMASAMYA is a free, blind-first WCAG 2.2 accessibility audit toolkit. Chrome extension with 24 audit engines plus a web platform for reports. Built by Akhilesh Malani for accessibility testers, developers, and designers who use screen readers.">
+  <meta name="keywords" content="AMASAMYA, accessibility audit, WCAG 2.2, Chrome extension, screen reader, blind-first, NVDA, JAWS, VoiceOver, accessibility testing">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="theme-color" content="#1a5276">
+  <link rel="canonical" href="https://akhileshmalani.com/amasamya.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://akhileshmalani.com/amasamya.html">
+  <meta property="og:title" content="AMASAMYA - Blind-First WCAG 2.2 Audit Tool">
+  <meta property="og:description" content="Free Chrome extension and web platform for WCAG 2.2 accessibility audits. Built to be operated by screen-reader users, not just for them.">
+  <meta property="og:site_name" content="Akhilesh Malani">
+  <meta property="og:image" content="https://akhileshmalani.com/images/og-banner.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AMASAMYA - Blind-First WCAG 2.2 Audit Tool">
+  <meta name="twitter:description" content="Free Chrome extension and web platform for WCAG 2.2 accessibility audits. Built to be operated by screen-reader users.">
+  <meta name="twitter:image" content="https://akhileshmalani.com/images/og-banner.png">
+
+  <title>AMASAMYA - Accessibility Audit Toolkit | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo-icon.svg">
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="screen-reader.css">
+  <link rel="preload" href="script.js" as="script">
+  <link rel="preload" href="screen-reader.js" as="script">
+
+  <!-- Prevent flash of wrong theme/preferences (mirrors index.html) -->
+  <script>
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
+  </script>
+
+  <style>
+    /*
+      Page-specific styles ONLY. Everything else inherits the global
+      design system from styles.css so this page reads as part of the
+      portfolio, not a separate microsite.
+    */
+    .amasamya-hero {
+      background: linear-gradient(135deg, #0d2240 0%, #003366 100%);
+      color: #fff;
+      padding: 64px 0 56px;
+      border-bottom: 4px solid #7ec8e3;
+    }
+    .amasamya-hero .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+    .amasamya-hero .brand-line {
+      display: flex; align-items: baseline; gap: 14px;
+      margin-bottom: 18px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .amasamya-hero .brand    { font-size: 2rem; font-weight: 900; color: #7ec8e3; letter-spacing: 0.02em; }
+    .amasamya-hero .version  { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.6); }
+    .amasamya-hero h1 {
+      font-size: 2.2rem; line-height: 1.25; color: #fff; font-weight: 700;
+      max-width: 720px; margin: 0 0 16px;
+    }
+    .amasamya-hero h1 .accent { color: #7ec8e3; }
+    .amasamya-hero .lead {
+      font-size: 1.05rem; color: #cfd8e3; max-width: 640px; line-height: 1.65;
+      margin: 0 0 28px;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .cta-btn {
+      display: inline-block; padding: 12px 22px; border-radius: 6px;
+      font-weight: 600; text-decoration: none; font-size: 1rem;
+      border: 2px solid transparent;
+    }
+    .cta-btn-primary { background: #7ec8e3; color: #003366; }
+    .cta-btn-primary:hover, .cta-btn-primary:focus {
+      background: #fff; outline: 3px solid #7ec8e3; outline-offset: 2px;
+    }
+    .cta-btn-secondary {
+      background: transparent; color: #fff; border-color: #7ec8e3;
+    }
+    .cta-btn-secondary:hover, .cta-btn-secondary:focus {
+      background: rgba(126,200,227,0.15); outline: 3px solid #7ec8e3; outline-offset: 2px;
+    }
+    .amasamya-section {
+      padding: 56px 0;
+    }
+    .amasamya-section .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+    .amasamya-section h2 {
+      font-size: 1.5rem; margin: 0 0 16px; color: var(--text, #1a2a3a);
+    }
+    .amasamya-section p { margin: 0 0 14px; line-height: 1.7; }
+    .amasamya-section ul { margin: 0 0 18px 22px; line-height: 1.7; }
+    .amasamya-section ul li { margin-bottom: 6px; }
+    .feature-grid {
+      display: grid; gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-top: 18px;
+    }
+    .feature-card {
+      background: var(--bg-2, #fff);
+      border: 1px solid var(--border, #e2eaf4);
+      border-left: 4px solid #7ec8e3;
+      padding: 18px 22px;
+      border-radius: 6px;
+    }
+    .feature-card h3 {
+      font-size: 1.05rem; margin: 0 0 8px; color: #003366;
+    }
+    .feature-card p {
+      margin: 0; font-size: 0.95rem; line-height: 1.6;
+    }
+    .quick-links {
+      background: var(--bg-alt, #f0f5fa);
+      border-left: 4px solid #003366;
+      padding: 18px 22px;
+      border-radius: 6px;
+      margin-top: 22px;
+    }
+    .quick-links h3 { margin: 0 0 10px; font-size: 1.05rem; color: #003366; }
+    .quick-links ul { margin: 0 0 0 22px; }
+    .quick-links li { margin-bottom: 4px; }
+    .alt-cta-row {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px;
+    }
+    .alt-cta-btn {
+      display: inline-block; padding: 11px 20px; border-radius: 6px;
+      font-weight: 600; text-decoration: none; font-size: 0.98rem;
+      background: #003366; color: #fff; border: 2px solid #003366;
+    }
+    .alt-cta-btn.outline {
+      background: transparent; color: #003366;
+    }
+    .alt-cta-btn:hover, .alt-cta-btn:focus {
+      outline: 3px solid #7ec8e3; outline-offset: 2px;
+    }
+    [data-theme="dark"] .amasamya-section h2 { color: #e8eef5; }
+    [data-theme="dark"] .feature-card { background: #1a2332; border-color: #2a3a4a; }
+    [data-theme="dark"] .feature-card h3 { color: #7ec8e3; }
+    [data-theme="dark"] .quick-links { background: #1a2332; }
+    [data-theme="dark"] .quick-links h3 { color: #7ec8e3; }
+    [data-theme="dark"] .alt-cta-btn { background: #7ec8e3; color: #003366; border-color: #7ec8e3; }
+    [data-theme="dark"] .alt-cta-btn.outline { background: transparent; color: #7ec8e3; }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Reuses the portfolio's navbar so this page does not look orphaned. -->
+<header role="banner" class="site-header">
+  <nav aria-label="Primary navigation" class="navbar">
+    <div class="container nav-container">
+      <a href="/" class="nav-brand">
+        <span class="nav-name">Akhilesh Malani</span>
+      </a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+      <ul id="nav-menu" class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#journey">Journey</a></li>
+        <li><a href="/#skills">Skills</a></li>
+        <li><a href="/#recognition">Recognition</a></li>
+        <li><a href="/#blog">Blog</a></li>
+        <li><a href="/#speaking">Speaking</a></li>
+        <li><a href="/amasamya.html" aria-current="page">AMASAMYA</a></li>
+        <li><a href="/checker.html">Checker</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main id="main-content">
+
+  <!-- Hero with the two primary CTAs (install extension, open platform). -->
+  <section class="amasamya-hero" aria-labelledby="amasamya-h1">
+    <div class="container">
+      <div class="brand-line">
+        <span class="brand">AMASAMYA</span>
+        <span class="version" aria-label="Current Chrome Web Store version 4.0.1">v4.0.1 on Chrome Web Store</span>
+      </div>
+      <h1 id="amasamya-h1">
+        The <span class="accent">blind-first</span> WCAG 2.2 accessibility audit toolkit.
+      </h1>
+      <p class="lead">
+        A Chrome extension and web platform built to be operated BY accessibility
+        testers, developers, and designers who use a screen reader, not just FOR
+        them. Free. Open source. No signup needed for the extension.
+      </p>
+      <div class="cta-row">
+        <a class="cta-btn cta-btn-primary"
+           href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif"
+           rel="noopener">
+          Install the Chrome extension
+        </a>
+        <a class="cta-btn cta-btn-secondary"
+           href="https://amasamya.akhileshmalani.com"
+           rel="noopener">
+          Open the web platform
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- What it is -->
+  <section class="amasamya-section" aria-labelledby="what-h2">
+    <div class="container">
+      <h2 id="what-h2">What AMASAMYA is</h2>
+      <p>
+        AMASAMYA has two parts. The <strong>Chrome extension</strong> runs 24
+        WCAG 2.2 audit engines against whatever page you are looking at and
+        presents findings in a side panel that is fully operable with NVDA,
+        JAWS, and VoiceOver. The <strong>web platform</strong> at
+        <a href="https://amasamya.akhileshmalani.com">amasamya.akhileshmalani.com</a>
+        accepts audit results, document files, and structured mobile checklists,
+        and produces reports a manager can read.
+      </p>
+      <p>
+        Both are free. The extension is open source under MIT licence at
+        <a href="https://github.com/accessitestai/AMASAMYA" rel="noopener">github.com/accessitestai/AMASAMYA</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- How it differs from other automated tools -->
+  <section class="amasamya-section" aria-labelledby="diff-h2"
+           style="background: var(--bg-alt, #f8fafc);">
+    <div class="container">
+      <h2 id="diff-h2">How it is different from other automated audit tools</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Blind-first design</h3>
+          <p>The side panel UI itself is screen-reader operable. Findings appear as
+          keyboard-navigable tables and lists, not visual overlays. The tool
+          passes the standards it tests for.</p>
+        </div>
+        <div class="feature-card">
+          <h3>WCAG 2.2 coverage from day one</h3>
+          <p>24 engines covering Level A and AA, including the 2.2 additions
+          (Focus Not Obscured, Dragging Movements, Consistent Help, Redundant
+          Entry, Accessible Authentication) that older tools have not caught
+          up to.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Vision AI with your own key</h3>
+          <p>Optional Focus Indicator Narrator and Visual Layout Auditor modules
+          connect to your Anthropic, OpenAI, or Google Gemini key for visual
+          checks a blind tester cannot perform alone. Your key stays on your
+          device.</p>
+        </div>
+        <div class="feature-card">
+          <h3>No accessibility overlay</h3>
+          <p>AMASAMYA finds issues and tells you how to fix them. It does not
+          inject JavaScript into your page to "fix" accessibility, a pattern the
+          community has criticised for not actually solving underlying problems.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who benefits -->
+  <section class="amasamya-section" aria-labelledby="who-h2">
+    <div class="container">
+      <h2 id="who-h2">Who benefits</h2>
+      <ul>
+        <li><strong>Accessibility testers who are blind or low-vision:</strong> stop relying on a sighted colleague to translate findings.</li>
+        <li><strong>Developers who use a screen reader:</strong> a tool whose UI respects your input modality.</li>
+        <li><strong>Designers verifying WCAG 2.2 work:</strong> check your own work without sighted help.</li>
+        <li><strong>Consultants and auditors:</strong> structured findings, exportable as JSON, HTML, CSV, Text, SARIF, or annotated PNG.</li>
+        <li><strong>Managers and procurement officers:</strong> reports aggregated and presentable, including a VPAT 2.5 generator on the platform.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Quick links + supporting CTAs -->
+  <section class="amasamya-section" aria-labelledby="links-h2">
+    <div class="container">
+      <h2 id="links-h2">Quick links</h2>
+      <div class="quick-links" role="region" aria-label="AMASAMYA quick links">
+        <h3>On the AMASAMYA platform</h3>
+        <ul>
+          <li><a href="https://amasamya.akhileshmalani.com/faq.html">FAQ</a> - what AMASAMYA does, costs, covers, and does not cover.</li>
+          <li><a href="https://amasamya.akhileshmalani.com/limitations.html">Known limitations</a> - honest list of what no automated tool catches.</li>
+          <li><a href="https://amasamya.akhileshmalani.com/about.html">About Akhilesh</a> - the person behind the tool.</li>
+          <li><a href="https://amasamya.akhileshmalani.com/feedback.html">Send feedback</a> - bug reports, feature requests, anything.</li>
+          <li><a href="https://amasamya.akhileshmalani.com/privacy.html">Privacy policy</a> - what is collected, what is not, where data lives.</li>
+        </ul>
+      </div>
+
+      <div class="alt-cta-row">
+        <a class="alt-cta-btn"
+           href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif"
+           rel="noopener">
+          Install the Chrome extension
+        </a>
+        <a class="alt-cta-btn outline"
+           href="https://amasamya.akhileshmalani.com"
+           rel="noopener">
+          Open the web platform
+        </a>
+        <a class="alt-cta-btn outline"
+           href="https://github.com/accessitestai/AMASAMYA"
+           rel="noopener">
+          View source on GitHub
+        </a>
+      </div>
+
+      <p style="margin-top: 28px;">
+        If you try AMASAMYA, please rate the extension on the Chrome Web Store
+        and share what worked or what did not via the feedback page. Community
+        feedback shapes the next release.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer role="contentinfo" class="footer">
+  <div class="container">
+    <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    <p class="footer-note">
+      <a href="/accessibility.html">Accessibility Statement</a> - known issues,
+      assistive technology support, and how to report a problem.
+    </p>
+  </div>
+</footer>
+
+<script src="script.js" defer></script>
+<script src="screen-reader.js" defer></script>
+</body>
+</html>
