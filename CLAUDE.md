@@ -86,17 +86,17 @@ this project, ever, going forward.
 - **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
-  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0 and v4.0.1 are both
-  Published. v4.2.0 "Site Crawl" was uploaded to CWS on 2026-07-01 and
-  is currently pending review. Site Crawl ships the crawl queue +
-  sitemap.xml parser + side-panel Site Crawl tab + platform Aggregated
-  Reports + four export shapes (HTML, two CSV flavours, JSON) + crawl
-  session metadata header + platform import of the crawl JSON shape.
-  Post-upload polish pass (still within v4.2.0, folded into the same
-  submission): crawler correctness sweep (10 s fetch timeout, empty
-  sitemap rejection, NO_RESPONSE status, waiter race fix, findings
-  shape validation, deeper sitemap-index recursion), 3-page
-  concurrent runner (~10x faster wall time), side-panel keyboard/SR
+  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0, v4.0.1, and v4.2.0
+  are all Published. v4.2.0 "Site Crawl" went live on 2026-07-01
+  (uploaded and approved same day). It ships the crawl queue +
+  sitemap.xml parser + side-panel Site Crawl tab + platform
+  Aggregated Reports + four export shapes (HTML, two CSV flavours,
+  JSON) + crawl session metadata header + platform import of the
+  crawl JSON shape, plus the polish pass folded in pre-approval:
+  crawler correctness sweep (10 s fetch timeout, empty sitemap
+  rejection, NO_RESPONSE status, waiter race fix, findings shape
+  validation, deeper sitemap-index recursion), 3-page concurrent
+  runner (roughly 10x faster wall time), side-panel keyboard/SR
   sweep, Site Crawl URL fields wrapped in role="application" so JAWS
   arrow keys work inside them, focus trap and auto-focus-into on
   panel open, and a role="dialog" close-confirmation on both header

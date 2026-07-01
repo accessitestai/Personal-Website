@@ -1,12 +1,12 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-07-01.
+Last reviewed: 2026-07-01 (post-v4.2.0 publish).
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
 If a feature is not on this list, it is not planned.
 
-## Published: v4.0.0, v4.0.1
+## Published: v4.0.0, v4.0.1, v4.2.0
 
 Both Live on the Chrome Web Store. v4.0.0 shipped the 24 audit
 engines, three Vision AI providers, Focus Indicator Narrator,
@@ -17,16 +17,39 @@ Dragging-Movements pre-filter, Mac shortcut text, summary cards
 keyboard-focusable, main landmark programmatically focusable,
 minimum_chrome_version 114).
 
-## In flight: v4.2.0 "Site Crawl" (uploaded, pending CWS review)
+## Shipped: v4.2.0 "Site Crawl"
 
+Published on the Chrome Web Store 2026-07-01. Manifest at 4.2.0.
+SITE_CRAWL_ENABLED flipped true in background.js and panel.js.
 ZIP built at `dist/amasamya-extension-v4.2.0.zip` (127 KB, 26
-entries). Feature flag SITE_CRAWL_ENABLED flipped to true in both
-background.js and panel.js. Manifest at 4.2.0. Uploaded to the
-Chrome Web Store on 2026-07-01, submitted for review. Waiting on
-approval email.
+entries). Uploaded 2026-07-01, approved same day.
 
-Post-upload polish pass (still v4.2.0, folded into the same
-submission):
+What shipped in v4.2.0 (Site Crawl core):
+
+- Crawl queue + concurrent audit runner module
+  (engines/site-crawler.js). 3 pages in parallel by default.
+- Sitemap.xml parser with sitemap-index recursion, 10 s fetch
+  timeout, and 200-page hard cap
+  (engines/sitemap-parser.js).
+- Side-panel Site Crawl tab with paste-URLs (default) and
+  sitemap input modes, start/cancel, live progress, per-page
+  results table.
+- Background service-worker driver that hooks audit results
+  from injected pages and forwards per-page records to the
+  platform tab when one is open.
+- Platform-side Aggregated Reports mode with per-template
+  grouping and drill-down to affected pages.
+- Four crawl exports: HTML grouped report, CSV by template,
+  CSV by page, JSON raw.
+- Crawl session metadata header (start, finish, duration,
+  per-status page counts) as a definition list for
+  screen-reader navigation.
+- Platform import of the crawl JSON shape, routed through the
+  live ingest pipeline so imported sessions behave like live
+  ones.
+
+Post-upload polish pass (folded into the same submission before
+publish):
 
 - Crawler correctness sweep. Sitemap fetches now time out after
   10 s (AbortController), reject empty 200 responses with an
@@ -62,42 +85,19 @@ submission):
   inside the confirm dialog cancels. Escape inside editable form
   fields is untouched.
 
-Post-approval TODO on this file: move v4.2.0 into the `## Shipped`
-section at the bottom with the actual publish date.
+Extension ID on the store remains
+`blnfmiipkccpggpinjofhhglfcgglbif`. No user action needed on
+install; the Alt+Shift+1 shortcut stays bound and the panel
+queries chrome.commands.getAll() at load so any user whose
+Chrome dropped the binding sees the correct fallback text.
 
-Ships:
-
-- Crawl queue + sequential audit runner module
-  (engines/site-crawler.js).
-- Sitemap.xml parser with sitemap-index recursion and 200-page cap
-  (engines/sitemap-parser.js).
-- Side-panel Site Crawl tab with sitemap and paste-URLs input,
-  start/cancel, progress, results table.
-- Background service-worker driver that hooks audit results from
-  injected pages and forwards per-page records to the platform tab
-  when one is open.
-- Platform-side Aggregated Reports mode with per-template grouping
-  and drill-down to affected pages.
-- Four crawl exports: HTML grouped report, CSV by template, CSV by
-  page, JSON raw.
-- Crawl session metadata header (start, finish, duration,
-  per-status page counts) as a definition list for screen-reader
-  navigation.
-- Platform import of the crawl JSON shape, routed through the live
-  ingest pipeline so imported sessions behave like live ones.
-
-Accessibility:
+Screen-reader specifics (retained across every crawl):
 
 - Per-page completion announcements via the polite live region
-  ("Page 3 complete. /checkout. Audited successfully. 5 findings.
-  2.4 seconds.") so screen-reader users hear progress without
-  navigating the table.
-- aria-valuetext on the progressbar reads as a sentence rather
+  (for example "Page 3 complete. /checkout. Audited
+  successfully. 5 findings. 2.4 seconds.").
+- aria-valuetext on the progress bar reads as a sentence rather
   than a bare percent.
-- Default keyboard shortcut moved to Alt+Shift+1 after Akhilesh
-  reported JAWS table-cell conflicts on Alt+Shift+Period and
-  Alt+Shift+Comma. Side panel queries chrome.commands.getAll() at
-  load time and renders the actual bound chord.
 
 ## Next release: v4.3.0 - Audit diff and history
 
