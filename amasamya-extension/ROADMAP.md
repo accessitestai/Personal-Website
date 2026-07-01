@@ -1,6 +1,6 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-06-14.
+Last reviewed: 2026-07-01.
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
@@ -17,12 +17,53 @@ Dragging-Movements pre-filter, Mac shortcut text, summary cards
 keyboard-focusable, main landmark programmatically focusable,
 minimum_chrome_version 114).
 
-## In flight: v4.2.0 "Site Crawl" (uploading)
+## In flight: v4.2.0 "Site Crawl" (uploaded, pending CWS review)
 
-ZIP built at `AMASAMYA-extension-v4.2.0.zip`. Feature flag
-SITE_CRAWL_ENABLED flipped to true in both background.js and
-panel.js. Manifest at 4.2.0. Pending upload to the Chrome Web
-Store.
+ZIP built at `dist/amasamya-extension-v4.2.0.zip` (127 KB, 26
+entries). Feature flag SITE_CRAWL_ENABLED flipped to true in both
+background.js and panel.js. Manifest at 4.2.0. Uploaded to the
+Chrome Web Store on 2026-07-01, submitted for review. Waiting on
+approval email.
+
+Post-upload polish pass (still v4.2.0, folded into the same
+submission):
+
+- Crawler correctness sweep. Sitemap fetches now time out after
+  10 s (AbortController), reject empty 200 responses with an
+  actionable error, and recurse into sitemap-index trees deeper
+  (depth 5, threshold 2000 URLs). Crawler distinguishes NO_RESPONSE
+  from PASS so CSP-blocked pages no longer count as clean. Waiter
+  race between content-script and the background-side awaitAudit
+  waiter fixed by a per-tabId pending buffer. Cancel pre-empts the
+  current waiter so it feels immediate. Findings shape validated at
+  the platform bridge.
+- Crawler concurrency. Runs 3 pages in parallel (was strictly
+  serial); real-world wall time on a 32.5 s/page workload drops to
+  ~3.5 s. Concurrency is tunable via start() options for sites that
+  push back on parallel hits.
+- Side-panel keyboard and screen-reader sweep. Tablist arrow-key
+  hint moved out of `<ul>` and into an `sr-only` paragraph so
+  aria-describedby actually resolves. Focus Narrator and Visual
+  Layout Auditor progress: aria-live moved from the wrapper onto the
+  persistent label so updates announce reliably. Finding-detail
+  toggle now announces expanded/collapsed. Settings Save/Clear
+  status text stays on screen instead of wiping at 3 s. Site Crawl
+  URL fields (textarea + input) wrapped in `role="application"` so
+  JAWS passes arrow keys straight to the field instead of ejecting
+  focus to the virtual cursor. External About link announces "opens
+  in a new tab".
+- Focus trap. Panel now auto-focuses the currently selected tab on
+  load (Chrome leaves focus on the toolbar after activation, which
+  ejected the very first Tab press). Tab and Shift+Tab wrap within
+  the panel instead of leaking to browser chrome.
+- Close confirmation. Header Close button and Escape both raise a
+  role="dialog" aria-modal="true" confirmation with Cancel focused
+  by default. Guards against accidental Escape presses. Escape
+  inside the confirm dialog cancels. Escape inside editable form
+  fields is untouched.
+
+Post-approval TODO on this file: move v4.2.0 into the `## Shipped`
+section at the bottom with the actual publish date.
 
 Ships:
 

@@ -87,19 +87,25 @@ this project, ever, going forward.
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
   ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0 and v4.0.1 are both
-  Published. Current development is v4.2.0 "Site Crawl" - the feature
-  flag is flipped on, the manifest is at 4.2.0, ZIP is built. Pending
-  upload to CWS. Site Crawl ships the crawl queue + sitemap.xml
-  parser + side-panel Site Crawl tab + platform Aggregated Reports
-  + four export shapes (HTML, two CSV flavours, JSON) + crawl session
-  metadata header + platform import of the crawl JSON shape. Default
-  keyboard shortcut moved from Ctrl+Shift+U to Alt+Shift+1 after Akhilesh
-  reported JAWS table-cell command conflicts on Alt+Shift+Period and
-  Alt+Shift+Comma. The side panel queries chrome.commands.getAll() at
-  load time and renders the actual bound chord, with a fallback when
-  Chrome left the shortcut unbound. Audit diff and history is still
-  planned for v4.3.0 (slotted after v4.2.0 publishes); offline-only
-  Vision AI for v5.0. See amasamya-extension/ROADMAP.md.
+  Published. v4.2.0 "Site Crawl" was uploaded to CWS on 2026-07-01 and
+  is currently pending review. Site Crawl ships the crawl queue +
+  sitemap.xml parser + side-panel Site Crawl tab + platform Aggregated
+  Reports + four export shapes (HTML, two CSV flavours, JSON) + crawl
+  session metadata header + platform import of the crawl JSON shape.
+  Post-upload polish pass (still within v4.2.0, folded into the same
+  submission): crawler correctness sweep (10 s fetch timeout, empty
+  sitemap rejection, NO_RESPONSE status, waiter race fix, findings
+  shape validation, deeper sitemap-index recursion), 3-page
+  concurrent runner (~10x faster wall time), side-panel keyboard/SR
+  sweep, Site Crawl URL fields wrapped in role="application" so JAWS
+  arrow keys work inside them, focus trap and auto-focus-into on
+  panel open, and a role="dialog" close-confirmation on both header
+  Close button and Escape. Default keyboard shortcut is Alt+Shift+1
+  after Akhilesh reported JAWS table-cell command conflicts on
+  Alt+Shift+Period and Alt+Shift+Comma. Side panel queries
+  chrome.commands.getAll() at load and renders the actual bound
+  chord. Audit diff and history is v4.3.0; offline-only Vision AI is
+  v5.0. See amasamya-extension/ROADMAP.md.
 - **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
   private at github.com/accessitestai/Personal-Website.

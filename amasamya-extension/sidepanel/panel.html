@@ -34,9 +34,15 @@
 
 <!-- Panel navigation tabs -->
 <nav aria-label="AMASAMYA panel sections" class="panel-nav">
+  <!-- v4.2.1 kbd/SR fix (K2): the arrow-key hint used to sit as a
+       <p> inside <ul> with hidden. Two problems: <p> is invalid
+       inside <ul>, and hidden removes it from the accessibility
+       tree so aria-describedby never resolved. Moved outside the
+       tablist and swapped hidden for the sr-only class so NVDA and
+       JAWS can read the hint when the user focuses the tab list. -->
+  <p id="panel-nav-hint" class="sr-only">Use Left and Right arrow keys to switch panels.</p>
   <ul role="tablist" aria-label="Panel tabs" aria-orientation="horizontal"
       aria-describedby="panel-nav-hint">
-    <p id="panel-nav-hint" hidden>Use Left and Right arrow keys to switch panels.</p>
     <li role="presentation">
       <button class="panel-tab" role="tab" id="ptab-wcag"
               aria-controls="ppanel-wcag" aria-selected="true" tabindex="0"
@@ -206,14 +212,20 @@
         </button>
       </div>
 
-      <!-- Progress -->
-      <div id="fn-progress-wrap" hidden aria-live="polite" class="progress-wrap">
+      <!-- Progress. v4.2.1 K5: aria-live moved from the wrapper (which
+           starts hidden and only becomes live at insertion time; NVDA
+           may not track this reliably) onto the label paragraph itself,
+           which is always present in the a11y tree even while the
+           wrapper is hidden. aria-atomic ensures the full sentence is
+           spoken on each update instead of a diff. -->
+      <div id="fn-progress-wrap" hidden class="progress-wrap">
         <div class="progress-bar-track" role="progressbar"
              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
              aria-label="Focus audit progress" id="fn-progress-bar">
           <div class="progress-bar-fill" id="fn-progress-fill" style="width:0%"></div>
         </div>
-        <p id="fn-progress-label" class="progress-label">Starting…</p>
+        <p id="fn-progress-label" class="progress-label"
+           aria-live="polite" aria-atomic="true">Starting.</p>
       </div>
 
       <!-- Results -->
@@ -269,14 +281,17 @@
         </button>
       </div>
 
-      <!-- Progress -->
-      <div id="vla-progress-wrap" hidden aria-live="polite" class="progress-wrap">
+      <!-- Progress. v4.2.1 K5: same rationale as the Focus Narrator
+           progress region above - aria-live lives on the persistent
+           label element. -->
+      <div id="vla-progress-wrap" hidden class="progress-wrap">
         <div class="progress-bar-track" role="progressbar"
              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
              aria-label="Layout audit progress" id="vla-progress-bar">
           <div class="progress-bar-fill" id="vla-progress-fill" style="width:0%"></div>
         </div>
-        <p id="vla-progress-label" class="progress-label">Starting…</p>
+        <p id="vla-progress-label" class="progress-label"
+           aria-live="polite" aria-atomic="true">Starting.</p>
       </div>
 
       <!-- Results -->
@@ -430,7 +445,8 @@
       <p class="section-desc">
         AMASAMYA v4.2 - Built by Akhilesh Malani, Accessibility Architect &amp;
         Digital Inclusion Strategist.<br>
-        <a href="https://amasamya.akhileshmalani.com" target="_blank" rel="noopener">
+        <a href="https://amasamya.akhileshmalani.com" target="_blank" rel="noopener"
+           aria-label="Visit AMASAMYA.akhileshmalani.com (opens in a new tab)">
           AMASAMYA.akhileshmalani.com
         </a>
       </p>
@@ -451,49 +467,75 @@
   <div role="tabpanel" id="ppanel-crawl" aria-labelledby="ptab-crawl" tabindex="-1" hidden>
 
     <section aria-labelledby="crawl-heading">
-      <h2 id="crawl-heading">Site Crawl</h2>
+      <h2 id="crawl-heading">Audit a whole website (Site Crawl)</h2>
       <p class="section-desc">
-        Audit a whole website in one run. The crawler walks each URL in
-        your already-signed-in browser session, runs all 24 WCAG 2.2
-        audit engines per page, and forwards the findings to the
-        AMASAMYA Platform for aggregated reporting. Cap is 200 pages
-        per run.
+        This runs the AMASAMYA audit on many pages of a website, one
+        after another, instead of just the page you are on. The
+        results go to the AMASAMYA web platform if you have it open
+        in another tab. Up to 200 pages per run.
       </p>
 
       <fieldset class="settings-fieldset">
-        <legend>URL source</legend>
+        <legend>Which pages do you want to check?</legend>
         <div class="radio-group">
           <label class="radio-label">
-            <input type="radio" name="crawl-source" id="crawl-src-sitemap" value="sitemap" checked>
-            Sitemap.xml (recommended): point me at a site root, I will read its sitemap.
+            <input type="radio" name="crawl-source" id="crawl-src-list" value="list" checked>
+            I will paste the page addresses myself (works on any site)
           </label>
           <label class="radio-label">
-            <input type="radio" name="crawl-source" id="crawl-src-list" value="list">
-            Paste a URL list, one per line.
+            <input type="radio" name="crawl-source" id="crawl-src-sitemap" value="sitemap">
+            Let AMASAMYA find the pages from the website's own list (only works on sites that publish a list)
           </label>
         </div>
+        <p class="field-hint" style="margin-top:8px;">
+          If you are not sure which option to pick, choose the first one
+          and paste 3 or 4 page addresses to start.
+        </p>
       </fieldset>
 
-      <div class="settings-field" id="crawl-sitemap-wrap">
-        <label for="crawl-sitemap-url">Site root URL</label>
-        <input type="url" id="crawl-sitemap-url" class="key-input"
-               placeholder="https://example.com"
-               aria-describedby="crawl-sitemap-hint">
-        <p id="crawl-sitemap-hint" class="field-hint">
-          AMASAMYA will fetch /sitemap.xml from this root. If the site uses
-          /sitemap_index.xml or /sitemap-index.xml instead, that is also
-          tried automatically.
-        </p>
-      </div>
-
-      <div class="settings-field" id="crawl-list-wrap" hidden>
-        <label for="crawl-url-list">URLs to audit, one per line</label>
+      <!-- v4.2.1 UX:
+           - Pasted-URL-list is now the default because it works on every
+             site, including large e-commerce and banking sites that
+             block sitemap access.
+           - type="text" + inputmode="url" + autocomplete="off" stops
+             Chrome's URL autocomplete dropdown from intercepting Left /
+             Right arrow keys, which was making focus jump for JAWS
+             users reading the field character by character.
+           - role="application" on each field wrapper: Chrome side
+             panels do not always trigger JAWS / NVDA auto-forms-mode
+             when Tab lands on a text field, so arrow keys were being
+             consumed by the virtual PC cursor and moving the reading
+             cursor off the field. role="application" tells the screen
+             reader to pass keys straight to the control inside that
+             wrapper. Scoped tightly (one field per wrapper) so
+             everything outside - radio group, headings, links - keeps
+             normal virtual-cursor navigation. -->
+      <div class="settings-field" id="crawl-list-wrap" role="application">
+        <label for="crawl-url-list">Page addresses to check, one per line</label>
         <textarea id="crawl-url-list" rows="8" class="key-input"
+                  autocomplete="off" spellcheck="false"
                   placeholder="https://example.com/&#10;https://example.com/about&#10;https://example.com/contact"
                   aria-describedby="crawl-list-hint"></textarea>
         <p id="crawl-list-hint" class="field-hint">
-          Up to 200 URLs. Lines beyond 200 are ignored with a warning at
-          the start of the crawl.
+          Each line must start with https:// or http://. Up to 200
+          addresses. If you paste more, the extra ones are ignored
+          with a notice before the audit starts.
+        </p>
+      </div>
+
+      <div class="settings-field" id="crawl-sitemap-wrap" role="application" hidden>
+        <label for="crawl-sitemap-url">Website address (homepage URL)</label>
+        <input type="text" inputmode="url"
+               id="crawl-sitemap-url" class="key-input"
+               autocomplete="off" spellcheck="false"
+               placeholder="https://example.com"
+               aria-describedby="crawl-sitemap-hint">
+        <p id="crawl-sitemap-hint" class="field-hint">
+          AMASAMYA tries to read the website's published list of pages
+          (called a sitemap). This works on most marketing and content
+          sites. Large stores like Amazon and most banks block this on
+          purpose; for those sites, switch to the first option above
+          and paste the page addresses yourself.
         </p>
       </div>
 
@@ -565,6 +607,39 @@
 <footer role="contentinfo">
   <p>AMASAMYA v4.2 - Private and Confidential</p>
 </footer>
+
+<!-- v4.2.1: Close-confirmation dialog. Shown whenever the user tries
+     to close the panel via the header Close button or by pressing
+     Escape. Explicit confirmation guards against accidental
+     dismissal (Escape is a common finger-slip for screen-reader users
+     who are trying to clear a JAWS message). Focus starts on Cancel
+     so a stray Enter after triggering close does not confirm. The
+     dialog uses role=dialog + aria-modal=true and traps Tab inside
+     itself while open. -->
+<div id="close-confirm-dialog"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="close-confirm-title"
+     aria-describedby="close-confirm-desc"
+     hidden>
+  <div class="dialog-backdrop" aria-hidden="true"></div>
+  <div class="dialog-body">
+    <h2 id="close-confirm-title">Close AMASAMYA panel?</h2>
+    <p id="close-confirm-desc">
+      The panel will close and any findings that are not exported will
+      be lost. To open AMASAMYA again, activate the toolbar icon or
+      press the AMASAMYA keyboard shortcut.
+    </p>
+    <div class="dialog-actions">
+      <button type="button" id="close-confirm-cancel" class="btn btn-primary">
+        Cancel, keep panel open
+      </button>
+      <button type="button" id="close-confirm-yes" class="btn btn-danger">
+        Yes, close the panel
+      </button>
+    </div>
+  </div>
+</div>
 
 <script src="panel.js"></script>
 </body>

@@ -14,22 +14,32 @@ const { SiteCrawler, STATUS, _internal } = require(
   path.resolve(__dirname, '..', '..', 'amasamya-extension', 'engines', 'site-crawler.js')
 );
 
-/* Build a fake deps object whose chrome-API analogues just resolve. */
+/* Build a fake deps object whose chrome-API analogues just resolve.
+
+   v4.2.1: `onTabUpdated` now holds a Set of listeners rather than a
+   single reference. The real chrome.tabs.onUpdated supports any
+   number of registered listeners simultaneously, and the SiteCrawler
+   installs one per in-flight audit; with concurrency > 1 the old
+   single-slot fake caused earlier workers' listeners to be
+   overwritten and their `_waitForLoad` never resolved. Every load
+   event is dispatched to every listener; each listener filters on
+   its captured tabId. */
 function makeFakeDeps(opts) {
   opts = opts || {};
   let tabIdSeq = 1000;
   const events = [];
-  const listenerHolder = { listener: null };
+  const listeners = new Set();
   const deps = {
     createTab: async (url) => {
       events.push({ op: 'createTab', url: url });
       const myTabId = tabIdSeq++;
       /* Schedule the load event AFTER returning the tab so the crawler
-         has time to register its listener. The listener checks the
-         tabId; capture our own id in closure so we fire with the right
-         one, not whatever tabIdSeq has become later. */
+         has time to register its listener. Every registered listener
+         gets called with this tab's id; they filter internally. */
       setTimeout(() => {
-        if (listenerHolder.listener) listenerHolder.listener(myTabId, { status: 'complete' });
+        for (const fn of listeners) {
+          try { fn(myTabId, { status: 'complete' }); } catch (_) {}
+        }
       }, 5);
       return { id: myTabId };
     },
@@ -38,8 +48,8 @@ function makeFakeDeps(opts) {
     executeScript: async (tabId, files) => { events.push({ op: 'executeScript', tabId: tabId, files: files }); },
     awaitAuditResults: async (tabId) => opts.findings || [],
     onTabUpdated: {
-      addListener:    (fn) => { listenerHolder.listener = fn; },
-      removeListener: ()   => { listenerHolder.listener = null; }
+      addListener:    (fn) => { listeners.add(fn); },
+      removeListener: (fn) => { listeners.delete(fn); }
     },
     onAuditMessage: null,
     delay: () => Promise.resolve(),

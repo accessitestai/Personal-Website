@@ -141,8 +141,11 @@ test.describe('Sitemap parser', () => {
   });
 
   test('throws when no sitemap exists', async () => {
+    /* v4.2.1: error wording rewritten to tell the user what to do
+       next (switch to paste-list mode). Assertion now matches the
+       stable stem of the new message. */
     const fetch = makeFakeFetch({});
-    await expect(sp.resolveSiteUrls('https://example.com', { deps: { fetch } })).rejects.toThrow(/No sitemap found/);
+    await expect(sp.resolveSiteUrls('https://example.com', { deps: { fetch } })).rejects.toThrow(/[Cc]ould not find a public sitemap/);
   });
 
   test('handles trailing slash on site root', async () => {

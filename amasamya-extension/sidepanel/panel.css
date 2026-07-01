@@ -859,3 +859,54 @@ main {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
+
+/* ────────────────────────────────────────────────────────────
+   v4.2.1 - Close-confirmation dialog.
+   Full-viewport overlay with a centred card. Sighted styling is
+   deliberately plain: the dialog's job is to catch an accidental
+   close, not to look impressive. Screen readers get the dialog
+   role + aria-modal from panel.html; this stylesheet only handles
+   presentation.
+──────────────────────────────────────────────────────────── */
+#close-confirm-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+#close-confirm-dialog[hidden] { display: none; }
+#close-confirm-dialog .dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+#close-confirm-dialog .dialog-body {
+  position: relative;
+  background: var(--ama-panel-bg, #ffffff);
+  color: var(--ama-text, #1a1a1a);
+  border: 2px solid var(--ama-focus, #0057b7);
+  border-radius: 6px;
+  max-width: 380px;
+  width: 100%;
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+#close-confirm-dialog h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+#close-confirm-dialog p {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+#close-confirm-dialog .dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+#close-confirm-dialog .dialog-actions .btn { min-width: 120px; }

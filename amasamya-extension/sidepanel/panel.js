@@ -201,32 +201,164 @@
         window.close() - this is the supported MV3 side-panel close
         path. ========================================================= */
 
-  const closeBtn = $('close-panel-btn');
+  /* ================================================================
+     v4.2.1 - Close-confirmation dialog, focus-into, and Tab trap.
+     ----------------------------------------------------------------
+     Three related concerns for screen-reader users:
+
+     1. Focus-into: activating the toolbar icon opens the side panel
+        but leaves keyboard focus on the toolbar. The user's next Tab
+        moves through browser chrome instead of into the panel.
+        Fixed by focusing the currently-selected tab as soon as the
+        panel's DOM is ready.
+
+     2. Focus trap: Chrome side panels do not naturally trap Tab.
+        After the last focusable element in the panel, Tab moves to
+        browser chrome and the user is stranded. Intercept Tab /
+        Shift+Tab at the document level and wrap within the panel's
+        own focusable set.
+
+     3. Close confirmation: Escape is a common finger-slip when
+        clearing JAWS speech. Both the Close button and Escape now
+        raise a confirm dialog. Focus starts on Cancel so a stray
+        Enter after triggering close does not confirm.
+  ================================================================ */
+
+  const closeBtn        = $('close-panel-btn');
+  const confirmDialog   = $('close-confirm-dialog');
+  const confirmYesBtn   = $('close-confirm-yes');
+  const confirmNoBtn    = $('close-confirm-cancel');
+  let   focusBeforeDialog = null;
+
+  function panelFocusables() {
+    /* All visible, non-disabled focusables inside the panel, EXCLUDING
+       elements inside the close-confirm dialog (that is a separate
+       trap while it is open). Filters offsetParent to catch things
+       hidden by an ancestor's `hidden` attribute or `display:none`. */
+    const nodes = document.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), ' +
+      'select:not([disabled]), textarea:not([disabled]), ' +
+      '[tabindex]:not([tabindex="-1"])'
+    );
+    const list = [];
+    for (const el of nodes) {
+      if (confirmDialog && confirmDialog.contains(el)) continue;
+      if (el.offsetParent === null && el !== document.activeElement) continue;
+      list.push(el);
+    }
+    return list;
+  }
+
+  function dialogFocusables() {
+    return [confirmNoBtn, confirmYesBtn].filter(Boolean);
+  }
+
+  function dialogIsOpen() {
+    return confirmDialog && !confirmDialog.hasAttribute('hidden');
+  }
+
+  function openConfirmDialog() {
+    if (!confirmDialog || dialogIsOpen()) return;
+    focusBeforeDialog = document.activeElement;
+    confirmDialog.removeAttribute('hidden');
+    /* Announce the confirmation politely; assertive would step on
+       whatever the user was reading and this action is not urgent. */
+    announce('Close AMASAMYA panel? Choose Cancel to keep the panel open, or Yes to close it.');
+    /* Default focus goes to Cancel (safer default). */
+    if (confirmNoBtn) confirmNoBtn.focus();
+  }
+
+  function closeConfirmDialog(restoreFocus) {
+    if (!confirmDialog) return;
+    confirmDialog.setAttribute('hidden', '');
+    if (restoreFocus && focusBeforeDialog && typeof focusBeforeDialog.focus === 'function') {
+      try { focusBeforeDialog.focus(); } catch (_) { /* stale */ }
+    }
+    focusBeforeDialog = null;
+  }
+
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener('click', openConfirmDialog);
+  }
+  if (confirmYesBtn) {
+    confirmYesBtn.addEventListener('click', () => {
       try { window.close(); } catch (_) { /* nothing to do */ }
     });
   }
+  if (confirmNoBtn) {
+    confirmNoBtn.addEventListener('click', () => {
+      closeConfirmDialog(true);
+      announce('Panel kept open.');
+    });
+  }
 
+  /* Escape + Tab trap. Both share the same document-level keydown
+     listener so their interactions with the dialog stay coherent. */
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    /* Do not interfere with native Escape behaviour on form
-       controls (e.g. closing a native <select> dropdown or
-       cancelling an in-progress text input). Only trap Escape
-       when focus is on a non-editable element. */
-    const t = e.target;
-    const tag = t && t.tagName ? t.tagName.toUpperCase() : '';
-    const editable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
-    if (editable) return;
-    e.preventDefault();
-    e.stopPropagation();
-    /* Keep keyboard focus inside the panel by re-focusing the
-       currently-selected tab. NVDA/JAWS will announce the tab
-       again, giving the user an unambiguous "you are still in
-       AMASAMYA" cue. */
-    const selectedTab = document.querySelector('.panel-tab[aria-selected="true"]');
-    if (selectedTab) selectedTab.focus();
+
+    /* Escape handling. */
+    if (e.key === 'Escape') {
+      /* If the confirm dialog is open, Escape cancels it (equivalent
+         to pressing Cancel). This is the standard modal pattern. */
+      if (dialogIsOpen()) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeConfirmDialog(true);
+        announce('Close cancelled. Panel kept open.');
+        return;
+      }
+      /* Do not interfere with native Escape behaviour on editable
+         form controls (closing a native <select> dropdown, etc.). */
+      const t = e.target;
+      const tag = t && t.tagName ? t.tagName.toUpperCase() : '';
+      const editable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
+      if (editable) return;
+      /* Otherwise Escape is treated as a close request: raise the
+         confirmation dialog. User's explicit request 2026-07-01:
+         every close path must confirm, to guard against accidental
+         Escape presses. */
+      e.preventDefault();
+      e.stopPropagation();
+      openConfirmDialog();
+      return;
+    }
+
+    /* Tab focus trap. Applied to the whole document while the panel
+       is open. When the confirm dialog is up, trap inside the dialog;
+       otherwise trap inside the panel as a whole. */
+    if (e.key !== 'Tab') return;
+    const list = dialogIsOpen() ? dialogFocusables() : panelFocusables();
+    if (list.length === 0) return;
+    const first = list[0];
+    const last  = list[list.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey) {
+      if (active === first || !list.includes(active)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (active === last || !list.includes(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
   }, true);
+
+  /* Focus-into. Move focus to the currently-selected panel tab as
+     soon as the DOM is ready, so the user's first Tab press moves
+     through the panel, not back to the toolbar. Wrapped in a
+     requestAnimationFrame + setTimeout so we run after Chrome has
+     fully attached the side-panel iframe; without the small delay
+     Chrome sometimes reclaims focus for the toolbar after we set it.
+     Announces the current tab so JAWS / NVDA users hear where focus
+     landed. */
+  function focusIntoPanel() {
+    const selectedTab = document.querySelector('.panel-tab[aria-selected="true"]');
+    if (!selectedTab) return;
+    try { selectedTab.focus(); } catch (_) { /* stale */ }
+  }
+  window.requestAnimationFrame(() => setTimeout(focusIntoPanel, 30));
 
   /* ================================================================
      SETTINGS - load / save API keys
@@ -262,9 +394,14 @@
       AMASAMYA_gemini_key:      geminiKeyInput.value.trim(),
       AMASAMYA_vision_provider: provider
     }, () => {
+      /* v4.2.1 K8: leave the confirmation on screen persistently. The
+         previous 3 s clear was too short for JAWS / NVDA users who
+         tab away from the button and back to verify the save landed;
+         by the time they reached the status line it was already
+         wiped. The live-region announce() still fires immediately,
+         but the text stays so a later visit can re-read it. */
       settingsStatus.textContent = 'Settings saved.';
       announce('Settings saved successfully.');
-      setTimeout(() => { settingsStatus.textContent = ''; }, 3000);
     });
   });
 
@@ -275,9 +412,9 @@
         anthropicKeyInput.value = '';
         openaiKeyInput.value    = '';
         geminiKeyInput.value    = '';
+        /* v4.2.1 K8: same rationale as Save above - keep the text. */
         settingsStatus.textContent = 'Keys cleared.';
         announce('API keys cleared.');
-        setTimeout(() => { settingsStatus.textContent = ''; }, 3000);
       }
     );
   });
@@ -463,8 +600,14 @@
       toggle.addEventListener('click', () => {
         const d = $(`detail-${idx}`);
         const expanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!expanded));
+        const nowExpanded = !expanded;
+        toggle.setAttribute('aria-expanded', String(nowExpanded));
         d.classList.toggle('expanded');
+        /* v4.2.1 K7: NVDA / JAWS announce the new aria-expanded state
+           when the user re-reads the button, but not on the click that
+           caused the change. Push a polite announcement so the user
+           gets immediate feedback that the toggle did something. */
+        announce(nowExpanded ? 'Finding detail expanded.' : 'Finding detail collapsed.');
       });
 
       const detail = document.createElement('div');

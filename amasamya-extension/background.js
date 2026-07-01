@@ -118,8 +118,18 @@ chrome.action.onClicked.addListener(async (tab) => {
    immediately with a clear reason.
 ═════════════════════════════════════════════════════════ */
 
-let __crawlCurrent  = null; /* { crawler, waiters: Map<tabId, resolve> } */
+let __crawlCurrent  = null; /* { crawler, waiters: Map<tabId, resolve>, pending: Map<tabId, findings[]> } */
 const CRAWL_WAIT_TIMEOUT = 25000; /* match the per-page audit budget */
+
+/* v4.2.1: findings-shape validator. The platform's aggregated
+   report renders each finding's selector + verdict; a finding with
+   missing fields drops out silently in the export. Reject at the
+   bridge so malformed page-side output never crosses the wire. */
+function validCrawlFinding(f) {
+  return f && typeof f === 'object'
+       && typeof f.selector === 'string' && f.selector.length > 0
+       && typeof f.verdict  === 'string' && f.verdict.length > 0;
+}
 
 function broadcastCrawlUi(message) {
   /* The side panel may not be open. Swallow disconnected-port errors. */
@@ -136,6 +146,10 @@ async function sendCrawlPageToPlatform(record) {
     const existingTabs = await chrome.tabs.query({ url: PLATFORM_URL + '/*' });
     if (existingTabs.length === 0) return;
     const platformTab = existingTabs[0];
+    /* v4.2.1: guard findings shape before crossing the platform bridge. */
+    const cleanFindings = Array.isArray(record.findings)
+      ? record.findings.filter(validCrawlFinding)
+      : [];
     await chrome.tabs.sendMessage(platformTab.id, {
       type:      'AMASAMYA_crawl_page_result',
       url:       record.url,
@@ -143,7 +157,7 @@ async function sendCrawlPageToPlatform(record) {
       title:     record.finalTitle,
       status:    record.status,
       index:     record.index,
-      findings:  record.findings || [],
+      findings:  cleanFindings,
       durationMs: record.durationMs,
       timestamp: new Date().toISOString()
     });
@@ -194,8 +208,18 @@ async function startSiteCrawl(input) {
 
   /* Construct crawler with real chrome deps + an awaitAuditResults
      impl that intercepts the standard audit-results message for the
-     specific tab id we just injected. */
-  const waiters = new Map(); /* tabId -> { resolve, reject, timer } */
+     specific tab id we just injected.
+
+     v4.2.1: added a `pending` buffer keyed by tabId. The race is:
+     content-script.js can post audit-results before the crawler
+     has installed its waiter (fast-loading pages, or the
+     awaitAuditResults call being scheduled a microtask after
+     executeScript resolves). Previously that message escaped through
+     the standalone-audit branch and the crawler timed out with null.
+     Now: if we see audit-results with no waiter yet, we stash it in
+     `pending`. When the waiter arrives, it drains the buffer first. */
+  const waiters = new Map(); /* tabId -> { resolve, timer } */
+  const pending = new Map(); /* tabId -> findings[] */
   const crawler = new self.AMASAMYASiteCrawler.SiteCrawler({
     createTab:        (url) => chrome.tabs.create({ url: url, active: false }),
     removeTab:        (tabId) => chrome.tabs.remove(tabId),
@@ -204,6 +228,13 @@ async function startSiteCrawl(input) {
     onTabUpdated:     chrome.tabs && chrome.tabs.onUpdated,
     onAuditMessage:   chrome.runtime && chrome.runtime.onMessage,
     awaitAuditResults: (tabId, timeoutMs) => new Promise((resolve) => {
+      /* Drain the buffer first: if audit-results already landed, resolve immediately. */
+      if (pending.has(tabId)) {
+        const findings = pending.get(tabId);
+        pending.delete(tabId);
+        resolve(findings);
+        return;
+      }
       const ms = (typeof timeoutMs === 'number' ? timeoutMs : CRAWL_WAIT_TIMEOUT);
       const timer = setTimeout(() => { waiters.delete(tabId); resolve(null); }, ms);
       waiters.set(tabId, { resolve: resolve, timer: timer });
@@ -212,7 +243,7 @@ async function startSiteCrawl(input) {
     now:              () => Date.now()
   });
 
-  __crawlCurrent = { crawler: crawler, waiters: waiters };
+  __crawlCurrent = { crawler: crawler, waiters: waiters, pending: pending };
 
   crawler
     .on('progress',     (p) => broadcastCrawlUi({ phase: 'progress', index: p.index, total: p.total, url: p.url }))
@@ -224,6 +255,10 @@ async function startSiteCrawl(input) {
     })
     .on('complete',     (summary) => {
       broadcastCrawlUi({ phase: 'complete', summary: summary });
+      /* v4.2.1: drop any leftover pending buffer so it cannot leak
+         into the next crawl. Waiters map should already be empty. */
+      pending.clear();
+      waiters.clear();
       __crawlCurrent = null;
     });
 
@@ -234,6 +269,18 @@ async function startSiteCrawl(input) {
 function cancelSiteCrawl() {
   if (__crawlCurrent && __crawlCurrent.crawler) {
     __crawlCurrent.crawler.cancel();
+    /* v4.2.1: pre-empt any waiter that is currently blocked on
+       audit-results. Without this, cancel appears to hang for up
+       to 25 seconds (the per-page timeout) before the loop notices
+       the state change. Resolve with null so the current page ends
+       as NO_RESPONSE and the loop breaks on its next iteration. */
+    if (__crawlCurrent.waiters) {
+      __crawlCurrent.waiters.forEach((w) => {
+        clearTimeout(w.timer);
+        w.resolve(null);
+      });
+      __crawlCurrent.waiters.clear();
+    }
     broadcastCrawlUi({ phase: 'cancelled' });
   }
 }
@@ -253,14 +300,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   /* ── Crawl-internal: an audit-results message that arrives from a
         crawler-managed tab should be routed to the waiter that the
         crawler installed, NOT broadcast to the side panel as a
-        standalone audit result. Detect by checking the waiters
-        map for the sender's tab id. ──────────────────────────── */
-  if (message && message.type === 'audit-results' && __crawlCurrent && sender && sender.tab && __crawlCurrent.waiters.has(sender.tab.id)) {
-    const w = __crawlCurrent.waiters.get(sender.tab.id);
-    __crawlCurrent.waiters.delete(sender.tab.id);
-    clearTimeout(w.timer);
-    w.resolve(Array.isArray(message.findings) ? message.findings : []);
-    return false;
+        standalone audit result.
+
+        v4.2.1: race fix. Previously we only intercepted when a
+        waiter was already installed. If audit-results arrived first
+        (fast pages, cached content), it fell through to the
+        standalone-audit branch, the crawler's later awaitAuditResults
+        got null on timeout, and the page was recorded as PASS with
+        empty findings. Now we recognise a crawler-managed tab by
+        two channels: an installed waiter (fast path), OR a tab that
+        this crawler has ever asked about (we track by leaving an
+        entry in the pending map when we see the first message).
+        For robustness against orphan messages after the crawl ends,
+        we only buffer when __crawlCurrent exists. ─────────────── */
+  if (message && message.type === 'audit-results' && __crawlCurrent && sender && sender.tab) {
+    const tabId    = sender.tab.id;
+    const findings = Array.isArray(message.findings) ? message.findings : [];
+    if (__crawlCurrent.waiters.has(tabId)) {
+      const w = __crawlCurrent.waiters.get(tabId);
+      __crawlCurrent.waiters.delete(tabId);
+      clearTimeout(w.timer);
+      w.resolve(findings);
+      return false;
+    }
+    /* No waiter yet. Is this tab one the crawler opened? Only the
+       crawler creates background tabs while __crawlCurrent is set,
+       so any audit-results whose sender tab we did not open must
+       have come from a real user-driven audit. Distinguish by tab
+       activeness: crawler-opened tabs have active=false. */
+    if (sender.tab.active === false) {
+      __crawlCurrent.pending.set(tabId, findings);
+      return false;
+    }
+    /* Foreground tab; fall through to the standalone-audit branch. */
   }
 
   /* ── WCAG audit results → side panel + platform ── */
