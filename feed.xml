@@ -6,8 +6,17 @@
     <description>Insights on digital accessibility from Akhilesh Malani - a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>
     <language>en</language>
     <managingEditor>akhilesh.malani@gmail.com (Akhilesh Malani)</managingEditor>
-    <lastBuildDate>Tue, 07 Apr 2026 06:05:45 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 01 Jul 2026 12:30:00 GMT</lastBuildDate>
     <atom:link href="https://akhileshmalani.com/feed.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>Launching AMASAMYA on GAAD 2026</title>
+      <link>https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html</link>
+      <guid isPermaLink="true">https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html</guid>
+      <pubDate>Thu, 21 May 2026 09:00:00 +0530</pubDate>
+      <description>Why I built AMASAMYA, what it does that other automated accessibility tools do not, and what shipped in the v4.2.0 Site Crawl release now live on the Chrome Web Store.</description>
+      <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
+    </item>
 
     <item>
       <title>How to Test Your Website with a Screen Reader - A Beginner's Guide</title>
