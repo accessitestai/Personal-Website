@@ -1,10 +1,11 @@
 /**
- * AMASAMYA Extension - Side Panel v4.2.0
+ * AMASAMYA Extension - Side Panel v4.3.0
  *
  * Panels:
- *   1. WCAG Audit      - existing 13-engine results
+ *   1. WCAG Audit      - 24 engines + v4.3.0 Audit Diff and History
  *   2. Visual Audit    - Focus Narrator (Module 2) + Visual Layout (Module 1)
  *   3. Settings        - Vision AI API keys
+ *   4. Site Crawl      - v4.2.0
  */
 
 (function () {
@@ -470,6 +471,23 @@
   let filteredFindings = [];
   let auditMeta        = { pageTitle: '', pageUrl: '', timestamp: '' };
 
+  /* v4.3.0: Audit Diff and History state.
+     diffTagged[]      - findings augmented with diffVerdict, or [] when
+                         no comparison audit is available.
+     diffSummary       - { new, regressed, unchanged, resolved } or null.
+     diffAgainst       - the previous audit record we compared against,
+                         or null.
+     historyList[]     - the full history for the current URL, sorted
+                         newest first. Used by renderHistoryTable().
+     historyLoadingUrl - URL for which the last history fetch was
+                         requested; guards against race conditions when
+                         the user switches URLs rapidly. */
+  let diffTagged        = [];
+  let diffSummary       = null;
+  let diffAgainst       = null;
+  let historyList       = [];
+  let historyLoadingUrl = '';
+
   /* Recover last audit from session storage */
   document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.session.get('lastAudit', (data) => {
@@ -542,10 +560,210 @@
     $('filter-engine').value   = 'all';
     $('filter-verdict').value  = 'all';
     $('filter-severity').value = 'all';
-    applyFilters();
 
-    announce(`Audit complete. ${fail} failures, ${warn} warnings, ${pass} passes. ${allFindings.length} total findings.`);
+    /* v4.3.0: fetch history and diff BEFORE applyFilters so the first
+       render already includes the Change column badges. */
+    loadHistoryAndDiff().then(() => {
+      applyFilters();
+      announce(diffSummaryAnnouncement(fail, warn, pass, allFindings.length));
+    }).catch(() => {
+      /* If history is unavailable for any reason, still render the audit. */
+      applyFilters();
+      announce(`Audit complete. ${fail} failures, ${warn} warnings, ${pass} passes. ${allFindings.length} total findings.`);
+    });
   }
+
+  /* v4.3.0: sentence that both the polite live region reads out and
+     the diff-summary card renders visually. Reads as normal English
+     when a diff exists ("...Compared to your last audit on
+     6 July 2026: 3 new, 1 regressed, 2 resolved.") and as the plain
+     audit sentence when it does not. */
+  function diffSummaryAnnouncement(fail, warn, pass, total) {
+    const base = `Audit complete. ${fail} failures, ${warn} warnings, ${pass} passes. ${total} total findings.`;
+    if (!diffSummary || !diffAgainst) return base;
+    const when = new Date(diffAgainst.timestamp).toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    return base + ` Compared to your last audit on ${when}: ${diffSummary.new} new, ${diffSummary.regressed} regressed, ${diffSummary.resolved} resolved.`;
+  }
+
+  /* v4.3.0: history + diff coordination.
+     - Queries the background service worker (which owns the storage
+       APIs) rather than reading chrome.storage.local directly, so the
+       side panel does not need to duplicate storage schema knowledge.
+     - Rebuilds the diff view AND the History section as a single
+       coordinated step to avoid intermediate flicker.
+     - Guards against races: if the user runs a second audit while the
+       first history fetch is still pending, historyLoadingUrl acts as
+       a version check. */
+  function loadHistoryAndDiff() {
+    /* Reset. */
+    diffTagged  = [];
+    diffSummary = null;
+    diffAgainst = null;
+    historyList = [];
+    const url   = auditMeta.pageUrl || '';
+    if (!url || typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+      hideDiffAndHistoryUi();
+      return Promise.resolve();
+    }
+    historyLoadingUrl = url;
+    return Promise.all([
+      askBackground({ type: 'history-request', action: 'list',     url: url }),
+      askBackground({ type: 'history-request', action: 'previous', url: url, timestamp: auditMeta.timestamp })
+    ]).then(([listRes, prevRes]) => {
+      /* Race guard. */
+      if (historyLoadingUrl !== url) return;
+      historyList = (listRes && Array.isArray(listRes.list)) ? listRes.list : [];
+      const previous = (prevRes && prevRes.audit) || null;
+      if (previous && Array.isArray(previous.findings) && window.AMASAMYAAuditDiff) {
+        const result = window.AMASAMYAAuditDiff.diffAudits(allFindings, previous.findings);
+        diffTagged  = result.tagged;
+        diffSummary = result.summary;
+        diffAgainst = previous;
+      }
+      renderDiffSummary();
+      renderHistoryTable();
+      toggleChangeColumn(!!diffAgainst);
+    }).catch(() => {
+      hideDiffAndHistoryUi();
+    });
+  }
+
+  function askBackground(msg) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage(msg, (resp) => {
+          if (chrome.runtime.lastError) return resolve(null);
+          resolve(resp || null);
+        });
+      } catch (_) { resolve(null); }
+    });
+  }
+
+  function hideDiffAndHistoryUi() {
+    const ds = $('diff-summary');
+    if (ds) { ds.hidden = true; ds.textContent = ''; }
+    const hs = $('history-section');
+    if (hs) hs.hidden = true;
+    toggleChangeColumn(false);
+  }
+
+  function renderDiffSummary() {
+    const ds = $('diff-summary');
+    if (!ds) return;
+    if (!diffSummary || !diffAgainst) {
+      ds.hidden = true; ds.textContent = ''; return;
+    }
+    const when = new Date(diffAgainst.timestamp).toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    ds.textContent = `Compared to your last audit on ${when}: ${diffSummary.new} new, ${diffSummary.regressed} regressed, ${diffSummary.unchanged} unchanged, ${diffSummary.resolved} resolved.`;
+    ds.hidden = false;
+  }
+
+  function renderHistoryTable() {
+    const section = $('history-section');
+    const body    = $('history-body');
+    if (!section || !body) return;
+    if (!historyList.length) { section.hidden = true; return; }
+    section.hidden = false;
+    body.innerHTML = '';
+    historyList.forEach((entry) => {
+      const tr    = document.createElement('tr');
+      const tdWhen = document.createElement('td');
+      const when   = new Date(entry.timestamp).toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      tdWhen.textContent = when;
+      const tdCount = document.createElement('td');
+      tdCount.textContent = String((entry.counts && entry.counts.total) || (entry.findings ? entry.findings.length : 0));
+      const tdAction = document.createElement('td');
+      const isCurrent = entry.timestamp === auditMeta.timestamp;
+      if (isCurrent) {
+        tr.classList.add('history-row-current');
+        tdAction.textContent = 'Current';
+        tr.setAttribute('aria-label', `Audit from ${when}, ${tdCount.textContent} findings, currently loaded.`);
+      } else {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-small';
+        btn.textContent = 'Load';
+        btn.setAttribute('aria-label', `Load audit from ${when} with ${tdCount.textContent} findings, and compare with what came before it.`);
+        btn.addEventListener('click', () => loadHistoricalAudit(entry));
+        tdAction.appendChild(btn);
+        tr.setAttribute('aria-label', `Audit from ${when}, ${tdCount.textContent} findings. Press the Load button in this row to open it.`);
+      }
+      tr.appendChild(tdWhen);
+      tr.appendChild(tdCount);
+      tr.appendChild(tdAction);
+      body.appendChild(tr);
+    });
+  }
+
+  function toggleChangeColumn(showColumn) {
+    const table = $('findings-table');
+    if (!table) return;
+    const th = table.querySelector('th.col-change');
+    if (th) th.hidden = !showColumn;
+    /* The Diff CSV button belongs to the export toolbar; toggle it in
+       lockstep with the column. Only meaningful when we actually have
+       a diff to export. */
+    const diffBtn = $('export-diff-csv');
+    if (diffBtn) diffBtn.hidden = !showColumn;
+  }
+
+  /* v4.3.0: load a specific historical audit into the current view.
+     Sets allFindings to the historical audit's findings, remembers
+     auditMeta as the historical audit's meta, and re-runs the diff
+     against whatever came BEFORE it in history. This means the
+     Change column always answers "how did this audit differ from
+     the previous run?", not "how does this compare to today?". That
+     matches how developers actually think about regression tracking. */
+  function loadHistoricalAudit(entry) {
+    if (!entry || !Array.isArray(entry.findings)) return;
+    allFindings = entry.findings;
+    auditMeta = {
+      pageTitle: entry.pageTitle || '',
+      pageUrl:   entry.pageUrl   || auditMeta.pageUrl,
+      timestamp: entry.timestamp || new Date().toISOString()
+    };
+    /* Re-run the counts and card labels for the historical audit. */
+    const fail = allFindings.filter(f => f.verdict === 'Fail').length;
+    const warn = allFindings.filter(f => f.verdict === 'Warning').length;
+    const pass = allFindings.filter(f => f.verdict === 'Pass').length;
+    const info = allFindings.filter(f => f.verdict === 'Info').length;
+    $('count-fail').textContent  = fail;
+    $('count-warn').textContent  = warn;
+    $('count-pass').textContent  = pass;
+    $('count-info').textContent  = info;
+    $('count-total').textContent = allFindings.length;
+    $('card-fail').setAttribute('aria-label',  `Failures: ${fail}`);
+    $('card-warn').setAttribute('aria-label',  `Warnings: ${warn}`);
+    $('card-pass').setAttribute('aria-label',  `Passes: ${pass}`);
+    $('card-info').setAttribute('aria-label',  `Info: ${info}`);
+    $('card-total').setAttribute('aria-label', `Total: ${allFindings.length}`);
+    $('page-info').textContent = `${auditMeta.pageTitle} - ${auditMeta.pageUrl}`;
+    loadHistoryAndDiff().then(() => {
+      applyFilters();
+      announce(`Loaded audit from ${new Date(entry.timestamp).toLocaleString()}. ${fail} failures, ${warn} warnings, ${pass} passes. ${allFindings.length} total. ${diffSummary ? `Compared to the previous audit: ${diffSummary.new} new, ${diffSummary.regressed} regressed, ${diffSummary.resolved} resolved.` : 'No prior audit to compare against.'}`);
+    });
+  }
+
+  /* Clear history buttons. */
+  document.addEventListener('DOMContentLoaded', () => {
+    const clearUrlBtn = $('history-clear-url-btn');
+    const clearAllBtn = $('history-clear-all-btn');
+    if (clearUrlBtn) clearUrlBtn.addEventListener('click', () => {
+      if (!auditMeta.pageUrl) { announce('No URL loaded to clear.', 'assertive'); return; }
+      askBackground({ type: 'history-request', action: 'clear-url', url: auditMeta.pageUrl })
+        .then(() => { loadHistoryAndDiff().then(applyFilters); announce('History for this URL cleared.'); });
+    });
+    if (clearAllBtn) clearAllBtn.addEventListener('click', () => {
+      askBackground({ type: 'history-request', action: 'clear-all' })
+        .then(() => { loadHistoryAndDiff().then(applyFilters); announce('All AMASAMYA history cleared.'); });
+    });
+  });
 
   function applyFilters() {
     const eng = $('filter-engine').value;
@@ -577,19 +795,56 @@
 
   function renderFindings() {
     const tbody = $('findings-body');
+    const showDiff = !!diffAgainst && diffTagged.length > 0;
+    const colspan  = showDiff ? 6 : 5;
     if (!filteredFindings.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No findings match the current filters.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="${colspan}" class="empty-state">No findings match the current filters.</td></tr>`;
       return;
     }
     tbody.innerHTML = '';
+
+    /* v4.3.0: when a diff view is active, build a fast lookup so we
+       can annotate each visible row with its diff verdict without
+       re-running the identity key. Diff view also implicitly appends
+       resolved rows (which are not in filteredFindings by design);
+       we splice them in at the bottom for the sighted user and add
+       an aria-label prefix for the SR user. */
+    const diffByIdKey = new Map();
+    if (showDiff && window.AMASAMYAAuditDiff) {
+      diffTagged.forEach((row) => {
+        const k = window.AMASAMYAAuditDiff.identityKey(row);
+        if (k) diffByIdKey.set(k, row.diffVerdict);
+      });
+    }
+
     filteredFindings.forEach((f, idx) => {
       const tr = document.createElement('tr');
       tr.dataset.findingId = f.id; // used by baseline diff colouring
 
+      /* v4.3.0: Change column cell. Only added when a diff is active. */
+      let diffVerdict = '';
+      if (showDiff && window.AMASAMYAAuditDiff) {
+        const k = window.AMASAMYAAuditDiff.identityKey(f);
+        diffVerdict = diffByIdKey.get(k) || '';
+        if (diffVerdict) {
+          const tdChange = document.createElement('td');
+          tdChange.className = 'col-change';
+          const badge = document.createElement('span');
+          badge.className = `change-badge change-badge--${diffVerdict}`;
+          badge.textContent = diffVerdict.charAt(0).toUpperCase() + diffVerdict.slice(1);
+          tdChange.appendChild(badge);
+          tr.appendChild(tdChange);
+          if (diffVerdict === 'resolved') tr.classList.add('diff-resolved');
+          /* SR: prepend the diff verdict word to the row's aria-label
+             so it lands before the ID/engine/etc columns are read. */
+          tr.setAttribute('aria-label', `${badge.textContent}. ${f.id}. ${f.engine}. ${f.verdict}. ${f.severity}. ${f.issue}.`);
+        }
+      }
+
       const tdId  = document.createElement('td'); tdId.textContent = f.id;
       const tdEng = document.createElement('td'); tdEng.textContent = f.engine;
-      const tdVer = document.createElement('td'); tdVer.textContent = f.verdict; tdVer.className = `verdict-${f.verdict.toLowerCase()}`;
-      const tdSev = document.createElement('td'); tdSev.textContent = f.severity; tdSev.className = `severity-${f.severity.toLowerCase()}`;
+      const tdVer = document.createElement('td'); tdVer.textContent = f.verdict; tdVer.className = `verdict-${(f.verdict||'').toLowerCase()}`;
+      const tdSev = document.createElement('td'); tdSev.textContent = f.severity; tdSev.className = `severity-${(f.severity||'').toLowerCase()}`;
 
       const tdIss   = document.createElement('td');
       const toggle  = document.createElement('button');
@@ -626,20 +881,78 @@
       [tdId, tdEng, tdVer, tdSev, tdIss].forEach(td => tr.appendChild(td));
       tbody.appendChild(tr);
     });
+
+    /* v4.3.0: append Resolved rows at the bottom of the table when a
+       diff is active. These rows are informational only (the finding
+       is gone from the current audit); we render them so the reader
+       can see what fixes were shipped since the previous audit. */
+    if (showDiff) {
+      diffTagged.filter(r => r.diffVerdict === 'resolved').forEach((f, i) => {
+        const tr = document.createElement('tr');
+        tr.classList.add('diff-resolved');
+        const tdChange = document.createElement('td');
+        tdChange.className = 'col-change';
+        const badge = document.createElement('span');
+        badge.className = 'change-badge change-badge--resolved';
+        badge.textContent = 'Resolved';
+        tdChange.appendChild(badge);
+        tr.appendChild(tdChange);
+        const tdId  = document.createElement('td'); tdId.textContent = f.id  || '';
+        const tdEng = document.createElement('td'); tdEng.textContent = f.engine || '';
+        const tdVer = document.createElement('td'); tdVer.textContent = f.verdict || '';
+        const tdSev = document.createElement('td'); tdSev.textContent = f.severity || '';
+        const tdIss = document.createElement('td'); tdIss.textContent = f.issue || '';
+        tr.setAttribute('aria-label', `Resolved. Previously ${f.verdict} at ${f.severity}. ${f.issue}. Element ${f.element || f.selector || ''}.`);
+        [tdId, tdEng, tdVer, tdSev, tdIss].forEach(td => tr.appendChild(td));
+        tbody.appendChild(tr);
+      });
+    }
   }
 
   /* Export */
   $('export-json').addEventListener('click', () => {
     downloadFile(JSON.stringify({
-      tool: 'AMASAMYA', version: '4.2.0', page: auditMeta.pageTitle,
+      tool: 'AMASAMYA', version: '4.3.0', page: auditMeta.pageTitle,
       url: auditMeta.pageUrl, timestamp: auditMeta.timestamp,
       summary: { total: allFindings.length, fail: allFindings.filter(f=>f.verdict==='Fail').length,
         warning: allFindings.filter(f=>f.verdict==='Warning').length,
         pass: allFindings.filter(f=>f.verdict==='Pass').length,
         info: allFindings.filter(f=>f.verdict==='Info').length },
+      /* v4.3.0: include diff meta when a comparison was available. */
+      diff: (diffSummary && diffAgainst) ? {
+        against: { timestamp: diffAgainst.timestamp, pageTitle: diffAgainst.pageTitle },
+        summary: diffSummary
+      } : null,
       findings: filteredFindings
     }, null, 2), 'AMASAMYA-audit.json', 'application/json');
     announce('JSON exported.');
+  });
+
+  /* v4.3.0: Diff CSV export. Writes only the actionable rows (new +
+     regressed) against the previous audit for this URL. Filename
+     encodes the compared-to timestamp so multiple exports do not
+     overwrite each other in Downloads. */
+  const diffCsvBtn = $('export-diff-csv');
+  if (diffCsvBtn) diffCsvBtn.addEventListener('click', () => {
+    if (!diffAgainst || !window.AMASAMYAAuditDiff) {
+      announce('No diff view active; cannot export Diff CSV.', 'assertive');
+      return;
+    }
+    const rows = window.AMASAMYAAuditDiff.actionableRows(diffTagged);
+    const headers = ['Change','ID','Engine','Element','Selector','Criterion','Issue','Computed','Required','Verdict','Severity','How to Fix'];
+    const body = rows.map(f => [
+      (f.diffVerdict || '').charAt(0).toUpperCase() + (f.diffVerdict || '').slice(1),
+      f.id || '', f.engine || '', f.element || '', f.selector || '',
+      f.criterion || '', f.issue || '', f.computed || '', f.required || '',
+      f.verdict || '', f.severity || '', f.howToFix || ''
+    ].map(csvEscape));
+    const filenameTs = (diffAgainst.timestamp || '').replace(/[:.]/g, '-');
+    downloadFile(
+      [headers.join(','), ...body.map(r => r.join(','))].join('\r\n'),
+      `AMASAMYA-diff-vs-${filenameTs}.csv`,
+      'text/csv'
+    );
+    announce(`Diff CSV exported. ${rows.length} actionable rows.`);
   });
 
   $('export-html').addEventListener('click', () => {

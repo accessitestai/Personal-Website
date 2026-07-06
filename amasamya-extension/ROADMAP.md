@@ -1,6 +1,6 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-07-01 (post-v4.2.0 publish).
+Last reviewed: 2026-07-06 (v4.3.0 uploaded, pending CWS review).
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
@@ -99,7 +99,70 @@ Screen-reader specifics (retained across every crawl):
 - aria-valuetext on the progress bar reads as a sentence rather
   than a bare percent.
 
-## Next release: v4.3.0 - Audit diff and history
+## In flight: v4.3.0 "Audit Diff and History" (uploaded, pending CWS review)
+
+Manifest at 4.3.0. Two new engine modules
+(`engines/audit-history.js` and `engines/audit-diff.js`), full
+Playwright coverage (32 new tests, 132 passing overall). ZIP built
+at `dist/amasamya-extension-v4.3.0.zip`. Uploaded to the Chrome
+Web Store on 2026-07-06.
+
+What ships in v4.3.0:
+
+- On-device history storage. Every completed audit is saved to
+  `chrome.storage.local` with per-URL bucketing, a 10-audit cap
+  per URL (oldest evicted first), and an 8 MB total-storage soft
+  cap with automatic eviction to a 6 MB target when over.
+- URL normalisation for history keys. Fragments dropped, utm_*
+  and common tracker params (`gclid`, `fbclid`, `mc_cid`, etc.)
+  dropped, trailing slash on non-root paths dropped. Distinct
+  query-driven pages remain distinct history buckets.
+- Diff engine. Identity tuple `{engine, criterion, selector}`,
+  exact match. Four verdicts: New, Regressed (Pass or Warning
+  became Fail), Unchanged, Resolved (identity gone from current).
+  Pure module, no I/O, tests-first.
+- Auto-diff. The moment a URL has 2+ audits in history, the
+  panel automatically renders the Change column, the diff
+  summary card ("Compared to your last audit on 2026-07-01:
+  N new, N regressed, N unchanged, N resolved."), and appends
+  resolved rows to the bottom of the findings table.
+- Screen-reader announcements. The complete-audit polite
+  announcement now trails the diff summary sentence so JAWS/NVDA
+  users hear the delta without navigating to it. Row-level
+  aria-labels prepend the diff verdict word so it lands before
+  the row's other columns are read.
+- Diff CSV export. Toolbar button labelled "Diff CSV (new +
+  regressed)" appears only when a diff view is active. Writes
+  only the actionable rows in a format directly consumable as
+  a ticket-import CSV. Filename encodes the compared-against
+  timestamp so multiple exports do not overwrite.
+- History section in the side panel. Collapsed by default. Two-
+  column table (When, Findings) plus a Load button per row.
+  Clicking Load swaps the current view to that historical audit
+  and re-runs the diff against whatever came immediately before
+  it. Current row is marked distinctly.
+- History management. "Clear history for this URL" and "Clear
+  all AMASAMYA history" buttons inside the History section.
+  History is intentionally separate from baseline and API keys;
+  clearing one does not touch the others.
+
+Non-goals in v4.3.0 (deferred to v4.4.0 or later):
+
+- Framework selector (React / Vue / Angular / vanilla). Adds
+  real per-engine rule variation. Deferred so v4.3.0 ships now.
+- Baseline promotion from history (right-click a past audit and
+  set it as the baseline). Simple, deferred.
+- Selector normalisation for stability against `:nth-child`
+  drift. Reactive, based on real crawl signal. Deferred.
+- Cross-URL diff (audit URL A vs audit URL B). Rarely useful,
+  deferred.
+- Cloud sync of history. Violates the no-backend promise.
+  Not planned.
+
+Post-approval TODO on this file: move v4.3.0 into the Published
+heading at the top with the actual Chrome Web Store publish date.
+
+## Next release: v4.4.0 - deferred v4.3.0 nice-to-haves
 
 Build on top of the existing baseline feature so a user can see what
 changed between any two audits of the same URL.

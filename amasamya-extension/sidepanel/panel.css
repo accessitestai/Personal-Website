@@ -910,3 +910,105 @@ main {
   justify-content: flex-end;
 }
 #close-confirm-dialog .dialog-actions .btn { min-width: 120px; }
+
+/* ────────────────────────────────────────────────────────────
+   v4.3.0 - Audit Diff and History.
+
+   `.diff-summary` is the one-sentence live-region line that says
+   "Compared to audit on <date>: N new, N regressed, N resolved."
+   Rendered as a card-like banner above the findings table only
+   when a diff view is active. Uses semantic colour cues (fail-
+   like for regressions, warn-like for new-highlighted, ok-like
+   for resolved) but relies on text content, not colour alone,
+   for meaning.
+
+   `.col-change` / `.change-badge` implement the Change column on
+   findings rows when a diff is active. Badges are text-first;
+   colour is a redundant channel. The four values are New,
+   Regressed, Unchanged, Resolved. Resolved rows are visually
+   de-emphasised (they were fixed; the reader's attention should
+   go to actionable rows).
+
+   `.history-section` frames the History disclosure. The details
+   summary is a native disclosure widget and needs no extra ARIA.
+──────────────────────────────────────────────────────────── */
+.diff-summary {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--ama-border, #d5dbe3);
+  border-left: 4px solid var(--ama-focus, #0057b7);
+  border-radius: 6px;
+  background: var(--ama-bg-alt, #f4f6f9);
+  color: var(--ama-text, #1a1a1a);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.diff-summary[hidden] { display: none; }
+
+.findings-table th.col-change,
+.findings-table td.col-change {
+  white-space: nowrap;
+  padding-right: 0.75rem;
+}
+.findings-table th.col-change[hidden],
+.findings-table td.col-change[hidden] {
+  display: none;
+}
+
+.change-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.change-badge--new        { background: #fff4d6; color: #6b4a00; border-color: #d4a72c; }
+.change-badge--regressed  { background: #fde2e2; color: #7a1e1e; border-color: #d9534f; }
+.change-badge--unchanged  { background: #eef1f4; color: #4a5560; border-color: #c5cbd3; }
+.change-badge--resolved   { background: #d8f0d5; color: #1a5f13; border-color: #4bab3e; }
+
+.findings-table tr.diff-resolved td { opacity: 0.75; }
+
+.history-section {
+  margin-top: 1rem;
+}
+.history-section[hidden] { display: none; }
+.history-section h2 { font-size: 1rem; }
+.history-section details > summary {
+  cursor: pointer;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--ama-border, #d5dbe3);
+  border-radius: 6px;
+  background: var(--ama-bg-alt, #f4f6f9);
+  font-weight: 600;
+}
+.history-section details > summary:hover,
+.history-section details > summary:focus-visible {
+  border-color: var(--ama-focus, #0057b7);
+  outline: 2px solid var(--ama-focus, #0057b7);
+  outline-offset: 2px;
+}
+.history-section .section-desc {
+  margin: 0.6rem 0;
+  font-size: 0.88rem;
+  color: var(--ama-text-muted, #4a5560);
+}
+.history-section .history-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+.history-row-current {
+  font-weight: 700;
+}
+.history-row-current td::before {
+  content: 'Current: ';
+  color: var(--ama-focus, #0057b7);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}

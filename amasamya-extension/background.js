@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Background Service Worker v4.2.0
+ * AMASAMYA Extension - Background Service Worker v4.3.0
  *
  * Orchestrates:
  *   A. WCAG Audit  - injects content-script.js, relays findings to side panel + platform
@@ -38,10 +38,18 @@ const SITE_CRAWL_ENABLED = true; /* v4.2.0 release - flag flipped at commit L */
    off (they just sit dormant). */
 try {
   if (typeof self.importScripts === 'function') {
-    self.importScripts('engines/site-crawler.js', 'engines/sitemap-parser.js');
+    self.importScripts(
+      'engines/site-crawler.js',
+      'engines/sitemap-parser.js',
+      /* v4.3.0: Audit history + diff. History storage runs on every
+         audit; the diff engine is called from the side panel when a
+         previous audit exists for the current URL. */
+      'engines/audit-history.js',
+      'engines/audit-diff.js'
+    );
   }
 } catch (e) {
-  console.warn('AMASAMYA: site crawl modules not loaded:', e && e.message);
+  console.warn('AMASAMYA: engine modules not loaded:', e && e.message);
 }
 
 /* ════════════════════════════════════════════════════════
@@ -74,6 +82,21 @@ function restrictedUrlReason(url) {
     return 'AMASAMYA cannot audit local file:// pages by default. Enable "Allow access to file URLs" for AMASAMYA in chrome://extensions and reload the tab.';
   }
   return null;
+}
+
+/* v4.3.0: persist a completed audit into the on-device history store
+   so subsequent audits of the same URL can be diffed. Silent on
+   failure (history is nice-to-have, not required for correctness). */
+async function persistAuditToHistory(message) {
+  if (typeof self.AMASAMYAAuditHistory === 'undefined') return;
+  const url = message.pageUrl || message.url;
+  if (!url) return;
+  const deps = self.AMASAMYAAuditHistory.makeChromeStorageDeps();
+  await self.AMASAMYAAuditHistory.saveAudit(url, message.findings || [], {
+    timestamp: message.timestamp || new Date().toISOString(),
+    pageTitle: message.pageTitle || message.title || '',
+    pageUrl:   url
+  }, deps);
 }
 
 chrome.action.onClicked.addListener(async (tab) => {
@@ -287,6 +310,40 @@ function cancelSiteCrawl() {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
+  /* v4.3.0 ── Audit History requests from the side panel ── */
+  if (message && message.type === 'history-request') {
+    (async () => {
+      if (typeof self.AMASAMYAAuditHistory === 'undefined') {
+        sendResponse({ error: 'History module not loaded' });
+        return;
+      }
+      const deps = self.AMASAMYAAuditHistory.makeChromeStorageDeps();
+      try {
+        if (message.action === 'list') {
+          const list = await self.AMASAMYAAuditHistory.getHistory(message.url, deps);
+          sendResponse({ list: list });
+        } else if (message.action === 'get') {
+          const audit = await self.AMASAMYAAuditHistory.getAudit(message.url, message.timestamp, deps);
+          sendResponse({ audit: audit });
+        } else if (message.action === 'previous') {
+          const audit = await self.AMASAMYAAuditHistory.getPreviousAudit(message.url, message.timestamp, deps);
+          sendResponse({ audit: audit });
+        } else if (message.action === 'clear-url') {
+          await self.AMASAMYAAuditHistory.clearHistory(message.url, deps);
+          sendResponse({ ok: true });
+        } else if (message.action === 'clear-all') {
+          await self.AMASAMYAAuditHistory.clearAllHistory(deps);
+          sendResponse({ ok: true });
+        } else {
+          sendResponse({ error: 'Unknown history action' });
+        }
+      } catch (err) {
+        sendResponse({ error: (err && err.message) || String(err) });
+      }
+    })();
+    return true; /* async sendResponse */
+  }
+
   /* ── Site Crawl control ── */
   if (message && message.type === 'site-crawl-start') {
     startSiteCrawl(message.input);
@@ -335,12 +392,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     /* Foreground tab; fall through to the standalone-audit branch. */
   }
 
-  /* ── WCAG audit results → side panel + platform ── */
+  /* ── WCAG audit results → side panel + platform + history ── */
   if (message.type === 'audit-results' || message.type === 'audit-error') {
     chrome.runtime.sendMessage(message).catch(() => {
       chrome.storage.session.set({ lastAudit: message }).catch(() => {});
     });
-    if (message.type === 'audit-results') sendResultsToPlatform(message);
+    if (message.type === 'audit-results') {
+      sendResultsToPlatform(message);
+      /* v4.3.0: persist to history so future audits of the same URL
+         can be diffed against this one. Fire-and-forget: history
+         failure must not block the audit results reaching the side
+         panel or the platform. */
+      persistAuditToHistory(message).catch((err) => {
+        console.warn('AMASAMYA history save failed:', err && err.message);
+      });
+    }
     return false;
   }
 

@@ -152,9 +152,14 @@ test.describe('Side panel: existing structure regression safety net', () => {
     await expect(assertive).toHaveClass(/sr-only/);
   });
 
-  test('export toolbar has the six export buttons in order', async ({ page }) => {
+  test('export toolbar leads with the six baseline export buttons in order', async ({ page }) => {
+    /* v4.3.0: the toolbar can now contain additional buttons (Diff
+       CSV) that are hidden by default until a diff view is active.
+       Assert the first six positions to keep the regression signal
+       without freezing the toolbar size. */
     const buttons = await page.locator('#export-toolbar button').allTextContents();
-    expect(buttons).toEqual(['JSON', 'HTML', 'CSV', 'Text', 'SARIF', 'Annotated screenshot']);
+    const firstSix = buttons.slice(0, 6);
+    expect(firstSix).toEqual(['JSON', 'HTML', 'CSV', 'Text', 'SARIF', 'Annotated screenshot']);
   });
 
   test('no remaining emoji or unicode glyph noise in user-visible labels', async ({ page }) => {

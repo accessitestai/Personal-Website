@@ -25,7 +25,7 @@
 <header role="banner">
   <div class="header-bar">
     <h1>AMASAMYA</h1>
-    <span class="version">v4.2</span>
+    <span class="version">v4.3</span>
     <button id="close-panel-btn" type="button" class="btn btn-small close-panel-btn"
             aria-label="Close AMASAMYA panel">Close</button>
   </div>
@@ -137,12 +137,20 @@
       <p id="filter-status" class="filter-status" aria-live="polite"></p>
     </section>
 
+    <!-- v4.3.0: When a previous audit exists for the current URL, the
+         panel renders a one-sentence summary through a polite live
+         region so JAWS/NVDA users hear the diff shape as soon as the
+         current audit finishes. Hidden by default; unhidden by
+         panel.js only when a diff has been computed. -->
+    <p id="diff-summary" class="diff-summary" aria-live="polite" hidden></p>
+
     <section id="findings-section" aria-labelledby="findings-heading">
       <h2 id="findings-heading">Findings <span id="findings-count"></span></h2>
       <div id="findings-container" role="region" aria-labelledby="findings-heading">
         <table id="findings-table" class="findings-table" aria-label="Accessibility audit findings">
           <thead>
             <tr>
+              <th scope="col" class="col-change" hidden>Change</th>
               <th scope="col">ID</th>
               <th scope="col">Engine</th>
               <th scope="col">Verdict</th>
@@ -157,6 +165,38 @@
       </div>
     </section>
 
+    <!-- v4.3.0: Audit History. Collapsed by default so users who do
+         not care about history are not visually or cognitively taxed.
+         Screen reader users get a "History" heading level for
+         predictable navigation. Loading an older audit swaps the
+         Findings table content for that audit's rows and computes the
+         diff against the current one. Storage is on-device only. -->
+    <section id="history-section" aria-labelledby="history-heading" class="history-section" hidden>
+      <h2 id="history-heading">Audit History</h2>
+      <details id="history-details">
+        <summary>Show past audits for this URL</summary>
+        <p id="history-desc" class="section-desc">
+          Older audits of the current URL are stored on your device only. Nothing is uploaded. Up to 10 audits per URL are kept; loading an older one compares it with the current one and shows what changed. When you delete history, it is gone from your device with no way to recover.
+        </p>
+        <div id="history-table-wrap" role="region" aria-labelledby="history-heading">
+          <table class="findings-table" aria-label="Past audits for this URL">
+            <thead>
+              <tr>
+                <th scope="col">When</th>
+                <th scope="col">Findings</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+        <div class="settings-actions history-actions">
+          <button id="history-clear-url-btn" type="button" class="btn btn-danger-sm">Clear history for this URL</button>
+          <button id="history-clear-all-btn" type="button" class="btn btn-danger-sm">Clear all AMASAMYA history</button>
+        </div>
+      </details>
+    </section>
+
     <section aria-labelledby="export-heading">
       <h2 id="export-heading">Export</h2>
       <div id="export-toolbar" role="toolbar" aria-label="Export formats" class="export-toolbar">
@@ -166,6 +206,10 @@
         <button id="export-text"       type="button" class="btn" disabled>Text</button>
         <button id="export-sarif"      type="button" class="btn" disabled title="SARIF 2.1.0 - for GitHub Code Scanning / CI">SARIF</button>
         <button id="export-annotated"  type="button" class="btn btn-screenshot" disabled title="Annotated PNG screenshot with numbered issue boxes">Annotated screenshot</button>
+        <!-- v4.3.0: Diff CSV. Only enabled when a diff view is active,
+             writes just the New and Regressed rows so the file is
+             directly consumable as a ticket-import CSV. -->
+        <button id="export-diff-csv"   type="button" class="btn" hidden title="CSV with only the new and regressed findings vs a prior audit">Diff CSV (new + regressed)</button>
       </div>
     </section>
 
@@ -443,7 +487,7 @@
     <section aria-labelledby="about-heading">
       <h2 id="about-heading">About</h2>
       <p class="section-desc">
-        AMASAMYA v4.2 - Built by Akhilesh Malani, Accessibility Architect &amp;
+        AMASAMYA v4.3 - Built by Akhilesh Malani, Accessibility Architect &amp;
         Digital Inclusion Strategist.<br>
         <a href="https://amasamya.akhileshmalani.com" target="_blank" rel="noopener"
            aria-label="Visit AMASAMYA.akhileshmalani.com (opens in a new tab)">
@@ -605,7 +649,7 @@
 </main>
 
 <footer role="contentinfo">
-  <p>AMASAMYA v4.2 - Private and Confidential</p>
+  <p>AMASAMYA v4.3 - Private and Confidential</p>
 </footer>
 
 <!-- v4.2.1: Close-confirmation dialog. Shown whenever the user tries

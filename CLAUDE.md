@@ -87,25 +87,38 @@ this project, ever, going forward.
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
   ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0, v4.0.1, and v4.2.0
-  are all Published. v4.2.0 "Site Crawl" went live on 2026-07-01
-  (uploaded and approved same day). It ships the crawl queue +
-  sitemap.xml parser + side-panel Site Crawl tab + platform
-  Aggregated Reports + four export shapes (HTML, two CSV flavours,
-  JSON) + crawl session metadata header + platform import of the
-  crawl JSON shape, plus the polish pass folded in pre-approval:
-  crawler correctness sweep (10 s fetch timeout, empty sitemap
-  rejection, NO_RESPONSE status, waiter race fix, findings shape
-  validation, deeper sitemap-index recursion), 3-page concurrent
-  runner (roughly 10x faster wall time), side-panel keyboard/SR
-  sweep, Site Crawl URL fields wrapped in role="application" so JAWS
-  arrow keys work inside them, focus trap and auto-focus-into on
-  panel open, and a role="dialog" close-confirmation on both header
-  Close button and Escape. Default keyboard shortcut is Alt+Shift+1
-  after Akhilesh reported JAWS table-cell command conflicts on
-  Alt+Shift+Period and Alt+Shift+Comma. Side panel queries
-  chrome.commands.getAll() at load and renders the actual bound
-  chord. Audit diff and history is v4.3.0; offline-only Vision AI is
-  v5.0. See amasamya-extension/ROADMAP.md.
+  are all Published. v4.3.0 "Audit Diff and History" was uploaded to
+  CWS on 2026-07-06 and is currently pending review. v4.3.0 adds
+  on-device history storage (10 audits per URL in
+  chrome.storage.local, 8 MB total soft cap with automatic eviction),
+  a diff engine with identity tuple {engine, criterion, selector} and
+  four verdicts (New / Regressed / Unchanged / Resolved), auto-diff
+  when 2+ audits exist for a URL, a Change column and diff summary
+  sentence in the findings table, Diff CSV export (new + regressed
+  only) as an actionable ticket-import file, a History section with
+  Load buttons per past audit and clear-URL / clear-all controls,
+  and screen-reader announcements that trail the diff summary onto
+  the audit-complete polite announcement. v4.2.0 "Site Crawl" went
+  live on 2026-07-01 (uploaded and approved same day). It shipped
+  the crawl queue + sitemap.xml parser + side-panel Site Crawl tab +
+  platform Aggregated Reports + four export shapes (HTML, two CSV
+  flavours, JSON) + crawl session metadata header + platform import
+  of the crawl JSON shape, plus a post-upload polish pass folded in
+  pre-approval: crawler correctness sweep (10 s fetch timeout, empty
+  sitemap rejection, NO_RESPONSE status, waiter race fix, findings
+  shape validation, deeper sitemap-index recursion), 3-page
+  concurrent runner (roughly 10x faster wall time), side-panel
+  keyboard/SR sweep, Site Crawl URL fields wrapped in
+  role="application" so JAWS arrow keys work inside them, focus trap
+  and auto-focus-into on panel open, and a role="dialog"
+  close-confirmation on both header Close button and Escape. Default
+  keyboard shortcut is Alt+Shift+1 after Akhilesh reported JAWS
+  table-cell command conflicts on Alt+Shift+Period and
+  Alt+Shift+Comma. Side panel queries chrome.commands.getAll() at
+  load and renders the actual bound chord. Framework selector,
+  baseline promotion from history, and selector normalisation are
+  deferred to v4.4.0; offline-only Vision AI is v5.0. See
+  amasamya-extension/ROADMAP.md.
 - **Public source** - github.com/accessitestai/AMASAMYA (mirror of the
   extension code; MIT licence). The full Personal-Website source remains
   private at github.com/accessitestai/Personal-Website.
