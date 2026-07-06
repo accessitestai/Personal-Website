@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="I audited HDFC Bank's homepage as a blind screen reader user using AMASAMYA. 13 critical WCAG 2.2 failures, including a navigation link at 1.00 to 1 contrast (essentially invisible) and unlabelled Fixed Deposit inputs. Full findings with fixes.">
+  <meta name="author" content="Akhilesh Malani">
+  <meta name="keywords" content="HDFC Bank accessibility, WCAG audit banking India, SEBI accessibility mandate, screen reader banking, AMASAMYA audit, colour contrast failure, unlabelled form field, blind user banking">
+  <link rel="canonical" href="https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="I audited HDFC Bank's homepage as a blind user. Here is what I found. | Akhilesh Malani">
+  <meta property="og:description" content="13 critical WCAG 2.2 failures on hdfcbank.com. A primary navigation link at 1.00 to 1 contrast. Unlabelled Fixed Deposit inputs. Six top-nav links at 1.76 to 1. Full findings and fixes.">
+  <meta property="og:url" content="https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html">
+
+  <title>I audited HDFC Bank's homepage as a blind user. Here is what I found. | Akhilesh Malani</title>
+  <link rel="icon" type="image/svg+xml" href="../images/logo-icon.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .blog-post { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .blog-post-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); }
+    .blog-post-header h1 { font-size: 2rem; line-height: 1.3; color: var(--color-primary-dark); margin-bottom: 0.75rem; }
+    .blog-meta { color: var(--color-text-light); font-size: 0.95rem; }
+    .blog-meta time { font-weight: 600; }
+    .blog-post-content h2 { font-size: 1.4rem; color: var(--color-primary); margin-top: 2.5rem; margin-bottom: 1rem; }
+    .blog-post-content h3 { font-size: 1.15rem; margin-top: 2rem; margin-bottom: 0.75rem; }
+    .blog-post-content p { margin-bottom: 1.25rem; line-height: 1.8; }
+    .blog-post-content ul, .blog-post-content ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+    .blog-post-content li { margin-bottom: 0.5rem; line-height: 1.7; }
+    .blog-post-content blockquote { border-left: 4px solid var(--color-primary); padding: 1rem 1.5rem; margin: 1.5rem 0; background: var(--color-bg-alt); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; }
+    .blog-post-content code { background: var(--color-bg-alt); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .blog-post-content .callout { background: #eaf2f8; border: 1px solid #aed6f1; padding: 1.25rem; border-radius: var(--radius); margin: 1.5rem 0; }
+    .blog-post-content .callout strong { color: var(--color-primary); }
+    .findings-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.92rem; }
+    .findings-table caption { text-align: left; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-text); }
+    .findings-table th, .findings-table td { padding: 0.65rem 0.75rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-border); }
+    .findings-table th { background: var(--color-bg-alt); font-weight: 700; }
+    .findings-table code { font-size: 0.85em; }
+    .findings-table .severity-critical { color: #b02020; font-weight: 700; }
+    .blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; margin-top: 2rem; border-top: 2px solid var(--color-border); }
+    .blog-nav a { color: var(--color-primary); font-weight: 600; text-decoration: none; }
+    .blog-nav a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .blog-post-header h1 { font-size: 1.5rem; }
+      .findings-table { font-size: 0.82rem; }
+      .findings-table th, .findings-table td { padding: 0.5rem 0.5rem; }
+    }
+    .share-section { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+    .share-section h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-text); }
+    .share-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease; }
+    .share-btn:hover { transform: translateY(-2px); }
+    .share-btn:focus-visible { outline: 3px solid var(--color-focus, #2471a3); outline-offset: 3px; }
+    .share-btn--linkedin { background: #004471; color: #fff; }
+    .share-btn--linkedin:hover { background: #00355a; color: #fff; }
+    .share-btn--twitter { background: #000000; color: #fff; }
+    .share-btn--twitter:hover { background: #2a2a2a; color: #fff; }
+    .share-btn--email { background: var(--color-bg-alt, #f4f6f9); color: var(--color-text, #1a1a2e); border: 1px solid var(--color-border, #d5dbe3); }
+    .share-btn--email:hover { background: var(--color-border, #d5dbe3); }
+    .share-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  </style>
+  <script>
+    (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true')})();
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <nav class="navbar" aria-label="Primary navigation">
+      <div class="nav-container">
+        <a href="../index.html" class="nav-brand"><img src="../images/logo-horizontal.svg" alt="" role="presentation" class="logo-img" width="280" height="62"><span class="sr-only">Akhilesh Malani - Accessibility Architect, Home</span></a>
+        <a href="../index.html#blog" class="btn-text">&larr; Back to Blog</a>
+        <div class="nav-actions">
+          <button class="a11y-toggle" id="a11y-toggle" aria-label="Accessibility settings" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v10"/><path d="M7 11l5-1.5 5 1.5"/><path d="M9 21l3-4 3 4"/></svg>
+          </button>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">
+            <svg id="theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Accessibility Preferences Panel -->
+  <div id="a11y-backdrop" class="a11y-backdrop"></div>
+  <div id="a11y-panel" class="a11y-panel" role="dialog" aria-labelledby="a11y-panel-title" aria-modal="true" hidden>
+    <div class="a11y-panel-header">
+      <h2 id="a11y-panel-title" tabindex="-1">Accessibility Settings</h2>
+      <button type="button" class="a11y-panel-close" id="a11y-panel-close" aria-label="Close accessibility settings">&times;</button>
+    </div>
+    <div class="a11y-panel-body">
+      <fieldset class="a11y-option">
+        <legend>Text Size</legend>
+        <div class="a11y-text-sizes" role="group" aria-label="Text size options">
+          <button type="button" class="a11y-size-btn" data-size="normal" aria-pressed="true"><span style="font-size:0.85em">A</span><span class="sr-only"> Normal</span></button>
+          <button type="button" class="a11y-size-btn" data-size="large" aria-pressed="false"><span style="font-size:1.1em">A</span><span class="sr-only"> Large</span></button>
+          <button type="button" class="a11y-size-btn" data-size="larger" aria-pressed="false"><span style="font-size:1.4em">A</span><span class="sr-only"> Larger</span></button>
+        </div>
+      </fieldset>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-contrast">High Contrast</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-contrast" id="a11y-contrast" class="a11y-switch"></button>
+        </div>
+      </div>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-dyslexia">Dyslexia-Friendly Font</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-dyslexia" id="a11y-dyslexia" class="a11y-switch"></button>
+        </div>
+      </div>
+      <div class="a11y-option">
+        <div class="a11y-switch-row">
+          <span class="a11y-switch-label" id="label-motion">Reduce Motion</span>
+          <button type="button" role="switch" aria-checked="false" aria-labelledby="label-motion" id="a11y-motion" class="a11y-switch"></button>
+        </div>
+      </div>
+      <button type="button" class="a11y-reset" id="a11y-reset">Reset All Preferences</button>
+    </div>
+  </div>
+
+  <main id="main-content">
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ol>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#blog">Blog</a></li>
+        <li><span aria-current="page">HDFC Bank homepage audit, 6 July 2026</span></li>
+      </ol>
+    </nav>
+    <article class="blog-post" aria-label="Blog post">
+      <header class="blog-post-header">
+        <h1>I audited HDFC Bank's homepage as a blind user. Here is what I found.</h1>
+        <p class="blog-meta">
+          By <strong>Akhilesh Malani</strong> &middot; <time datetime="2026-07-06">6 July 2026</time> &middot; 6 min read
+        </p>
+      </header>
+
+      <div class="blog-post-content">
+
+        <p>Before you read anything else on this page: I emailed HDFC Bank's grievance and accessibility teams with the complete findings and a copy of the AMASAMYA CSV export at the same time as I published this post. This is responsible disclosure, not a shame post. My intent is that these get fixed. If you are on the HDFC Bank web team and want a private walkthrough with a fix pathway for each item, my email is at the bottom of this article.</p>
+
+        <div class="callout">
+          <strong>Summary.</strong> I audited hdfcbank.com on the morning of 6 July 2026 using AMASAMYA, the open-source WCAG 2.2 audit toolkit I built. The homepage returned 13 Critical-severity Fails. Three of them make core banking tasks unusable for a screen reader user. All 13 are violations of the WCAG 2.1 Level AA commitment HDFC Bank publishes on its own accessibility statement. All 13 are also within scope of the SEBI accessibility mandate for listed financial entities.
+        </div>
+
+        <h2>Why HDFC Bank, and why now</h2>
+
+        <p>I picked HDFC Bank for the first entry in this weekly public-audit series for four specific reasons. First, HDFC Bank publishes an Accessibility Statement on their own website committing to WCAG 2.1 Level AA. Every finding on this page is therefore a violation of their own stated policy, not just of an external standard. Second, HDFC is a listed entity under the SEBI accessibility mandate, so accessibility is a regulatory requirement on top of a moral one. Third, HDFC is a large private brand with an active reputation management team, so this audit has a realistic chance of reaching someone who can act on it. Fourth, HDFC is not politically loaded the way a government service would be, which means we can talk about the findings on their technical merit without the discussion getting derailed.</p>
+
+        <h2>The tool</h2>
+
+        <p>The audit was run using <a href="../amasamya.html">AMASAMYA</a>, the Chrome extension I built and published on the Chrome Web Store. Anyone can install it for free and run the same audit on any website. It runs 24 WCAG 2.2 engines against the active page in about five seconds. I did not manually cherry-pick findings for this post. The findings below are the complete Critical-severity Fail set from the automatic export, in the order the tool produced them.</p>
+
+        <h2>The three worst findings</h2>
+
+        <h3>1. The "Personal" primary navigation link is essentially invisible</h3>
+
+        <p>The "Personal" link in the top-level navigation has a colour contrast ratio of <strong>1.00 to 1</strong> against its background. That is not a typo. WCAG 2.2 SC 1.4.3 Contrast (Minimum) requires 4.5 to 1 for normal text at Level AA. A 1.00 to 1 ratio means the link text has effectively the same colour as its background. A sighted user with normal vision cannot see it unless they hover over it. A sighted user with low vision cannot see it under any circumstance. A blind user does not see it either way, but that is not the point. The point is that this is the primary navigation entry for personal-banking customers on a bank's homepage.</p>
+
+        <h3>2. The Fixed Deposit calculator has two unlabelled number inputs</h3>
+
+        <p>The Fixed Deposit calculator on the homepage has two inputs, <code>fdTermMonths-Amt</code> and <code>fdTermDays-Amt</code>. Neither has an accessible name. There is no <code>&lt;label for=""&gt;</code> association, no <code>aria-label</code>, no <code>aria-labelledby</code>. When my screen reader lands on either field, it announces just "edit". No context. No indication of whether I should type months, days, an amount, or something else.</p>
+
+        <p>The consequence is not academic. A blind customer trying to plan a Fixed Deposit on hdfcbank.com cannot use this calculator. Fixed Deposits are one of the most common Indian banking products. Blocking that transaction is a WCAG 2.2 SC 1.3.1 Info and Relationships failure and a WCAG 2.2 SC 3.3.2 Labels or Instructions failure, both at Level A. Level A means these are the minimum required for any conformance claim at all. Missing Level A is not a "we did not have time" situation; it is a broken product.</p>
+
+        <h3>3. Six top-level navigation links sit at 1.76 to 1 contrast</h3>
+
+        <p>The primary navigation links for NRI, HNI, Wholesale, Agri, MSME, and Government Schemes all have a contrast ratio of <strong>1.76 to 1</strong> against their background. Same WCAG 2.2 SC 1.4.3 criterion as finding 1. All six fail. These are not obscure pages tucked in the footer. These are the top-level customer segments of an entire bank. If you are an NRI customer trying to find NRI banking on the homepage, and you have any form of low vision, you cannot see the link that would take you there.</p>
+
+        <h2>The full findings table</h2>
+
+        <p>Below is the complete Critical-severity Fail set for hdfcbank.com's homepage, as of the audit run at approximately 9:30 IST on 6 July 2026. Verdict and Severity are omitted from the table because every row is Critical Fail.</p>
+
+        <table class="findings-table">
+          <caption>HDFC Bank homepage: 13 Critical WCAG 2.2 failures found by AMASAMYA on 6 July 2026</caption>
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Engine</th>
+              <th scope="col">Element</th>
+              <th scope="col">Criterion</th>
+              <th scope="col">Issue</th>
+              <th scope="col">How to fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0102</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor active"&gt; "Personal"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.00 to 1 (foreground rgb 255, 255, 255) against a near-white background. Effectively invisible.</td>
+              <td>Adjust the active-state foreground or background so the ratio is 4.5 to 1 or higher for normal text.</td>
+            </tr>
+            <tr>
+              <td>0103</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor"&gt; "NRI"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.76 to 1 (foreground rgb 161, 199, 240).</td>
+              <td>Use a darker foreground or lighter background to reach 4.5 to 1 or higher.</td>
+            </tr>
+            <tr>
+              <td>0104</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor"&gt; "HNI"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.76 to 1.</td>
+              <td>Same fix as 0103.</td>
+            </tr>
+            <tr>
+              <td>0105</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor"&gt; "Wholesale"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.76 to 1.</td>
+              <td>Same fix as 0103.</td>
+            </tr>
+            <tr>
+              <td>0106</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor"&gt; "Agri"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.76 to 1.</td>
+              <td>Same fix as 0103.</td>
+            </tr>
+            <tr>
+              <td>0107</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor"&gt; "MSME"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.76 to 1.</td>
+              <td>Same fix as 0103.</td>
+            </tr>
+            <tr>
+              <td>0108</td>
+              <td>Colour Contrast</td>
+              <td><code>&lt;a class="nav_inner_anchor"&gt; "Government Schemes"</code></td>
+              <td>WCAG 2.2 SC 1.4.3 (AA)</td>
+              <td>Contrast 1.76 to 1.</td>
+              <td>Same fix as 0103. This fix cascades: findings 0103 through 0108 likely share a single CSS rule for <code>.nav_inner_anchor</code>. One correction covers six failures.</td>
+            </tr>
+            <tr>
+              <td>0159</td>
+              <td>Forms</td>
+              <td><code>&lt;input id="fdTermMonths-Amt"&gt;</code></td>
+              <td>WCAG 2.2 SC 1.3.1 and 3.3.2 (A)</td>
+              <td>Number input has no programmatically associated label. Screen reader announces "edit" with no context.</td>
+              <td>Add a <code>&lt;label for="fdTermMonths-Amt"&gt;Months&lt;/label&gt;</code>, or <code>aria-label="Months"</code>, or <code>aria-labelledby</code> pointing to a visible heading.</td>
+            </tr>
+            <tr>
+              <td>0160</td>
+              <td>Forms</td>
+              <td><code>&lt;input id="fdTermDays-Amt"&gt;</code></td>
+              <td>WCAG 2.2 SC 1.3.1 and 3.3.2 (A)</td>
+              <td>Number input has no programmatically associated label.</td>
+              <td>Add a <code>&lt;label for="fdTermDays-Amt"&gt;Days&lt;/label&gt;</code> or equivalent.</td>
+            </tr>
+            <tr>
+              <td>0165</td>
+              <td>Links and Buttons</td>
+              <td><code>&lt;a class="app-wrap"&gt;</code></td>
+              <td>WCAG 2.2 SC 2.4.4 and 4.1.2 (A)</td>
+              <td>Link has no accessible name. Announced as "link" with no destination context.</td>
+              <td>Add visible link text, or if the link wraps an icon only, add <code>aria-label</code> describing where the link goes.</td>
+            </tr>
+            <tr>
+              <td>0166</td>
+              <td>Links and Buttons</td>
+              <td><code>&lt;a class="app-wrap"&gt;</code></td>
+              <td>WCAG 2.2 SC 2.4.4 and 4.1.2 (A)</td>
+              <td>Link has no accessible name.</td>
+              <td>Same fix as 0165. Both instances likely share the same component; fix the component once.</td>
+            </tr>
+            <tr>
+              <td>0167</td>
+              <td>Links and Buttons</td>
+              <td><code>&lt;div role="button" class="select-btn"&gt;</code></td>
+              <td>WCAG 2.2 SC 4.1.2 (A)</td>
+              <td>Custom button (div with role button) has no accessible name.</td>
+              <td>Add visible text inside the div, or <code>aria-label</code>. Consider replacing the <code>&lt;div role="button"&gt;</code> with a real <code>&lt;button&gt;</code> element while you are there; native buttons get keyboard interaction, focus, and role for free.</td>
+            </tr>
+            <tr>
+              <td>0168</td>
+              <td>Links and Buttons</td>
+              <td><code>&lt;button id="sf-sersend"&gt;</code></td>
+              <td>WCAG 2.2 SC 4.1.2 (A)</td>
+              <td>Button has no accessible name. Announced as "button" with no purpose.</td>
+              <td>Add visible button text ("Send", "Submit query", etc.) or <code>aria-label</code>. Given the ID contains "sersend", this is likely a service-send button in a contact form; a screen reader user cannot submit that form.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Why this matters, in concrete terms</h2>
+
+        <p>Every finding on this page corresponds to something a real customer of HDFC Bank cannot do today. If you have low vision, you cannot see six of the seven top-level navigation categories. If you are a blind screen reader user and you want to open a Fixed Deposit, you cannot use the FD calculator on the homepage to work out your terms. If you use a screen reader and want to submit a service query, the send button announces as "button" and you have no way to know what it does. These are not theoretical failures. Every one of them has a customer on the other side of it.</p>
+
+        <p>HDFC Bank is India's largest private-sector bank by market capitalisation. It has a formal Accessibility Statement committing to WCAG 2.1 AA. It is a listed entity under the SEBI accessibility mandate. It is not a startup that has not gotten around to accessibility yet. It has the resources and the regulatory obligation to fix all 13 of these findings within a fortnight if it chooses to.</p>
+
+        <h2>What HDFC Bank should do next</h2>
+
+        <ol>
+          <li>Fix the <code>.nav_inner_anchor</code> stylesheet rule. That single CSS change closes findings 0103 through 0108 in one pass.</li>
+          <li>Fix the active-state colour on the "Personal" nav link (finding 0102). This is a separate rule; treat it separately.</li>
+          <li>Add <code>&lt;label&gt;</code> elements to the two Fixed Deposit inputs. Two lines of HTML. Findings 0159 and 0160 closed.</li>
+          <li>Add <code>aria-label</code> or visible text to the four anonymous links and buttons (0165, 0166, 0167, 0168). If <code>a.app-wrap</code> and <code>div.select-btn</code> are shared components, the fix compounds across every page they appear on, not just the homepage.</li>
+          <li>Run a follow-up audit with AMASAMYA or any WCAG 2.2 tool and confirm the failures are closed before you write back to the accessibility community.</li>
+        </ol>
+
+        <p>Estimated engineering effort for a competent front-end team: half a working day. Estimated review time from a QA team with a screen reader user in the room: another half a day. The gap between "we care about accessibility" and "we shipped the fix" here is one working day.</p>
+
+        <h2>What you can do next</h2>
+
+        <p>If you work at an Indian bank, insurance company, mutual fund house, or any other SEBI-listed financial entity, run AMASAMYA on your own homepage before someone else does. It is free. It takes five seconds. The link is below.</p>
+
+        <p>If you work at HDFC Bank and you want to talk about the findings privately before your team acts on them, my email is <a href="mailto:akhilesh.malani@gmail.com">akhilesh.malani@gmail.com</a>. I offered your grievance team the same call in this morning's email. The offer stands.</p>
+
+        <p>If you are a customer of HDFC Bank who has struggled with the site and this audit describes what you experience: your experience is real, it is not your fault, and you have a right to a working banking service. If you want to raise it formally, HDFC Bank's grievance email is grievance.redressal@hdfcbank.com. Referencing this audit and the specific WCAG success criteria above will make the complaint harder to dismiss.</p>
+
+        <h2>Responsible disclosure and integrity notes</h2>
+
+        <ul>
+          <li>Every finding on this page was produced by an automatic export from AMASAMYA. I did not cherry-pick, edit, or reword the technical detail. The CSV file itself is available on request.</li>
+          <li>I emailed HDFC Bank's grievance team and customer care lead at the same time as I published this post, with the complete findings CSV attached and an offer of a private walkthrough. The email is timestamped and I have kept a copy.</li>
+          <li>The audit is a snapshot of the homepage at approximately 9:30 IST on 6 July 2026. If HDFC Bank ships fixes and one or more findings are closed by the time you read this, that is a good outcome. I will update this post with a "resolved" note against each closed finding as I re-audit.</li>
+          <li>I hold no adversarial position toward HDFC Bank. I am a professional accessibility architect and a screen-reader user. My work is to name the gaps and, where possible, help close them.</li>
+          <li>The tool I used is open source. Anyone can rerun this audit. Anyone can verify the findings.</li>
+        </ul>
+
+        <div class="callout">
+          <strong>Try it yourself.</strong> AMASAMYA is free on the Chrome Web Store at <a href="https://chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif" target="_blank" rel="noopener noreferrer">chromewebstore.google.com/detail/blnfmiipkccpggpinjofhhglfcgglbif</a>. Install it, open any page, press Alt+Shift+1, and the audit runs in five seconds. Findings are announced through a polite screen reader live region so a blind auditor can work independently. Full information on <a href="../amasamya.html">akhileshmalani.com/amasamya</a>.
+        </div>
+
+        <p>Next Monday's audit will name a different Indian brand. If you want to nominate one, my email is above.</p>
+
+      </div>
+
+      <div class="share-section">
+        <h2>Share this article</h2>
+        <div class="share-buttons">
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html" target="_blank" rel="noopener noreferrer" class="share-btn share-btn--linkedin" aria-label="Share on LinkedIn (opens in new tab)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://twitter.com/intent/tweet?text=I%20audited%20HDFC%20Bank%20as%20a%20blind%20user.%2013%20critical%20WCAG%20failures.&url=https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html" target="_blank" rel="noopener noreferrer" class="share-btn share-btn--twitter" aria-label="Share on X/Twitter (opens in new tab)">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X / Twitter
+          </a>
+          <a href="mailto:?subject=HDFC%20Bank%20accessibility%20audit%20-%2013%20critical%20failures&body=I%20thought%20you%20should%20see%20this%20audit%20of%20HDFC%20Bank%27s%20homepage%3A%20https%3A//akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html" class="share-btn share-btn--email" aria-label="Share via email">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email
+          </a>
+        </div>
+      </div>
+
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../index.html#blog">&larr; All Posts</a>
+        <a href="gaad-2026-launching-amasamya.html">Next: Launching AMASAMYA on GAAD 2026 &rarr;</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>&copy; 2026 Akhilesh Malani. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "I audited HDFC Bank's homepage as a blind user. Here is what I found.",
+    "description": "13 critical WCAG 2.2 failures on hdfcbank.com. A primary navigation link at 1.00 to 1 contrast. Unlabelled Fixed Deposit inputs. Six top-nav links at 1.76 to 1. Full findings and fixes.",
+    "datePublished": "2026-07-06",
+    "dateModified": "2026-07-06",
+    "author": {
+      "@type": "Person",
+      "name": "Akhilesh Malani",
+      "url": "https://akhileshmalani.com",
+      "jobTitle": "Senior Accessibility Architect"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Akhilesh Malani",
+      "url": "https://akhileshmalani.com"
+    },
+    "mainEntityOfPage": "https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html",
+    "articleSection": "Accessibility Audit",
+    "keywords": ["HDFC Bank accessibility", "WCAG audit banking India", "SEBI accessibility mandate", "screen reader banking", "AMASAMYA audit"],
+    "wordCount": 1900,
+    "timeRequired": "PT6M"
+  }
+  </script>
+  <script src="../script.js"></script>
+</body>
+</html>
