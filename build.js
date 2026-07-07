@@ -369,23 +369,124 @@ function generateRssFeed(posts) {
 // ============================================================
 // Generate sitemap
 // ============================================================
+//
+// 2026-07-08: replaced the hardcoded `staticPages` array with a
+// filesystem scan of the repo root and blog/ directory. The previous
+// implementation only listed four pages and dropped every blog post
+// and every new tool page from the production sitemap on every
+// Netlify deploy, because Netlify runs `node build.js` and this
+// script overwrites the committed sitemap.xml. That silently deleted
+// every URL Google needed to crawl.
+//
+// The scan skips node_modules, hidden dot-directories, and explicit
+// admin/utility files that should NOT be in the sitemap. The
+// AMASAMYA subdomain files under amasamya/ and the extension source
+// under amasamya-extension/ are also excluded here; the subdomain
+// has its own sitemap and the extension source is not user-facing.
+//
+// Priority assignment is a simple lookup with a sensible default so
+// adding a new file just works without touching this function.
+
+var SITEMAP_BASE = 'https://akhileshmalani.com';
+
+/* Files that must never appear in the sitemap even if they exist in
+   scanned directories. Add here rather than complicating the walker. */
+var SITEMAP_EXCLUDES = new Set([
+  '404.html',                  /* Netlify error page, not a real URL */
+  'library-admin.html',        /* admin, redirected from /admin.html */
+  'admin.html',                /* legacy alias */
+  'jaws-test-script.html'      /* internal test scaffold, not user-facing */
+]);
+
+/* Directories to skip entirely during the scan. */
+var SITEMAP_SKIP_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.claude',
+  '.netlify',
+  'dist',
+  'admin',                     /* /admin/index.html is not public */
+  'amasamya',                  /* subdomain, has its own sitemap */
+  'amasamya-extension',        /* extension source, not user-facing */
+  'amasamya-public-repo',      /* mirror scratch, not user-facing */
+  'ama11y-extension-firefox',  /* experimental, not deployed */
+  'store-assets',              /* CWS/Play store templates */
+  'voiceover_audio_guide',     /* internal reference */
+  'test-fixtures',             /* extension test fixtures */
+  'tests',                     /* Playwright specs */
+  'content',                   /* markdown sources; HTML output lives in blog/ */
+  'netlify'                    /* function sources */
+]);
+
+/* Priority table. Any file not matched here gets DEFAULT_PRIORITY. */
+var SITEMAP_PRIORITIES = {
+  '':                       { priority: '1.0',  freq: 'weekly'  }, /* root index.html -> "/" */
+  'amasamya.html':          { priority: '0.95', freq: 'monthly' },
+  'checker.html':           { priority: '0.9',  freq: 'monthly' },
+  'doc-checker.html':       { priority: '0.9',  freq: 'monthly' },
+  'accessibility.html':     { priority: '0.6',  freq: 'monthly' },
+  '__blog_default__':       { priority: '0.8',  freq: 'monthly' } /* used for blog/*.html */
+};
+var DEFAULT_PRIORITY = { priority: '0.7',  freq: 'monthly' };
+
+function scanHtmlFiles(rootAbs) {
+  /* Returns an array of paths relative to rootAbs, forward-slashed,
+     with node_modules and other excluded dirs pruned. */
+  var results = [];
+  function walk(absDir, relDir) {
+    var entries;
+    try { entries = fs.readdirSync(absDir, { withFileTypes: true }); }
+    catch (_) { return; }
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (e.name.startsWith('.')) continue;
+      if (e.isDirectory()) {
+        if (SITEMAP_SKIP_DIRS.has(e.name)) continue;
+        walk(path.join(absDir, e.name), relDir ? relDir + '/' + e.name : e.name);
+      } else if (e.isFile() && e.name.toLowerCase().endsWith('.html')) {
+        if (SITEMAP_EXCLUDES.has(e.name)) continue;
+        results.push(relDir ? relDir + '/' + e.name : e.name);
+      }
+    }
+  }
+  walk(rootAbs, '');
+  return results;
+}
+
 function generateSitemap(posts) {
   var today = new Date().toISOString().split('T')[0];
+  var repoRoot = __dirname;
+  var scanned = scanHtmlFiles(repoRoot);
 
-  var staticPages = [
-    { url: 'https://akhileshmalani.com/', priority: '1.0', freq: 'weekly' },
-    { url: 'https://akhileshmalani.com/checker.html', priority: '0.9', freq: 'monthly' },
-    { url: 'https://akhileshmalani.com/doc-checker.html', priority: '0.9', freq: 'monthly' },
-    { url: 'https://akhileshmalani.com/accessibility.html', priority: '0.6', freq: 'monthly' }
-  ];
+  /* Deduplicate against markdown-derived posts (which are also on disk
+     as HTML after build). Uses a Set of relative paths. */
+  var seen = new Set(scanned);
+  posts.forEach(function (p) { seen.add('blog/' + p.slug + '.html'); });
 
-  var urls = staticPages.map(function (p) {
-    return '  <url>\n    <loc>' + p.url + '</loc>\n    <lastmod>' + today + '</lastmod>\n    <changefreq>' + p.freq + '</changefreq>\n    <priority>' + p.priority + '</priority>\n  </url>';
+  /* Build URL records with priorities and freq. */
+  var urls = [];
+  Array.from(seen).sort().forEach(function (rel) {
+    var url;
+    var entry;
+    if (rel === 'index.html') {
+      url = SITEMAP_BASE + '/';
+      entry = SITEMAP_PRIORITIES[''];
+    } else {
+      url = SITEMAP_BASE + '/' + rel;
+      if (rel.indexOf('blog/') === 0) {
+        entry = SITEMAP_PRIORITIES['__blog_default__'];
+      } else {
+        entry = SITEMAP_PRIORITIES[rel] || DEFAULT_PRIORITY;
+      }
+    }
+    urls.push('  <url>\n    <loc>' + url + '</loc>\n    <lastmod>' + today + '</lastmod>\n    <changefreq>' + entry.freq + '</changefreq>\n    <priority>' + entry.priority + '</priority>\n  </url>');
   });
 
-  posts.forEach(function (post) {
-    urls.push('  <url>\n    <loc>https://akhileshmalani.com/blog/' + post.slug + '.html</loc>\n    <lastmod>' + today + '</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>');
-  });
+  /* Cross-host reference into the AMASAMYA subdomain. Google treats
+     subdomains as separate properties, so this is not a substitute
+     for submitting the subdomain sitemap in Search Console, but it
+     helps discovery from the apex domain's crawl budget. */
+  urls.push('  <url>\n    <loc>https://amasamya.akhileshmalani.com/</loc>\n    <lastmod>' + today + '</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.9</priority>\n  </url>');
 
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.join('\n') + '\n</urlset>\n';
 }

@@ -637,6 +637,31 @@
       return map[type] || 'textbox';
     },
 
+    /* 2026-07-08 fix (double-read): return the container's own text
+       with interactive descendants excluded. Clones the element,
+       removes descendants that will be yielded as separate reading
+       nodes, then returns the resulting textContent. */
+    _containerText: function (el) {
+      if (!el || !el.cloneNode) return '';
+      var clone = el.cloneNode(true);
+      /* Elements that the walker will surface separately. Their text
+         must not also appear inside the container's name. */
+      var interactives = clone.querySelectorAll(
+        'a[href], button, input, select, textarea, ' +
+        '[role="link"], [role="button"], [role="checkbox"], ' +
+        '[role="radio"], [role="switch"], [role="tab"], ' +
+        '[role="menuitem"], [role="menuitemcheckbox"], ' +
+        '[role="menuitemradio"], [role="option"]'
+      );
+      for (var q = 0; q < interactives.length; q++) {
+        var node = interactives[q];
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }
+      /* Collapse whitespace so removing an inline element does not
+         leave "Read the  for details" with an awkward double space. */
+      return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    },
+
     _getName: function (el, tag, role) {
       // aria-labelledby
       var labelledBy = el.getAttribute('aria-labelledby');
@@ -675,13 +700,36 @@
       // title attribute
       if (el.getAttribute('title')) return el.getAttribute('title');
 
-      // Text content for interactive/heading elements
-      if (role === 'heading' || role === 'link' || role === 'button' || role === 'listitem' ||
-          role === 'paragraph' || role === 'blockquote' || role === 'term' || role === 'definition' ||
-          role === 'caption' || role === 'legend' || role === 'switch' ||
-          role === 'cell' || role === 'columnheader') {
-        var tc = (el.textContent || '').trim();
+      // Text content for interactive/heading elements.
+      //
+      // 2026-07-08 fix: container-type roles must NOT include the text
+      // of interactive descendants (links, buttons, form controls) in
+      // their own accessible name. The TreeWalker in _walkDOM yields
+      // both the container (e.g. a paragraph) and each interactive
+      // descendant (e.g. a link inside that paragraph) as separate
+      // reading nodes. If the container's name includes the child's
+      // text and the child's node also fires on the linear read, the
+      // user hears the child text twice. Real NVDA and JAWS handle
+      // this by folding link announcements into the paragraph read
+      // once; our closest equivalent is to strip interactive text
+      // from container names so the child's own node is the sole
+      // announcement of that text.
+      //
+      // Pure interactives (link, button, switch) still take their own
+      // textContent because they are leaves, not containers.
+      var CONTAINER_ROLES = {
+        heading: 1, listitem: 1, paragraph: 1, blockquote: 1,
+        term: 1, definition: 1, caption: 1, legend: 1,
+        cell: 1, columnheader: 1
+      };
+      var LEAF_INTERACTIVE_ROLES = { link: 1, button: 1, switch: 1 };
+      if (CONTAINER_ROLES[role]) {
+        var tc = this._containerText(el);
         return tc.length > 200 ? tc.substring(0, 200) + '...' : tc;
+      }
+      if (LEAF_INTERACTIVE_ROLES[role]) {
+        var tcLeaf = (el.textContent || '').trim();
+        return tcLeaf.length > 200 ? tcLeaf.substring(0, 200) + '...' : tcLeaf;
       }
 
       // placeholder for inputs

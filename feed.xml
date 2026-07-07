@@ -6,24 +6,24 @@
     <description>Insights on digital accessibility from Akhilesh Malani - a blind accessibility architect with 16+ years of experience helping organisations build inclusive digital products.</description>
     <language>en</language>
     <managingEditor>akhilesh.malani@gmail.com (Akhilesh Malani)</managingEditor>
-    <lastBuildDate>Mon, 06 Jul 2026 04:30:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 07 Jul 2026 06:02:14 GMT</lastBuildDate>
     <atom:link href="https://akhileshmalani.com/feed.xml" rel="self" type="application/rss+xml"/>
 
     <item>
       <title>I audited HDFC Bank's homepage as a blind user. Here is what I found.</title>
       <link>https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/audit-hdfc-bank-2026-07-06.html</guid>
-      <pubDate>Mon, 06 Jul 2026 10:00:00 +0530</pubDate>
-      <description>13 critical WCAG 2.2 failures on hdfcbank.com. A primary navigation link at 1.00 to 1 contrast. Unlabelled Fixed Deposit inputs. Six top-nav links at 1.76 to 1. Full findings and fixes.</description>
+      <pubDate>Sun, 05 Jul 2026 18:30:00 +0530</pubDate>
+      <description>I audited HDFC Bank's homepage as a blind screen reader user using AMASAMYA. 13 critical WCAG 2.2 failures, including a navigation link at 1.00 to 1 contrast (essentially invisible) and unlabelled Fixed Deposit inputs. Full findings with fixes.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 
     <item>
-      <title>Launching AMASAMYA on GAAD 2026</title>
+      <title>AMASAMYA at GAAD 2026: A Blind-First Audit Tool, Now Open-Source</title>
       <link>https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html</link>
       <guid isPermaLink="true">https://akhileshmalani.com/blog/gaad-2026-launching-amasamya.html</guid>
-      <pubDate>Thu, 21 May 2026 09:00:00 +0530</pubDate>
-      <description>Why I built AMASAMYA, what it does that other automated accessibility tools do not, and what shipped in the v4.2.0 Site Crawl release now live on the Chrome Web Store.</description>
+      <pubDate>Wed, 20 May 2026 18:30:00 +0530</pubDate>
+      <description>On Global Accessibility Awareness Day 2026, I'm releasing AMASAMYA - the blind-first WCAG 2.2 audit tool I built for myself, now open-source and free. Here is what it is, why I built it, and how it differs from what already exists.</description>
       <author>akhilesh.malani@gmail.com (Akhilesh Malani)</author>
     </item>
 

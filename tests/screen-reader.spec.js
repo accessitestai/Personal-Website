@@ -80,6 +80,46 @@ test.describe('Web Screen Reader', () => {
     expect(active).toBe(false);
   });
 
+  test('paragraph containing a link does not include the link text in its own name (no double-read)', async ({ page }) => {
+    /* 2026-07-08 regression guard for the container double-read fix.
+       Inject a fresh paragraph with a nested link into the DOM,
+       rebuild the reading tree, and assert:
+       1. Both nodes exist (the walker still surfaces the link so
+          quick-nav with K continues to find it).
+       2. The paragraph's accessible name does NOT contain the link
+          text word-for-word (previously it included the link text,
+          causing a double-read when Down arrow moved from paragraph
+          to link).
+       3. The link node's accessible name is the link text on its
+          own.
+    */
+    const result = await page.evaluate(() => {
+      const p = document.createElement('p');
+      p.id = 'wsr-double-read-fixture';
+      p.innerHTML = 'Read the <a href="#doc-target">documentation</a> for details.';
+      const main = document.querySelector('main') || document.body;
+      main.appendChild(p);
+      window._wsrScreenReader.rebuildTree();
+      const nodes = window._wsrScreenReader.nodes;
+      const paraNode = nodes.find(n => n.element === p);
+      const linkNode = nodes.find(n => n.element && n.element.tagName === 'A' && n.element.getAttribute('href') === '#doc-target');
+      return {
+        paraName:  paraNode ? paraNode.name : null,
+        paraRole:  paraNode ? paraNode.role : null,
+        linkName:  linkNode ? linkNode.name : null,
+        linkRole:  linkNode ? linkNode.role : null
+      };
+    });
+    expect(result.paraRole).toBe('paragraph');
+    expect(result.linkRole).toBe('link');
+    /* Paragraph text must contain its own words but NOT the link text. */
+    expect(result.paraName).toContain('Read the');
+    expect(result.paraName).toContain('for details');
+    expect(result.paraName.toLowerCase()).not.toContain('documentation');
+    /* Link's own name is the link text, unaffected by the fix. */
+    expect(result.linkName).toBe('documentation');
+  });
+
   test('tree rebuilds after language change', async ({ page }) => {
     const beforeCount = await page.evaluate(() => window._wsrScreenReader.nodes.length);
     await page.evaluate(() => localStorage.setItem('translateLang', 'hi'));
