@@ -23,6 +23,29 @@
   <!-- Preconnect for Firebase auto-redirect (signed-in users land in the app) -->
   <link rel="preconnect" href="https://www.gstatic.com">
 
+  <!--
+    v4.3.1 (2026-07-08): shared accessibility preferences panel. Same
+    surface as the portfolio's a11y widget so a user switching between
+    akhileshmalani.com and amasamya.akhileshmalani.com does not lose
+    the "text size / high contrast / dyslexia font / reduce motion"
+    controls. Inline snippet applies stored prefs before first paint
+    so a saved larger-text or high-contrast preference does not flash
+    the default styles then jump.
+  -->
+  <link rel="stylesheet" href="a11y.css">
+  <script>
+    (function () {
+      var h = document.documentElement;
+      try {
+        var s = localStorage.getItem('a11y-text-size');
+        if (s && s !== 'normal') h.setAttribute('data-text-size', s);
+        if (localStorage.getItem('a11y-high-contrast') === 'true') h.setAttribute('data-high-contrast', 'true');
+        if (localStorage.getItem('a11y-dyslexia-font') === 'true') h.setAttribute('data-dyslexia-font', 'true');
+        if (localStorage.getItem('a11y-reduce-motion') === 'true') h.setAttribute('data-reduce-motion', 'true');
+      } catch (e) { /* localStorage blocked */ }
+    })();
+  </script>
+
   <style>
     :root {
       --primary:    #003366;
@@ -193,7 +216,7 @@
 -->
 <nav class="platform-nav" aria-label="Platform"
      style="background:#fff;border-bottom:1px solid #e2eaf4;">
-  <div class="container" style="padding:14px 20px;display:flex;flex-wrap:wrap;gap:14px;">
+  <div class="container" style="padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;">
     <a href="/landing.html" style="font-size:0.92rem;font-weight:600;text-decoration:none;" aria-current="page">Home</a>
     <a href="/faq.html" style="font-size:0.92rem;font-weight:600;text-decoration:none;">FAQ</a>
     <a href="/limitations.html" style="font-size:0.92rem;font-weight:600;text-decoration:none;">Known limitations</a>
@@ -201,8 +224,92 @@
     <a href="/feedback.html" style="font-size:0.92rem;font-weight:600;text-decoration:none;">Send feedback</a>
     <a href="/privacy.html" style="font-size:0.92rem;font-weight:600;text-decoration:none;">Privacy</a>
     <a href="https://akhileshmalani.com/" rel="noopener" style="font-size:0.92rem;font-weight:600;text-decoration:none;">akhileshmalani.com</a>
+    <!--
+      v4.3.1: shared accessibility settings toggle. Placed as the last
+      item in the platform nav so it lands after every navigation link
+      in Tab order; keyboard users reach it right before they enter
+      the main content, which is the same slot the portfolio uses.
+    -->
+    <button type="button" id="a11y-toggle" class="a11y-toggle"
+            aria-label="Open accessibility settings"
+            aria-haspopup="dialog" aria-controls="a11y-panel"
+            aria-expanded="false"
+            style="margin-left:auto;">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="4.5" r="2"/>
+        <path d="M12 7v10"/>
+        <path d="M7 11l5-1.5 5 1.5"/>
+        <path d="M9 21l3-4 3 4"/>
+      </svg>
+    </button>
   </div>
 </nav>
+
+<!--
+  v4.3.1: Accessibility preferences panel.
+  Dialog with backdrop, slide-in from right. Same structure as the
+  portfolio widget so users see the same option set: text size (three
+  presets), high contrast, dyslexia font, reduce motion. Read-Aloud
+  and Screen-Reader-Mode from the portfolio are deliberately not
+  ported here; they require ~1600 lines of extra JS and platform
+  users overwhelmingly already run their own AT.
+-->
+<div id="a11y-backdrop" class="a11y-backdrop" aria-hidden="true"></div>
+<div id="a11y-panel"
+     class="a11y-panel"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="a11y-panel-title"
+     hidden>
+  <div class="a11y-panel-header">
+    <h2 id="a11y-panel-title" tabindex="-1">Accessibility Settings</h2>
+    <button type="button" class="a11y-panel-close" id="a11y-panel-close"
+            aria-label="Close accessibility settings">&times;</button>
+  </div>
+  <div class="a11y-panel-body">
+    <fieldset class="a11y-option">
+      <legend>Text Size</legend>
+      <div class="a11y-text-sizes" role="group" aria-label="Text size options">
+        <button type="button" class="a11y-size-btn" data-size="normal" aria-pressed="true">
+          <span style="font-size:0.85em">A</span><span class="sr-only"> Normal</span>
+        </button>
+        <button type="button" class="a11y-size-btn" data-size="large" aria-pressed="false">
+          <span style="font-size:1.1em">A</span><span class="sr-only"> Large</span>
+        </button>
+        <button type="button" class="a11y-size-btn" data-size="larger" aria-pressed="false">
+          <span style="font-size:1.4em">A</span><span class="sr-only"> Larger</span>
+        </button>
+      </div>
+    </fieldset>
+    <div class="a11y-option">
+      <div class="a11y-switch-row">
+        <span class="a11y-switch-label" id="label-contrast">High Contrast</span>
+        <button type="button" role="switch" aria-checked="false"
+                aria-labelledby="label-contrast"
+                id="a11y-contrast" class="a11y-switch"></button>
+      </div>
+    </div>
+    <div class="a11y-option">
+      <div class="a11y-switch-row">
+        <span class="a11y-switch-label" id="label-dyslexia">Dyslexia-Friendly Font</span>
+        <button type="button" role="switch" aria-checked="false"
+                aria-labelledby="label-dyslexia"
+                id="a11y-dyslexia" class="a11y-switch"></button>
+      </div>
+    </div>
+    <div class="a11y-option">
+      <div class="a11y-switch-row">
+        <span class="a11y-switch-label" id="label-motion">Reduce Motion</span>
+        <button type="button" role="switch" aria-checked="false"
+                aria-labelledby="label-motion"
+                id="a11y-motion" class="a11y-switch"></button>
+      </div>
+    </div>
+    <button type="button" class="a11y-reset" id="a11y-reset">Reset All Preferences</button>
+  </div>
+</div>
+
+<script src="a11y.js" defer></script>
 
 <main id="main-content">
   <div class="container">
