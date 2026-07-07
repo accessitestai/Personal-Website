@@ -86,9 +86,9 @@ this project, ever, going forward.
 - **Personal-Website** (this repo) - akhileshmalani.com portfolio + AMASAMYA
   web platform at amasamya.akhileshmalani.com subdomain.
 - **AMASAMYA Chrome extension** - published on Chrome Web Store at extension
-  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0, v4.0.1, and v4.2.0
-  are all Published. v4.3.0 "Audit Diff and History" was uploaded to
-  CWS on 2026-07-06 and is currently pending review. v4.3.0 adds
+  ID `blnfmiipkccpggpinjofhhglfcgglbif`. v4.0.0, v4.0.1, v4.2.0, and
+  v4.3.0 are all Published. v4.3.0 "Audit Diff and History" went live
+  on 2026-07-08 (uploaded 2026-07-06, approved same-week). v4.3.0 adds
   on-device history storage (10 audits per URL in
   chrome.storage.local, 8 MB total soft cap with automatic eviction),
   a diff engine with identity tuple {engine, criterion, selector} and

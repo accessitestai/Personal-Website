@@ -1,12 +1,12 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-07-06 (v4.3.0 uploaded, pending CWS review).
+Last reviewed: 2026-07-08 (post-v4.3.0 publish).
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
 If a feature is not on this list, it is not planned.
 
-## Published: v4.0.0, v4.0.1, v4.2.0
+## Published: v4.0.0, v4.0.1, v4.2.0, v4.3.0
 
 Both Live on the Chrome Web Store. v4.0.0 shipped the 24 audit
 engines, three Vision AI providers, Focus Indicator Narrator,
@@ -99,13 +99,15 @@ Screen-reader specifics (retained across every crawl):
 - aria-valuetext on the progress bar reads as a sentence rather
   than a bare percent.
 
-## In flight: v4.3.0 "Audit Diff and History" (uploaded, pending CWS review)
+## Shipped: v4.3.0 "Audit Diff and History"
 
-Manifest at 4.3.0. Two new engine modules
-(`engines/audit-history.js` and `engines/audit-diff.js`), full
-Playwright coverage (32 new tests, 132 passing overall). ZIP built
-at `dist/amasamya-extension-v4.3.0.zip`. Uploaded to the Chrome
-Web Store on 2026-07-06.
+Published on the Chrome Web Store 2026-07-08. Manifest at 4.3.0.
+Two new engine modules (`engines/audit-history.js` and
+`engines/audit-diff.js`), full Playwright coverage (32 new tests,
+132 passing overall at publish time; 133 including the
+subsequent screen-reader.js double-read regression guard). ZIP
+built at `dist/amasamya-extension-v4.3.0.zip`. Uploaded 2026-07-06,
+approved 2026-07-08.
 
 What ships in v4.3.0:
 
@@ -158,9 +160,6 @@ Non-goals in v4.3.0 (deferred to v4.4.0 or later):
   deferred.
 - Cloud sync of history. Violates the no-backend promise.
   Not planned.
-
-Post-approval TODO on this file: move v4.3.0 into the Published
-heading at the top with the actual Chrome Web Store publish date.
 
 ## Next release: v4.4.0 - deferred v4.3.0 nice-to-haves
 
