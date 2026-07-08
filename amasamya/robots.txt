@@ -4,6 +4,11 @@
 # respect Disallow but ignore meta robots (some specialised SEO crawlers,
 # archive.org, etc.).
 
+User-agent: LinkedInBot
+Allow: /index.html
+Disallow: /auth.html
+Disallow: /firebase-config.js
+
 User-agent: *
 Allow: /
 Disallow: /index.html
