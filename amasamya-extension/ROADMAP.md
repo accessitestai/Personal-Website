@@ -1,6 +1,6 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-07-08 (post-v4.3.0 publish).
+Last reviewed: 2026-07-08 (post-v4.3.0 publish, v4.3.1 quality pass in flight).
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
@@ -160,6 +160,57 @@ Non-goals in v4.3.0 (deferred to v4.4.0 or later):
   deferred.
 - Cloud sync of history. Violates the no-backend promise.
   Not planned.
+
+## In flight: v4.3.1 quality-pass patch
+
+Post-publish audit surfaced ten real bugs and several dead-code
+paths. All fixed same-week; no user-visible feature changes.
+
+- **Annotated PNG export was corrupted** (`sidepanel/panel.js:53`).
+  downloadFile wrapped the base64 data-URL string as ASCII bytes.
+  Fixed to decode base64 and use real bytes; URL.revokeObjectURL
+  deferred by 60 s so slow disks / Firefox do not cancel the read.
+- **announce() dropped rapid messages** (`sidepanel/panel.js:28`).
+  Blind users were losing intermediate announcements when the
+  crawl fired 4+ messages/second. Replaced 50 ms debounce with a
+  per-politeness FIFO queue that drains one message at a time
+  with a 600 ms dwell so AT can speak each before the next
+  arrives. Bounded queue length (24) drops OLDEST polite messages
+  under sustained flood; assertive is never dropped.
+- **Crawl silently stole manual audits** (`background.js:383`).
+  Prior heuristic ("sender.tab.active === false = crawler-owned")
+  misrouted a user's own manual audit into the crawler if the
+  user backgrounded their tab during a crawl. Replaced with an
+  explicit Set of tabIds the crawler created.
+- **Text-Spacing and Resize-Text engines could leave the user's
+  page permanently zoomed or restyled** if any exception fired
+  mid-audit. Wrapped both in try/finally.
+- **parseLLMJson regex was non-greedy** (`background.js`), matched
+  first inner object and returned useless payloads on any provider
+  that wrapped results. Rewritten to match the outer JSON block.
+- **Vision-AI finding verdicts miscounted on Gemini/OpenAI** because
+  comparisons hard-cased against "FAIL" but those two providers
+  regularly return lowercase. Normalised via .toUpperCase() at
+  both count and render sites.
+- **postMessage target changed from wildcard to location.origin**
+  in the platform bridge so a cross-origin iframe on the platform
+  page cannot receive audit findings.
+- **baselineKey collided** on long e-commerce URLs sharing the
+  first ~45 chars because it truncated btoa. Replaced with SHA-256
+  hex; automatic one-time migration keeps existing baselines.
+- **Message handler in panel.js and content-script-platform.js**
+  now null-guards the message so an extension-context reload race
+  cannot deliver undefined and kill the handler.
+- **Dead code removed**: waitForTabLoad (uncalled listener leak),
+  SITE_CRAWL_ENABLED constant and its `if (!SITE_CRAWL_ENABLED)`
+  branches in three files.
+- **Version strings synced** to 4.3.1 across manifest, TOOL_VERSION,
+  panel.js JSON export, panel.js SARIF driver, panel.js HTML report
+  footer, service-worker file header.
+
+Tests updated: three site-crawl announcement tests that assumed
+the old debounce contract now poll with `expect().toContainText()`
+until the queued message arrives. Full suite 133/133.
 
 ## Next release: v4.4.0 - deferred v4.3.0 nice-to-haves
 

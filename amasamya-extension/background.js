@@ -1,5 +1,5 @@
 /**
- * AMASAMYA Extension - Background Service Worker v4.3.0
+ * AMASAMYA Extension - Background Service Worker v4.3.1
  *
  * Orchestrates:
  *   A. WCAG Audit  - injects content-script.js, relays findings to side panel + platform
@@ -12,22 +12,11 @@
 
 const PLATFORM_URL = 'https://amasamya.akhileshmalani.com';
 
-/* ════════════════════════════════════════════════════════
-   FEATURE FLAGS
-   ────────────────────────────────────────────────────────
-   Off-by-default booleans that let in-development features
-   ship code to users without changing what those users
-   actually see. Flip to true only on the release commit that
-   ships the feature.
-
-   SITE_CRAWL_ENABLED gates v4.2.0 Site Crawl. While false, no
-   crawl UI is exposed in the side panel, no crawl messages
-   are routed, and the new modules (engines/site-crawler.js,
-   engines/sitemap-parser.js) are dead code from the user's
-   perspective. Their tests still run on Playwright because
-   tests load the modules directly.
-   ──────────────────────────────────────────────────────── */
-const SITE_CRAWL_ENABLED = true; /* v4.2.0 release - flag flipped at commit L */
+/* v4.3.1 (2026-07-08): the SITE_CRAWL_ENABLED feature flag lived here
+   as a dead constant since v4.2.0 shipped Site Crawl. Removed to make
+   the code state match reality and to delete every `if (!SITE_CRAWL_
+   ENABLED)` dead branch downstream. If a future release ever needs
+   to gate Site Crawl again, put the flag back at that time. */
 
 /* Pull the crawler + sitemap parser into the service worker
    scope. importScripts is the only way to share code between
@@ -190,10 +179,6 @@ async function sendCrawlPageToPlatform(record) {
 }
 
 async function startSiteCrawl(input) {
-  if (!SITE_CRAWL_ENABLED) {
-    broadcastCrawlUi({ phase: 'error', message: 'Site Crawl is disabled in this build.' });
-    return;
-  }
   if (__crawlCurrent) {
     broadcastCrawlUi({ phase: 'error', message: 'A crawl is already running.' });
     return;
@@ -243,9 +228,19 @@ async function startSiteCrawl(input) {
      `pending`. When the waiter arrives, it drains the buffer first. */
   const waiters = new Map(); /* tabId -> { resolve, timer } */
   const pending = new Map(); /* tabId -> findings[] */
+  /* v4.3.1: track tabs the crawler actually created so we route
+     audit-results ONLY from those tabs. Prior heuristic
+     (`sender.tab.active === false`) misrouted a user's manual
+     audit into the crawler's pending buffer if the user backgrounded
+     their own tab during a running crawl. */
+  const ownedTabs = new Set();
   const crawler = new self.AMASAMYASiteCrawler.SiteCrawler({
-    createTab:        (url) => chrome.tabs.create({ url: url, active: false }),
-    removeTab:        (tabId) => chrome.tabs.remove(tabId),
+    createTab:        async (url) => {
+      const tab = await chrome.tabs.create({ url: url, active: false });
+      if (tab && typeof tab.id === 'number') ownedTabs.add(tab.id);
+      return tab;
+    },
+    removeTab:        (tabId) => { ownedTabs.delete(tabId); return chrome.tabs.remove(tabId); },
     getTab:           (tabId) => chrome.tabs.get(tabId),
     executeScript:    (tabId, files) => chrome.scripting.executeScript({ target: { tabId: tabId }, files: files }),
     onTabUpdated:     chrome.tabs && chrome.tabs.onUpdated,
@@ -266,7 +261,7 @@ async function startSiteCrawl(input) {
     now:              () => Date.now()
   });
 
-  __crawlCurrent = { crawler: crawler, waiters: waiters, pending: pending };
+  __crawlCurrent = { crawler: crawler, waiters: waiters, pending: pending, ownedTabs: ownedTabs };
 
   crawler
     .on('progress',     (p) => broadcastCrawlUi({ phase: 'progress', index: p.index, total: p.total, url: p.url }))
@@ -282,6 +277,7 @@ async function startSiteCrawl(input) {
          into the next crawl. Waiters map should already be empty. */
       pending.clear();
       waiters.clear();
+      ownedTabs.clear();
       __crawlCurrent = null;
     });
 
@@ -380,16 +376,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       w.resolve(findings);
       return false;
     }
-    /* No waiter yet. Is this tab one the crawler opened? Only the
-       crawler creates background tabs while __crawlCurrent is set,
-       so any audit-results whose sender tab we did not open must
-       have come from a real user-driven audit. Distinguish by tab
-       activeness: crawler-opened tabs have active=false. */
-    if (sender.tab.active === false) {
+    /* v4.3.1: route to the crawler's pending buffer ONLY if this
+       exact tabId is one the crawler created. Prior heuristic
+       (`sender.tab.active === false`) misrouted a user's manual
+       audit into the crawler if they happened to be looking at a
+       different tab when they triggered it. */
+    if (__crawlCurrent.ownedTabs && __crawlCurrent.ownedTabs.has(tabId)) {
       __crawlCurrent.pending.set(tabId, findings);
       return false;
     }
-    /* Foreground tab; fall through to the standalone-audit branch. */
+    /* Not a crawler-owned tab; fall through to the standalone-audit branch. */
   }
 
   /* ── WCAG audit results → side panel + platform + history ── */
@@ -766,9 +762,17 @@ Respond ONLY with this exact JSON (no markdown fences, no extra text):
 
 /* ── Parse JSON from LLM response (handles markdown fences) ── */
 function parseLLMJson(text) {
+  /* v4.3.1: match the OUTER braces (greedy) instead of the first
+     inner object. Non-greedy `\{[\s\S]*?\}` returned things like
+     `{ "type": "text" }` when the real payload was
+     `{ "verdict": "PASS", "content": { "type": "text" }, ... }`,
+     making every subsequent .verdict lookup undefined. */
   try {
-    const match = text.match(/\{[\s\S]*?\}/);
-    if (match) return JSON.parse(match[0]);
+    const first = text.indexOf('{');
+    const last  = text.lastIndexOf('}');
+    if (first !== -1 && last > first) {
+      return JSON.parse(text.substring(first, last + 1));
+    }
   } catch (_) {}
   return { hasIndicator: null, description: text.slice(0, 300), raw: true };
 }
@@ -1232,18 +1236,11 @@ async function sendResultsToPlatform(message) {
 
 /* ── Utilities ── */
 
-function waitForTabLoad(tabId) {
-  return new Promise(resolve => {
-    const listener = (id, changeInfo) => {
-      if (id === tabId && changeInfo.status === 'complete') {
-        chrome.tabs.onUpdated.removeListener(listener);
-        resolve();
-      }
-    };
-    chrome.tabs.onUpdated.addListener(listener);
-    setTimeout(resolve, 12000);
-  });
-}
+/* v4.3.1: `waitForTabLoad` helper deleted. Never called anywhere;
+   the crawler uses its own _waitForLoad inside the SiteCrawler class.
+   The helper's fallback setTimeout also never removed its
+   chrome.tabs.onUpdated listener on the 12 s timeout path, so if it
+   had ever been called, each call would have leaked a listener. */
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

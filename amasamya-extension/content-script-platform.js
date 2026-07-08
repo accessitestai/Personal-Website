@@ -14,7 +14,15 @@
  *   'AMASAMYA_extension_results' and renders the findings automatically.
  */
 
+/*
+ * v4.3.1 (2026-07-08): postMessage target changed from '*' to
+ * location.origin so an embedded cross-origin iframe on the
+ * platform page cannot receive audit findings. The manifest content-
+ * script match rule already scopes execution to the platform origin,
+ * so location.origin is always the platform's own origin.
+ */
 chrome.runtime.onMessage.addListener((message) => {
+  if (!message || typeof message.type !== 'string') return;
   /* Standard single-page audit results from the WCAG engine. */
   if (message.type === 'AMASAMYA_platform_results') {
     window.postMessage({
@@ -23,7 +31,7 @@ chrome.runtime.onMessage.addListener((message) => {
       pageTitle: message.pageTitle,
       pageUrl:   message.pageUrl,
       timestamp: message.timestamp
-    }, '*');
+    }, location.origin);
     return;
   }
 
@@ -42,7 +50,7 @@ chrome.runtime.onMessage.addListener((message) => {
       findings:   message.findings || [],
       durationMs: message.durationMs,
       timestamp:  message.timestamp
-    }, '*');
+    }, location.origin);
     return;
   }
 });

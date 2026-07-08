@@ -15,7 +15,7 @@
      PHASE 1 ENGINES + UTILITIES (inlined from phase1-engines.js)
   ================================================================ */
 
-  const TOOL_VERSION = '4.3.0';
+  const TOOL_VERSION = '4.3.1';
   const CONTRAST = { NORMAL_AA: 4.5, LARGE_AA: 3.0, NORMAL_AAA: 7.0, LARGE_AAA: 4.5, NON_TEXT: 3.0 };
   const LARGE_TEXT_PT_BOLD = 14;
   const LARGE_TEXT_PT_NORMAL = 18;
@@ -393,14 +393,20 @@
     const ts = document.createElement('style'); ts.id = sid;
     ts.textContent = '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p,div,li,td,th,dd,dt,blockquote,figcaption,label,span { margin-bottom: 2em !important; }';
     document.head.appendChild(ts); document.body.offsetHeight;
-    overflows.forEach(el => {
-      const cs = window.getComputedStyle(el);
-      if (el.scrollHeight > el.clientHeight + 2 && (cs.height !== 'auto' || cs.maxHeight !== 'none')) findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: `Content clipped vertically (${el.scrollHeight - el.clientHeight}px hidden).`, computed: `overflow: hidden; height: ${cs.height}`, required: 'No content loss with increased spacing', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Use min-height and overflow: auto.' });
-      if (el.scrollWidth > el.clientWidth + 2 && cs.width !== 'auto') findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'Content clipped horizontally.', computed: `overflow: hidden; width: ${cs.width}`, required: 'No horizontal clipping', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Use flexible widths.' });
-      if (cs.textOverflow === 'ellipsis') findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'text-overflow: ellipsis may hide content.', computed: 'text-overflow: ellipsis', required: 'Full text accessible', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Allow container expansion.' });
-    });
-    textEls.forEach(el => { const cs = window.getComputedStyle(el); if (cs.whiteSpace === 'nowrap' && (cs.overflow === 'hidden' || cs.textOverflow === 'ellipsis')) findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'white-space: nowrap with overflow hidden.', computed: `white-space: nowrap; overflow: ${cs.overflow}`, required: 'Allow wrapping', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Remove white-space: nowrap or use overflow: visible.' }); });
-    ts.remove();
+    /* v4.3.1: wrap the analysis in try/finally so any exception thrown
+       inside the loops does NOT leave the injected stylesheet on the
+       user's page (which would break their real reading experience). */
+    try {
+      overflows.forEach(el => {
+        const cs = window.getComputedStyle(el);
+        if (el.scrollHeight > el.clientHeight + 2 && (cs.height !== 'auto' || cs.maxHeight !== 'none')) findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: `Content clipped vertically (${el.scrollHeight - el.clientHeight}px hidden).`, computed: `overflow: hidden; height: ${cs.height}`, required: 'No content loss with increased spacing', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Use min-height and overflow: auto.' });
+        if (el.scrollWidth > el.clientWidth + 2 && cs.width !== 'auto') findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'Content clipped horizontally.', computed: `overflow: hidden; width: ${cs.width}`, required: 'No horizontal clipping', verdict: 'Fail', severity: SEV.SERIOUS, howToFix: 'Use flexible widths.' });
+        if (cs.textOverflow === 'ellipsis') findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'text-overflow: ellipsis may hide content.', computed: 'text-overflow: ellipsis', required: 'Full text accessible', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Allow container expansion.' });
+      });
+      textEls.forEach(el => { const cs = window.getComputedStyle(el); if (cs.whiteSpace === 'nowrap' && (cs.overflow === 'hidden' || cs.textOverflow === 'ellipsis')) findings.push({ id: generateId(), engine: 'Text Spacing', element: describeEl(el), criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'white-space: nowrap with overflow hidden.', computed: `white-space: nowrap; overflow: ${cs.overflow}`, required: 'Allow wrapping', verdict: 'Warning', severity: SEV.MODERATE, howToFix: 'Remove white-space: nowrap or use overflow: visible.' }); });
+    } finally {
+      try { ts.remove(); } catch (_) { /* already gone */ }
+    }
     if (findings.length === 0) findings.push({ id: generateId(), engine: 'Text Spacing', element: 'Page', criterion: 'WCAG 2.2 SC 1.4.12 (Level AA)', issue: 'No text spacing issues.', computed: `${textEls.length} elements checked`, required: 'Content visible with spacing overrides', verdict: 'Pass', severity: SEV.MINOR, howToFix: 'No action.' });
     return findings;
   }
@@ -590,23 +596,28 @@
 
     /* Apply 200% zoom. CSS zoom (Chromium-supported) reflows text and
        grows pixel sizes proportionally - closest in-page approximation
-       of browser-zoom-to-200%. */
+       of browser-zoom-to-200%.
+
+       v4.3.1: wrap in try/finally so any exception between apply and
+       revert does not leave the user's page zoomed at 200%. */
     const original = document.documentElement.style.zoom || '';
     document.documentElement.style.zoom = '2';
-    /* Force layout. */
     void document.documentElement.offsetHeight;
 
-    const docAfter = document.documentElement.scrollWidth;
-    const horizScrollIntroduced = docAfter > docBefore * 2.05;   /* 5% slack for legitimate growth */
+    let docAfter, horizScrollIntroduced, after;
+    try {
+      docAfter = document.documentElement.scrollWidth;
+      horizScrollIntroduced = docAfter > docBefore * 2.05;   /* 5% slack for legitimate growth */
 
-    const after = probes.map(el => {
-      const r = el.getBoundingClientRect();
-      return { w: r.width, h: r.height, sw: el.scrollWidth, sh: el.scrollHeight };
-    });
-
-    /* Revert immediately so the user's view doesn't flicker. */
-    document.documentElement.style.zoom = original;
-    void document.documentElement.offsetHeight;
+      after = probes.map(el => {
+        const r = el.getBoundingClientRect();
+        return { w: r.width, h: r.height, sw: el.scrollWidth, sh: el.scrollHeight };
+      });
+    } finally {
+      /* Always revert. */
+      document.documentElement.style.zoom = original;
+      void document.documentElement.offsetHeight;
+    }
 
     /* Diagnose: an element fails resize if its scrollHeight/Width
        grew but its visible height/width didn't (= clipping). */

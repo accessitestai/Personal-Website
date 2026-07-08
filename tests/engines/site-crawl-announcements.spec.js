@@ -103,6 +103,11 @@ test.describe('Site Crawl screen-reader announcements (K calibration fix)', () =
   });
 
   test('per-page completion fires a polite live announcement with path, status, findings, seconds', async ({ page }) => {
+    /* v4.3.1: announce() now uses a per-politeness FIFO queue with
+       ~600 ms dwell between messages so blind users no longer lose
+       rapid ones. Tests that used to read the polite region after a
+       flat 120 ms wait now must POLL until the expected message
+       actually reaches the region. */
     await sendCrawlUi(page, { phase: 'queued', total: 3 });
     await sendCrawlUi(page, { phase: 'pageComplete', record: {
       url: 'https://example.com/checkout',
@@ -113,15 +118,12 @@ test.describe('Site Crawl screen-reader announcements (K calibration fix)', () =
       durationMs: 2400,
       findings: [{}, {}, {}, {}, {}]   /* five fake findings */
     } });
-    /* The polite region clears itself, then sets the text via a
-       50 ms setTimeout. Wait for it to settle, then read. */
-    await page.waitForTimeout(120);
-    const polite = await page.locator('#live-region-polite').textContent();
-    expect(polite).toMatch(/Page 1 complete/);
-    expect(polite).toContain('/checkout');
-    expect(polite).toMatch(/Audited successfully/);
-    expect(polite).toMatch(/5 findings/);
-    expect(polite).toMatch(/2\.4 seconds/);
+    const polite = page.locator('#live-region-polite');
+    await expect(polite).toContainText(/Page 1 complete/,       { timeout: 5000 });
+    await expect(polite).toContainText(/\/checkout/,            { timeout: 5000 });
+    await expect(polite).toContainText(/Audited successfully/,  { timeout: 5000 });
+    await expect(polite).toContainText(/5 findings/,            { timeout: 5000 });
+    await expect(polite).toContainText(/2\.4 seconds/,          { timeout: 5000 });
   });
 
   test('auth-wall page completion does not promise a findings count', async ({ page }) => {
@@ -133,13 +135,13 @@ test.describe('Site Crawl screen-reader announcements (K calibration fix)', () =
       durationMs: 800,
       findings: []
     } });
-    await page.waitForTimeout(120);
-    const polite = await page.locator('#live-region-polite').textContent();
-    expect(polite).toMatch(/Skipped, page is behind a sign in/);
+    const polite = page.locator('#live-region-polite');
+    await expect(polite).toContainText(/Skipped, page is behind a sign in/, { timeout: 5000 });
+    const text = await polite.textContent();
     /* Findings clause is suppressed for non-audited statuses so the
        user is not told "0 findings" for a page that was never run. */
-    expect(polite).not.toMatch(/0 findings/);
-    expect(polite).not.toMatch(/finding/);
+    expect(text).not.toMatch(/0 findings/);
+    expect(text).not.toMatch(/finding/);
   });
 
   test('appended results-table row carries a sentence aria-label', async ({ page }) => {
@@ -165,12 +167,15 @@ test.describe('Site Crawl screen-reader announcements (K calibration fix)', () =
     await sendCrawlUi(page, { phase: 'pageComplete', record: { url: 'https://e.com/b', status: 'auth-wall', index: 1, durationMs: 500,  findings: [] } });
     await sendCrawlUi(page, { phase: 'pageComplete', record: { url: 'https://e.com/c', status: 'timeout',   index: 2, durationMs: 25000, findings: [] } });
     await sendCrawlUi(page, { phase: 'complete' });
-    await page.waitForTimeout(120);
-    const polite = await page.locator('#live-region-polite').textContent();
-    expect(polite).toMatch(/Crawl complete/);
-    expect(polite).toMatch(/1 audited/);
-    expect(polite).toMatch(/1 skipped at sign in/);
-    expect(polite).toMatch(/1 timed out/);
+    /* v4.3.1: Five messages are queued (queued + 3 pageComplete +
+       complete). At ~650 ms per message drain, the final message
+       lands roughly 3.5 s later. Poll with a comfortable ceiling. */
+    const polite = page.locator('#live-region-polite');
+    await expect(polite).toContainText(/Crawl complete/,          { timeout: 8000 });
+    const text = await polite.textContent();
+    expect(text).toMatch(/1 audited/);
+    expect(text).toMatch(/1 skipped at sign in/);
+    expect(text).toMatch(/1 timed out/);
   });
 
   test('error phase routes through the assertive live region', async ({ page }) => {

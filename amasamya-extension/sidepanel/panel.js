@@ -22,13 +22,52 @@
     announce(text)               -> polite (default, status messages).
     announce(text, 'assertive')  -> interrupts current screen-reader speech,
                                     use only for errors and security alerts.
-    The empty-string-then-setTimeout dance forces re-announcement when the
-    same message arrives twice in a row.
+
+    v4.3.1 fix (2026-07-08): previous implementation cleared the live
+    region and set new text on a 50 ms timer. Any two calls within
+    50 ms produced only the second one; during Site Crawl the polite
+    stream can fire 4+ messages per second (progress + per-page +
+    diff), and every subsequent Fail/Warning finding also triggers a
+    message. Blind users were losing announcements silently.
+
+    New implementation: per-politeness FIFO queue that drains one
+    message at a time with a minimum 600 ms dwell so NVDA / JAWS can
+    speak it before the next arrives. If the queue depth exceeds
+    MAX_QUEUE (currently 24) the OLDEST polite messages are dropped
+    (assertive is never dropped). Live-region text is cleared before
+    each write so repeated identical messages still re-announce.
   */
+  const MAX_ANNOUNCE_QUEUE   = 24;
+  const ANNOUNCE_DWELL_MS    = 600;
+  const _announceQueue       = { polite: [], assertive: [] };
+  const _announceInFlight    = { polite: false, assertive: false };
+
   function announce(text, urgency) {
-    const region = (urgency === 'assertive') ? liveRegionAssertive : liveRegionPolite;
+    if (text === undefined || text === null) return;
+    const key = (urgency === 'assertive') ? 'assertive' : 'polite';
+    const q   = _announceQueue[key];
+    q.push(String(text));
+    if (key === 'polite' && q.length > MAX_ANNOUNCE_QUEUE) {
+      q.splice(0, q.length - MAX_ANNOUNCE_QUEUE);
+    }
+    _drainAnnounce(key);
+  }
+  function _drainAnnounce(key) {
+    if (_announceInFlight[key]) return;
+    const q = _announceQueue[key];
+    if (!q.length) return;
+    const region = (key === 'assertive') ? liveRegionAssertive : liveRegionPolite;
+    if (!region) return;
+    const next = q.shift();
+    _announceInFlight[key] = true;
     region.textContent = '';
-    setTimeout(() => { region.textContent = text; }, 50);
+    setTimeout(() => {
+      region.textContent = next;
+      setTimeout(() => {
+        _announceInFlight[key] = false;
+        _drainAnnounce(key);
+      }, ANNOUNCE_DWELL_MS);
+    }, 50);
   }
 
   function escHtml(str) {
@@ -45,12 +84,44 @@
       : s;
   }
 
+  /*
+    v4.3.1 fixes (2026-07-08):
+    1. Data URLs (base64) are now decoded to bytes instead of being
+       wrapped as ASCII in a Blob. Prior behaviour corrupted every
+       annotated-screenshot PNG export: the file contained the raw
+       "data:image/png;base64,..." string, not image bytes, and
+       every image viewer rejected it.
+    2. URL.revokeObjectURL is deferred by 60 s. Prior behaviour
+       revoked synchronously after a.click(), which cancelled the
+       download on some browsers (Firefox notably) before the file
+       had actually been read from the blob URL. Chrome usually
+       finished the read in time, but not always on slow disks.
+  */
   function downloadFile(content, filename, mimeType) {
-    const blob = new Blob([content], { type: mimeType });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+    let blob;
+    if (typeof content === 'string' && content.startsWith('data:')) {
+      const comma = content.indexOf(',');
+      const meta  = content.substring(5, comma); /* e.g. "image/png;base64" */
+      const isB64 = /;base64$/i.test(meta);
+      const type  = meta.replace(/;base64$/i, '') || mimeType || 'application/octet-stream';
+      const payload = content.substring(comma + 1);
+      if (isB64) {
+        const bin = atob(payload);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        blob = new Blob([bytes], { type: mimeType || type });
+      } else {
+        blob = new Blob([decodeURIComponent(payload)], { type: mimeType || type });
+      }
+    } else {
+      blob = new Blob([content], { type: mimeType });
+    }
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href = url; a.download = filename;
+    a.click();
+    /* Defer revoke so the browser finishes reading the blob URL. */
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
   function $(id) { return document.getElementById(id); }
@@ -130,31 +201,15 @@
     Single-source-of-truth is enforced at release time by flipping
     both occurrences together; commit L of the v4.2.0 plan does this.
   */
-  const SITE_CRAWL_ENABLED = true; /* v4.2.0 K calibration in progress */
-  const PANEL_TABS = SITE_CRAWL_ENABLED
-    ? ['wcag', 'visual', 'settings', 'crawl']
-    : ['wcag', 'visual', 'settings'];
-
-  /* Hide the Site Crawl tab list item, the tab button itself, and
-     the tabpanel while the flag is off. Hiding only the parent <li>
-     would still leave the .panel-tab button discoverable by
-     document.querySelectorAll, which would distort the arrow-key
-     navigation cycle (ArrowLeft from WCAG would wrap to the hidden
-     Site Crawl tab instead of Settings). Setting `hidden` on the
-     button itself lets the keyboard handler filter cleanly. */
-  if (!SITE_CRAWL_ENABLED) {
-    const crawlItem  = $('ptab-crawl-item');
-    const crawlBtn   = $('ptab-crawl');
-    const crawlPanel = $('ppanel-crawl');
-    if (crawlItem)  crawlItem.hidden = true;
-    if (crawlBtn)   crawlBtn.hidden  = true;
-    if (crawlPanel) crawlPanel.hidden = true;
-  } else {
-    const crawlItem = $('ptab-crawl-item');
-    const crawlBtn  = $('ptab-crawl');
-    if (crawlItem) crawlItem.hidden = false;
-    if (crawlBtn)  crawlBtn.hidden  = false;
-  }
+  /* v4.3.1 (2026-07-08): SITE_CRAWL_ENABLED constant deleted. The
+     flag has been permanently true since v4.2.0 shipped; keeping the
+     dead branches invited someone to mistakenly re-flip it. Site
+     Crawl is now unconditionally available in the panel. */
+  const PANEL_TABS = ['wcag', 'visual', 'settings', 'crawl'];
+  const crawlItem = $('ptab-crawl-item');
+  const crawlBtn  = $('ptab-crawl');
+  if (crawlItem) crawlItem.hidden = false;
+  if (crawlBtn)  crawlBtn.hidden  = false;
 
   function switchPanel(name) {
     PANEL_TABS.forEach(p => {
@@ -425,6 +480,10 @@
   ================================================================ */
 
   chrome.runtime.onMessage.addListener((message) => {
+    /* v4.3.1: null-guard so an extension-context reload race that
+       delivers an undefined message does not throw and kill the
+       handler for the rest of this side-panel session. */
+    if (!message || typeof message.type !== 'string') return;
     /* WCAG audit */
     if (message.type === 'audit-results') {
       allFindings = message.findings;
@@ -912,7 +971,7 @@
   /* Export */
   $('export-json').addEventListener('click', () => {
     downloadFile(JSON.stringify({
-      tool: 'AMASAMYA', version: '4.3.0', page: auditMeta.pageTitle,
+      tool: 'AMASAMYA', version: '4.3.1', page: auditMeta.pageTitle,
       url: auditMeta.pageUrl, timestamp: auditMeta.timestamp,
       summary: { total: allFindings.length, fail: allFindings.filter(f=>f.verdict==='Fail').length,
         warning: allFindings.filter(f=>f.verdict==='Warning').length,
@@ -1039,7 +1098,7 @@
         tool: {
           driver: {
             name: 'AMASAMYA',
-            version: '4.2.0',
+            version: '4.3.1',
             informationUri: 'https://amasamya.akhileshmalani.com',
             rules
           }
@@ -1085,8 +1144,24 @@
 
   /* ── Baseline Save / Clear / Compare ── */
 
-  function baselineKey() {
-    return 'AMASAMYA_baseline_' + btoa(encodeURIComponent(auditMeta.pageUrl)).slice(0, 60);
+  /* v4.3.1: baseline lookup key is now a SHA-256 hash of the URL
+     instead of a truncated btoa of the URL. Two long URLs that
+     shared the same first ~45 characters (very common on ecommerce
+     PDPs where the URL has a fixed prefix and a variable id at the
+     end) previously collided and loaded the wrong baseline.
+     baselineLegacyKey() returns the pre-fix key so we can migrate
+     any existing baseline on first access without losing user data. */
+  async function baselineKey() {
+    const encoder = new TextEncoder();
+    const data    = encoder.encode(auditMeta.pageUrl || '');
+    const digest  = await crypto.subtle.digest('SHA-256', data);
+    const bytes   = new Uint8Array(digest);
+    let hex = '';
+    for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+    return 'AMASAMYA_baseline_' + hex;
+  }
+  function baselineLegacyKey() {
+    return 'AMASAMYA_baseline_' + btoa(encodeURIComponent(auditMeta.pageUrl || '')).slice(0, 60);
   }
 
   function baselineFingerprint(f) {
@@ -1095,9 +1170,20 @@
   }
 
   async function baselineLoadAndCompare() {
-    const key = baselineKey();
-    const stored = await chrome.storage.local.get(key);
-    const baseline = stored[key];
+    const key       = await baselineKey();
+    const legacyKey = baselineLegacyKey();
+    let stored = await chrome.storage.local.get([key, legacyKey]);
+    let baseline = stored[key];
+    /* v4.3.1 migration: if no hashed-key baseline exists but a legacy
+       btoa-key baseline does, take it over and delete the legacy
+       entry. Once migrated the collision-prone key is gone. */
+    if (!baseline && stored[legacyKey]) {
+      baseline = stored[legacyKey];
+      try {
+        await chrome.storage.local.set({ [key]: baseline });
+        await chrome.storage.local.remove(legacyKey);
+      } catch (_) { /* best effort */ }
+    }
 
     $('clear-baseline-btn').disabled = !baseline;
 
@@ -1149,7 +1235,7 @@
   }
 
   $('save-baseline-btn').addEventListener('click', async () => {
-    const key = baselineKey();
+    const key = await baselineKey();
     await chrome.storage.local.set({
       [key]: {
         url:       auditMeta.pageUrl,
@@ -1169,7 +1255,7 @@
   });
 
   $('clear-baseline-btn').addEventListener('click', async () => {
-    await chrome.storage.local.remove(baselineKey());
+    await chrome.storage.local.remove([await baselineKey(), baselineLegacyKey()]);
     $('clear-baseline-btn').disabled = true;
     $('baseline-status').textContent = 'Baseline cleared.';
     $('regression-banner').hidden = true;
@@ -1269,7 +1355,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 <div style="overflow-x:auto;"><table aria-label="Findings">
 <thead><tr><th>ID</th><th>Engine</th><th>Element</th><th>Criterion</th><th>Severity</th><th>Verdict</th><th>Detail</th></tr></thead>
 <tbody>${rows}</tbody></table></div></main>
-<footer>Generated by AMASAMYA v4.2.0 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
+<footer>Generated by AMASAMYA v4.3.1 - AMASAMYA.akhileshmalani.com - Akhilesh Malani</footer>
 </body></html>`;
   }
 
@@ -1327,7 +1413,11 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       $('fn-progress-wrap').hidden = true;
       $('fn-export-btn').disabled = false;
       fnUpdateSummary();
-      const fails = fnFindings.filter(r => r.finding?.verdict === 'FAIL' || r.finding?.hasIndicator === false).length;
+      /* v4.3.1: normalise verdict casing. Gemini and OpenAI regularly
+         return lowercase or mixed case; comparing raw against 'FAIL'
+         silently miscounted failures on any run that used those two
+         providers. */
+      const fails = fnFindings.filter(r => (String(r.finding?.verdict || '').toUpperCase() === 'FAIL') || r.finding?.hasIndicator === false).length;
       announce(`Focus Narrator complete. ${fnFindings.length} elements checked. ${fails} focus indicator failures found.`);
 
     } else if (msg.phase === 'error') {
@@ -1343,7 +1433,10 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
     const tbody = $('fn-results-body');
     const tr    = document.createElement('tr');
 
-    const verdict    = finding?.verdict || (finding?.hasIndicator === false ? 'FAIL' : finding?.hasIndicator === true ? 'PASS' : '-');
+    /* v4.3.1: uppercase whatever the LLM returned so downstream
+       equality checks against 'FAIL' / 'PASS' work regardless of
+       provider quirks. */
+    const verdict    = String(finding?.verdict || (finding?.hasIndicator === false ? 'FAIL' : finding?.hasIndicator === true ? 'PASS' : '-')).toUpperCase();
     const hasFocus   = finding?.hasIndicator;
     const passes247  = finding?.passes_2_4_7;
     const passes2411 = finding?.passes_2_4_11;
@@ -1741,10 +1834,6 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
 
   if ($('crawl-start-btn')) {
     $('crawl-start-btn').addEventListener('click', () => {
-      if (!SITE_CRAWL_ENABLED) {
-        announce('Site Crawl is disabled in this build.', 'assertive');
-        return;
-      }
       const input = crawlReadInputs();
       if (input.error) {
         $('crawl-status').textContent = input.error;
@@ -1976,7 +2065,7 @@ footer{background:#f0f5fa;padding:16px 32px;font-size:.8rem;color:#555;border-to
       }
       const payload = {
         tool:    'AMASAMYA',
-        version: '4.2.0',
+        version: '4.3.1',
         kind:    'site-crawl-report',
         taken:   new Date().toISOString(),
         results: crawlResults
