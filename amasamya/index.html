@@ -1234,7 +1234,15 @@ input[type="file"]:focus + .file-input-label { outline: none; box-shadow: var(--
   <!-- Firebase Auth SDK (compat) - loaded before body script so firebase is available -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!--
+    v5.1 (2026-07-08): firebase-firestore-compat.js dropped. The whole
+    app used only firebase.auth(); Firestore was initialised in
+    firebase-config.js and never referenced anywhere else. Loading it
+    was costing roughly 250 KB of script for zero delivered value. If a
+    future feature actually needs Firestore, re-add this line and the
+    initialisation in firebase-config.js at the same time.
+  -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script> -->
   <script src="./firebase-config.js"></script>
   <!-- PDF.js - used by the Document Audit tab to walk the real PDF
        structure tree (tagged-PDF roles, alt text, outlines, permissions)
@@ -4110,9 +4118,15 @@ $('save-pin-btn').addEventListener('click', async () => {
   announce('PIN changed successfully.');
 });
 
+/* v5.1: both buttons must remove the USER-SCOPED sessions key, not
+   the un-scoped legacy key. Yesterday's per-user scoping pass added
+   userKey() to the read/write helpers but missed these two direct
+   removeItem calls; without this fix a signed-in user pressing
+   either button would nuke a key that has nothing in it, and their
+   real sessions would stay in place. Same bug in both handlers. */
 $('clear-sessions-btn').addEventListener('click', () => {
   if (confirm('Clear all session history? This cannot be undone.')) {
-    localStorage.removeItem(KEY_SESSIONS);
+    localStorage.removeItem(userKey(KEY_SESSIONS));
     renderDashboard();
     announce('All sessions cleared.');
   }
@@ -4120,7 +4134,7 @@ $('clear-sessions-btn').addEventListener('click', () => {
 
 $('clear-data-btn').addEventListener('click', () => {
   if (confirm('Clear all session data? This cannot be undone.')) {
-    localStorage.removeItem(KEY_SESSIONS);
+    localStorage.removeItem(userKey(KEY_SESSIONS));
     renderDashboard();
     announce('All data cleared.');
   }
