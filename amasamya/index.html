@@ -2488,25 +2488,70 @@ const KEY_PIN      = 'AMASAMYA_pin_hash';     /* legacy v1 - read-only */
 const KEY_PIN_V2   = 'AMASAMYA_pin_hash_v2';
 const KEY_SESSIONS = 'AMASAMYA_sessions';
 
+/* v5.1 (2026-07-08): per-user localStorage scoping.
+
+   Prior to this pass every user of a shared browser saw the same
+   sessions, champions, saved AI keys, and mobile-checklist state
+   because the storage keys were global. On a device where two people
+   sign in with different Firebase accounts, that means user B walks
+   into user A's data. This is a real leak, not a theoretical one.
+
+   Fix:
+   - AMASAMYA_CURRENT_UID is set from the Firebase auth guard when a
+     user signs in, and stays null for PIN-only (Firebase-unavailable)
+     usage so nothing changes for that flow.
+   - userKey(base) returns "<base>_<uid>" when signed in, otherwise
+     just base. Every storage read/write for user-owned state now
+     goes through userKey.
+   - migrateLegacyKeysToUser(uid) runs ONCE on first sign-in for
+     that UID. It moves any un-scoped legacy value into the user's
+     namespace, but only if the user's namespace is empty. This
+     means: legacy data is attributed to the first user who signs in
+     (which is the safest thing we can do; pre-fix behaviour was
+     "everyone shares it"), and subsequent users get a clean slate.
+*/
+let AMASAMYA_CURRENT_UID = null;
+function userKey(baseKey) {
+  return AMASAMYA_CURRENT_UID ? (baseKey + '_' + AMASAMYA_CURRENT_UID) : baseKey;
+}
+const AMASAMYA_LEGACY_KEYS_TO_SCOPE = [
+  'AMASAMYA_sessions',
+  'AMASAMYA_champions',
+  'AMASAMYA_pin_hash_v2',
+  'AMASAMYA_mob_state'
+];
+function migrateLegacyKeysToUser(uid) {
+  if (!uid) return;
+  AMASAMYA_LEGACY_KEYS_TO_SCOPE.forEach(function (base) {
+    const scoped = base + '_' + uid;
+    if (localStorage.getItem(scoped) !== null) return; /* user already has scoped data - leave alone */
+    const legacyVal = localStorage.getItem(base);
+    if (legacyVal !== null) {
+      localStorage.setItem(scoped, legacyVal);
+      localStorage.removeItem(base);
+    }
+  });
+}
+
 function getStoredPin() {
-  return localStorage.getItem(KEY_PIN_V2) || localStorage.getItem(KEY_PIN) || null;
+  return localStorage.getItem(userKey(KEY_PIN_V2)) || localStorage.getItem(userKey(KEY_PIN)) || null;
 }
 async function savePin(pin) {
   const stored = await hashPin(pin);
-  localStorage.setItem(KEY_PIN_V2, stored);
+  localStorage.setItem(userKey(KEY_PIN_V2), stored);
   /* Wipe the legacy unsalted hash so a stolen-disk attacker can't
      attack the weaker representation. */
-  localStorage.removeItem(KEY_PIN);
+  localStorage.removeItem(userKey(KEY_PIN));
 }
 
 /* ── Session management ── */
 function getSessions() {
-  try { return JSON.parse(localStorage.getItem(KEY_SESSIONS) || '[]'); }
+  try { return JSON.parse(localStorage.getItem(userKey(KEY_SESSIONS)) || '[]'); }
   catch { return []; }
 }
 
 function saveSessions(sessions) {
-  localStorage.setItem(KEY_SESSIONS, JSON.stringify(sessions));
+  localStorage.setItem(userKey(KEY_SESSIONS), JSON.stringify(sessions));
 }
 
 function addSession(data) {
@@ -4726,7 +4771,29 @@ window.addEventListener('message', function (e) {
    No backend write. No localStorage write. Same privacy story
    as the rest of the platform.
 ══════════════════════════════════════════════════════════════ */
-window.__AMASAMYA_crawlSession = null;
+/* v5.1: crawl session is now persisted to sessionStorage so a reload
+   during a 200-page crawl does not lose the aggregated data. Session-
+   Storage (not localStorage) matches the original privacy intent:
+   the data lives for the tab's lifetime only. Same guarantees as
+   before, plus reload survival. */
+const KEY_CRAWL_SESSION = 'AMASAMYA_crawl_session';
+function _crawlLoadPersisted() {
+  try {
+    const raw = sessionStorage.getItem(KEY_CRAWL_SESSION);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+function _crawlPersist() {
+  try {
+    if (window.__AMASAMYA_crawlSession) {
+      sessionStorage.setItem(KEY_CRAWL_SESSION, JSON.stringify(window.__AMASAMYA_crawlSession));
+    }
+  } catch (e) {
+    /* Quota exceeded on a large crawl. Drop the persistence rather
+       than break the crawl itself; the in-memory copy still works. */
+  }
+}
+window.__AMASAMYA_crawlSession = _crawlLoadPersisted();
 
 function _crawlEnsureSession() {
   if (!window.__AMASAMYA_crawlSession) {
@@ -4805,6 +4872,7 @@ function importSiteCrawlReport(data) {
     session.imported   = true;
     session.importedAt = new Date().toISOString();
   }
+  _crawlPersist(); /* v5.1: reload survival for imported reports too */
 
   /* 4. Render so the aggregator / per-page table / metadata header
      all reflect the imported session. */
@@ -4860,6 +4928,7 @@ window.addEventListener('message', function (e) {
 
   const isFirst = session.pages.length === 0;
   session.pages.push(record);
+  _crawlPersist(); /* v5.1: reload survival */
 
   /* Cheap on-page counter update if the UI has the slot. The
      real aggregated view lands in commit H. */
@@ -6234,11 +6303,13 @@ async function auditDOC(buffer, filename) {
 ══════════════════════════════════════════════ */
 
 const KEY_CHAMPIONS = 'AMASAMYA_champions';
+/* v5.1: champions state is per-user via userKey() below (see the
+   per-user scoping block near the top of the app JS). */
 
 function getChampions() {
-  try { return JSON.parse(localStorage.getItem(KEY_CHAMPIONS) || '[]'); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(userKey(KEY_CHAMPIONS)) || '[]'); } catch { return []; }
 }
-function saveChampions(data) { localStorage.setItem(KEY_CHAMPIONS, JSON.stringify(data)); }
+function saveChampions(data) { localStorage.setItem(userKey(KEY_CHAMPIONS), JSON.stringify(data)); }
 
 function renderChampions() {
   const data   = getChampions();
@@ -6564,7 +6635,24 @@ const MOBILE_CHECKS = {
   ]
 };
 
-let mobCheckState = {};
+/* v5.1: mobile checklist state is now persisted per-user via
+   localStorage so a page reload or a return visit tomorrow does not
+   lose every check mark and note the user has entered.
+   Key: AMASAMYA_mob_state (scoped by userKey()). Value: JSON of the
+   whole mobCheckState object across all platforms. */
+const KEY_MOB_STATE = 'AMASAMYA_mob_state';
+function mob_loadState() {
+  try {
+    const raw = localStorage.getItem(userKey(KEY_MOB_STATE));
+    return raw ? JSON.parse(raw) : {};
+  } catch (_) { return {}; }
+}
+function mob_saveState() {
+  try {
+    localStorage.setItem(userKey(KEY_MOB_STATE), JSON.stringify(mobCheckState || {}));
+  } catch (_) { /* localStorage full or blocked; silent */ }
+}
+let mobCheckState = mob_loadState();
 
 function mob_renderChecklist() {
   const platform = $('mob-platform') ? $('mob-platform').value : 'ios';
@@ -6611,6 +6699,7 @@ function mob_renderChecklist() {
         if (!mobCheckState[platform]) mobCheckState[platform] = {};
         if (!mobCheckState[platform][c.id]) mobCheckState[platform][c.id] = {};
         mobCheckState[platform][c.id].checked = cb.checked;
+        mob_saveState();
         announce(c.item + (cb.checked ? ' marked as tested.' : ' unmarked.'));
       });
 
@@ -6641,6 +6730,7 @@ function mob_renderChecklist() {
         if (!mobCheckState[platform]) mobCheckState[platform] = {};
         if (!mobCheckState[platform][c.id]) mobCheckState[platform][c.id] = {};
         mobCheckState[platform][c.id].notes = notesInput.value;
+        mob_saveState();
       });
 
       labelDiv.appendChild(itemLabel);
@@ -6755,6 +6845,19 @@ if ($('mob-export-txt')) {
   var unsub = firebase.auth().onAuthStateChanged(function (user) {
     unsub();
     if (user) {
+      /* v5.1: capture the UID globally and migrate any legacy un-
+         scoped localStorage entries into this user's namespace before
+         anything else reads them. Safe if already migrated
+         (migrateLegacyKeysToUser is a no-op when the scoped key
+         already exists). Also safe if the app runs without user
+         data yet: the migrator just walks an empty legacy set. */
+      AMASAMYA_CURRENT_UID = user.uid;
+      try { migrateLegacyKeysToUser(user.uid); } catch (_) {}
+      /* Reload mobile checklist state now that userKey() resolves
+         to the user's namespace; without this, the module-level
+         let above ran with UID null and picked up the wrong bucket
+         (or the empty bucket if this is a fresh browser). */
+      try { mobCheckState = mob_loadState(); } catch (_) {}
       // Signed in - go straight to app, skip PIN views
       showView('view-app');
       var lbl = document.querySelector('.nav-pin-label');
