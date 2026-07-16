@@ -306,6 +306,20 @@
                 id="a11y-motion" class="a11y-switch"></button>
       </div>
     </div>
+    <!--
+      v5.1: Read Aloud. Browser-native text-to-speech via
+      speechSynthesis. Serves low-vision, dyslexia, ADHD, cognitive-
+      load, and non-native readers. Distinct from a screen reader.
+    -->
+    <div class="a11y-option">
+      <div class="a11y-switch-row">
+        <span class="a11y-switch-label" id="label-read-aloud">Read Aloud</span>
+        <button type="button" role="switch" aria-checked="false"
+                aria-labelledby="label-read-aloud"
+                id="a11y-read-aloud" class="a11y-switch"></button>
+      </div>
+      <p style="font-size:.8rem;color:var(--text-muted,#475569);margin:4px 0 0">Reads the page aloud using your browser's default voice.</p>
+    </div>
     <button type="button" class="a11y-reset" id="a11y-reset">Reset All Preferences</button>
   </div>
 </div>

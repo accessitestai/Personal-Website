@@ -69,15 +69,25 @@
     bindSwitch(dyslexiaSw, 'a11y-dyslexia-font', 'data-dyslexia-font', 'Dyslexia font');
     bindSwitch(motionSw,   'a11y-reduce-motion', 'data-reduce-motion', 'Reduce motion');
 
+    /* v5.1: Read Aloud. Ported from the portfolio's read-aloud.js so
+       the platform surfaces the same text-to-speech feature. Uses
+       the browser's default voice per Akhilesh, 2026-07-10. */
+    const readAloudSw = document.getElementById('a11y-read-aloud');
+    bindReadAloud(readAloudSw);
+
     /* Reset. */
     if (resetBtn) resetBtn.addEventListener('click', function () {
-      ['a11y-text-size', 'a11y-high-contrast', 'a11y-dyslexia-font', 'a11y-reduce-motion'].forEach(function (k) {
+      ['a11y-text-size', 'a11y-high-contrast', 'a11y-dyslexia-font', 'a11y-reduce-motion', 'a11y-read-aloud'].forEach(function (k) {
         try { localStorage.removeItem(k); } catch (_) {}
       });
       html.removeAttribute('data-text-size');
       html.removeAttribute('data-high-contrast');
       html.removeAttribute('data-dyslexia-font');
       html.removeAttribute('data-reduce-motion');
+      if (readAloudSw) {
+        readAloudSw.setAttribute('aria-checked', 'false');
+        try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (_) {}
+      }
       reflectStateFromHtml(sizeBtns, contrastSw, dyslexiaSw, motionSw);
       announce('All accessibility preferences reset.');
     });
@@ -123,6 +133,68 @@
     btns.forEach(function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-size') === (size || 'normal') ? 'true' : 'false');
     });
+  }
+
+  /* v5.1 Read Aloud helper. Same TTS contract as the portfolio's
+     read-aloud.js: activate reads the page's main content aloud with
+     the browser default voice; deactivate cancels immediately.
+     Preserves aria-checked, localStorage, keyboard support for Space,
+     and cancels speech on beforeunload so pages do not inherit
+     queued utterances. */
+  function bindReadAloud(sw) {
+    if (!sw || !window.speechSynthesis) return;
+    var synth = window.speechSynthesis;
+
+    function collectText() {
+      var root = document.getElementById('main-content') || document.querySelector('main') || document.body;
+      if (!root) return '';
+      var clone = root.cloneNode(true);
+      ['nav', 'header', 'footer', '#a11y-backdrop', '#a11y-panel',
+       '.skip-link', 'script', 'style', 'noscript', '.a11y-toggle',
+       '.theme-toggle', '.platform-nav'].forEach(function (sel) {
+        clone.querySelectorAll(sel).forEach(function (el) { el.remove(); });
+      });
+      return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    function speak(text) {
+      if (!text) return;
+      synth.cancel();
+      var chunks = text.match(/[^.!?]+[.!?]?/g) || [text];
+      chunks.forEach(function (chunk) {
+        var u = new SpeechSynthesisUtterance(chunk.trim());
+        u.rate  = 1; u.pitch = 1;
+        u.lang  = document.documentElement.lang || 'en';
+        synth.speak(u);
+      });
+    }
+    function activate() {
+      var text = collectText();
+      speak(text || 'Read Aloud is on but no readable content was found on this page.');
+    }
+    function deactivate() {
+      try { synth.cancel(); } catch (_) {}
+    }
+
+    /* Restore saved state on load. */
+    try {
+      if (localStorage.getItem('a11y-read-aloud') === 'true') {
+        sw.setAttribute('aria-checked', 'true');
+        activate();
+      }
+    } catch (_) {}
+
+    sw.addEventListener('click', function () {
+      var next = sw.getAttribute('aria-checked') !== 'true';
+      sw.setAttribute('aria-checked', String(next));
+      try { localStorage.setItem('a11y-read-aloud', String(next)); } catch (_) {}
+      if (next) { activate(); announce('Read Aloud on.'); }
+      else      { deactivate(); announce('Read Aloud off.'); }
+    });
+    sw.addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); sw.click(); }
+    });
+
+    window.addEventListener('beforeunload', deactivate);
   }
 
   function bindSwitch(sw, storageKey, htmlAttr, label) {
