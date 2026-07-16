@@ -415,7 +415,8 @@ var SITEMAP_SKIP_DIRS = new Set([
   'test-fixtures',             /* extension test fixtures */
   'tests',                     /* Playwright specs */
   'content',                   /* markdown sources; HTML output lives in blog/ */
-  'netlify'                    /* function sources */
+  'netlify',                   /* function sources */
+  '_archived'                  /* deprecated files kept for history only */
 ]);
 
 /* Priority table. Any file not matched here gets DEFAULT_PRIORITY. */

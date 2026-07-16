@@ -806,6 +806,9 @@
       localStorage.removeItem('a11y-dyslexia-font');
       localStorage.removeItem('a11y-reduce-motion');
       localStorage.removeItem('a11y-read-aloud');
+      /* 2026-07-10: screen-reader emulator deprecated. Leaving the
+         key cleanup here so any returning user's stale localStorage
+         entry is scrubbed the next time they hit Reset. */
       localStorage.removeItem('a11y-screen-reader');
       html.removeAttribute('data-text-size');
       html.removeAttribute('data-high-contrast');
@@ -815,11 +818,9 @@
       if (contrastSwitch) contrastSwitch.setAttribute('aria-checked', 'false');
       if (dyslexiaSwitch) dyslexiaSwitch.setAttribute('aria-checked', 'false');
       if (motionSwitch) motionSwitch.setAttribute('aria-checked', 'false');
-      // Reset Read Aloud & Screen Reader
+      // Reset Read Aloud (screen-reader emulator deprecated 2026-07-10)
       var raSwitch = document.getElementById('a11y-read-aloud');
-      var srSwitch = document.getElementById('a11y-screen-reader');
       if (raSwitch) { raSwitch.setAttribute('aria-checked', 'false'); if (window._wsrReadAloud && window._wsrReadAloud.active) window._wsrReadAloud.deactivate(); }
-      if (srSwitch) { srSwitch.setAttribute('aria-checked', 'false'); if (window._wsrScreenReader && window._wsrScreenReader.active) window._wsrScreenReader.deactivate(); }
       if (window.srAnnounce) window.srAnnounce('All accessibility preferences have been reset to defaults');
     });
   }
@@ -843,29 +844,9 @@
     '<li>Go to Blog: <kbd>Alt + 2</kbd></li>' +
     '<li>Go to Contact: <kbd>Alt + 3</kbd></li>' +
     '<li>Toggle Read Aloud: <kbd>Alt + 4</kbd></li>' +
-    '<li>Toggle Screen Reader: <kbd>Alt + 5</kbd></li>' +
     '<li>Accessibility Settings: <kbd>Alt + 0</kbd></li>' +
     '<li>Show this help: <kbd>?</kbd></li>' +
-    '<li>SR - Toggle (alternate): <kbd>Alt + Shift + R</kbd></li>' +
     '<li>Read Aloud (alternate): <kbd>Alt + Shift + A</kbd></li>' +
-    '<li>SR - Next / Prev element: <kbd>↓</kbd> / <kbd>↑</kbd></li>' +
-    '<li>SR - Activate element: <kbd>Enter</kbd></li>' +
-    '<li>SR - Pause / resume speech: <kbd>Space</kbd></li>' +
-    '<li>SR - Stop speech: <kbd>Ctrl</kbd></li>' +
-    '<li>SR - Deactivate: <kbd>Esc</kbd></li>' +
-    '<li>SR - Next heading: <kbd>H</kbd> (reverse: <kbd>Shift + H</kbd>)</li>' +
-    '<li>SR - Headings by level: <kbd>1</kbd>–<kbd>6</kbd></li>' +
-    '<li>SR - Next link: <kbd>K</kbd></li>' +
-    '<li>SR - Next button: <kbd>B</kbd></li>' +
-    '<li>SR - Next form field: <kbd>F</kbd></li>' +
-    '<li>SR - Next landmark: <kbd>D</kbd></li>' +
-    '<li>SR - Next list: <kbd>L</kbd></li>' +
-    '<li>SR - Next image: <kbd>I</kbd></li>' +
-    '<li>SR - Next table: <kbd>T</kbd></li>' +
-    '<li>SR - Table cell nav: <kbd>Ctrl + Alt + Arrows</kbd></li>' +
-    '<li>SR - Read from here: <kbd>C</kbd></li>' +
-    '<li>SR - Element list: <kbd>E</kbd></li>' +
-    '<li>SR - Help: <kbd>?</kbd> (inside SR mode)</li>' +
     '</ul>' +
     '<button type="button" class="kbd-help-close" id="kbd-help-close">Close</button>' +
     '</div></div>';
@@ -959,12 +940,7 @@
       if (raSwitch) raSwitch.click();
     }
 
-    // Alt+5: Toggle Screen Reader
-    if (e.altKey && !e.shiftKey && e.key === '5') {
-      e.preventDefault();
-      var srSwitch = document.getElementById('a11y-screen-reader');
-      if (srSwitch) srSwitch.click();
-    }
+    // 2026-07-10: Alt+5 (Screen Reader emulator toggle) removed.
 
     // Alt+0: Accessibility Settings
     if (e.altKey && e.key === '0') {
