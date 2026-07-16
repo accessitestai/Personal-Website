@@ -1,12 +1,37 @@
 # AMASAMYA Chrome Extension Roadmap
 
-Last reviewed: 2026-07-08 (post-v4.3.0 publish, v4.3.1 quality pass in flight).
+Last reviewed: 2026-07-09 (v4.3.1 Published; Option B alignment policy locked with platform).
 
 This file captures what is committed, what is planned, and what has been
 explicitly deferred. It is the single source of truth for "what is next".
 If a feature is not on this list, it is not planned.
 
-## Published: v4.0.0, v4.0.1, v4.2.0, v4.3.0
+## Published: v4.0.0, v4.0.1, v4.2.0, v4.3.0, v4.3.1
+
+## Version alignment policy with the AMASAMYA web platform (Option B)
+
+Locked on 2026-07-09. The Chrome extension and the AMASAMYA web
+platform (amasamya.akhileshmalani.com, `PLATFORM_VERSION` constant
+in `amasamya/index.html`) share MAJOR.MINOR versioning. PATCH
+versions can differ.
+
+- **Feature or minor releases (x.Y)** are joint. Whenever either
+  product bumps to a new MAJOR.MINOR, the other product bumps to
+  match with real changes on its side. The joint release is one
+  logical event even if the two commits land minutes apart.
+- **Patch releases (x.y.Z)** are independent. A hotfix on the
+  extension may ship as v5.2.1 while the platform stays on v5.2.0,
+  and vice versa. This preserves hotfix agility.
+- **Numerical parity target**: MAJOR.MINOR always matches. PATCH
+  may drift up to two releases in either direction before we
+  consciously realign.
+
+Next joint MAJOR.MINOR release: **v5.2**. Both extension and
+platform bump to 5.2 whenever the next planned feature ships. The
+platform is already at 5.1.0 (formalised 2026-07-08); the
+extension will jump from 4.3.1 to 5.2 at that time. The extension
+jump is intentional and will be explained in its own commit as
+"aligning with platform per Option B alignment policy".
 
 Both Live on the Chrome Web Store. v4.0.0 shipped the 24 audit
 engines, three Vision AI providers, Focus Indicator Narrator,
@@ -161,10 +186,11 @@ Non-goals in v4.3.0 (deferred to v4.4.0 or later):
 - Cloud sync of history. Violates the no-backend promise.
   Not planned.
 
-## In flight: v4.3.1 quality-pass patch
+## Shipped: v4.3.1 quality-pass patch
 
-Post-publish audit surfaced ten real bugs and several dead-code
-paths. All fixed same-week; no user-visible feature changes.
+Published on the Chrome Web Store 2026-07-09. Same-week same-brand
+patch after v4.3.0. Closed ten real defects; no user-visible
+feature changes.
 
 - **Annotated PNG export was corrupted** (`sidepanel/panel.js:53`).
   downloadFile wrapped the base64 data-URL string as ASCII bytes.
