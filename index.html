@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Blind accessibility architect. I use a screen reader every day - and for 16 years I've made sure the products I work on don't shut out the billion people who do the same.">
+  <meta name="description" content="Product builder and blind accessibility architect. I ship accessibility tooling (AMASAMYA) in personal capacity and, across 16+ years of client work, I have made sure the products I audit do not shut out the billion people who use a screen reader like I do.">
   <meta name="keywords" content="accessibility consultant, WCAG, digital inclusion, accessibility architect, blind professional, screen reader expert, ADA compliance, Section 508, India accessibility">
   <meta name="author" content="Akhilesh Malani">
   <meta name="theme-color" content="#1a5276">
@@ -14,7 +14,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://akhileshmalani.com/">
   <meta property="og:title" content="Akhilesh Malani | Accessibility Architect">
-  <meta property="og:description" content="Blind accessibility architect with 16+ years of lived experience. Worked with Oracle Financial Services, Google, Bank of Montreal, and Dun &amp; Bradstreet.">
+  <meta property="og:description" content="Product builder and blind accessibility architect. Ships AMASAMYA (WCAG 2.2 audit toolkit) in personal capacity. 16+ years of client work with Oracle Financial Services, Google, Bank of Montreal, and Dun &amp; Bradstreet.">
   <meta property="og:site_name" content="Akhilesh Malani">
   <meta property="og:image" content="https://akhileshmalani.com/images/og-banner.png">
   <meta property="og:image:width" content="1200">
@@ -24,7 +24,7 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Akhilesh Malani | Accessibility Architect">
-  <meta name="twitter:description" content="Blind accessibility architect with 16+ years of lived experience. Worked with Oracle Financial Services, Google, Bank of Montreal, and Dun &amp; Bradstreet.">
+  <meta name="twitter:description" content="Product builder and blind accessibility architect. Ships AMASAMYA (WCAG 2.2 audit toolkit) in personal capacity. 16+ years of client work with Oracle Financial Services, Google, Bank of Montreal, and Dun &amp; Bradstreet.">
   <meta name="twitter:image" content="https://akhileshmalani.com/images/og-banner.png">
   <meta name="twitter:image:alt" content="Akhilesh Malani - Accessibility Architect. 16+ years of lived experience in digital accessibility.">
 
@@ -32,9 +32,10 @@
   <link rel="icon" type="image/svg+xml" href="images/logo-icon.svg">
   <link rel="preload" href="styles.css" as="style">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="screen-reader.css">
   <link rel="preload" href="script.js" as="script">
-  <!-- 2026-07-10: screen-reader.js deprecated; preload removed. -->
+  <!-- 2026-07-10: screen-reader.js deprecated (preload removed).
+       2026-07-20: screen-reader.css link removed (dead asset since
+       the emulator moved to _archived/). -->
   <!-- Prevent flash of wrong theme/preferences -->
   <script>
     (function(){var h=document.documentElement;var t=localStorage.getItem('theme');if(t){h.setAttribute('data-theme',t)}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){h.setAttribute('data-theme','dark')}var s=localStorage.getItem('a11y-text-size');if(s&&s!=='normal')h.setAttribute('data-text-size',s);if(localStorage.getItem('a11y-high-contrast')==='true')h.setAttribute('data-high-contrast','true');if(localStorage.getItem('a11y-dyslexia-font')==='true')h.setAttribute('data-dyslexia-font','true');if(localStorage.getItem('a11y-reduce-motion')==='true')h.setAttribute('data-reduce-motion','true');})();
@@ -257,59 +258,16 @@
 
   <main id="main-content">
 
-    <!-- ────────────────────────────────────────────────────────────
-         AMASAMYA v4.2.0 Site Crawl launch banner
-         ────────────────────────────────────────────────────────────
-         The GAAD 2026 banner block that lived here (window
-         2026-05-18 to 2026-05-28) has been retired. It is replaced
-         by this v4.2.0 Site Crawl launch announcement, which reuses
-         the same infrastructure: hidden by default, script below
-         removes hidden only if the date is in window AND the user
-         has not clicked Dismiss (state in localStorage under a new
-         key so the GAAD dismissal does not silence this one). The
-         heading is a <p> styled to look like a heading so it does
-         not violate heading hierarchy (the banner is already a
-         region landmark with an aria-label).
-         Remove this entire block after 2026-07-31 - search the
-         file for "Site Crawl launch banner".
-    ──────────────────────────────────────────────────────────── -->
-    <aside id="sitecrawl-banner" class="gaad-banner" role="region" aria-label="AMASAMYA v4.2.0 Site Crawl release announcement" hidden>
-      <div class="container gaad-banner-inner">
-        <p class="gaad-banner-heading">AMASAMYA v4.2.0 Site Crawl is live</p>
-        <p class="gaad-banner-text">
-          Published today on the Chrome Web Store. Audit up to 200 pages of a website in one run, three pages in parallel, with a keyboard and screen-reader first side panel. Free and open source.
-          <a href="amasamya.html" class="gaad-banner-link">See what shipped</a>.
-        </p>
-        <button type="button" id="sitecrawl-banner-dismiss" class="gaad-banner-dismiss" aria-label="Dismiss AMASAMYA v4.2.0 Site Crawl release announcement">Dismiss</button>
-      </div>
-    </aside>
-    <script>
-      (function () {
-        /* Window: 1 July 2026 inclusive to 31 July 2026 inclusive. */
-        var now = new Date();
-        var start = new Date('2026-07-01T00:00:00');
-        var end   = new Date('2026-08-01T00:00:00'); /* exclusive upper bound */
-        if (now < start || now >= end) return;
-        if (localStorage.getItem('sitecrawl-v420-dismissed') === '1') return;
-        var b = document.getElementById('sitecrawl-banner');
-        if (!b) return;
-        b.removeAttribute('hidden');
-        var dismiss = document.getElementById('sitecrawl-banner-dismiss');
-        if (dismiss) {
-          dismiss.addEventListener('click', function () {
-            try { localStorage.setItem('sitecrawl-v420-dismissed', '1'); } catch (e) {}
-            b.setAttribute('hidden', '');
-          });
-        }
-      })();
-    </script>
+    <!-- v4.2.0 Site Crawl launch banner retired 2026-07-20 (extension
+         is now on v4.3.1 Published). Next transient banner block for
+         v5.2 will go here when the joint MAJOR.MINOR release lands. -->
 
     <!-- Hero Section -->
     <section id="hero" class="hero">
       <div class="container hero-content">
         <p class="hero-greeting">Akhilesh Malani</p>
         <h1 id="hero-heading">Blind. Determined. Building an accessible world - one product at a time.</h1>
-        <p class="hero-subtitle">Blind accessibility architect with 16+ years of lived experience navigating the digital world using only a screen reader and keyboard - every single day. Not just compliant. Actually usable. That's what 16 years without sight teaches you.</p>
+        <p class="hero-subtitle">Product builder and blind accessibility architect. I ship accessibility tooling in my own time - AMASAMYA is the current one - and, in personal capacity, I have spent 16+ years navigating the digital world using only a screen reader and keyboard. Not just compliant. Actually usable.</p>
         <div class="hero-cta">
           <a href="https://www.linkedin.com/in/akhilesh-malani" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Connect on LinkedIn<span class="sr-only"> (opens in new tab)</span></a>
           <a href="#about" class="btn btn-outline">My Story</a>
